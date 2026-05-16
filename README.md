@@ -27,6 +27,21 @@ Rails 7.0 is expected to work, but Rails 7.1+ is recommended.
 
 Ruby 3.1+ is required.
 
+## Installation direction
+
+Rails Table Preferences stores user table preferences in the host application's primary database using a normal Rails migration.
+
+It does not use a separate schema file such as `db/queue_schema.rb`. The preference records are application data linked to users, not infrastructure data like a job queue.
+
+Planned installation flow:
+
+```bash
+bin/rails generate rails_table_preferences:install
+bin/rails db:migrate
+```
+
+The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`.
+
 ## Initial scope
 
 The first version focuses on extracting and generalizing the `ColumnAdjustment`-style table display settings used in existing Rails applications.
@@ -130,6 +145,20 @@ The settings payload is expected to evolve from column display preferences to in
   "sorts": []
 }
 ```
+
+## Configuration
+
+Default configuration:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.table_name = "table_preferences"
+  config.user_class_name = "User"
+  config.user_foreign_key = "user_id"
+end
+```
+
+The first implementation assumes a `User` model and a primary application database. Applications with different user model names can configure the class and foreign key before using the model.
 
 ## Usage direction
 
