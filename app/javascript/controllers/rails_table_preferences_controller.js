@@ -10,12 +10,13 @@ import { Controller } from "@hotwired/stimulus"
 //
 // The same controller can also be used with the editor helper.
 export default class extends Controller {
-  static targets = ["editorRows"]
+  static targets = ["editorRows", "presetName"]
 
   static values = {
     tableKey: String,
     name: { type: String, default: "default" },
     url: String,
+    collectionUrl: String,
     settings: Object,
     columns: Array
   }
@@ -56,16 +57,57 @@ export default class extends Controller {
     await this.save()
   }
 
+  async createPresetFromEditor(event) {
+    if (event) event.preventDefault()
+
+    this.settingsValue = this.settingsFromEditor()
+    const response = await fetch(this.collectionUrlValue, {
+      method: "POST",
+      headers: this.jsonHeaders,
+      body: JSON.stringify({ name: this.currentPresetName, settings: this.settingsValue })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to create table preference preset: ${response.status}`)
+    }
+
+    const payload = await response.json()
+    this.nameValue = payload.name
+    this.urlValue = this.preferenceUrl(payload.name)
+    this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
+    this.renderEditor()
+    this.apply()
+  }
+
+  async deletePreset(event) {
+    if (event) event.preventDefault()
+
+    const response = await fetch(this.preferenceUrl(this.currentPresetName), {
+      method: "DELETE",
+      headers: {
+        "Accept": "application/json",
+        "X-CSRF-Token": this.csrfToken
+      }
+    })
+
+    if (!response.ok && response.status !== 204) {
+      throw new Error(`Failed to delete table preference preset: ${response.status}`)
+    }
+
+    this.nameValue = "default"
+    this.urlValue = this.preferenceUrl("default")
+    this.setPresetNameInput("default")
+    this.settingsValue = this.defaultSettings
+    this.renderEditor()
+    this.apply()
+  }
+
   async save(event) {
     if (event) event.preventDefault()
 
-    const response = await fetch(this.urlValue, {
+    const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "PATCH",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "X-CSRF-Token": this.csrfToken
-      },
+      headers: this.jsonHeaders,
       body: JSON.stringify({ settings: this.settingsValue })
     })
 
@@ -74,6 +116,8 @@ export default class extends Controller {
     }
 
     const payload = await response.json()
+    this.nameValue = payload.name
+    this.urlValue = this.preferenceUrl(payload.name)
     this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
     this.renderEditor()
     this.apply()
@@ -85,6 +129,16 @@ export default class extends Controller {
     this.settingsValue = this.defaultSettings
     this.renderEditor()
     this.apply()
+  }
+
+  async loadPresets() {
+    const response = await fetch(this.collectionUrlValue, { headers: { "Accept": "application/json" } })
+
+    if (!response.ok) {
+      throw new Error(`Failed to load table preference presets: ${response.status}`)
+    }
+
+    return response.json()
   }
 
   renderEditor() {
@@ -381,6 +435,14 @@ export default class extends Controller {
     }
   }
 
+  preferenceUrl(name) {
+    return `${this.collectionUrlValue}/${encodeURIComponent(name || "default")}`
+  }
+
+  setPresetNameInput(name) {
+    if (this.hasPresetNameTarget) this.presetNameTarget.value = name
+  }
+
   cellsFor(key) {
     return this.element.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
   }
@@ -410,6 +472,12 @@ export default class extends Controller {
     return this.settingsValue?.columns || []
   }
 
+  get currentPresetName() {
+    if (!this.hasPresetNameTarget) return this.nameValue || "default"
+
+    return this.presetNameTarget.value.trim() || "default"
+  }
+
   get editorRows() {
     if (!this.hasEditorRowsTarget) return []
 
@@ -428,6 +496,14 @@ export default class extends Controller {
     if (!table) return []
 
     return table.querySelectorAll("tr")
+  }
+
+  get jsonHeaders() {
+    return {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      "X-CSRF-Token": this.csrfToken
+    }
   }
 
   get csrfToken() {
