@@ -250,11 +250,20 @@ end
 Current helper direction:
 
 ```erb
-<%= table_preferences_table_tag(table_key: :orders, class: "table") do %>
+<% columns = [
+  table_preferences_column(:order_no, label: "Order No.", default_order: 10, default_width: 120),
+  table_preferences_column(:customer_code, label: "Customer Code", default_order: 20, default_width: 120),
+  table_preferences_column(:customer_name, label: "Customer Name", default_order: 30, default_width: 240, default_truncate: 30)
+] %>
+
+<%= table_preferences_editor(table_key: :orders, columns: columns, title: "Order table settings") %>
+
+<%= table_preferences_table_tag(table_key: :orders, columns: columns, class: "table") do %>
   <thead>
     <tr>
       <th data-rails-table-preferences-column-key="order_no">Order No.</th>
       <th data-rails-table-preferences-column-key="customer_code">Customer Code</th>
+      <th data-rails-table-preferences-column-key="customer_name">Customer Name</th>
     </tr>
   </thead>
   <tbody>
@@ -262,13 +271,14 @@ Current helper direction:
       <tr>
         <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
         <td data-rails-table-preferences-column-key="customer_code"><%= order.customer_code %></td>
+        <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
       </tr>
     <% end %>
   </tbody>
 <% end %>
 ```
 
-The bundled Stimulus controller applies saved `visible`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`.
+The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders Apply, Save, and Reset buttons for the same settings payload.
 
 ## Development status
 
