@@ -9,11 +9,12 @@ module RailsTablePreferences
                 :default_width,
                 :default_truncate,
                 :pinned,
+                :ignored,
                 :model,
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false)
+    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil)
       @key = key.to_s
       @model = model
       @model_name = model_name
@@ -24,6 +25,7 @@ module RailsTablePreferences
       @default_width = integer_or_nil(default_width)
       @default_truncate = integer_or_nil(default_truncate)
       @pinned = ActiveModel::Type::Boolean.new.cast(pinned)
+      @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore)
     end
 
     def to_h
@@ -34,7 +36,8 @@ module RailsTablePreferences
         "order" => default_order,
         "width" => default_width,
         "truncate" => default_truncate,
-        "pinned" => pinned
+        "pinned" => pinned,
+        "ignored" => ignored
       }.compact
     end
 
