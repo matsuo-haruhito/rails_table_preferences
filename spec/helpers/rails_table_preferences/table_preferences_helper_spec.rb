@@ -68,6 +68,12 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         "pinned" => false
       )
     end
+
+    it "uses locale-backed labels" do
+      I18n.backend.store_translations(:en, activerecord: { attributes: { order: { customer_code: "Customer Code from locale" } } })
+
+      expect(helper.table_preferences_column(:customer_code, model_name: :order)["label"]).to eq("Customer Code from locale")
+    end
   end
 
   describe "#table_preferences_editor" do
@@ -94,6 +100,14 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
       expect(html).to include("rails-table-preferences-editor__rows")
       expect(html).to include("rails-table-preferences-target=\"editorRows\"")
+    end
+
+    it "allows a custom partial" do
+      expect(helper).to receive(:render).with(
+        hash_including(partial: "shared/custom_table_preferences_editor")
+      ).and_return("custom editor")
+
+      expect(helper.table_preferences_editor(table_key: :orders, columns: [], partial: "shared/custom_table_preferences_editor")).to eq("custom editor")
     end
   end
 end
