@@ -70,5 +70,12 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include("rails-table-preferences#saveFromEditor")
       expect(html).to include("rails-table-preferences#resetEditor")
     end
+
+    it "renders a container used for draggable editor rows" do
+      html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+
+      expect(html).to include("rails-table-preferences-editor__rows")
+      expect(html).to include("rails-table-preferences-target=\"editorRows\"")
+    end
   end
 end
