@@ -9,11 +9,24 @@
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
   <div class="rails-table-preferences-editor__preset">
+    <label for="rails-table-preferences-preset-select"><%= t("rails_table_preferences.editor.preset_select", default: "Saved presets") %></label>
+    <select id="rails-table-preferences-preset-select"
+            data-rails-table-preferences-target="presetSelect"
+            data-action="rails-table-preferences#selectPreset">
+      <option value="<%= name %>"><%= name %></option>
+    </select>
+
     <label for="rails-table-preferences-preset-name"><%= t("rails_table_preferences.editor.preset", default: "Preset") %></label>
     <input type="text"
            id="rails-table-preferences-preset-name"
            value="<%= name %>"
            data-rails-table-preferences-target="presetName">
+
+    <label class="rails-table-preferences-editor__default-preset">
+      <input type="checkbox"
+             data-rails-table-preferences-target="defaultPreset">
+      <%= t("rails_table_preferences.editor.default_preset", default: "Use as default") %>
+    </label>
   </div>
 
   <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
