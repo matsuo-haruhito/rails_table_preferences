@@ -10,6 +10,7 @@ It is designed for business applications with many index tables, where users nee
 - Support column visibility, order, width, and truncation
 - Provide Rails helpers and Stimulus controllers
 - Keep compatibility with existing `ColumnAdjustment`-style implementations
+- Allow host applications to customize ERB, CSS, JavaScript, and locales
 - Start small and allow future support for Excel-like filters and saved sorts
 
 ## Supported versions
@@ -203,6 +204,7 @@ RailsTablePreferences.configure do |config|
   config.parent_controller_class_name = "ApplicationController"
   config.current_user_method = :current_user
   config.mount_path = "/rails_table_preferences"
+  config.editor_partial = "rails_table_preferences/editor"
 end
 ```
 
@@ -231,6 +233,111 @@ config.user_foreign_key = :member_id
 ```
 
 The first implementation assumes a primary application database. Applications with different owner model names can configure the owner model and foreign key before using the model. If the engine is mounted at a different path, set `mount_path` to the same value.
+
+## Column labels and host app locales
+
+Column labels are resolved in this order:
+
+1. Explicit `label:`
+2. Explicit `i18n_key:`
+3. `activerecord.attributes.<model_name>.<column>`
+4. `activemodel.attributes.<model_name>.<column>`
+5. `attributes.<column>`
+6. `column.to_s.humanize`
+
+Examples:
+
+```ruby
+columns = [
+  table_preferences_column(:customer_code, model_name: :order),
+  table_preferences_column(:customer_name, model: Order),
+  table_preferences_column(:delivery_date, i18n_key: "orders.index.columns.delivery_date"),
+  table_preferences_column(:memo, label: "備考")
+]
+```
+
+Host app locale example:
+
+```yaml
+ja:
+  activerecord:
+    attributes:
+      order:
+        customer_code: 得意先コード
+        customer_name: 得意先名
+  orders:
+    index:
+      columns:
+        delivery_date: 納品日
+```
+
+## Host app customization
+
+### ERB
+
+The editor is rendered through a partial. By default:
+
+```ruby
+config.editor_partial = "rails_table_preferences/editor"
+```
+
+To customize the markup, copy the default partial into the host application:
+
+```bash
+bin/rails generate rails_table_preferences:views
+```
+
+Then edit:
+
+```text
+app/views/rails_table_preferences/_editor.html.erb
+```
+
+You can also provide a custom partial per call:
+
+```erb
+<%= table_preferences_editor(
+  table_key: :orders,
+  columns: columns,
+  partial: "shared/table_preferences_editor"
+) %>
+```
+
+The partial receives these locals:
+
+```text
+table_key, name, title, settings, columns, settings_json, columns_json,
+preference_url, collection_url, data_attributes
+```
+
+### CSS
+
+The gem intentionally keeps styling minimal. Host applications can style the emitted classes directly:
+
+```text
+rails-table-preferences-editor
+rails-table-preferences-editor__title
+rails-table-preferences-editor__preset
+rails-table-preferences-editor__rows
+rails-table-preferences-editor__actions
+rails-table-preferences-editor__row
+rails-table-preferences-editor__drag-handle
+rails-table-preferences-resize-handle
+```
+
+### JavaScript
+
+The bundled Stimulus controller uses stable data attributes and class hooks. Host applications can either use the bundled controller or register their own controller that reads the same data attributes:
+
+```text
+data-rails-table-preferences-table-key-value
+data-rails-table-preferences-name-value
+data-rails-table-preferences-url-value
+data-rails-table-preferences-collection-url-value
+data-rails-table-preferences-settings-value
+data-rails-table-preferences-columns-value
+data-rails-table-preferences-column-key
+```
 
 ## Current API foundation
 
@@ -322,9 +429,9 @@ Current helper direction:
 
 ```erb
 <% columns = [
-  table_preferences_column(:order_no, label: "Order No.", default_order: 10, default_width: 120),
-  table_preferences_column(:customer_code, label: "Customer Code", default_order: 20, default_width: 120),
-  table_preferences_column(:customer_name, label: "Customer Name", default_order: 30, default_width: 240, default_truncate: 30)
+  table_preferences_column(:order_no, model_name: :order, default_order: 10, default_width: 120),
+  table_preferences_column(:customer_code, model_name: :order, default_order: 20, default_width: 120),
+  table_preferences_column(:customer_name, model_name: :order, default_order: 30, default_width: 240, default_truncate: 30)
 ] %>
 
 <%= table_preferences_editor(table_key: :orders, columns: columns, title: "Order table settings") %>
