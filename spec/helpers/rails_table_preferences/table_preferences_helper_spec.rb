@@ -127,6 +127,14 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include("rails-table-preferences#resetEditor")
     end
 
+    it "renders preset selection and default controls" do
+      html = helper.table_preferences_editor(table_key: :orders, name: "inspection", columns: [:customer_code])
+
+      expect(html).to include("rails-table-preferences-target=\"presetSelect\"")
+      expect(html).to include("rails-table-preferences#selectPreset")
+      expect(html).to include("rails-table-preferences-target=\"defaultPreset\"")
+    end
+
     it "renders a preset name input" do
       html = helper.table_preferences_editor(table_key: :orders, name: "inspection", columns: [:customer_code])
 
