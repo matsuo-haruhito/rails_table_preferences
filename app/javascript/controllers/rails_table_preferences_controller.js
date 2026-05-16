@@ -21,6 +21,7 @@ export default class extends Controller {
   }
 
   connect() {
+    this.draggedEditorRow = null
     this.defaultSettings = this.buildDefaultSettings()
     this.settingsValue = this.mergeSettings(this.defaultSettings, this.settingsValue || {})
     this.renderEditor()
@@ -87,14 +88,22 @@ export default class extends Controller {
     this.columnsFromSettings.forEach((column) => {
       this.editorRowsTarget.appendChild(this.buildEditorRow(column))
     })
+
+    this.refreshEditorOrderInputs()
   }
 
   buildEditorRow(column) {
     const row = document.createElement("div")
     row.className = "rails-table-preferences-editor__row"
+    row.draggable = true
     row.dataset.railsTablePreferencesColumnKey = column.key
+    row.addEventListener("dragstart", this.dragEditorRowStart.bind(this))
+    row.addEventListener("dragover", this.dragEditorRowOver.bind(this))
+    row.addEventListener("drop", this.dropEditorRow.bind(this))
+    row.addEventListener("dragend", this.dragEditorRowEnd.bind(this))
 
     row.innerHTML = `
+      <button type="button" class="rails-table-preferences-editor__drag-handle" draggable="false" aria-label="Drag to reorder" title="Drag to reorder">↕</button>
       <label class="rails-table-preferences-editor__visible">
         <input type="checkbox" data-field="visible" ${column.visible === false ? "" : "checked"}>
         <span>${this.escapeHtml(column.label || column.key)}</span>
@@ -116,17 +125,68 @@ export default class extends Controller {
     return row
   }
 
+  dragEditorRowStart(event) {
+    const row = event.currentTarget
+    this.draggedEditorRow = row
+    row.classList.add("rails-table-preferences-editor__row--dragging")
+    event.dataTransfer.effectAllowed = "move"
+    event.dataTransfer.setData("text/plain", row.dataset.railsTablePreferencesColumnKey)
+  }
+
+  dragEditorRowOver(event) {
+    event.preventDefault()
+
+    const targetRow = event.currentTarget
+    if (!this.draggedEditorRow || targetRow === this.draggedEditorRow) return
+
+    const placement = this.editorRowPlacement(event, targetRow)
+
+    if (placement === "before") {
+      this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow)
+    } else {
+      this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow.nextSibling)
+    }
+
+    this.refreshEditorOrderInputs()
+  }
+
+  dropEditorRow(event) {
+    event.preventDefault()
+    this.refreshEditorOrderInputs()
+  }
+
+  dragEditorRowEnd(event) {
+    event.currentTarget.classList.remove("rails-table-preferences-editor__row--dragging")
+    this.draggedEditorRow = null
+    this.refreshEditorOrderInputs()
+  }
+
+  editorRowPlacement(event, row) {
+    const rect = row.getBoundingClientRect()
+    const offset = event.clientY - rect.top
+    return offset < rect.height / 2 ? "before" : "after"
+  }
+
+  refreshEditorOrderInputs() {
+    if (!this.hasEditorRowsTarget) return
+
+    this.editorRows.forEach((row, index) => {
+      const orderInput = row.querySelector('[data-field="order"]')
+      if (orderInput) orderInput.value = String((index + 1) * 10)
+    })
+  }
+
   settingsFromEditor() {
     if (!this.hasEditorRowsTarget) return this.settingsValue
 
-    const columns = Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]")).map((row, index) => {
+    const columns = this.editorRows.map((row, index) => {
       const key = row.dataset.railsTablePreferencesColumnKey
       const current = this.columnByKey(key) || {}
 
       return {
         key,
         visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
-        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? index,
+        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? (index + 1) * 10,
         width: this.integerValue(row.querySelector('[data-field="width"]')?.value),
         truncate: this.integerValue(row.querySelector('[data-field="truncate"]')?.value),
         pinned: current.pinned === true
@@ -196,7 +256,7 @@ export default class extends Controller {
         key: column.key,
         label: column.label || column.key,
         visible: column.visible !== false,
-        order: column.order ?? index,
+        order: column.order ?? (index + 1) * 10,
         width: column.width,
         truncate: column.truncate,
         pinned: column.pinned === true
@@ -216,7 +276,7 @@ export default class extends Controller {
         ...defaultColumn,
         ...savedColumn,
         label: defaultColumn.label,
-        order: savedColumn.order ?? defaultColumn.order ?? index,
+        order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10,
         visible: savedColumn.visible ?? defaultColumn.visible
       }
     })
@@ -255,6 +315,12 @@ export default class extends Controller {
 
   get columnsFromSettings() {
     return this.settingsValue?.columns || []
+  }
+
+  get editorRows() {
+    if (!this.hasEditorRowsTarget) return []
+
+    return Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]"))
   }
 
   get tableRows() {
