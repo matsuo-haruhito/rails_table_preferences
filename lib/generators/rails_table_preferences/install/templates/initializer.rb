@@ -15,11 +15,11 @@ RailsTablePreferences.configure do |config|
   #   config.user_class_name = "User"
   #   config.user_model = :users
   #   config.account_model = :accounts
-  config.owner_model = :users
+  config.owner_model = :<%= owner_model %>
 
   # Override only when the default foreign key is not correct.
   # By default this follows owner_model, for example Customer => customer_id.
-  # config.owner_foreign_key = :user_id
+  # config.owner_foreign_key = :<%= owner_foreign_key %>
 
   # The engine controller inherits from this class and calls this method.
   config.parent_controller_class_name = "ApplicationController"
