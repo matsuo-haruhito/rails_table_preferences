@@ -20,8 +20,21 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
         "order" => 10,
         "width" => 120,
         "truncate" => 20,
-        "pinned" => false
+        "pinned" => false,
+        "ignored" => false
       )
+    end
+
+    it "marks ignored columns" do
+      definition = described_class.new(key: :internal_cost, ignored: true)
+
+      expect(definition.to_h["ignored"]).to eq(true)
+    end
+
+    it "accepts ignore as an alias" do
+      definition = described_class.new(key: :internal_cost, ignore: true)
+
+      expect(definition.to_h["ignored"]).to eq(true)
     end
 
     it "uses an explicit label first" do
