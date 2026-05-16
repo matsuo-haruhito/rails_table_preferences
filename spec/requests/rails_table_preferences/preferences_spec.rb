@@ -119,6 +119,31 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
         ]
       )
     end
+
+    it "updates default flags for an existing preference" do
+      existing = RailsTablePreferences::Preference.create!(
+        user: user,
+        table_key: "orders",
+        name: "default",
+        default_flag: true,
+        settings: { "columns" => [] }
+      )
+      target = RailsTablePreferences::Preference.create!(
+        user: user,
+        table_key: "orders",
+        name: "inspection",
+        settings: { "columns" => [] }
+      )
+
+      patch "/rails_table_preferences/preferences/orders/inspection", params: {
+        default: true,
+        settings: { columns: [] }
+      }
+
+      expect(response).to have_http_status(:ok)
+      expect(existing.reload.default_flag).to eq(false)
+      expect(target.reload.default_flag).to eq(true)
+    end
   end
 
   describe "DELETE /rails_table_preferences/preferences/:table_key/:name" do
