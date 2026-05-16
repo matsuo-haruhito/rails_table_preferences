@@ -1,0 +1,28 @@
+<div data-controller="rails-table-preferences"
+     data-rails-table-preferences-table-key-value="<%= table_key %>"
+     data-rails-table-preferences-name-value="<%= name %>"
+     data-rails-table-preferences-url-value="<%= preference_url %>"
+     data-rails-table-preferences-collection-url-value="<%= collection_url %>"
+     data-rails-table-preferences-settings-value="<%= settings_json %>"
+     data-rails-table-preferences-columns-value="<%= columns_json %>"
+     class="rails-table-preferences-editor">
+  <div class="rails-table-preferences-editor__title"><%= title %></div>
+
+  <div class="rails-table-preferences-editor__preset">
+    <label for="rails-table-preferences-preset-name"><%= t("rails_table_preferences.editor.preset", default: "Preset") %></label>
+    <input type="text"
+           id="rails-table-preferences-preset-name"
+           value="<%= name %>"
+           data-rails-table-preferences-target="presetName">
+  </div>
+
+  <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
+
+  <div class="rails-table-preferences-editor__actions">
+    <button type="button" data-action="rails-table-preferences#applyFromEditor"><%= t("rails_table_preferences.editor.apply", default: "Apply") %></button>
+    <button type="button" data-action="rails-table-preferences#saveFromEditor"><%= t("rails_table_preferences.editor.save", default: "Save") %></button>
+    <button type="button" data-action="rails-table-preferences#createPresetFromEditor"><%= t("rails_table_preferences.editor.save_as_new", default: "Save as new") %></button>
+    <button type="button" data-action="rails-table-preferences#deletePreset"><%= t("rails_table_preferences.editor.delete", default: "Delete") %></button>
+    <button type="button" data-action="rails-table-preferences#resetEditor"><%= t("rails_table_preferences.editor.reset", default: "Reset") %></button>
+  </div>
+</div>
