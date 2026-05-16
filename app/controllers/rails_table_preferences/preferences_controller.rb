@@ -2,10 +2,35 @@
 
 module RailsTablePreferences
   class PreferencesController < ApplicationController
+    def index
+      preferences = Preference.for_user(table_preferences_current_user)
+                              .for_table(params[:table_key])
+                              .order(default_flag: :desc, name: :asc)
+
+      render json: {
+        table_key: params[:table_key].to_s,
+        preferences: preferences.map { |preference| preference_payload(preference) }
+      }
+    end
+
     def show
       preference = Preference.find_for(user: table_preferences_current_user, table_key: params[:table_key], name: preference_name)
 
       render json: preference_payload(preference)
+    end
+
+    def create
+      preference = Preference.new(
+        RailsTablePreferences.configuration.user_foreign_key => table_preferences_current_user,
+        table_key: params[:table_key].to_s,
+        name: preference_name,
+        settings: SettingsNormalizer.call(settings_params),
+        default_flag: default_param?
+      )
+      clear_other_defaults(preference) if preference.default_flag?
+      preference.save!
+
+      render json: preference_payload(preference), status: :created
     end
 
     def update
@@ -15,16 +40,28 @@ module RailsTablePreferences
         name: preference_name
       )
       preference.settings = SettingsNormalizer.call(settings_params)
-      preference.default_flag = ActiveModel::Type::Boolean.new.cast(params[:default]) if params.key?(:default)
+      preference.default_flag = default_param? if params.key?(:default)
+      clear_other_defaults(preference) if preference.default_flag?
       preference.save!
 
       render json: preference_payload(preference), status: :ok
     end
 
+    def destroy
+      preference = Preference.find_for(user: table_preferences_current_user, table_key: params[:table_key], name: preference_name)
+      preference&.destroy!
+
+      head :no_content
+    end
+
     private
 
     def preference_name
-      params[:name].presence || "default"
+      params[:name].presence || params[:preference_name].presence || "default"
+    end
+
+    def default_param?
+      ActiveModel::Type::Boolean.new.cast(params[:default])
     end
 
     def settings_params
@@ -38,6 +75,13 @@ module RailsTablePreferences
       else
         {}
       end
+    end
+
+    def clear_other_defaults(preference)
+      Preference.for_user(table_preferences_current_user)
+                .for_table(preference.table_key)
+                .where.not(id: preference.id)
+                .update_all(default_flag: false)
     end
 
     def preference_payload(preference)
