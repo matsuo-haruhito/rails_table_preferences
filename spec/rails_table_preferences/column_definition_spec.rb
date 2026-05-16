@@ -24,10 +24,44 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       )
     end
 
-    it "uses a humanized label by default" do
+    it "uses an explicit label first" do
+      I18n.backend.store_translations(:en, attributes: { customer_code: "Localized customer code" })
+
+      definition = described_class.new(key: :customer_code, label: "Customer Code")
+
+      expect(definition.to_h["label"]).to eq("Customer Code")
+    end
+
+    it "uses a custom i18n key" do
+      I18n.backend.store_translations(:en, orders: { index: { columns: { customer_code: "Customer code for order list" } } })
+
+      definition = described_class.new(key: :customer_code, i18n_key: "orders.index.columns.customer_code")
+
+      expect(definition.to_h["label"]).to eq("Customer code for order list")
+    end
+
+    it "uses Active Record attribute translations when a model name is given" do
+      I18n.backend.store_translations(:en, activerecord: { attributes: { order: { customer_code: "Customer code from Order" } } })
+
+      definition = described_class.new(key: :customer_code, model_name: :order)
+
+      expect(definition.to_h["label"]).to eq("Customer code from Order")
+    end
+
+    it "uses generic attribute translations" do
+      I18n.backend.store_translations(:en, attributes: { customer_code: "Generic customer code" })
+
       definition = described_class.new(key: :customer_code)
 
-      expect(definition.to_h["label"]).to eq("Customer code")
+      expect(definition.to_h["label"]).to eq("Generic customer code")
+    end
+
+    it "uses a humanized label by default" do
+      I18n.backend.store_translations(:en, attributes: { customer_code: nil })
+
+      definition = described_class.new(key: :delivery_due_date)
+
+      expect(definition.to_h["label"]).to eq("Delivery due date")
     end
   end
 end
