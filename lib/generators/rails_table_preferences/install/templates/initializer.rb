@@ -27,4 +27,9 @@ RailsTablePreferences.configure do |config|
 
   # Keep this in sync with the path used to mount RailsTablePreferences::Engine.
   config.mount_path = "/rails_table_preferences"
+
+  # Override this to render an application-owned editor partial.
+  # The default partial can be copied with:
+  #   bin/rails generate rails_table_preferences:views
+  config.editor_partial = "rails_table_preferences/editor"
 end
