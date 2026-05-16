@@ -22,10 +22,16 @@ export default class extends Controller {
 
   connect() {
     this.draggedEditorRow = null
+    this.resizingColumn = null
     this.defaultSettings = this.buildDefaultSettings()
     this.settingsValue = this.mergeSettings(this.defaultSettings, this.settingsValue || {})
     this.renderEditor()
     this.apply()
+    this.installResizeHandles()
+  }
+
+  disconnect() {
+    this.uninstallDocumentResizeListeners()
   }
 
   apply() {
@@ -33,6 +39,7 @@ export default class extends Controller {
     this.columnsFromSettings.forEach((column) => {
       this.applyColumn(column)
     })
+    this.syncEditorWidthInputs()
   }
 
   applyFromEditor(event) {
@@ -176,6 +183,81 @@ export default class extends Controller {
     })
   }
 
+  syncEditorWidthInputs() {
+    if (!this.hasEditorRowsTarget) return
+
+    this.editorRows.forEach((row) => {
+      const key = row.dataset.railsTablePreferencesColumnKey
+      const column = this.columnByKey(key)
+      const widthInput = row.querySelector('[data-field="width"]')
+      if (widthInput && column?.width) widthInput.value = String(column.width)
+    })
+  }
+
+  installResizeHandles() {
+    this.headerCells.forEach((cell) => {
+      if (cell.querySelector("[data-rails-table-preferences-resize-handle]")) return
+
+      const handle = document.createElement("button")
+      handle.type = "button"
+      handle.className = "rails-table-preferences-resize-handle"
+      handle.dataset.railsTablePreferencesResizeHandle = "true"
+      handle.setAttribute("aria-label", `Resize ${cell.dataset.railsTablePreferencesColumnKey}`)
+      handle.addEventListener("mousedown", this.startColumnResize.bind(this))
+      handle.addEventListener("click", (event) => event.preventDefault())
+
+      cell.appendChild(handle)
+    })
+  }
+
+  startColumnResize(event) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const headerCell = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
+    if (!headerCell) return
+
+    const key = headerCell.dataset.railsTablePreferencesColumnKey
+    const currentWidth = headerCell.getBoundingClientRect().width
+
+    this.resizingColumn = {
+      key,
+      startX: event.clientX,
+      startWidth: currentWidth
+    }
+
+    this.boundResizeColumn = this.resizeColumn.bind(this)
+    this.boundStopColumnResize = this.stopColumnResize.bind(this)
+    document.addEventListener("mousemove", this.boundResizeColumn)
+    document.addEventListener("mouseup", this.boundStopColumnResize)
+  }
+
+  resizeColumn(event) {
+    if (!this.resizingColumn) return
+
+    const width = Math.max(40, Math.round(this.resizingColumn.startWidth + event.clientX - this.resizingColumn.startX))
+    this.updateColumnSetting(this.resizingColumn.key, { width })
+    this.applyColumn(this.columnByKey(this.resizingColumn.key))
+    this.syncEditorWidthInputs()
+  }
+
+  stopColumnResize() {
+    this.uninstallDocumentResizeListeners()
+    this.resizingColumn = null
+  }
+
+  uninstallDocumentResizeListeners() {
+    if (this.boundResizeColumn) {
+      document.removeEventListener("mousemove", this.boundResizeColumn)
+      this.boundResizeColumn = null
+    }
+
+    if (this.boundStopColumnResize) {
+      document.removeEventListener("mouseup", this.boundStopColumnResize)
+      this.boundStopColumnResize = null
+    }
+  }
+
   settingsFromEditor() {
     if (!this.hasEditorRowsTarget) return this.settingsValue
 
@@ -202,6 +284,8 @@ export default class extends Controller {
   }
 
   applyColumn(column) {
+    if (!column) return
+
     const key = column.key
     const cells = this.cellsFor(key)
 
@@ -288,6 +372,15 @@ export default class extends Controller {
     }
   }
 
+  updateColumnSetting(key, attributes) {
+    this.settingsValue = {
+      ...this.settingsValue,
+      columns: this.columnsFromSettings.map((column) => (
+        column.key === key ? { ...column, ...attributes } : column
+      ))
+    }
+  }
+
   cellsFor(key) {
     return this.element.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
   }
@@ -321,6 +414,13 @@ export default class extends Controller {
     if (!this.hasEditorRowsTarget) return []
 
     return Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]"))
+  }
+
+  get headerCells() {
+    const table = this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table")
+    if (!table) return []
+
+    return Array.from(table.querySelectorAll("th[data-rails-table-preferences-column-key]"))
   }
 
   get tableRows() {
