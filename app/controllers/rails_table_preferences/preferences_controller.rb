@@ -28,7 +28,16 @@ module RailsTablePreferences
     end
 
     def settings_params
-      params.fetch(:settings, {}).permit!.to_h
+      raw_settings = params[:settings]
+
+      case raw_settings
+      when ActionController::Parameters
+        raw_settings.permit!.to_h
+      when Hash
+        raw_settings
+      else
+        {}
+      end
     end
 
     def preference_payload(preference)
