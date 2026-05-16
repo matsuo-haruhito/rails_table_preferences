@@ -17,6 +17,14 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
     end
   end
 
+  describe "#table_preferences_collection_url" do
+    it "builds a collection URL for table presets" do
+      expect(helper.table_preferences_collection_url(table_key: :orders)).to eq(
+        "/rails_table_preferences/preferences/orders"
+      )
+    end
+  end
+
   describe "#table_preferences_data_attributes" do
     it "returns Stimulus data attributes for a table" do
       attributes = helper.table_preferences_data_attributes(
@@ -28,7 +36,8 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         controller: "rails-table-preferences",
         rails_table_preferences_table_key_value: "orders",
         rails_table_preferences_name_value: "default",
-        rails_table_preferences_url_value: "/rails_table_preferences/preferences/orders/default"
+        rails_table_preferences_url_value: "/rails_table_preferences/preferences/orders/default",
+        rails_table_preferences_collection_url_value: "/rails_table_preferences/preferences/orders"
       )
       expect(JSON.parse(attributes[:rails_table_preferences_settings_value])).to eq(
         "columns" => [],
@@ -68,7 +77,16 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include("rails-table-preferences-editor")
       expect(html).to include("rails-table-preferences#applyFromEditor")
       expect(html).to include("rails-table-preferences#saveFromEditor")
+      expect(html).to include("rails-table-preferences#createPresetFromEditor")
+      expect(html).to include("rails-table-preferences#deletePreset")
       expect(html).to include("rails-table-preferences#resetEditor")
+    end
+
+    it "renders a preset name input" do
+      html = helper.table_preferences_editor(table_key: :orders, name: "inspection", columns: [:customer_code])
+
+      expect(html).to include("value=\"inspection\"")
+      expect(html).to include("rails-table-preferences-target=\"presetName\"")
     end
 
     it "renders a container used for draggable editor rows" do
