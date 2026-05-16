@@ -355,6 +355,7 @@ The gem intentionally keeps styling minimal. Host applications can style the emi
 rails-table-preferences-editor
 rails-table-preferences-editor__title
 rails-table-preferences-editor__preset
+rails-table-preferences-editor__default-preset
 rails-table-preferences-editor__rows
 rails-table-preferences-editor__actions
 rails-table-preferences-editor__row
@@ -389,13 +390,14 @@ PUT    /rails_table_preferences/preferences/:table_key/:name
 DELETE /rails_table_preferences/preferences/:table_key/:name
 ```
 
-`name` is optional for single-preset operations and defaults to `default`. `POST` accepts `name`, `settings`, and optional `default`.
+`name` is optional for single-preset operations and defaults to `default`. `POST` accepts `name`, `settings`, and optional `default`. `PATCH` and `PUT` also accept optional `default` to mark the preset as the default for that table. When one preset is marked default, other presets for the same owner and table are cleared.
 
 Example request body:
 
 ```json
 {
   "name": "inspection",
+  "default": true,
   "settings": {
     "columns": [
       {
@@ -493,13 +495,13 @@ Current helper direction:
 <% end %>
 ```
 
-The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders Apply, Save, Save as new, Delete, and Reset buttons for the same settings payload.
+The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders a preset selector, preset name input, default checkbox, Apply, Save, Save as new, Delete, and Reset buttons for the same settings payload.
+
+The preset selector loads existing presets for the current table. Selecting a preset fetches that preset, merges it with the current column definitions, and applies it to the table. The preset name input controls the current preset name. Use Save to update the current preset, Save as new to create a named preset, Delete to remove it, and the default checkbox to mark a preset as the table default.
 
 The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
 
 Header cells also receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
-
-The preset name input controls the current preset name. Use Save to update the current preset, Save as new to create a named preset, and Delete to remove it. The JSON API also supports listing presets for a table.
 
 ## Legacy ColumnAdjustment import
 
