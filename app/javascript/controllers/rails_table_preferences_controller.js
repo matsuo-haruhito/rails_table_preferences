@@ -18,7 +18,9 @@ export default class extends Controller {
     url: String,
     collectionUrl: String,
     settings: Object,
-    columns: Array
+    columns: Array,
+    resizeHandleWidth: { type: Number, default: 10 },
+    reorderSensitivity: { type: Number, default: 1.2 }
   }
 
   connect() {
@@ -289,6 +291,20 @@ export default class extends Controller {
   editorRowPlacement(event, row) {
     const rect = row.getBoundingClientRect()
     const offset = event.clientY - rect.top
+    const rows = this.editorRows
+    const draggedIndex = rows.indexOf(this.draggedEditorRow)
+    const targetIndex = rows.indexOf(row)
+
+    if (draggedIndex >= 0 && targetIndex >= 0) {
+      if (draggedIndex < targetIndex) {
+        return offset > rect.height * this.reorderActivationRatio ? "after" : "before"
+      }
+
+      if (draggedIndex > targetIndex) {
+        return offset < rect.height * (1 - this.reorderActivationRatio) ? "before" : "after"
+      }
+    }
+
     return offset < rect.height / 2 ? "before" : "after"
   }
 
@@ -324,8 +340,26 @@ export default class extends Controller {
       handle.addEventListener("mousedown", this.startColumnResize.bind(this))
       handle.addEventListener("click", (event) => event.preventDefault())
 
+      this.applyResizeHandleHitArea(cell, handle)
       cell.appendChild(handle)
     })
+  }
+
+  applyResizeHandleHitArea(cell, handle) {
+    const existingPosition = window.getComputedStyle(cell).position
+    if (existingPosition === "static") cell.style.position = "relative"
+
+    handle.style.position = "absolute"
+    handle.style.top = "0"
+    handle.style.right = "0"
+    handle.style.bottom = "0"
+    handle.style.width = `${this.normalizedResizeHandleWidth}px`
+    handle.style.padding = "0"
+    handle.style.border = "0"
+    handle.style.background = "transparent"
+    handle.style.cursor = "col-resize"
+    handle.style.opacity = "0"
+    handle.style.zIndex = "1"
   }
 
   startColumnResize(event) {
@@ -432,6 +466,20 @@ export default class extends Controller {
   tableColumnPlacement(event, cell) {
     const rect = cell.getBoundingClientRect()
     const offset = event.clientX - rect.left
+    const columns = this.orderedColumnsFromSettings
+    const draggedIndex = columns.findIndex((column) => column.key === this.draggedTableColumnKey)
+    const targetIndex = columns.findIndex((column) => column.key === cell.dataset.railsTablePreferencesColumnKey)
+
+    if (draggedIndex >= 0 && targetIndex >= 0) {
+      if (draggedIndex < targetIndex) {
+        return offset > rect.width * this.reorderActivationRatio ? "after" : "before"
+      }
+
+      if (draggedIndex > targetIndex) {
+        return offset < rect.width * (1 - this.reorderActivationRatio) ? "before" : "after"
+      }
+    }
+
     return offset < rect.width / 2 ? "before" : "after"
   }
 
@@ -620,6 +668,20 @@ export default class extends Controller {
 
   get orderedColumnsFromSettings() {
     return this.columnsFromSettings.slice().sort((left, right) => this.orderValue(left) - this.orderValue(right))
+  }
+
+  get normalizedResizeHandleWidth() {
+    const value = Number(this.resizeHandleWidthValue)
+    return Number.isFinite(value) && value > 0 ? value : 10
+  }
+
+  get normalizedReorderSensitivity() {
+    const value = Number(this.reorderSensitivityValue)
+    return Number.isFinite(value) && value > 0 ? value : 1
+  }
+
+  get reorderActivationRatio() {
+    return Math.max(0.25, Math.min(0.5, 0.5 / this.normalizedReorderSensitivity))
   }
 
   get currentPresetName() {
