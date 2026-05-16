@@ -1,0 +1,179 @@
+/*
+ * Minimal default styles for Rails Table Preferences.
+ *
+ * These styles intentionally focus on layout stability rather than visual branding.
+ * Host applications can override any class below.
+ */
+
+.rails-table-preferences-editor,
+.rails-table-preferences-editor * {
+  box-sizing: border-box;
+}
+
+.rails-table-preferences-editor {
+  display: block;
+  max-width: 100%;
+}
+
+.rails-table-preferences-editor__title {
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.rails-table-preferences-editor__preset,
+.rails-table-preferences-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.rails-table-preferences-editor__preset label {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.rails-table-preferences-editor__preset select,
+.rails-table-preferences-editor__preset input[type="text"],
+.rails-table-preferences-editor__row input[type="number"] {
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.5rem;
+  font: inherit;
+}
+
+.rails-table-preferences-editor__default-preset {
+  display: flex !important;
+  align-items: center;
+  gap: 0.375rem !important;
+  min-height: 2.5rem;
+}
+
+.rails-table-preferences-editor__rows {
+  display: grid;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+}
+
+.rails-table-preferences-editor__row {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) 8rem 9rem 10rem;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+}
+
+.rails-table-preferences-editor__row--dragging,
+.rails-table-preferences-table-column--dragging {
+  opacity: 0.65;
+}
+
+.rails-table-preferences-editor__drag-handle {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  cursor: grab;
+}
+
+.rails-table-preferences-editor__visible {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.5rem;
+  padding-left: 3rem;
+}
+
+.rails-table-preferences-editor__visible input[type="checkbox"] {
+  flex: 0 0 auto;
+}
+
+.rails-table-preferences-editor__visible span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rails-table-preferences-editor__row > label:not(.rails-table-preferences-editor__visible) {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.rails-table-preferences-editor__row > label:nth-of-type(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.rails-table-preferences-editor__row > label:nth-of-type(3) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.rails-table-preferences-editor__row > label:nth-of-type(4) {
+  grid-column: 4;
+  grid-row: 1;
+}
+
+.rails-table-preferences-editor__row input[type="number"] {
+  width: 100%;
+  min-width: 0;
+}
+
+.rails-table-preferences-editor__actions button {
+  min-height: 2.5rem;
+  padding: 0.375rem 0.75rem;
+  font: inherit;
+}
+
+.rails-table-preferences-table-column-draggable {
+  cursor: grab;
+}
+
+.rails-table-preferences-resize-handle {
+  cursor: col-resize;
+}
+
+@media (max-width: 64rem) {
+  .rails-table-preferences-editor__row {
+    grid-template-columns: minmax(14rem, 1fr) 7rem 8rem 9rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .rails-table-preferences-editor__row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rails-table-preferences-editor__drag-handle,
+  .rails-table-preferences-editor__visible {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(4) {
+    grid-column: 3;
+    grid-row: 2;
+  }
+}
