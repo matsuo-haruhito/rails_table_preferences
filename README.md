@@ -42,6 +42,13 @@ bin/rails db:migrate
 
 The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`.
 
+Mount the engine when using the bundled JSON API:
+
+```ruby
+# config/routes.rb
+mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
+```
+
 ## Initial scope
 
 The first version focuses on extracting and generalizing the `ColumnAdjustment`-style table display settings used in existing Rails applications.
@@ -146,6 +153,21 @@ The settings payload is expected to evolve from column display preferences to in
 }
 ```
 
+Existing `ColumnAdjustment` style keys are accepted by the normalizer:
+
+```json
+{
+  "columns": [
+    {
+      "column_name": "customer_code",
+      "display_flag": true,
+      "display_order": 10,
+      "width": 120
+    }
+  ]
+}
+```
+
 ## Configuration
 
 Default configuration:
@@ -155,10 +177,57 @@ RailsTablePreferences.configure do |config|
   config.table_name = "table_preferences"
   config.user_class_name = "User"
   config.user_foreign_key = "user_id"
+  config.parent_controller_class_name = "ApplicationController"
+  config.current_user_method = :current_user
 end
 ```
 
 The first implementation assumes a `User` model and a primary application database. Applications with different user model names can configure the class and foreign key before using the model.
+
+## Current API foundation
+
+The mounted engine exposes a small JSON API for one user's table preference.
+
+```http
+GET /rails_table_preferences/preferences/:table_key/:name
+PATCH /rails_table_preferences/preferences/:table_key/:name
+PUT /rails_table_preferences/preferences/:table_key/:name
+```
+
+`name` is optional and defaults to `default`.
+
+Example request body:
+
+```json
+{
+  "settings": {
+    "columns": [
+      {
+        "key": "customer_code",
+        "visible": true,
+        "order": 10,
+        "width": 120,
+        "truncate": 20
+      }
+    ]
+  }
+}
+```
+
+Example response:
+
+```json
+{
+  "table_key": "orders",
+  "name": "default",
+  "default": false,
+  "settings": {
+    "columns": [],
+    "filters": {},
+    "sorts": []
+  }
+}
+```
 
 ## Usage direction
 
@@ -177,15 +246,28 @@ class OrdersController < ApplicationController
 end
 ```
 
-View-side direction:
+Current helper direction:
 
 ```erb
-<%= table_preferences_toolbar(:orders) %>
-
-<table data-controller="rails-table-preferences" data-table-key="orders">
-  ...
-</table>
+<%= table_preferences_table_tag(table_key: :orders, class: "table") do %>
+  <thead>
+    <tr>
+      <th data-rails-table-preferences-column-key="order_no">Order No.</th>
+      <th data-rails-table-preferences-column-key="customer_code">Customer Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+        <td data-rails-table-preferences-column-key="customer_code"><%= order.customer_code %></td>
+      </tr>
+    <% end %>
+  </tbody>
+<% end %>
 ```
+
+The bundled Stimulus controller applies saved `visible`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`.
 
 ## Development status
 
