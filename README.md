@@ -282,6 +282,8 @@ The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `
 
 The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
 
+Header cells also receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
+
 ## Development status
 
 This gem is in the initial planning and skeleton stage.
