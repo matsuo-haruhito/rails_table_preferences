@@ -19,7 +19,10 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
   describe "#table_preferences_data_attributes" do
     it "returns Stimulus data attributes for a table" do
-      attributes = helper.table_preferences_data_attributes(table_key: :orders)
+      attributes = helper.table_preferences_data_attributes(
+        table_key: :orders,
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code", default_width: 120)]
+      )
 
       expect(attributes).to include(
         controller: "rails-table-preferences",
@@ -32,6 +35,40 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         "filters" => {},
         "sorts" => []
       )
+      expect(JSON.parse(attributes[:rails_table_preferences_columns_value])).to eq(
+        [
+          {
+            "key" => "customer_code",
+            "label" => "Customer Code",
+            "visible" => true,
+            "width" => 120,
+            "pinned" => false
+          }
+        ]
+      )
+    end
+  end
+
+  describe "#table_preferences_column" do
+    it "builds a column definition hash" do
+      expect(helper.table_preferences_column(:customer_code, label: "Customer Code", default_order: 10)).to eq(
+        "key" => "customer_code",
+        "label" => "Customer Code",
+        "visible" => true,
+        "order" => 10,
+        "pinned" => false
+      )
+    end
+  end
+
+  describe "#table_preferences_editor" do
+    it "renders an editor container with action buttons" do
+      html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+
+      expect(html).to include("rails-table-preferences-editor")
+      expect(html).to include("rails-table-preferences#applyFromEditor")
+      expect(html).to include("rails-table-preferences#saveFromEditor")
+      expect(html).to include("rails-table-preferences#resetEditor")
     end
   end
 end
