@@ -21,7 +21,7 @@ module RailsTablePreferences
 
     def create
       preference = Preference.new(
-        RailsTablePreferences.configuration.user_foreign_key => table_preferences_current_user,
+        user: table_preferences_current_user,
         table_key: params[:table_key].to_s,
         name: preference_name,
         settings: SettingsNormalizer.call(settings_params),
