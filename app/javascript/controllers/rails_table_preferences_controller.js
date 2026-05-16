@@ -1,28 +1,51 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Applies saved table display preferences to a server-rendered table.
+// Applies and edits saved table display preferences for a server-rendered table.
 //
-// Expected markup:
+// Expected table markup:
 //   <table data-controller="rails-table-preferences" ...>
 //     <th data-rails-table-preferences-column-key="customer_code">...</th>
 //     <td data-rails-table-preferences-column-key="customer_code">...</td>
 //   </table>
+//
+// The same controller can also be used with the editor helper.
 export default class extends Controller {
+  static targets = ["editorRows"]
+
   static values = {
     tableKey: String,
     name: { type: String, default: "default" },
     url: String,
-    settings: Object
+    settings: Object,
+    columns: Array
   }
 
   connect() {
+    this.defaultSettings = this.buildDefaultSettings()
+    this.settingsValue = this.mergeSettings(this.defaultSettings, this.settingsValue || {})
+    this.renderEditor()
     this.apply()
   }
 
   apply() {
-    this.columns.forEach((column) => {
+    this.applyColumnOrder()
+    this.columnsFromSettings.forEach((column) => {
       this.applyColumn(column)
     })
+  }
+
+  applyFromEditor(event) {
+    if (event) event.preventDefault()
+
+    this.settingsValue = this.settingsFromEditor()
+    this.apply()
+  }
+
+  async saveFromEditor(event) {
+    if (event) event.preventDefault()
+
+    this.settingsValue = this.settingsFromEditor()
+    await this.save()
   }
 
   async save(event) {
@@ -43,8 +66,79 @@ export default class extends Controller {
     }
 
     const payload = await response.json()
-    this.settingsValue = payload.settings
+    this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
+    this.renderEditor()
     this.apply()
+  }
+
+  resetEditor(event) {
+    if (event) event.preventDefault()
+
+    this.settingsValue = this.defaultSettings
+    this.renderEditor()
+    this.apply()
+  }
+
+  renderEditor() {
+    if (!this.hasEditorRowsTarget) return
+
+    this.editorRowsTarget.innerHTML = ""
+
+    this.columnsFromSettings.forEach((column) => {
+      this.editorRowsTarget.appendChild(this.buildEditorRow(column))
+    })
+  }
+
+  buildEditorRow(column) {
+    const row = document.createElement("div")
+    row.className = "rails-table-preferences-editor__row"
+    row.dataset.railsTablePreferencesColumnKey = column.key
+
+    row.innerHTML = `
+      <label class="rails-table-preferences-editor__visible">
+        <input type="checkbox" data-field="visible" ${column.visible === false ? "" : "checked"}>
+        <span>${this.escapeHtml(column.label || column.key)}</span>
+      </label>
+      <label>
+        Order
+        <input type="number" data-field="order" value="${column.order ?? ""}" inputmode="numeric">
+      </label>
+      <label>
+        Width
+        <input type="number" data-field="width" value="${column.width ?? ""}" inputmode="numeric">
+      </label>
+      <label>
+        Truncate
+        <input type="number" data-field="truncate" value="${column.truncate ?? ""}" inputmode="numeric">
+      </label>
+    `
+
+    return row
+  }
+
+  settingsFromEditor() {
+    if (!this.hasEditorRowsTarget) return this.settingsValue
+
+    const columns = Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]")).map((row, index) => {
+      const key = row.dataset.railsTablePreferencesColumnKey
+      const current = this.columnByKey(key) || {}
+
+      return {
+        key,
+        visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
+        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? index,
+        width: this.integerValue(row.querySelector('[data-field="width"]')?.value),
+        truncate: this.integerValue(row.querySelector('[data-field="truncate"]')?.value),
+        pinned: current.pinned === true
+      }
+    })
+
+    return {
+      ...this.settingsValue,
+      columns,
+      filters: this.settingsValue?.filters || {},
+      sorts: this.settingsValue?.sorts || []
+    }
   }
 
   applyColumn(column) {
@@ -53,6 +147,13 @@ export default class extends Controller {
 
     cells.forEach((cell) => {
       cell.hidden = column.visible === false
+
+      cell.style.width = ""
+      cell.style.maxWidth = ""
+      cell.style.overflow = ""
+      cell.style.textOverflow = ""
+      cell.style.whiteSpace = ""
+      delete cell.dataset.railsTablePreferencesTruncate
 
       if (column.width) {
         cell.style.width = `${column.width}px`
@@ -64,16 +165,103 @@ export default class extends Controller {
         cell.style.overflow = "hidden"
         cell.style.textOverflow = "ellipsis"
         cell.style.whiteSpace = "nowrap"
+        if (!cell.title) cell.title = cell.textContent.trim()
       }
     })
+  }
+
+  applyColumnOrder() {
+    const orderedKeys = this.columnsFromSettings
+      .slice()
+      .sort((left, right) => this.orderValue(left) - this.orderValue(right))
+      .map((column) => column.key)
+
+    this.tableRows.forEach((row) => {
+      const keyedCells = new Map(
+        Array.from(row.children)
+          .filter((cell) => cell.dataset.railsTablePreferencesColumnKey)
+          .map((cell) => [cell.dataset.railsTablePreferencesColumnKey, cell])
+      )
+
+      orderedKeys.forEach((key) => {
+        const cell = keyedCells.get(key)
+        if (cell) row.appendChild(cell)
+      })
+    })
+  }
+
+  buildDefaultSettings() {
+    return {
+      columns: this.columnsValue.map((column, index) => ({
+        key: column.key,
+        label: column.label || column.key,
+        visible: column.visible !== false,
+        order: column.order ?? index,
+        width: column.width,
+        truncate: column.truncate,
+        pinned: column.pinned === true
+      })),
+      filters: {},
+      sorts: []
+    }
+  }
+
+  mergeSettings(defaultSettings, savedSettings) {
+    const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))
+
+    const columns = defaultSettings.columns.map((defaultColumn, index) => {
+      const savedColumn = savedColumns.get(defaultColumn.key) || {}
+
+      return {
+        ...defaultColumn,
+        ...savedColumn,
+        label: defaultColumn.label,
+        order: savedColumn.order ?? defaultColumn.order ?? index,
+        visible: savedColumn.visible ?? defaultColumn.visible
+      }
+    })
+
+    return {
+      columns,
+      filters: savedSettings?.filters || {},
+      sorts: savedSettings?.sorts || []
+    }
   }
 
   cellsFor(key) {
     return this.element.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
   }
 
-  get columns() {
+  columnByKey(key) {
+    return this.columnsFromSettings.find((column) => column.key === key)
+  }
+
+  orderValue(column) {
+    return Number.isFinite(Number(column.order)) ? Number(column.order) : Number.MAX_SAFE_INTEGER
+  }
+
+  integerValue(value) {
+    if (value === undefined || value === null || value === "") return null
+
+    const integer = Number.parseInt(value, 10)
+    return Number.isNaN(integer) ? null : integer
+  }
+
+  escapeHtml(value) {
+    const span = document.createElement("span")
+    span.textContent = value
+    return span.innerHTML
+  }
+
+  get columnsFromSettings() {
     return this.settingsValue?.columns || []
+  }
+
+  get tableRows() {
+    const table = this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table")
+    if (!table) return []
+
+    return table.querySelectorAll("tr")
   }
 
   get csrfToken() {
