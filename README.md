@@ -271,6 +271,43 @@ ja:
         delivery_date: 納品日
 ```
 
+## Ignored columns
+
+Use ignored columns for fields that should not appear in the user-facing column editor, even if the table or saved settings contain them.
+
+Per-column form:
+
+```ruby
+columns = [
+  table_preferences_column(:customer_code, model_name: :order),
+  table_preferences_column(:internal_cost, model_name: :order, ignored: true),
+  table_preferences_column(:secret_note, model_name: :order, ignore: true)
+]
+```
+
+Blacklist form:
+
+```erb
+<%= table_preferences_editor(
+  table_key: :orders,
+  columns: columns,
+  ignored_columns: [:internal_cost, :secret_note]
+) %>
+
+<%= table_preferences_table_tag(
+  table_key: :orders,
+  columns: columns,
+  ignored_columns: [:internal_cost, :secret_note],
+  class: "table"
+) do %>
+  ...
+<% end %>
+```
+
+Ignored columns are removed from `columns_json` and are also filtered out of the initial `settings_json`. This prevents an old saved preference from reintroducing a column that the host application has since hidden from users.
+
+This is a UI/display protection mechanism. Sensitive values should still be protected by normal authorization, query selection, and view rendering rules in the host application.
+
 ## Host app customization
 
 ### ERB
