@@ -1,0 +1,1 @@
+# rails_table_preferences
