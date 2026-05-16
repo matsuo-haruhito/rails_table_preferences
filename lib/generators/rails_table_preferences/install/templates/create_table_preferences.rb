@@ -3,7 +3,7 @@
 class CreateTablePreferences < ActiveRecord::Migration[7.0]
   def change
     create_table :table_preferences do |t|
-      t.references :user, null: false, foreign_key: true
+      t.references :<%= owner_foreign_key.delete_suffix("_id") %>, null: false, foreign_key: { to_table: :<%= owner_table_name %> }
       t.string :table_key, null: false
       t.string :name, null: false, default: "default"
       t.json :settings, null: false
@@ -11,7 +11,7 @@ class CreateTablePreferences < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :table_preferences, [:user_id, :table_key, :name], unique: true
-    add_index :table_preferences, [:user_id, :table_key, :default_flag]
+    add_index :table_preferences, [:<%= owner_foreign_key %>, :table_key, :name], unique: true
+    add_index :table_preferences, [:<%= owner_foreign_key %>, :table_key, :default_flag]
   end
 end
