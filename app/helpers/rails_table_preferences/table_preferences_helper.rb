@@ -8,6 +8,7 @@ module RailsTablePreferences
         rails_table_preferences_table_key_value: table_key.to_s,
         rails_table_preferences_name_value: name.to_s,
         rails_table_preferences_url_value: table_preferences_preference_url(table_key: table_key, name: name),
+        rails_table_preferences_collection_url_value: table_preferences_collection_url(table_key: table_key),
         rails_table_preferences_settings_value: SettingsNormalizer.call(settings || {}).to_json,
         rails_table_preferences_columns_value: table_preferences_columns(columns).to_json
       }
@@ -28,12 +29,23 @@ module RailsTablePreferences
         safe_join(
           [
             tag.div(title, class: "rails-table-preferences-editor__title"),
+            tag.div(class: "rails-table-preferences-editor__preset") do
+              safe_join(
+                [
+                  tag.label("Preset", for: "rails-table-preferences-preset-name"),
+                  tag.input(type: "text", id: "rails-table-preferences-preset-name", value: name, data: { rails_table_preferences_target: "presetName" })
+                ],
+                "\n"
+              )
+            end,
             tag.div(data: { rails_table_preferences_target: "editorRows" }, class: "rails-table-preferences-editor__rows"),
             tag.div(class: "rails-table-preferences-editor__actions") do
               safe_join(
                 [
                   tag.button("Apply", type: "button", data: { action: "rails-table-preferences#applyFromEditor" }),
                   tag.button("Save", type: "button", data: { action: "rails-table-preferences#saveFromEditor" }),
+                  tag.button("Save as new", type: "button", data: { action: "rails-table-preferences#createPresetFromEditor" }),
+                  tag.button("Delete", type: "button", data: { action: "rails-table-preferences#deletePreset" }),
                   tag.button("Reset", type: "button", data: { action: "rails-table-preferences#resetEditor" })
                 ],
                 "\n"
@@ -46,11 +58,14 @@ module RailsTablePreferences
     end
 
     def table_preferences_preference_url(table_key:, name: "default")
+      "#{table_preferences_collection_url(table_key: table_key)}/#{ERB::Util.url_encode(name.to_s)}"
+    end
+
+    def table_preferences_collection_url(table_key:)
       mount_path = RailsTablePreferences.configuration.mount_path.to_s.chomp("/")
       encoded_table_key = ERB::Util.url_encode(table_key.to_s)
-      encoded_name = ERB::Util.url_encode(name.to_s)
 
-      "#{mount_path}/preferences/#{encoded_table_key}/#{encoded_name}"
+      "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
     def table_preferences_column(key, label: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false)
