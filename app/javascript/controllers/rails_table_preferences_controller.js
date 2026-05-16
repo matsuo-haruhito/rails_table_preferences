@@ -10,7 +10,7 @@ import { Controller } from "@hotwired/stimulus"
 //
 // The same controller can also be used with the editor helper.
 export default class extends Controller {
-  static targets = ["editorRows", "presetName"]
+  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset"]
 
   static values = {
     tableKey: String,
@@ -24,11 +24,13 @@ export default class extends Controller {
   connect() {
     this.draggedEditorRow = null
     this.resizingColumn = null
+    this.presets = []
     this.defaultSettings = this.buildDefaultSettings()
     this.settingsValue = this.mergeSettings(this.defaultSettings, this.settingsValue || {})
     this.renderEditor()
     this.apply()
     this.installResizeHandles()
+    this.refreshPresetOptions()
   }
 
   disconnect() {
@@ -64,7 +66,7 @@ export default class extends Controller {
     const response = await fetch(this.collectionUrlValue, {
       method: "POST",
       headers: this.jsonHeaders,
-      body: JSON.stringify({ name: this.currentPresetName, settings: this.settingsValue })
+      body: JSON.stringify({ name: this.currentPresetName, settings: this.settingsValue, default: this.defaultPresetChecked })
     })
 
     if (!response.ok) {
@@ -74,9 +76,12 @@ export default class extends Controller {
     const payload = await response.json()
     this.nameValue = payload.name
     this.urlValue = this.preferenceUrl(payload.name)
+    this.setPresetNameInput(payload.name)
+    this.setDefaultPresetInput(payload.default)
     this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
     this.renderEditor()
     this.apply()
+    await this.refreshPresetOptions()
   }
 
   async deletePreset(event) {
@@ -97,9 +102,11 @@ export default class extends Controller {
     this.nameValue = "default"
     this.urlValue = this.preferenceUrl("default")
     this.setPresetNameInput("default")
+    this.setDefaultPresetInput(false)
     this.settingsValue = this.defaultSettings
     this.renderEditor()
     this.apply()
+    await this.refreshPresetOptions()
   }
 
   async save(event) {
@@ -108,7 +115,7 @@ export default class extends Controller {
     const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "PATCH",
       headers: this.jsonHeaders,
-      body: JSON.stringify({ settings: this.settingsValue })
+      body: JSON.stringify({ settings: this.settingsValue, default: this.defaultPresetChecked })
     })
 
     if (!response.ok) {
@@ -118,9 +125,12 @@ export default class extends Controller {
     const payload = await response.json()
     this.nameValue = payload.name
     this.urlValue = this.preferenceUrl(payload.name)
+    this.setPresetNameInput(payload.name)
+    this.setDefaultPresetInput(payload.default)
     this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
     this.renderEditor()
     this.apply()
+    await this.refreshPresetOptions()
   }
 
   resetEditor(event) {
@@ -139,6 +149,58 @@ export default class extends Controller {
     }
 
     return response.json()
+  }
+
+  async refreshPresetOptions() {
+    if (!this.hasPresetSelectTarget) return
+
+    const payload = await this.loadPresets()
+    this.presets = payload.preferences || []
+    this.renderPresetOptions()
+  }
+
+  renderPresetOptions() {
+    if (!this.hasPresetSelectTarget) return
+
+    this.presetSelectTarget.innerHTML = ""
+
+    if (this.presets.length === 0) {
+      this.presetSelectTarget.appendChild(this.buildPresetOption(this.currentPresetName, false))
+    } else {
+      this.presets.forEach((preset) => {
+        this.presetSelectTarget.appendChild(this.buildPresetOption(preset.name, preset.default === true))
+      })
+    }
+
+    this.presetSelectTarget.value = this.currentPresetName
+  }
+
+  buildPresetOption(name, defaultFlag) {
+    const option = document.createElement("option")
+    option.value = name
+    option.textContent = defaultFlag ? `${name} *` : name
+    option.dataset.default = defaultFlag ? "true" : "false"
+    return option
+  }
+
+  async selectPreset(event) {
+    if (event) event.preventDefault()
+
+    const name = this.presetSelectTarget.value || "default"
+    const response = await fetch(this.preferenceUrl(name), { headers: { "Accept": "application/json" } })
+
+    if (!response.ok) {
+      throw new Error(`Failed to load table preference preset: ${response.status}`)
+    }
+
+    const payload = await response.json()
+    this.nameValue = payload.name
+    this.urlValue = this.preferenceUrl(payload.name)
+    this.setPresetNameInput(payload.name)
+    this.setDefaultPresetInput(payload.default)
+    this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
+    this.renderEditor()
+    this.apply()
   }
 
   renderEditor() {
@@ -443,6 +505,10 @@ export default class extends Controller {
     if (this.hasPresetNameTarget) this.presetNameTarget.value = name
   }
 
+  setDefaultPresetInput(value) {
+    if (this.hasDefaultPresetTarget) this.defaultPresetTarget.checked = value === true
+  }
+
   cellsFor(key) {
     return this.element.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
   }
@@ -476,6 +542,10 @@ export default class extends Controller {
     if (!this.hasPresetNameTarget) return this.nameValue || "default"
 
     return this.presetNameTarget.value.trim() || "default"
+  }
+
+  get defaultPresetChecked() {
+    return this.hasDefaultPresetTarget ? this.defaultPresetTarget.checked : false
   }
 
   get editorRows() {
