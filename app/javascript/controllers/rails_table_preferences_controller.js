@@ -20,7 +20,12 @@ export default class extends Controller {
     settings: Object,
     columns: Array,
     resizeHandleWidth: { type: Number, default: 10 },
-    reorderSensitivity: { type: Number, default: 1.2 }
+    reorderSensitivity: { type: Number, default: 1.2 },
+    orderLabel: { type: String, default: "表示順" },
+    widthLabel: { type: String, default: "列幅" },
+    truncateLabel: { type: String, default: "省略文字数" },
+    dragLabel: { type: String, default: "ドラッグして並び替え" },
+    resizeLabel: { type: String, default: "列幅を変更" }
   }
 
   connect() {
@@ -230,21 +235,21 @@ export default class extends Controller {
     row.addEventListener("dragend", this.dragEditorRowEnd.bind(this))
 
     row.innerHTML = `
-      <button type="button" class="rails-table-preferences-editor__drag-handle" draggable="false" aria-label="Drag to reorder" title="Drag to reorder">↕</button>
+      <button type="button" class="rails-table-preferences-editor__drag-handle" draggable="false" aria-label="${this.escapeHtml(this.dragLabelValue)}" title="${this.escapeHtml(this.dragLabelValue)}">↕</button>
       <label class="rails-table-preferences-editor__visible">
         <input type="checkbox" data-field="visible" ${column.visible === false ? "" : "checked"}>
         <span>${this.escapeHtml(column.label || column.key)}</span>
       </label>
       <label>
-        Order
+        ${this.escapeHtml(this.orderLabelValue)}
         <input type="number" data-field="order" value="${column.order ?? ""}" inputmode="numeric">
       </label>
       <label>
-        Width
+        ${this.escapeHtml(this.widthLabelValue)}
         <input type="number" data-field="width" value="${column.width ?? ""}" inputmode="numeric">
       </label>
       <label>
-        Truncate
+        ${this.escapeHtml(this.truncateLabelValue)}
         <input type="number" data-field="truncate" value="${column.truncate ?? ""}" inputmode="numeric">
       </label>
     `
@@ -336,7 +341,7 @@ export default class extends Controller {
       handle.type = "button"
       handle.className = "rails-table-preferences-resize-handle"
       handle.dataset.railsTablePreferencesResizeHandle = "true"
-      handle.setAttribute("aria-label", `Resize ${cell.dataset.railsTablePreferencesColumnKey}`)
+      handle.setAttribute("aria-label", `${this.resizeLabelValue}: ${cell.dataset.railsTablePreferencesColumnKey}`)
       handle.addEventListener("mousedown", this.startColumnResize.bind(this))
       handle.addEventListener("click", (event) => event.preventDefault())
 
@@ -638,7 +643,10 @@ export default class extends Controller {
   }
 
   cellsFor(key) {
-    return this.element.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
+    const table = this.tableElement
+    if (!table) return []
+
+    return table.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
   }
 
   columnByKey(key) {
@@ -700,15 +708,19 @@ export default class extends Controller {
     return Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]"))
   }
 
+  get tableElement() {
+    return this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table")
+  }
+
   get headerCells() {
-    const table = this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table")
+    const table = this.tableElement
     if (!table) return []
 
     return Array.from(table.querySelectorAll("th[data-rails-table-preferences-column-key]"))
   }
 
   get tableRows() {
-    const table = this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table")
+    const table = this.tableElement
     if (!table) return []
 
     return table.querySelectorAll("tr")
