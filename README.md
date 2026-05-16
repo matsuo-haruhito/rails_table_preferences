@@ -41,7 +41,7 @@ bin/rails generate rails_table_preferences:install
 bin/rails db:migrate
 ```
 
-The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb`.
+The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb` and copies the bundled Stimulus controller to `app/javascript/controllers/rails_table_preferences_controller.js`.
 
 If preferences should belong to a model other than `User`, pass an owner model. The value can be singular or plural:
 
@@ -54,6 +54,18 @@ bin/rails generate rails_table_preferences:install --owner-model client
 
 ```bash
 bin/rails generate rails_table_preferences:install --owner-model customers --owner-foreign-key member_id
+```
+
+Skip JavaScript copying when the host app wants to provide or register its own controller:
+
+```bash
+bin/rails generate rails_table_preferences:install --skip-javascript
+```
+
+You can also copy only the JavaScript controller later:
+
+```bash
+bin/rails generate rails_table_preferences:javascript
 ```
 
 Mount the engine when using the bundled JSON API:
@@ -365,7 +377,28 @@ rails-table-preferences-resize-handle
 
 ### JavaScript
 
-The bundled Stimulus controller uses stable data attributes and class hooks. Host applications can either use the bundled controller or register their own controller that reads the same data attributes:
+The supported default integration is copy-based. The install generator copies the bundled Stimulus controller into the host application:
+
+```text
+app/javascript/controllers/rails_table_preferences_controller.js
+```
+
+For Rails applications using the default `stimulus-rails` manifest loader, files ending in `_controller.js` under `app/javascript/controllers` are registered automatically. In that setup, no extra import is needed after running the install generator.
+
+For jsbundling or a custom Stimulus setup, import and register the copied controller manually:
+
+```js
+import RailsTablePreferencesController from "./controllers/rails_table_preferences_controller"
+application.register("rails-table-preferences", RailsTablePreferencesController)
+```
+
+If the host application wants to maintain its own JavaScript implementation, skip copying during install and register a controller with the same Stimulus name:
+
+```bash
+bin/rails generate rails_table_preferences:install --skip-javascript
+```
+
+The controller contract is the data attributes emitted by the helper/partial:
 
 ```text
 data-rails-table-preferences-table-key-value
