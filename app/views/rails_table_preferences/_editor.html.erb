@@ -9,14 +9,14 @@
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
   <div class="rails-table-preferences-editor__preset">
-    <label for="rails-table-preferences-preset-select"><%= t("rails_table_preferences.editor.preset_select", default: "Saved presets") %></label>
+    <label for="rails-table-preferences-preset-select"><%= t("rails_table_preferences.editor.preset_select", default: "保存済み設定") %></label>
     <select id="rails-table-preferences-preset-select"
             data-rails-table-preferences-target="presetSelect"
             data-action="rails-table-preferences#selectPreset">
       <option value="<%= name %>"><%= name %></option>
     </select>
 
-    <label for="rails-table-preferences-preset-name"><%= t("rails_table_preferences.editor.preset", default: "Preset") %></label>
+    <label for="rails-table-preferences-preset-name"><%= t("rails_table_preferences.editor.preset", default: "設定名") %></label>
     <input type="text"
            id="rails-table-preferences-preset-name"
            value="<%= name %>"
@@ -25,17 +25,17 @@
     <label class="rails-table-preferences-editor__default-preset">
       <input type="checkbox"
              data-rails-table-preferences-target="defaultPreset">
-      <%= t("rails_table_preferences.editor.default_preset", default: "Use as default") %>
+      <%= t("rails_table_preferences.editor.default_preset", default: "標準設定にする") %>
     </label>
   </div>
 
   <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
 
   <div class="rails-table-preferences-editor__actions">
-    <button type="button" data-action="rails-table-preferences#applyFromEditor"><%= t("rails_table_preferences.editor.apply", default: "Apply") %></button>
-    <button type="button" data-action="rails-table-preferences#saveFromEditor"><%= t("rails_table_preferences.editor.save", default: "Save") %></button>
-    <button type="button" data-action="rails-table-preferences#createPresetFromEditor"><%= t("rails_table_preferences.editor.save_as_new", default: "Save as new") %></button>
-    <button type="button" data-action="rails-table-preferences#deletePreset"><%= t("rails_table_preferences.editor.delete", default: "Delete") %></button>
-    <button type="button" data-action="rails-table-preferences#resetEditor"><%= t("rails_table_preferences.editor.reset", default: "Reset") %></button>
+    <button type="button" data-action="rails-table-preferences#applyFromEditor"><%= t("rails_table_preferences.editor.apply", default: "適用") %></button>
+    <button type="button" data-action="rails-table-preferences#saveFromEditor"><%= t("rails_table_preferences.editor.save", default: "保存") %></button>
+    <button type="button" data-action="rails-table-preferences#createPresetFromEditor"><%= t("rails_table_preferences.editor.save_as_new", default: "別名で保存") %></button>
+    <button type="button" data-action="rails-table-preferences#deletePreset"><%= t("rails_table_preferences.editor.delete", default: "削除") %></button>
+    <button type="button" data-action="rails-table-preferences#resetEditor"><%= t("rails_table_preferences.editor.reset", default: "リセット") %></button>
   </div>
 </div>
