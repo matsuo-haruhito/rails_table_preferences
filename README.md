@@ -179,10 +179,11 @@ RailsTablePreferences.configure do |config|
   config.user_foreign_key = "user_id"
   config.parent_controller_class_name = "ApplicationController"
   config.current_user_method = :current_user
+  config.mount_path = "/rails_table_preferences"
 end
 ```
 
-The first implementation assumes a `User` model and a primary application database. Applications with different user model names can configure the class and foreign key before using the model.
+The first implementation assumes a `User` model and a primary application database. Applications with different user model names can configure the class and foreign key before using the model. If the engine is mounted at a different path, set `mount_path` to the same value.
 
 ## Current API foundation
 
