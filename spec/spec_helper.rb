@@ -3,7 +3,14 @@
 require "bundler/setup"
 require "active_record"
 require "action_controller/railtie"
+require "rspec/rails"
 require "rails_table_preferences"
+
+class ApplicationController < ActionController::Base
+  def current_user
+    Thread.current[:rails_table_preferences_current_user]
+  end
+end
 
 class TestApplication < Rails::Application
   config.root = File.expand_path("..", __dir__)
@@ -51,11 +58,17 @@ RSpec.configure do |config|
   end
 
   config.shared_context_metadata_behavior = :apply_to_host_groups
+  config.infer_spec_type_from_file_location!
 
   config.before do
     RailsTablePreferences.configuration = RailsTablePreferences::Configuration.new
     RailsTablePreferences::Preference.table_name = RailsTablePreferences.configuration.table_name
     RailsTablePreferences::Preference.delete_all
     User.delete_all
+    Thread.current[:rails_table_preferences_current_user] = nil
+  end
+
+  config.after do
+    Thread.current[:rails_table_preferences_current_user] = nil
   end
 end
