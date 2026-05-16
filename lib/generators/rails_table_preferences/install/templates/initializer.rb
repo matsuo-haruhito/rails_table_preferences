@@ -4,9 +4,22 @@ RailsTablePreferences.configure do |config|
   # Stores table preferences in the host application's primary database.
   config.table_name = "table_preferences"
 
-  # Configure these when your application uses a user model other than User.
-  config.user_class_name = "User"
-  config.user_foreign_key = "user_id"
+  # Configure this when your application uses a model other than User to own preferences.
+  #
+  # The value may be a String or Symbol, singular or plural:
+  #   config.owner_model = :customers # => Customer / customer_id
+  #   config.owner_model = "clients"  # => Client / client_id
+  #   config.owner_model = :account   # => Account / account_id
+  #
+  # Backward-compatible aliases are also available:
+  #   config.user_class_name = "User"
+  #   config.user_model = :users
+  #   config.account_model = :accounts
+  config.owner_model = :users
+
+  # Override only when the default foreign key is not correct.
+  # By default this follows owner_model, for example Customer => customer_id.
+  # config.owner_foreign_key = :user_id
 
   # The engine controller inherits from this class and calls this method.
   config.parent_controller_class_name = "ApplicationController"
