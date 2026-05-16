@@ -7,7 +7,8 @@ module RailsTablePreferences
     attr_accessor :table_name,
                   :parent_controller_class_name,
                   :current_user_method,
-                  :mount_path
+                  :mount_path,
+                  :editor_partial
 
     attr_reader :user_class_name, :user_foreign_key
 
@@ -19,6 +20,7 @@ module RailsTablePreferences
       @parent_controller_class_name = "ApplicationController"
       @current_user_method = :current_user
       @mount_path = "/rails_table_preferences"
+      @editor_partial = "rails_table_preferences/editor"
     end
 
     def user_class_name=(value)
