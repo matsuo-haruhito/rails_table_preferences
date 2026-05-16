@@ -56,6 +56,28 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         ]
       )
     end
+
+    it "excludes ignored columns from columns and saved settings" do
+      attributes = helper.table_preferences_data_attributes(
+        table_key: :orders,
+        columns: [
+          helper.table_preferences_column(:customer_code, label: "Customer Code"),
+          helper.table_preferences_column(:internal_cost, label: "Internal Cost", ignored: true),
+          helper.table_preferences_column(:secret_note, label: "Secret Note")
+        ],
+        ignored_columns: [:secret_note],
+        settings: {
+          columns: [
+            { key: "customer_code", visible: true, order: 10 },
+            { key: "internal_cost", visible: true, order: 20 },
+            { key: "secret_note", visible: true, order: 30 }
+          ]
+        }
+      )
+
+      expect(JSON.parse(attributes[:rails_table_preferences_columns_value]).map { |column| column["key"] }).to eq(["customer_code"])
+      expect(JSON.parse(attributes[:rails_table_preferences_settings_value])["columns"].map { |column| column["key"] }).to eq(["customer_code"])
+    end
   end
 
   describe "#table_preferences_column" do
@@ -65,7 +87,8 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         "label" => "Customer Code",
         "visible" => true,
         "order" => 10,
-        "pinned" => false
+        "pinned" => false,
+        "ignored" => false
       )
     end
 
@@ -73,6 +96,22 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       I18n.backend.store_translations(:en, activerecord: { attributes: { order: { customer_code: "Customer Code from locale" } } })
 
       expect(helper.table_preferences_column(:customer_code, model_name: :order)["label"]).to eq("Customer Code from locale")
+    end
+  end
+
+  describe "#table_preferences_columns" do
+    it "filters ignored columns" do
+      columns = helper.table_preferences_columns(
+        [
+          :customer_code,
+          { key: :internal_cost, ignored: true },
+          { key: :secret_note }
+        ],
+        ignored_columns: ["secret_note"]
+      )
+
+      expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
+      expect(columns.first).not_to have_key("ignored")
     end
   end
 
