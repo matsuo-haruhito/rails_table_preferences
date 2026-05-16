@@ -23,6 +23,7 @@ export default class extends Controller {
 
   connect() {
     this.draggedEditorRow = null
+    this.draggedTableColumnKey = null
     this.resizingColumn = null
     this.presets = []
     this.defaultSettings = this.buildDefaultSettings()
@@ -30,6 +31,7 @@ export default class extends Controller {
     this.renderEditor()
     this.apply()
     this.installResizeHandles()
+    this.installTableColumnDragHandles()
     this.refreshPresetOptions()
   }
 
@@ -374,6 +376,87 @@ export default class extends Controller {
     }
   }
 
+  installTableColumnDragHandles() {
+    this.headerCells.forEach((cell) => {
+      if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") return
+
+      cell.draggable = true
+      cell.dataset.railsTablePreferencesTableDragInstalled = "true"
+      cell.classList.add("rails-table-preferences-table-column-draggable")
+      cell.addEventListener("dragstart", this.startTableColumnDrag.bind(this))
+      cell.addEventListener("dragover", this.dragTableColumnOver.bind(this))
+      cell.addEventListener("drop", this.dropTableColumn.bind(this))
+      cell.addEventListener("dragend", this.endTableColumnDrag.bind(this))
+    })
+  }
+
+  startTableColumnDrag(event) {
+    if (event.target.closest("[data-rails-table-preferences-resize-handle]")) {
+      event.preventDefault()
+      return
+    }
+
+    const cell = event.currentTarget
+    const key = cell.dataset.railsTablePreferencesColumnKey
+    if (!key) return
+
+    this.draggedTableColumnKey = key
+    cell.classList.add("rails-table-preferences-table-column--dragging")
+    event.dataTransfer.effectAllowed = "move"
+    event.dataTransfer.setData("text/plain", key)
+  }
+
+  dragTableColumnOver(event) {
+    event.preventDefault()
+
+    const targetCell = event.currentTarget
+    const targetKey = targetCell.dataset.railsTablePreferencesColumnKey
+    if (!this.draggedTableColumnKey || !targetKey || targetKey === this.draggedTableColumnKey) return
+
+    const placement = this.tableColumnPlacement(event, targetCell)
+    this.moveColumnInSettings(this.draggedTableColumnKey, targetKey, placement)
+    this.applyColumnOrder()
+  }
+
+  dropTableColumn(event) {
+    event.preventDefault()
+    this.refreshEditorFromSettings()
+  }
+
+  endTableColumnDrag(event) {
+    event.currentTarget.classList.remove("rails-table-preferences-table-column--dragging")
+    this.draggedTableColumnKey = null
+    this.refreshEditorFromSettings()
+  }
+
+  tableColumnPlacement(event, cell) {
+    const rect = cell.getBoundingClientRect()
+    const offset = event.clientX - rect.left
+    return offset < rect.width / 2 ? "before" : "after"
+  }
+
+  moveColumnInSettings(draggedKey, targetKey, placement) {
+    const columns = this.orderedColumnsFromSettings
+    const draggedIndex = columns.findIndex((column) => column.key === draggedKey)
+    const targetIndex = columns.findIndex((column) => column.key === targetKey)
+    if (draggedIndex < 0 || targetIndex < 0) return
+
+    const [draggedColumn] = columns.splice(draggedIndex, 1)
+    const adjustedTargetIndex = columns.findIndex((column) => column.key === targetKey)
+    const insertIndex = placement === "before" ? adjustedTargetIndex : adjustedTargetIndex + 1
+    columns.splice(insertIndex, 0, draggedColumn)
+
+    this.settingsValue = {
+      ...this.settingsValue,
+      columns: columns.map((column, index) => ({ ...column, order: (index + 1) * 10 }))
+    }
+  }
+
+  refreshEditorFromSettings() {
+    this.renderEditor()
+    this.syncEditorWidthInputs()
+  }
+
   settingsFromEditor() {
     if (!this.hasEditorRowsTarget) return this.settingsValue
 
@@ -431,10 +514,7 @@ export default class extends Controller {
   }
 
   applyColumnOrder() {
-    const orderedKeys = this.columnsFromSettings
-      .slice()
-      .sort((left, right) => this.orderValue(left) - this.orderValue(right))
-      .map((column) => column.key)
+    const orderedKeys = this.orderedColumnsFromSettings.map((column) => column.key)
 
     this.tableRows.forEach((row) => {
       const keyedCells = new Map(
@@ -536,6 +616,10 @@ export default class extends Controller {
 
   get columnsFromSettings() {
     return this.settingsValue?.columns || []
+  }
+
+  get orderedColumnsFromSettings() {
+    return this.columnsFromSettings.slice().sort((left, right) => this.orderValue(left) - this.orderValue(right))
   }
 
   get currentPresetName() {
