@@ -40,7 +40,7 @@ bin/rails generate rails_table_preferences:install
 bin/rails db:migrate
 ```
 
-The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`.
+The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb`.
 
 Mount the engine when using the bundled JSON API:
 
@@ -283,6 +283,28 @@ The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `
 The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
 
 Header cells also receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
+
+## Legacy ColumnAdjustment import
+
+Applications with an existing `ColumnAdjustment` model can import those records into `table_preferences`:
+
+```bash
+bin/rails rails_table_preferences:legacy:import_column_adjustments
+```
+
+Run a dry run first:
+
+```bash
+DRY_RUN=1 bin/rails rails_table_preferences:legacy:import_column_adjustments
+```
+
+If legacy records do not have `user`, `user_id`, `create_user`, or `create_user_id`, provide a fallback user:
+
+```bash
+USER_ID=1 bin/rails rails_table_preferences:legacy:import_column_adjustments
+```
+
+The importer reads `setting_name`, `table_name`, and `value`, accepts legacy column keys such as `column_name`, `display_flag`, and `display_order`, and stores normalized settings in `table_preferences`.
 
 ## Development status
 
