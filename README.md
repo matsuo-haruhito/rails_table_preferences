@@ -6,7 +6,7 @@ It is designed for business applications with many index tables, where users nee
 
 ## Goals
 
-- Save table display preferences per user
+- Save table display preferences per owner model, usually a user
 - Support column visibility, order, width, and truncation
 - Provide Rails helpers and Stimulus controllers
 - Keep compatibility with existing `ColumnAdjustment`-style implementations
@@ -29,9 +29,9 @@ Ruby 3.1+ is required.
 
 ## Installation direction
 
-Rails Table Preferences stores user table preferences in the host application's primary database using a normal Rails migration.
+Rails Table Preferences stores table preferences in the host application's primary database using a normal Rails migration.
 
-It does not use a separate schema file such as `db/queue_schema.rb`. The preference records are application data linked to users, not infrastructure data like a job queue.
+It does not use a separate schema file such as `db/queue_schema.rb`. The preference records are application data linked to an owner model, not infrastructure data like a job queue.
 
 Planned installation flow:
 
@@ -41,6 +41,19 @@ bin/rails db:migrate
 ```
 
 The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb`.
+
+If preferences should belong to a model other than `User`, pass an owner model. The value can be singular or plural:
+
+```bash
+bin/rails generate rails_table_preferences:install --owner-model customers
+bin/rails generate rails_table_preferences:install --owner-model client
+```
+
+`customers` generates `Customer` / `customer_id`; `client` generates `Client` / `client_id`. Override the generated foreign key only when needed:
+
+```bash
+bin/rails generate rails_table_preferences:install --owner-model customers --owner-foreign-key member_id
+```
 
 Mount the engine when using the bundled JSON API:
 
@@ -56,7 +69,7 @@ The first version focuses on extracting and generalizing the `ColumnAdjustment`-
 Included in the initial scope:
 
 - Table-specific display settings
-- User-specific preference persistence
+- Owner-specific preference persistence
 - Column visibility
 - Column order
 - Column width
@@ -89,7 +102,7 @@ The following features are intentionally left for later versions:
 ### v0.1: Column display preferences
 
 - Column visibility, order, width, and truncation
-- User-specific persistence
+- Owner-specific persistence
 - Rails helpers and Stimulus integration
 - Migration and install generators
 - Existing `ColumnAdjustment` compatibility guidance
@@ -99,7 +112,7 @@ The following features are intentionally left for later versions:
 - Multiple presets per table
 - Default preset
 - Duplicate, delete, and reset actions
-- Clearer user/table/preset data model
+- Clearer owner/table/preset data model
 
 ### v0.3: Excel-like filters
 
@@ -119,7 +132,7 @@ The following features are intentionally left for later versions:
 
 ## Data model direction
 
-The preferred long-term model is a user-specific table preference record:
+The preferred long-term model is an owner-specific table preference record. By default the owner model is `User`, but it can be changed to `Customer`, `Client`, `Account`, or another application model.
 
 ```ruby
 create_table :table_preferences do |t|
@@ -132,6 +145,17 @@ create_table :table_preferences do |t|
 end
 
 add_index :table_preferences, [:user_id, :table_key, :name], unique: true
+```
+
+With `--owner-model customers`, the generated migration uses `customer_id` instead of `user_id`:
+
+```ruby
+create_table :table_preferences do |t|
+  t.references :customer, null: false, foreign_key: true
+  # ...
+end
+
+add_index :table_preferences, [:customer_id, :table_key, :name], unique: true
 ```
 
 The settings payload is expected to evolve from column display preferences to include filters and sorts:
@@ -175,19 +199,42 @@ Default configuration:
 ```ruby
 RailsTablePreferences.configure do |config|
   config.table_name = "table_preferences"
-  config.user_class_name = "User"
-  config.user_foreign_key = "user_id"
+  config.owner_model = :users
   config.parent_controller_class_name = "ApplicationController"
   config.current_user_method = :current_user
   config.mount_path = "/rails_table_preferences"
 end
 ```
 
-The first implementation assumes a `User` model and a primary application database. Applications with different user model names can configure the class and foreign key before using the model. If the engine is mounted at a different path, set `mount_path` to the same value.
+`owner_model` accepts a `String` or `Symbol`, singular or plural:
+
+```ruby
+config.owner_model = :customers # Customer / customer_id
+config.owner_model = "clients"  # Client / client_id
+config.owner_model = :account   # Account / account_id
+```
+
+Backward-compatible aliases are available:
+
+```ruby
+config.user_class_name = "User"
+config.user_model = :users
+config.account_model = :accounts
+```
+
+Override the foreign key only when the default is not correct:
+
+```ruby
+config.owner_foreign_key = :member_id
+# Backward-compatible alias:
+config.user_foreign_key = :member_id
+```
+
+The first implementation assumes a primary application database. Applications with different owner model names can configure the owner model and foreign key before using the model. If the engine is mounted at a different path, set `mount_path` to the same value.
 
 ## Current API foundation
 
-The mounted engine exposes a small JSON API for one user's table preferences and presets.
+The mounted engine exposes a small JSON API for one owner's table preferences and presets.
 
 ```http
 GET    /rails_table_preferences/preferences/:table_key
@@ -324,7 +371,7 @@ Run a dry run first:
 DRY_RUN=1 bin/rails rails_table_preferences:legacy:import_column_adjustments
 ```
 
-If legacy records do not have `user`, `user_id`, `create_user`, or `create_user_id`, provide a fallback user:
+If legacy records do not have `user`, `user_id`, `create_user`, or `create_user_id`, provide a fallback owner:
 
 ```bash
 USER_ID=1 bin/rails rails_table_preferences:legacy:import_column_adjustments
