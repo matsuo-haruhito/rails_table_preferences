@@ -10,7 +10,11 @@ module RailsTablePreferences
 
       source_root File.expand_path("templates", __dir__)
 
-      desc "Copies Rails Table Preferences migrations into the host application."
+      desc "Copies Rails Table Preferences migrations and initializer into the host application."
+
+      def copy_initializer
+        template "initializer.rb", "config/initializers/rails_table_preferences.rb"
+      end
 
       def copy_migration
         migration_template "create_table_preferences.rb", "db/migrate/create_table_preferences.rb"
