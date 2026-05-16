@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "set"
+
 module RailsTablePreferences
   module TablePreferencesHelper
     def table_preferences_data_attributes(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [])
