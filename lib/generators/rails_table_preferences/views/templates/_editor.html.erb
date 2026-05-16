@@ -9,29 +9,29 @@
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
   <div class="rails-table-preferences-editor__preset">
-    <label for="rails-table-preferences-preset-select">Saved presets</label>
+    <label for="rails-table-preferences-preset-select">保存済み設定</label>
     <select id="rails-table-preferences-preset-select"
             data-rails-table-preferences-target="presetSelect"
             data-action="rails-table-preferences#selectPreset">
       <option value="<%= name %>"><%= name %></option>
     </select>
 
-    <label for="rails-table-preferences-preset-name">Preset</label>
+    <label for="rails-table-preferences-preset-name">設定名</label>
     <input type="text" id="rails-table-preferences-preset-name" value="<%= name %>" data-rails-table-preferences-target="presetName">
 
     <label class="rails-table-preferences-editor__default-preset">
       <input type="checkbox" data-rails-table-preferences-target="defaultPreset">
-      Use as default
+      標準設定にする
     </label>
   </div>
 
   <div class="rails-table-preferences-editor__rows" data-rails-table-preferences-target="editorRows"></div>
 
   <div class="rails-table-preferences-editor__actions">
-    <button type="button" data-action="rails-table-preferences#applyFromEditor">Apply</button>
-    <button type="button" data-action="rails-table-preferences#saveFromEditor">Save</button>
-    <button type="button" data-action="rails-table-preferences#createPresetFromEditor">Save as new</button>
-    <button type="button" data-action="rails-table-preferences#deletePreset">Delete</button>
-    <button type="button" data-action="rails-table-preferences#resetEditor">Reset</button>
+    <button type="button" data-action="rails-table-preferences#applyFromEditor">適用</button>
+    <button type="button" data-action="rails-table-preferences#saveFromEditor">保存</button>
+    <button type="button" data-action="rails-table-preferences#createPresetFromEditor">別名で保存</button>
+    <button type="button" data-action="rails-table-preferences#deletePreset">削除</button>
+    <button type="button" data-action="rails-table-preferences#resetEditor">リセット</button>
   </div>
 </div>
