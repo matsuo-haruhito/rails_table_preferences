@@ -187,20 +187,24 @@ The first implementation assumes a `User` model and a primary application databa
 
 ## Current API foundation
 
-The mounted engine exposes a small JSON API for one user's table preference.
+The mounted engine exposes a small JSON API for one user's table preferences and presets.
 
 ```http
-GET /rails_table_preferences/preferences/:table_key/:name
-PATCH /rails_table_preferences/preferences/:table_key/:name
-PUT /rails_table_preferences/preferences/:table_key/:name
+GET    /rails_table_preferences/preferences/:table_key
+POST   /rails_table_preferences/preferences/:table_key
+GET    /rails_table_preferences/preferences/:table_key/:name
+PATCH  /rails_table_preferences/preferences/:table_key/:name
+PUT    /rails_table_preferences/preferences/:table_key/:name
+DELETE /rails_table_preferences/preferences/:table_key/:name
 ```
 
-`name` is optional and defaults to `default`.
+`name` is optional for single-preset operations and defaults to `default`. `POST` accepts `name`, `settings`, and optional `default`.
 
 Example request body:
 
 ```json
 {
+  "name": "inspection",
   "settings": {
     "columns": [
       {
@@ -215,7 +219,7 @@ Example request body:
 }
 ```
 
-Example response:
+Example single preference response:
 
 ```json
 {
@@ -227,6 +231,26 @@ Example response:
     "filters": {},
     "sorts": []
   }
+}
+```
+
+Example collection response:
+
+```json
+{
+  "table_key": "orders",
+  "preferences": [
+    {
+      "table_key": "orders",
+      "name": "default",
+      "default": true,
+      "settings": {
+        "columns": [],
+        "filters": {},
+        "sorts": []
+      }
+    }
+  ]
 }
 ```
 
@@ -278,11 +302,13 @@ Current helper direction:
 <% end %>
 ```
 
-The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders Apply, Save, and Reset buttons for the same settings payload.
+The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders Apply, Save, Save as new, Delete, and Reset buttons for the same settings payload.
 
 The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
 
 Header cells also receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
+
+The preset name input controls the current preset name. Use Save to update the current preset, Save as new to create a named preset, and Delete to remove it. The JSON API also supports listing presets for a table.
 
 ## Legacy ColumnAdjustment import
 
