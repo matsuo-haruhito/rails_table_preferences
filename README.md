@@ -280,6 +280,8 @@ Current helper direction:
 
 The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders Apply, Save, and Reset buttons for the same settings payload.
 
+The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
+
 ## Development status
 
 This gem is in the initial planning and skeleton stage.
