@@ -21,7 +21,12 @@ module RailsTablePreferences
                    default: nil,
                    desc: "Foreign key column for the owner model. Defaults to the owner model foreign key."
 
-      desc "Copies Rails Table Preferences migrations and initializer into the host application."
+      class_option :skip_javascript,
+                   type: :boolean,
+                   default: false,
+                   desc: "Skip copying the Stimulus controller into app/javascript/controllers."
+
+      desc "Copies Rails Table Preferences migrations, initializer, and JavaScript into the host application."
 
       def copy_initializer
         template "initializer.rb", "config/initializers/rails_table_preferences.rb"
@@ -29,6 +34,12 @@ module RailsTablePreferences
 
       def copy_migration
         migration_template "create_table_preferences.rb", "db/migrate/create_table_preferences.rb"
+      end
+
+      def copy_javascript
+        return if options[:skip_javascript]
+
+        invoke "rails_table_preferences:javascript"
       end
 
       def owner_class_name
