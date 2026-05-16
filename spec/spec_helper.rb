@@ -1,0 +1,61 @@
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "active_record"
+require "action_controller/railtie"
+require "rails_table_preferences"
+
+class TestApplication < Rails::Application
+  config.root = File.expand_path("..", __dir__)
+  config.eager_load = false
+  config.secret_key_base = "test-secret-key-base"
+  config.hosts.clear
+
+  routes.append do
+    mount RailsTablePreferences::Engine, at: RailsTablePreferences.configuration.mount_path
+  end
+end
+
+Rails.application.initialize! unless Rails.application.initialized?
+
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+
+ActiveRecord::Schema.define do
+  create_table :users, force: true do |t|
+    t.string :name
+    t.timestamps
+  end
+
+  create_table :table_preferences, force: true do |t|
+    t.references :user, null: false
+    t.string :table_key, null: false
+    t.string :name, null: false, default: "default"
+    t.json :settings, null: false
+    t.boolean :default_flag, null: false, default: false
+    t.timestamps
+  end
+
+  add_index :table_preferences, [:user_id, :table_key, :name], unique: true
+end
+
+class User < ActiveRecord::Base
+end
+
+RSpec.configure do |config|
+  config.expect_with :rspec do |expectations|
+    expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+  end
+
+  config.mock_with :rspec do |mocks|
+    mocks.verify_partial_doubles = true
+  end
+
+  config.shared_context_metadata_behavior = :apply_to_host_groups
+
+  config.before do
+    RailsTablePreferences.configuration = RailsTablePreferences::Configuration.new
+    RailsTablePreferences::Preference.table_name = RailsTablePreferences.configuration.table_name
+    RailsTablePreferences::Preference.delete_all
+    User.delete_all
+  end
+end
