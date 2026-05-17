@@ -19,8 +19,8 @@ module RailsTablePreferences
     def call
       normalized = DEFAULT_SETTINGS.merge(normalize_hash(@settings))
       normalized["columns"] = normalize_columns(normalized["columns"])
-      normalized["filters"] = normalize_hash(normalized["filters"])
-      normalized["sorts"] = normalize_array(normalized["sorts"])
+      normalized["filters"] = normalize_filters(normalized["filters"])
+      normalized["sorts"] = normalize_sorts(normalized["sorts"])
       normalized
     end
 
@@ -58,6 +58,62 @@ module RailsTablePreferences
         "truncate" => integer_value(attributes["truncate"]),
         "pinned" => boolean_value(attributes.fetch("pinned", false))
       }.compact
+    end
+
+    def normalize_filters(value)
+      normalize_hash(value).each_with_object({}) do |(key, condition), filters|
+        normalized = normalize_filter_condition(condition)
+        filters[key.to_s] = normalized if normalized.present?
+      end
+    end
+
+    def normalize_filter_condition(condition)
+      attributes = normalize_hash(condition)
+      operator = attributes["operator"].presence || attributes["predicate"].presence
+      return if operator.blank?
+
+      normalized = {
+        "operator" => operator.to_s,
+        "value" => attributes["value"],
+        "values" => normalize_values(attributes["values"]),
+        "from" => attributes["from"],
+        "to" => attributes["to"]
+      }.compact
+
+      normalized.delete("values") if normalized["values"].blank?
+      normalized
+    end
+
+    def normalize_values(value)
+      case value
+      when Array
+        value
+      when nil
+        nil
+      else
+        [value]
+      end
+    end
+
+    def normalize_sorts(value)
+      normalize_array(value).filter_map do |sort|
+        normalize_sort(sort)
+      end
+    end
+
+    def normalize_sort(sort)
+      attributes = normalize_hash(sort)
+      key = attributes["key"].presence || attributes["column"].presence
+      direction = attributes["direction"].presence || attributes["dir"].presence
+      return if key.blank? || direction.blank?
+
+      normalized_direction = direction.to_s.downcase
+      return unless %w[asc desc].include?(normalized_direction)
+
+      {
+        "key" => key.to_s,
+        "direction" => normalized_direction
+      }
     end
 
     def boolean_value(value)
