@@ -189,29 +189,68 @@ Example:
 The key must match the `table_preferences_column` key:
 
 ```ruby
-table_preferences_column(:customer_name, model_name: :order)
+table_preferences_column(:customer_name, label: "得意先名")
+```
+
+## A column is missing from the editor
+
+Symptoms:
+
+- A column passed to `table_preferences_editor` does not appear in the column list.
+- Saved filters/sorts for that column are also removed from the settings payload.
+
+By default, Rails Table Preferences hides columns whose user-facing label cannot be resolved. The default label resolution order is:
+
+1. Explicit `label:`
+2. Explicit `i18n_key:`
+3. Database column comment through `model.columns_hash[key].comment`
+
+Fix by marking the column as user-facing in one of those ways:
+
+```ruby
+table_preferences_column(:customer_name, label: "得意先名")
+table_preferences_column(:customer_name, i18n_key: "orders.index.columns.customer_name")
+table_preferences_column(:customer_name, model: Order)
+```
+
+If you intentionally want unresolved columns to remain visible, configure a fallback:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[label i18n_key column_comment humanize]
+  # or:
+  config.unresolved_label_behavior = :humanize
+end
 ```
 
 ## Japanese labels are not shown
 
 Symptoms:
 
-- Column labels fall back to humanized English-like text.
+- Column labels are missing from the editor.
+- Columns disappear because no user-facing label was resolved.
 
-Column labels are resolved in this order:
-
-1. Explicit `label:`
-2. Explicit `i18n_key:`
-3. `activerecord.attributes.<model_name>.<column>`
-4. `activemodel.attributes.<model_name>.<column>`
-5. `attributes.<column>`
-6. `column.to_s.humanize`
-
-For Japanese apps, either pass `model_name:` or explicit labels:
+By default, locale attribute keys are not used unless you opt in. Use `label:`, `i18n_key:`, or DB column comments first:
 
 ```ruby
-table_preferences_column(:customer_name, model_name: :order)
 table_preferences_column(:customer_name, label: "得意先名")
+table_preferences_column(:customer_name, i18n_key: "orders.index.columns.customer_name")
+table_preferences_column(:customer_name, model: Order)
+```
+
+If the host app wants Rails-style attribute locale keys, add those rules in the initializer:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[
+    label
+    i18n_key
+    column_comment
+    activerecord_attribute_i18n
+    activemodel_attribute_i18n
+    attribute_i18n
+  ]
+end
 ```
 
 Host app locale example:
@@ -281,7 +320,7 @@ For forms, use `namespace: :q`:
 
 ## ignored columns still appear
 
-`ignored_columns` and `ignored: true` remove columns from Rails Table Preferences' column editor and settings payload. They do not remove HTML that the host application explicitly renders.
+`ignored_columns`, `ignored: true`, and unresolved labels remove columns from Rails Table Preferences' column editor and settings payload. They do not remove HTML that the host application explicitly renders.
 
 If a value should not appear on screen, also remove it from the table markup and from the underlying query or serializer.
 
@@ -289,8 +328,8 @@ Example:
 
 ```ruby
 columns = [
-  table_preferences_column(:customer_name, model_name: :order),
-  table_preferences_column(:internal_cost, model_name: :order, ignored: true)
+  table_preferences_column(:customer_name, label: "得意先名"),
+  table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
 ]
 ```
 
