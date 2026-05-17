@@ -25,6 +25,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort/export params to existing Rails controllers.
 - [Filter metadata](docs/filter_metadata.md): declaring filterable/sortable columns and understanding neutral filter/sort settings.
 - [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
+- [JavaScript entrypoints](docs/javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, and custom JS bundlers.
 - [JavaScript controller notes](docs/javascript_controller.md): bundled Stimulus controller responsibilities and safety boundaries.
 
 ## Goals
@@ -75,6 +76,24 @@ Mount the engine when using the bundled JSON API:
 # config/routes.rb
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
+
+For Vite / `app/frontend/entrypoints/application.js`, register the packaged Stimulus controller explicitly:
+
+```js
+import { Application } from "@hotwired/stimulus"
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+
+const application = Application.start()
+application.register("rails-table-preferences", RailsTablePreferencesController)
+```
+
+The package root also exposes a named export:
+
+```js
+import { RailsTablePreferencesController } from "rails_table_preferences"
+```
+
+See [JavaScript entrypoints](docs/javascript_entrypoints.md) for the default `stimulus-rails`, Vite, and custom bundler registration paths.
 
 For a lightweight local browser verification screen, add `--with-demo`:
 
@@ -147,6 +166,7 @@ Included in v0.1 scope:
 - View helpers
 - Controller helpers
 - Stimulus controller
+- Package JavaScript entrypoints for Vite and other JS bundlers
 - Install, JavaScript, stylesheet, view, and demo generators
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
@@ -192,6 +212,7 @@ Included scope:
 - Hidden fields helper for existing search forms
 - Export payload helper for host app CSV/Excel/report code
 - Rails helpers and Stimulus integration
+- JavaScript package entrypoints for Vite / `app/frontend` registration
 - JSON API for preference and preset persistence
 - Migration, install, JavaScript, stylesheet, view, and demo generators
 - `--with-demo`, `--skip-javascript`, and `--skip-stylesheets` install options
@@ -600,7 +621,9 @@ Host applications can freely edit or override the copied stylesheet.
 
 ### JavaScript
 
-The supported default integration is copy-based. The install generator copies the bundled Stimulus controller into the host application:
+Rails Table Preferences supports both copy-based and package-entrypoint Stimulus integration.
+
+The install generator copies the bundled Stimulus controller into the host application:
 
 ```text
 app/javascript/controllers/rails_table_preferences_controller.js
@@ -608,7 +631,14 @@ app/javascript/controllers/rails_table_preferences_controller.js
 
 For Rails applications using the default `stimulus-rails` manifest loader, files ending in `_controller.js` under `app/javascript/controllers` are registered automatically. In that setup, no extra import is needed after running the install generator.
 
-For jsbundling or a custom Stimulus setup, import and register the copied controller manually:
+For Vite / `app/frontend` apps, import and register the package entrypoint:
+
+```js
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+application.register("rails-table-preferences", RailsTablePreferencesController)
+```
+
+For jsbundling or a custom Stimulus setup that uses the copied file, import and register the copied controller manually:
 
 ```js
 import RailsTablePreferencesController from "./controllers/rails_table_preferences_controller"
@@ -623,7 +653,7 @@ bin/rails generate rails_table_preferences:install --skip-javascript
 
 Rails Table Preferences does not require importmap-specific setup.
 
-See [JavaScript controller notes](docs/javascript_controller.md) for the bundled controller's responsibilities and event boundaries.
+See [JavaScript entrypoints](docs/javascript_entrypoints.md) for import paths and [JavaScript controller notes](docs/javascript_controller.md) for the bundled controller's responsibilities and event boundaries.
 
 ## JSON API
 
