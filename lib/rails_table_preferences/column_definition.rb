@@ -30,7 +30,7 @@ module RailsTablePreferences
       @default_truncate = integer_or_nil(default_truncate)
       @pinned = ActiveModel::Type::Boolean.new.cast(fixed.nil? ? pinned : fixed)
       @group = normalize_group(group)
-      @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore)
+      @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore) || label_unresolved?
       @filter = normalize_filter(filter)
       @sortable = normalize_sortable(sortable)
       @sort_param = sort_param&.to_s
@@ -56,27 +56,77 @@ module RailsTablePreferences
     private
 
     def resolve_label(explicit_label)
-      return explicit_label if explicit_label.present?
-
-      i18n_candidates.each do |candidate|
-        translated = I18n.t(candidate, default: nil)
-        return translated if translated.present?
+      configured_label_resolution.each do |rule|
+        resolved = resolve_label_rule(rule, explicit_label)
+        return resolved if resolved.present?
       end
 
-      key.humanize
+      resolve_unresolved_label
     end
 
-    def i18n_candidates
-      candidates = []
-      candidates << i18n_key.to_s if i18n_key.present?
-
-      if normalized_model_name.present?
-        candidates << "activerecord.attributes.#{normalized_model_name}.#{key}"
-        candidates << "activemodel.attributes.#{normalized_model_name}.#{key}"
+    def resolve_label_rule(rule, explicit_label)
+      case rule.to_sym
+      when :label
+        explicit_label
+      when :i18n_key
+        translate_i18n_key
+      when :column_comment
+        column_comment
+      when :activerecord_attribute_i18n
+        translate_model_attribute("activerecord")
+      when :activemodel_attribute_i18n
+        translate_model_attribute("activemodel")
+      when :attribute_i18n
+        translate("attributes.#{key}")
+      when :humanize
+        key.humanize
+      when :key
+        key
       end
+    end
 
-      candidates << "attributes.#{key}"
-      candidates
+    def configured_label_resolution
+      RailsTablePreferences.configuration.label_resolution
+    end
+
+    def resolve_unresolved_label
+      case RailsTablePreferences.configuration.unresolved_label_behavior
+      when :humanize
+        key.humanize
+      when :key
+        key
+      else
+        nil
+      end
+    end
+
+    def label_unresolved?
+      label.blank? && RailsTablePreferences.configuration.unresolved_label_behavior == :hide
+    end
+
+    def translate_i18n_key
+      return if i18n_key.blank?
+
+      translate(i18n_key.to_s)
+    end
+
+    def translate_model_attribute(namespace)
+      return if normalized_model_name.blank?
+
+      translate("#{namespace}.attributes.#{normalized_model_name}.#{key}")
+    end
+
+    def translate(candidate)
+      I18n.t(candidate, default: nil).presence
+    end
+
+    def column_comment
+      return unless model.respond_to?(:columns_hash)
+
+      column = model.columns_hash[key]
+      return unless column.respond_to?(:comment)
+
+      column.comment.presence
     end
 
     def normalized_model_name

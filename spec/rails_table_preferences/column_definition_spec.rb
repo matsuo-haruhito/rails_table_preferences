@@ -2,6 +2,14 @@
 
 RSpec.describe RailsTablePreferences::ColumnDefinition do
   describe "#to_h" do
+    let(:column_with_comment) { Struct.new(:comment).new("顧客コード") }
+    let(:model_with_comment) do
+      column = column_with_comment
+      Class.new do
+        define_singleton_method(:columns_hash) { { "customer_code" => column } }
+      end
+    end
+
     it "builds a serializable column definition" do
       definition = described_class.new(
         key: :customer_code,
@@ -58,31 +66,31 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
     end
 
     it "accepts true as a text filter shorthand" do
-      definition = described_class.new(key: :customer_name, filter: true)
+      definition = described_class.new(key: :customer_name, label: "得意先名", filter: true)
 
       expect(definition.to_h["filter"]).to eq("type" => "text")
     end
 
     it "accepts a symbol as a filter type shorthand" do
-      definition = described_class.new(key: :status, filter: :select)
+      definition = described_class.new(key: :status, label: "状態", filter: :select)
 
       expect(definition.to_h["filter"]).to eq("type" => "select")
     end
 
     it "omits filter metadata when disabled" do
-      definition = described_class.new(key: :internal_note, filter: false)
+      definition = described_class.new(key: :internal_note, label: "Internal note", filter: false)
 
       expect(definition.to_h).not_to have_key("filter")
     end
 
     it "includes sortable metadata when explicitly configured" do
-      definition = described_class.new(key: :delivery_date, sortable: "1")
+      definition = described_class.new(key: :delivery_date, label: "Delivery date", sortable: "1")
 
       expect(definition.to_h["sortable"]).to eq(true)
     end
 
     it "omits sortable metadata when not configured" do
-      definition = described_class.new(key: :delivery_date)
+      definition = described_class.new(key: :delivery_date, label: "Delivery date")
 
       expect(definition.to_h).not_to have_key("sortable")
     end
@@ -95,15 +103,27 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       expect(definition.to_h["label"]).to eq("Customer Code")
     end
 
-    it "uses a custom i18n key" do
+    it "uses a custom i18n key before database column comments" do
       I18n.backend.store_translations(:en, orders: { index: { columns: { customer_code: "Customer code for order list" } } })
 
-      definition = described_class.new(key: :customer_code, i18n_key: "orders.index.columns.customer_code")
+      definition = described_class.new(
+        key: :customer_code,
+        i18n_key: "orders.index.columns.customer_code",
+        model: model_with_comment
+      )
 
       expect(definition.to_h["label"]).to eq("Customer code for order list")
     end
 
-    it "uses Active Record attribute translations when a model name is given" do
+    it "uses database column comments by default" do
+      definition = described_class.new(key: :customer_code, model: model_with_comment)
+
+      expect(definition.to_h["label"]).to eq("顧客コード")
+      expect(definition.to_h["ignored"]).to eq(false)
+    end
+
+    it "uses Active Record attribute translations when configured" do
+      RailsTablePreferences.configuration.label_resolution = %i[activerecord_attribute_i18n]
       I18n.backend.store_translations(:en, activerecord: { attributes: { order: { customer_code: "Customer code from Order" } } })
 
       definition = described_class.new(key: :customer_code, model_name: :order)
@@ -111,20 +131,56 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       expect(definition.to_h["label"]).to eq("Customer code from Order")
     end
 
-    it "uses generic attribute translations" do
-      I18n.backend.store_translations(:en, attributes: { customer_code: "Generic customer code" })
+    it "uses Active Model attribute translations when configured" do
+      RailsTablePreferences.configuration.label_resolution = %i[activemodel_attribute_i18n]
+      I18n.backend.store_translations(:en, activemodel: { attributes: { order: { customer_code: "Customer code from Active Model" } } })
 
-      definition = described_class.new(key: :customer_code)
+      definition = described_class.new(key: :customer_code, model_name: :order)
+
+      expect(definition.to_h["label"]).to eq("Customer code from Active Model")
+    end
+
+    it "uses generic attribute translations when configured" do
+      RailsTablePreferences.configuration.label_resolution = %i[attribute_i18n]
+      I18n.backend.store_translations(:en, attributes: { generic_customer_code: "Generic customer code" })
+
+      definition = described_class.new(key: :generic_customer_code)
 
       expect(definition.to_h["label"]).to eq("Generic customer code")
     end
 
-    it "uses a humanized label by default" do
-      I18n.backend.store_translations(:en, attributes: { customer_code: nil })
+    it "uses a humanized label when configured" do
+      RailsTablePreferences.configuration.label_resolution = %i[humanize]
 
       definition = described_class.new(key: :delivery_due_date)
 
       expect(definition.to_h["label"]).to eq("Delivery due date")
+      expect(definition.to_h["ignored"]).to eq(false)
+    end
+
+    it "marks unresolved labels as ignored by default" do
+      definition = described_class.new(key: :delivery_due_date)
+
+      expect(definition.to_h["label"]).to be_nil
+      expect(definition.to_h["ignored"]).to eq(true)
+    end
+
+    it "can fallback to humanized labels when unresolved" do
+      RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
+
+      definition = described_class.new(key: :delivery_due_date)
+
+      expect(definition.to_h["label"]).to eq("Delivery due date")
+      expect(definition.to_h["ignored"]).to eq(false)
+    end
+
+    it "can fallback to raw keys when unresolved" do
+      RailsTablePreferences.configuration.unresolved_label_behavior = :key
+
+      definition = described_class.new(key: :delivery_due_date)
+
+      expect(definition.to_h["label"]).to eq("delivery_due_date")
+      expect(definition.to_h["ignored"]).to eq(false)
     end
   end
 end
