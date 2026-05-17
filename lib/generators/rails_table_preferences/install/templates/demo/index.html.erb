@@ -1,0 +1,54 @@
+<h1>Rails Table Preferences Demo</h1>
+
+<p>
+  This demo screen uses in-memory rows for table display and the normal
+  <code>table_preferences</code> table for preference persistence.
+</p>
+
+<%= table_preferences_editor(
+  table_key: :rails_table_preferences_demo_orders,
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  title: "デモ受注一覧の表示設定"
+) %>
+
+<%= form_with url: request.path, method: :get do %>
+  <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
+
+  <%= table_preferences_hidden_fields(
+    settings: @table_preference_settings,
+    columns: @table_columns
+  ) %>
+
+  <%= submit_tag "検索" %>
+<% end %>
+
+<%= table_preferences_table_tag(
+  table_key: :rails_table_preferences_demo_orders,
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  class: "table"
+) do %>
+  <thead>
+    <tr>
+      <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+      <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+      <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
+      <th data-rails-table-preferences-column-key="status">状態</th>
+      <th data-rails-table-preferences-column-key="amount">金額</th>
+      <th data-rails-table-preferences-column-key="memo">備考</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
+        <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
+        <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
+        <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
+        <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+        <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+<% end %>
