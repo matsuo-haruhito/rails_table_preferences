@@ -20,12 +20,16 @@ Run the minimum local checks:
 ```bash
 bundle exec rspec
 node --check app/javascript/controllers/rails_table_preferences_controller.js
+bundle exec rake build
+bundle exec rake package:verify
 ```
 
 Confirm:
 
 - [ ] RSpec passes.
 - [ ] JavaScript syntax check passes.
+- [ ] Gem package builds.
+- [ ] Package verification passes.
 - [ ] No generated files are unexpectedly changed.
 
 ## 3. CI checks
@@ -34,32 +38,26 @@ Confirm GitHub Actions passes for the release commit:
 
 - [ ] Ruby test job passes.
 - [ ] JavaScript syntax check passes.
+- [ ] Gem build step passes.
+- [ ] Package verification step passes.
 - [ ] Any future matrix jobs pass.
 
 ## 4. Gem package checks
 
-Build the gem package:
+Build and verify the gem package:
 
 ```bash
 bundle exec rake build
+bundle exec rake package:verify
 ```
 
-Then inspect the built gem or unpack it locally and confirm it includes:
+Then optionally inspect the built gem or unpack it locally:
 
-- [ ] `lib/**/*`
-- [ ] `app/controllers/**/*`
-- [ ] `app/controllers/concerns/**/*`
-- [ ] `app/helpers/**/*`
-- [ ] `app/views/**/*`
-- [ ] `app/javascript/**/*`
-- [ ] `app/assets/**/*`
-- [ ] `lib/generators/**/*`
-- [ ] `lib/tasks/**/*`
-- [ ] `docs/**/*`
-- [ ] `CHANGELOG.md`
-- [ ] `README.md`
-- [ ] `LICENSE`
-- [ ] `rails_table_preferences.gemspec`
+```bash
+gem contents pkg/rails_table_preferences-*.gem --all
+```
+
+See [Package verification](package_verification.md) for the required file list and manual inspection commands.
 
 Pay special attention to generator templates and copied assets. Missing templates usually appear only when a host app runs a generator.
 
@@ -170,6 +168,7 @@ Check the main user paths:
 - [ ] README links to Troubleshooting.
 - [ ] README links to Manual QA.
 - [ ] README links to Release checklist.
+- [ ] README links to Package verification.
 - [ ] `docs/index.md` links to all major docs.
 - [ ] Installation docs mention engine mount.
 - [ ] Demo docs clearly say the demo route must be added manually.
@@ -216,6 +215,7 @@ For the current early release stage, the minimum gate is:
 bundle exec rspec
 node --check app/javascript/controllers/rails_table_preferences_controller.js
 bundle exec rake build
+bundle exec rake package:verify
 ```
 
 Plus one successful sandbox/demo verification before asking real application users to try the release.
