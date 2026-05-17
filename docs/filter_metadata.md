@@ -41,6 +41,35 @@ table_preferences_column(:internal_note, filter: false)   # no filter metadata
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render. It is not a query definition.
 
+## Sort UI
+
+When `sortable: true` is set, the default Stimulus controller lets users click the table header to cycle through sort states:
+
+1. no sort -> ascending
+2. ascending -> descending
+3. descending -> clear sort
+
+The current sort state is saved in the neutral `sorts` array:
+
+```json
+{
+  "sorts": [
+    {
+      "key": "delivery_date",
+      "direction": "desc"
+    }
+  ]
+}
+```
+
+The header also receives `aria-sort` and a minimal visual indicator:
+
+- ascending: `▲`
+- descending: `▼`
+- none: no indicator
+
+The sort click handler ignores clicks from filter buttons, resize handles, buttons, inputs, selects, and textareas so it does not interfere with filtering, resizing, or other controls.
+
 ## Mapping to existing controller params
 
 Many Rails applications already expose list screens through methods such as:
