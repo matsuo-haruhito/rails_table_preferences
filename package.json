@@ -1,0 +1,10 @@
+{
+  "name": "rails_table_preferences",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./app/javascript/rails_table_preferences/index.js",
+    "./controller": "./app/javascript/rails_table_preferences/controller.js"
+  }
+}
