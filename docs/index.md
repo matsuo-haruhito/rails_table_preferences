@@ -7,6 +7,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets and default resolution.
+- [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
@@ -26,14 +27,15 @@ This directory contains focused documentation for Rails Table Preferences.
 3. Define table columns with `table_preferences_column`.
 4. Render `table_preferences_editor` and `table_preferences_table_tag`.
 5. Add `filter:` and `sortable: true` metadata where needed.
-6. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-7. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-8. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-9. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-10. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-11. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
-12. Verify the feature in a sandbox Rails app.
-13. Run the manual QA checklist before asking real users to try the feature.
+6. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+7. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+8. Configure `scope_context_method` only if shared, role, or organization presets are needed.
+9. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+10. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+11. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+12. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
+13. Verify the feature in a sandbox Rails app.
+14. Run the manual QA checklist before asking real users to try the feature.
 
 ## Responsibility boundary
 
@@ -41,6 +43,8 @@ Rails Table Preferences owns:
 
 - table display preference UI
 - column visibility, order, width, and truncation settings
+- fixed/pinned column metadata and CSS hooks
+- column group metadata
 - owner, shared, role, and organization scoped presets
 - saved presets and default presets
 - filter/sort UI state
@@ -53,6 +57,8 @@ Host applications own:
 - authorization
 - joins and association search logic
 - business-specific query behavior
+- sticky column offset and scroll-container polish for complex layouts
+- grouped table header markup
 - CSV, Excel, and report file generation
 - administration UI for shared, role, or organization presets
 - final styling and UI polish
