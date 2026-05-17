@@ -18,6 +18,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - [Sandbox Rails app verification](docs/sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Manual QA checklist](docs/manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Release checklist](docs/release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
+- [Package verification](docs/package_verification.md): build and inspect the gem package before tagging or publishing a release.
 - [Practical examples](docs/examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
 - [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort/export params to existing Rails controllers.
@@ -148,7 +149,7 @@ Included in v0.1 scope:
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
 - Local demo and sandbox verification guidance
-- Manual QA, troubleshooting, decision guide, scoped preset, fixed column, export, accessibility, and release checklist documentation
+- Manual QA, troubleshooting, decision guide, scoped preset, fixed column, export, accessibility, release checklist, and package verification documentation
 
 ## Out of scope
 
@@ -194,14 +195,14 @@ Included scope:
 - Owner model and owner foreign key generator/configuration options
 - Existing `ColumnAdjustment` compatibility and import guidance
 - Copy-based ERB, CSS, and JavaScript customization path
-- Quick start, practical examples, troubleshooting, demo, sandbox, decision guide, scoped presets, fixed columns/groups, export integration, accessibility baseline, manual QA, and release checklist docs
+- Quick start, practical examples, troubleshooting, demo, sandbox, decision guide, scoped presets, fixed columns/groups, export integration, accessibility baseline, manual QA, release checklist, and package verification docs
 
 Remaining before tagging v0.1:
 
-- Add `CHANGELOG.md`
-- Run `bundle exec rake build` and inspect package contents
 - Confirm CI is green on the release commit
 - Do one final sandbox/demo verification pass
+- Inspect package contents with [Package verification](docs/package_verification.md)
+- Move `CHANGELOG.md` entries from `[Unreleased]` to `0.1.0` when tagging
 - Review README/docs consistency against the released behavior
 
 ### Later candidates
@@ -710,9 +711,10 @@ The current minimum local verification before pushing changes is:
 ```bash
 bundle exec rspec
 node --check app/javascript/controllers/rails_table_preferences_controller.js
+bundle exec rake build
 ```
 
-The same checks are run by the GitHub Actions CI workflow.
+The same checks are run by the GitHub Actions CI workflow. Before tagging or publishing a release, also inspect the built package with [Package verification](docs/package_verification.md).
 
 ## Development status
 
