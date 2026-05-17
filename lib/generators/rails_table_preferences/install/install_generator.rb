@@ -82,6 +82,7 @@ module RailsTablePreferences
         unless options[:skip_javascript]
           say "  4. Ensure the Stimulus controller is registered."
           say "     stimulus-rails default manifests usually register app/javascript/controllers/*_controller.js automatically."
+          say "     For Vite/app/frontend entrypoints, import rails_table_preferences/controller and register it manually."
         end
 
         if options[:with_demo]
