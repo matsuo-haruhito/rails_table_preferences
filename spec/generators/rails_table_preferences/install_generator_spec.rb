@@ -22,6 +22,8 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(generated_migration).to exist
     expect(file("app/javascript/controllers/rails_table_preferences_controller.js")).to exist
     expect(file("app/assets/stylesheets/rails_table_preferences.css")).to exist
+    expect(file("app/controllers/rails_table_preferences_demo/orders_controller.rb")).not_to exist
+    expect(file("app/views/rails_table_preferences_demo/orders/index.html.erb")).not_to exist
   end
 
   it "uses the configured owner model in the generated migration and initializer" do
@@ -62,6 +64,20 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(file("app/assets/stylesheets/rails_table_preferences.css")).not_to exist
   end
 
+  it "can copy optional demo files" do
+    run_generator %w[--with-demo]
+
+    controller = file("app/controllers/rails_table_preferences_demo/orders_controller.rb")
+    view = file("app/views/rails_table_preferences_demo/orders/index.html.erb")
+
+    expect(controller).to exist
+    expect(view).to exist
+    expect(controller.read).to include("module RailsTablePreferencesDemo")
+    expect(controller.read).to include("rails_table_preferences_demo_orders")
+    expect(view.read).to include("Rails Table Preferences Demo")
+    expect(view.read).to include("table_preferences_editor")
+  end
+
   it "provides post-install next steps in the generator source" do
     source = File.read(File.expand_path("../../../lib/generators/rails_table_preferences/install/install_generator.rb", __dir__))
 
@@ -70,6 +86,8 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(source).to include("mount RailsTablePreferences::Engine")
     expect(source).to include("rails_table_preferences.css")
     expect(source).to include("Stimulus controller")
+    expect(source).to include("--with-demo")
+    expect(source).to include("rails_table_preferences_demo/orders#index")
   end
 
   def generated_migration
