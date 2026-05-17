@@ -45,6 +45,19 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("get tableRows()")
   end
 
+  it "preserves filters and sorts when editor rows are applied" do
+    expect(source).to include("settingsFromEditor()")
+    expect(source).to include("filters: this.settingsValue?.filters || {}")
+    expect(source).to include("sorts: this.settingsValue?.sorts || []")
+  end
+
+  it "merges saved settings without letting stale column metadata override current definitions" do
+    expect(source).to include("mergeSettings(defaultSettings, savedSettings)")
+    expect(source).to include("label: defaultColumn.label")
+    expect(source).to include("filter: defaultColumn.filter")
+    expect(source).to include("sortable: defaultColumn.sortable")
+  end
+
   it "supports direct table header reordering" do
     expect(source).to include("installTableColumnDragHandles()")
     expect(source).to include("startTableColumnDrag(event)")
@@ -57,6 +70,10 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("shouldIgnoreHeaderAction(target)")
     expect(source).to include('target.closest("[data-rails-table-preferences-filter-button]")')
     expect(source).to include('target.closest("[data-rails-table-preferences-resize-handle]")')
+    expect(source).to include('target.closest("button")')
+    expect(source).to include('target.closest("input")')
+    expect(source).to include('target.closest("select")')
+    expect(source).to include('target.closest("textarea")')
   end
 
   it "supports column resize with a widened hit area" do
@@ -90,6 +107,13 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('return ["contains", "equals", "starts_with", "ends_with", "blank", "present"]')
   end
 
+  it "cleans up document-level listeners and detached panels" do
+    expect(source).to include("disconnect()")
+    expect(source).to include("uninstallDocumentResizeListeners()")
+    expect(source).to include("closeFilterPanel()")
+    expect(source).to include("document.removeEventListener")
+  end
+
   it "supports sortable header click UI" do
     expect(source).to include("installSortControls()")
     expect(source).to include("toggleSortFromHeader(event, cell, column)")
@@ -97,5 +121,11 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("sortFor(key)")
     expect(source).to include('indicator.textContent = sort?.direction === "asc" ? "▲"')
     expect(source).to include('cell.setAttribute("aria-sort"')
+  end
+
+  it "limits sorting to sortable columns and ignores active drag/resize operations" do
+    expect(source).to include("if (column?.sortable !== true) return")
+    expect(source).to include("if (this.shouldIgnoreHeaderAction(event.target)) return")
+    expect(source).to include("if (this.draggedTableColumnKey || this.resizingColumn) return")
   end
 end
