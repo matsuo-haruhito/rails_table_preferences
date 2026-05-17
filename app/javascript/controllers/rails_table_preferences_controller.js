@@ -36,6 +36,7 @@ export default class extends Controller {
     this.resizingColumn = null
     this.filterPanel = null
     this.presets = []
+    this.currentPreferenceEditable = true
     this.defaultSettings = this.buildDefaultSettings()
     this.settingsValue = this.mergeSettings(this.defaultSettings, this.settingsValue || {})
     this.renderEditor()
@@ -55,6 +56,7 @@ export default class extends Controller {
   apply() {
     this.applyColumnOrder()
     this.columnsFromSettings.forEach((column) => this.applyColumn(column))
+    this.syncPinnedColumnOffsets()
     this.syncEditorWidthInputs()
     this.syncFilterButtonStates()
     this.syncSortStates()
@@ -69,6 +71,7 @@ export default class extends Controller {
   async saveFromEditor(event) {
     if (event) event.preventDefault()
     this.settingsValue = this.settingsFromEditor()
+    if (!this.currentPreferenceEditable) return this.createPresetFromEditor()
     await this.save()
   }
 
@@ -88,6 +91,7 @@ export default class extends Controller {
 
   async deletePreset(event) {
     if (event) event.preventDefault()
+    if (!this.currentPreferenceEditable) return
     const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "DELETE",
       headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
@@ -95,17 +99,20 @@ export default class extends Controller {
     if (!response.ok && response.status !== 204) throw new Error(`Failed to delete table preference preset: ${response.status}`)
     this.nameValue = "default"
     this.urlValue = this.preferenceUrl("default")
+    this.currentPreferenceEditable = true
     this.setPresetNameInput("default")
     this.setDefaultPresetInput(false)
     this.settingsValue = this.defaultSettings
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.syncPresetEditingState()
     await this.refreshPresetOptions()
   }
 
   async save(event) {
     if (event) event.preventDefault()
+    if (!this.currentPreferenceEditable) return this.createPresetFromEditor()
     const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "PATCH",
       headers: this.jsonHeaders,
@@ -140,16 +147,23 @@ export default class extends Controller {
   renderPresetOptions() {
     if (!this.hasPresetSelectTarget) return
     this.presetSelectTarget.innerHTML = ""
-    const presets = this.presets.length ? this.presets : [{ name: this.currentPresetName, default: false }]
-    presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset.name, preset.default === true)))
+    const presets = this.presets.length ? this.presets : [{ name: this.currentPresetName, default: false, editable: true }]
+    presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset)))
     this.presetSelectTarget.value = this.currentPresetName
   }
 
-  buildPresetOption(name, defaultFlag) {
+  buildPresetOption(preset) {
     const option = document.createElement("option")
+    const name = preset.name || "default"
+    const scopeLabel = preset.scope_label || preset.scope_type || "owner"
+    const defaultMark = preset.default === true ? " *" : ""
+    const scopeMark = scopeLabel && scopeLabel !== "owner" ? ` [${scopeLabel}]` : ""
     option.value = name
-    option.textContent = defaultFlag ? `${name} *` : name
-    option.dataset.default = defaultFlag ? "true" : "false"
+    option.textContent = `${name}${scopeMark}${defaultMark}`
+    option.dataset.default = preset.default === true ? "true" : "false"
+    option.dataset.editable = preset.editable === false ? "false" : "true"
+    option.dataset.scopeType = preset.scope_type || "owner"
+    option.dataset.scopeKey = preset.scope_key || ""
     return option
   }
 
@@ -164,12 +178,26 @@ export default class extends Controller {
   applyPreferencePayload(payload) {
     this.nameValue = payload.name
     this.urlValue = this.preferenceUrl(payload.name)
+    this.currentPreferenceEditable = payload.editable !== false
     this.setPresetNameInput(payload.name)
     this.setDefaultPresetInput(payload.default)
     this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.syncPresetEditingState()
+  }
+
+  syncPresetEditingState() {
+    const editable = this.currentPreferenceEditable !== false
+    if (this.hasDefaultPresetTarget) this.defaultPresetTarget.disabled = !editable
+    this.element.querySelectorAll("[data-action~='rails-table-preferences#saveFromEditor']").forEach((button) => {
+      button.disabled = false
+      button.dataset.railsTablePreferencesNonEditableFallback = editable ? "false" : "true"
+    })
+    this.element.querySelectorAll("[data-action~='rails-table-preferences#deletePreset']").forEach((button) => {
+      button.disabled = !editable
+    })
   }
 
   renderEditor() {
@@ -182,8 +210,14 @@ export default class extends Controller {
   buildEditorRow(column) {
     const row = document.createElement("div")
     row.className = "rails-table-preferences-editor__row"
+    row.classList.toggle("rails-table-preferences-editor__row--pinned", column.pinned === true)
+    row.classList.toggle("rails-table-preferences-editor__row--fixed", column.pinned === true)
     row.draggable = true
     row.dataset.railsTablePreferencesColumnKey = column.key
+    if (column.pinned === true) {
+      row.dataset.railsTablePreferencesPinned = "true"
+      row.dataset.railsTablePreferencesFixed = "true"
+    }
     row.addEventListener("dragstart", this.dragEditorRowStart.bind(this))
     row.addEventListener("dragover", this.dragEditorRowOver.bind(this))
     row.addEventListener("drop", this.dropEditorRow.bind(this))
@@ -311,6 +345,7 @@ export default class extends Controller {
     const width = Math.max(40, Math.round(this.resizingColumn.startWidth + event.clientX - this.resizingColumn.startX))
     this.updateColumnSetting(this.resizingColumn.key, { width })
     this.applyColumn(this.columnByKey(this.resizingColumn.key))
+    this.syncPinnedColumnOffsets()
     this.syncEditorWidthInputs()
   }
 
@@ -359,6 +394,7 @@ export default class extends Controller {
     const placement = this.tableColumnPlacement(event, event.currentTarget)
     this.moveColumnInSettings(this.draggedTableColumnKey, targetKey, placement)
     this.applyColumnOrder()
+    this.syncPinnedColumnOffsets()
   }
 
   dropTableColumn(event) {
@@ -636,6 +672,7 @@ export default class extends Controller {
   refreshEditorFromSettings() {
     this.renderEditor()
     this.syncEditorWidthInputs()
+    this.syncPinnedColumnOffsets()
     this.syncFilterButtonStates()
     this.syncSortStates()
   }
@@ -666,6 +703,16 @@ export default class extends Controller {
       cell.style.overflow = ""
       cell.style.textOverflow = ""
       cell.style.whiteSpace = ""
+      cell.style.removeProperty("--rails-table-preferences-pinned-left")
+      cell.classList.toggle("rails-table-preferences-pinned", column.pinned === true)
+      cell.classList.toggle("rails-table-preferences-fixed", column.pinned === true)
+      if (column.pinned === true) {
+        cell.dataset.railsTablePreferencesPinned = "true"
+        cell.dataset.railsTablePreferencesFixed = "true"
+      } else {
+        delete cell.dataset.railsTablePreferencesPinned
+        delete cell.dataset.railsTablePreferencesFixed
+      }
       delete cell.dataset.railsTablePreferencesTruncate
       if (column.width) {
         cell.style.width = `${column.width}px`
@@ -678,6 +725,20 @@ export default class extends Controller {
         cell.style.whiteSpace = "nowrap"
         if (!cell.title) cell.title = cell.textContent.trim()
       }
+    })
+  }
+
+  syncPinnedColumnOffsets() {
+    let left = 0
+    this.orderedColumnsFromSettings.forEach((column) => {
+      const cells = Array.from(this.cellsFor(column.key))
+      if (column.pinned !== true || column.visible === false) {
+        cells.forEach((cell) => cell.style.removeProperty("--rails-table-preferences-pinned-left"))
+        return
+      }
+      cells.forEach((cell) => cell.style.setProperty("--rails-table-preferences-pinned-left", `${left}px`))
+      const firstVisibleCell = cells.find((cell) => !cell.hidden)
+      left += column.width || Math.round(firstVisibleCell?.getBoundingClientRect().width || 0)
     })
   }
 
@@ -704,7 +765,7 @@ export default class extends Controller {
     const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))
     const columns = defaultSettings.columns.map((defaultColumn, index) => {
       const savedColumn = savedColumns.get(defaultColumn.key) || {}
-      return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }
+      return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, pinned: defaultColumn.pinned, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }
     })
     return { columns, filters: savedSettings?.filters || {}, sorts: savedSettings?.sorts || [] }
   }
