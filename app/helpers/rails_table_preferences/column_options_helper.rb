@@ -24,6 +24,19 @@ module RailsTablePreferences
       ).to_h
     end
 
+    def table_preferences_column_groups(columns, ignored_columns: [])
+      table_preferences_columns(columns, ignored_columns: ignored_columns)
+        .group_by { |column| normalized_column_group(column) }
+        .map do |group, grouped_columns|
+          {
+            "key" => group["key"],
+            "label" => group["label"],
+            "columns" => grouped_columns,
+            "colspan" => grouped_columns.length
+          }
+        end
+    end
+
     private
 
     def table_preferences_column_hash(column)
@@ -52,6 +65,22 @@ module RailsTablePreferences
         ).to_h
       else
         table_preferences_column(column)
+      end
+    end
+
+    def normalized_column_group(column)
+      group = column["group"] || column[:group]
+      return { "key" => "", "label" => "" } if group.blank?
+
+      case group
+      when Hash
+        stringified = group.deep_stringify_keys
+        {
+          "key" => stringified.fetch("key", stringified.fetch("label", "")).to_s,
+          "label" => stringified.fetch("label", stringified.fetch("key", "")).to_s
+        }
+      else
+        { "key" => group.to_s, "label" => group.to_s }
       end
     end
   end
