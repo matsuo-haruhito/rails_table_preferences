@@ -70,7 +70,7 @@ module RailsTablePreferences
     end
 
     def rails_table_preferences_current_owner
-      public_send(RailsTablePreferences.configuration.current_user_method)
+      send(RailsTablePreferences.configuration.current_user_method)
     end
 
     def rails_table_preferences_hash_from_params(params_source)
