@@ -18,6 +18,7 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
         default_order: "10",
         default_width: "120",
         default_truncate: "20",
+        overflow: :ellipsis,
         pinned: "0"
       )
 
@@ -28,6 +29,7 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
         "order" => 10,
         "width" => 120,
         "truncate" => 20,
+        "overflow" => "ellipsis",
         "pinned" => false,
         "ignored" => false
       )
@@ -43,6 +45,20 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       definition = described_class.new(key: :internal_cost, ignore: true)
 
       expect(definition.to_h["ignored"]).to eq(true)
+    end
+
+    it "normalizes overflow metadata" do
+      expect(described_class.new(key: :memo, label: "Memo", overflow: :truncate).to_h["overflow"]).to eq("ellipsis")
+      expect(described_class.new(key: :memo, label: "Memo", overflow: "wrap").to_h["overflow"]).to eq("wrap")
+      expect(described_class.new(key: :memo, label: "Memo", overflow: :clip).to_h["overflow"]).to eq("clip")
+      expect(described_class.new(key: :memo, label: "Memo", overflow: :nowrap).to_h["overflow"]).to eq("nowrap")
+      expect(described_class.new(key: :memo, label: "Memo", overflow: :unknown).to_h).not_to have_key("overflow")
+    end
+
+    it "accepts default_overflow when overflow is not provided" do
+      definition = described_class.new(key: :memo, label: "Memo", default_overflow: :ellipsis)
+
+      expect(definition.to_h["overflow"]).to eq("ellipsis")
     end
 
     it "includes normalized filter metadata" do

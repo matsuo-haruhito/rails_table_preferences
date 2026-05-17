@@ -12,6 +12,9 @@ export default class extends Controller {
     settings: Object,
     columns: Array,
     resizeHandleWidth: { type: Number, default: 10 },
+    resizeAutoFitPadding: { type: Number, default: 24 },
+    resizeAutoFitMinWidth: { type: Number, default: 40 },
+    resizeAutoFitMaxWidth: { type: Number, default: 640 },
     reorderSensitivity: { type: Number, default: 1.2 },
     orderLabel: { type: String, default: "表示順" },
     widthLabel: { type: String, default: "列幅" },
@@ -303,6 +306,7 @@ export default class extends Controller {
       handle.dataset.railsTablePreferencesResizeHandle = "true"
       handle.setAttribute("aria-label", `${this.resizeLabelValue}: ${cell.dataset.railsTablePreferencesColumnKey}`)
       handle.addEventListener("mousedown", this.startColumnResize.bind(this))
+      handle.addEventListener("dblclick", this.autoFitColumnFromHandle.bind(this))
       handle.addEventListener("click", (event) => event.preventDefault())
       this.applyResizeHandleHitArea(cell, handle)
       cell.appendChild(handle)
@@ -327,6 +331,7 @@ export default class extends Controller {
   startColumnResize(event) {
     event.preventDefault()
     event.stopPropagation()
+    if (event.detail > 1) return
     const headerCell = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
     if (!headerCell) return
     this.resizingColumn = {
@@ -352,6 +357,49 @@ export default class extends Controller {
   stopColumnResize() {
     this.uninstallDocumentResizeListeners()
     this.resizingColumn = null
+  }
+
+  autoFitColumnFromHandle(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    const headerCell = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
+    const key = headerCell?.dataset.railsTablePreferencesColumnKey
+    if (!key) return
+    this.uninstallDocumentResizeListeners()
+    this.resizingColumn = null
+    const width = this.autoFitWidthForColumn(key)
+    if (!width) return
+    this.updateColumnSetting(key, { width })
+    this.applyColumn(this.columnByKey(key))
+    this.syncPinnedColumnOffsets()
+    this.syncEditorWidthInputs()
+  }
+
+  autoFitWidthForColumn(key) {
+    const cells = Array.from(this.cellsFor(key)).filter((cell) => !cell.hidden && cell.offsetParent !== null)
+    if (cells.length === 0) return null
+    const measured = Math.max(...cells.map((cell) => this.measureAutoFitCellWidth(cell))) + this.normalizedResizeAutoFitPadding
+    return Math.max(this.normalizedResizeAutoFitMinWidth, Math.min(this.normalizedResizeAutoFitMaxWidth, Math.ceil(measured)))
+  }
+
+  measureAutoFitCellWidth(cell) {
+    const clone = cell.cloneNode(true)
+    clone.querySelectorAll("[data-rails-table-preferences-resize-handle], [data-rails-table-preferences-filter-button], [data-rails-table-preferences-sort-indicator]").forEach((node) => node.remove())
+    clone.style.position = "absolute"
+    clone.style.visibility = "hidden"
+    clone.style.left = "-10000px"
+    clone.style.top = "0"
+    clone.style.width = "auto"
+    clone.style.maxWidth = "none"
+    clone.style.minWidth = "0"
+    clone.style.overflow = "visible"
+    clone.style.textOverflow = "clip"
+    clone.style.whiteSpace = "nowrap"
+    clone.style.removeProperty("--rails-table-preferences-pinned-left")
+    document.body.appendChild(clone)
+    const width = Math.max(clone.scrollWidth, clone.getBoundingClientRect().width)
+    clone.remove()
+    return width
   }
 
   uninstallDocumentResizeListeners() {
@@ -714,18 +762,44 @@ export default class extends Controller {
         delete cell.dataset.railsTablePreferencesFixed
       }
       delete cell.dataset.railsTablePreferencesTruncate
+      delete cell.dataset.railsTablePreferencesOverflow
       if (column.width) {
         cell.style.width = `${column.width}px`
         cell.style.maxWidth = `${column.width}px`
       }
       if (column.truncate) {
         cell.dataset.railsTablePreferencesTruncate = column.truncate
+      }
+      this.applyColumnOverflow(cell, column)
+    })
+  }
+
+  applyColumnOverflow(cell, column) {
+    const overflow = column.overflow || (column.truncate ? "ellipsis" : null)
+    if (!overflow) return
+    cell.dataset.railsTablePreferencesOverflow = overflow
+    switch (overflow) {
+      case "wrap":
+        cell.style.overflow = "visible"
+        cell.style.textOverflow = "clip"
+        cell.style.whiteSpace = "normal"
+        break
+      case "clip":
+        cell.style.overflow = "hidden"
+        cell.style.textOverflow = "clip"
+        cell.style.whiteSpace = "nowrap"
+        break
+      case "nowrap":
+        cell.style.overflow = "visible"
+        cell.style.textOverflow = "clip"
+        cell.style.whiteSpace = "nowrap"
+        break
+      default:
         cell.style.overflow = "hidden"
         cell.style.textOverflow = "ellipsis"
         cell.style.whiteSpace = "nowrap"
         if (!cell.title) cell.title = cell.textContent.trim()
-      }
-    })
+    }
   }
 
   syncPinnedColumnOffsets() {
@@ -755,7 +829,7 @@ export default class extends Controller {
 
   buildDefaultSettings() {
     return {
-      columns: this.columnsValue.map((column, index) => ({ key: column.key, label: column.label || column.key, visible: column.visible !== false, order: column.order ?? (index + 1) * 10, width: column.width, truncate: column.truncate, pinned: column.pinned === true, filter: column.filter, sortable: column.sortable })),
+      columns: this.columnsValue.map((column, index) => ({ key: column.key, label: column.label || column.key, visible: column.visible !== false, order: column.order ?? (index + 1) * 10, width: column.width, truncate: column.truncate, overflow: column.overflow, pinned: column.pinned === true, filter: column.filter, sortable: column.sortable })),
       filters: {},
       sorts: []
     }
@@ -765,7 +839,7 @@ export default class extends Controller {
     const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))
     const columns = defaultSettings.columns.map((defaultColumn, index) => {
       const savedColumn = savedColumns.get(defaultColumn.key) || {}
-      return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, pinned: defaultColumn.pinned, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }
+      return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, overflow: defaultColumn.overflow, pinned: defaultColumn.pinned, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }
     })
     return { columns, filters: savedSettings?.filters || {}, sorts: savedSettings?.sorts || [] }
   }
@@ -819,6 +893,9 @@ export default class extends Controller {
   get columnsFromSettings() { return this.settingsValue?.columns || [] }
   get orderedColumnsFromSettings() { return this.columnsFromSettings.slice().sort((left, right) => this.orderValue(left) - this.orderValue(right)) }
   get normalizedResizeHandleWidth() { const value = Number(this.resizeHandleWidthValue); return Number.isFinite(value) && value > 0 ? value : 10 }
+  get normalizedResizeAutoFitPadding() { const value = Number(this.resizeAutoFitPaddingValue); return Number.isFinite(value) && value >= 0 ? value : 24 }
+  get normalizedResizeAutoFitMinWidth() { const value = Number(this.resizeAutoFitMinWidthValue); return Number.isFinite(value) && value > 0 ? value : 40 }
+  get normalizedResizeAutoFitMaxWidth() { const value = Number(this.resizeAutoFitMaxWidthValue); return Number.isFinite(value) && value > 0 ? value : 640 }
   get normalizedReorderSensitivity() { const value = Number(this.reorderSensitivityValue); return Number.isFinite(value) && value > 0 ? value : 1 }
   get reorderActivationRatio() { return Math.max(0.25, Math.min(0.5, 0.5 / this.normalizedReorderSensitivity)) }
   get currentPresetName() { return this.hasPresetNameTarget ? (this.presetNameTarget.value.trim() || "default") : (this.nameValue || "default") }

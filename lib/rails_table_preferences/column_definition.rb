@@ -2,12 +2,27 @@
 
 module RailsTablePreferences
   class ColumnDefinition
+    OVERFLOW_ALIASES = {
+      true => "ellipsis",
+      false => nil,
+      truncate: "ellipsis",
+      truncated: "ellipsis",
+      ellipsis: "ellipsis",
+      clip: "clip",
+      clipped: "clip",
+      wrap: "wrap",
+      wrapped: "wrap",
+      nowrap: "nowrap",
+      none: nil
+    }.freeze
+
     attr_reader :key,
                 :label,
                 :default_visible,
                 :default_order,
                 :default_width,
                 :default_truncate,
+                :default_overflow,
                 :pinned,
                 :group,
                 :ignored,
@@ -18,7 +33,7 @@ module RailsTablePreferences
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       @key = key.to_s
       @model = model
       @model_name = model_name
@@ -28,6 +43,7 @@ module RailsTablePreferences
       @default_order = integer_or_nil(default_order)
       @default_width = integer_or_nil(default_width)
       @default_truncate = integer_or_nil(default_truncate)
+      @default_overflow = normalize_overflow(overflow.nil? ? default_overflow : overflow)
       @pinned = ActiveModel::Type::Boolean.new.cast(fixed.nil? ? pinned : fixed)
       @group = normalize_group(group)
       @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore) || label_unresolved?
@@ -44,6 +60,7 @@ module RailsTablePreferences
         "order" => default_order,
         "width" => default_width,
         "truncate" => default_truncate,
+        "overflow" => default_overflow,
         "pinned" => pinned,
         "group" => group,
         "ignored" => ignored,
@@ -178,6 +195,11 @@ module RailsTablePreferences
       return nil if value.nil?
 
       ActiveModel::Type::Boolean.new.cast(value)
+    end
+
+    def normalize_overflow(value)
+      normalized = value.is_a?(String) || value.is_a?(Symbol) ? value.to_s.strip.downcase.to_sym : value
+      OVERFLOW_ALIASES.fetch(normalized, nil)
     end
 
     def integer_or_nil(value)

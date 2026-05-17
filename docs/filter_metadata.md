@@ -6,7 +6,7 @@ This document describes the neutral metadata that can be attached to column defi
 
 ## Column metadata
 
-Columns can declare filter metadata and sortability:
+Columns can declare filter metadata, sortability, and display metadata such as overflow behavior:
 
 ```ruby
 columns = [
@@ -14,7 +14,8 @@ columns = [
     :customer_name,
     label: "得意先名",
     filter: { type: :text, operators: %i[contains equals blank] },
-    sortable: true
+    sortable: true,
+    overflow: :ellipsis
   ),
   table_preferences_column(
     :status,
@@ -27,6 +28,12 @@ columns = [
     label: "納品日",
     filter: { type: :date, operators: %i[equals gteq lteq between] },
     sortable: true
+  ),
+  table_preferences_column(
+    :note,
+    label: "備考",
+    filter: true,
+    overflow: :wrap
   )
 ]
 ```
@@ -36,12 +43,20 @@ You can also omit `label:` when the label is resolved through `i18n_key:` or a d
 Shorthands are available:
 
 ```ruby
-table_preferences_column(:customer_name, label: "得意先名", filter: true)    # { "type" => "text" }
-table_preferences_column(:status, label: "状態", filter: :select)            # { "type" => "select" }
-table_preferences_column(:internal_note, label: "内部メモ", filter: false)   # no filter metadata
+table_preferences_column(:customer_name, label: "得意先名", filter: true)                         # { "type" => "text" }
+table_preferences_column(:status, label: "状態", filter: :select)                                 # { "type" => "select" }
+table_preferences_column(:customer_name, label: "得意先名", overflow: :truncate)                   # overflow: "ellipsis"
+table_preferences_column(:internal_note, label: "内部メモ", filter: false, overflow: :wrap)        # no filter metadata, wrapped text
 ```
 
-The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render. It is not a query definition.
+The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
+
+Supported overflow values are:
+
+- `:ellipsis` or `:truncate`: single-line hidden overflow with `...`
+- `:clip`: single-line hidden overflow without `...`
+- `:wrap`: multi-line wrapping
+- `:nowrap`: single-line overflow without clipping
 
 ## Sort UI
 
@@ -70,7 +85,7 @@ The header also receives `aria-sort` and a minimal visual indicator:
 - descending: `▼`
 - none: no indicator
 
-The sort click handler ignores clicks from filter buttons, resize handles, buttons, inputs, selects, and textareas so it does not interfere with filtering, resizing, or other controls.
+The sort click handler ignores clicks from filter buttons, resize handles, buttons, inputs, selects, and textareas so it does not interfere with filtering, resizing, or other controls. Double-clicking a resize handle auto-fits column width and stores the result as normal width state; it does not change filter or sort state.
 
 ## Mapping to existing controller params
 
@@ -89,7 +104,8 @@ columns = [
   table_preferences_column(
     :customer_name,
     label: "得意先名",
-    filter: { type: :text, param: :search_word }
+    filter: { type: :text, param: :search_word },
+    overflow: :ellipsis
   ),
   table_preferences_column(
     :status,

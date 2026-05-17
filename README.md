@@ -176,7 +176,8 @@ This is the current target version. It is intended to be usable in real Rails ap
 
 Included scope:
 
-- Column visibility, order, width, truncation, fixed/pinned metadata, and column group metadata
+- Column visibility, order, width, truncation, fixed/pinned metadata, overflow metadata, and column group metadata
+- Spreadsheet-like auto-fit by double-clicking a column resize handle
 - Owner, shared, role, and organization scoped presets
 - Default preset resolution across owner, role, organization, and shared scopes
 - Apply, Save, Save as new, Delete, and Reset actions
@@ -387,11 +388,28 @@ Examples:
 columns = [
   table_preferences_column(:order_no, label: "受注番号", fixed: true, default_width: 120),
   table_preferences_column(:customer_code, model: Order, group: { key: :customer, label: "得意先情報" }),
-  table_preferences_column(:customer_name, model: Order, group: { key: :customer, label: "得意先情報" }),
+  table_preferences_column(:customer_name, model: Order, group: { key: :customer, label: "得意先情報" }, overflow: :ellipsis),
   table_preferences_column(:delivery_date, i18n_key: "orders.index.columns.delivery_date", sortable: true),
-  table_preferences_column(:memo, label: "備考", filter: { type: :text, param: :memo })
+  table_preferences_column(:memo, label: "備考", filter: { type: :text, param: :memo }, overflow: :wrap)
 ]
 ```
+
+Column resize handles support two actions:
+
+- drag: manually resize the column
+- double-click: auto-fit to the currently rendered header/body cell content, similar to spreadsheet applications
+
+The auto-fit result is saved as the normal column `width` when the user saves the preset. The auto-fit calculation is based on currently rendered cells, so paginated or virtualized tables are fitted to the visible page.
+
+Use `overflow:` to control text that is wider than the configured column width:
+
+```ruby
+table_preferences_column(:customer_name, label: "得意先名", default_width: 200, overflow: :ellipsis)
+table_preferences_column(:note, label: "備考", default_width: 320, overflow: :wrap)
+table_preferences_column(:code, label: "コード", default_width: 120, overflow: :clip)
+```
+
+Supported values are `:ellipsis`/`:truncate`, `:clip`, `:wrap`, and `:nowrap`. `default_truncate:` remains available as a backward-compatible way to enable ellipsis behavior.
 
 Host apps that want Rails-style attribute locale keys can opt in by adding the locale rules:
 
@@ -477,7 +495,8 @@ columns = [
     :customer_name,
     label: "得意先名",
     filter: { type: :text, param: :search_word },
-    sortable: true
+    sortable: true,
+    overflow: :ellipsis
   ),
   table_preferences_column(
     :delivery_date,

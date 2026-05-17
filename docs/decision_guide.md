@@ -47,6 +47,29 @@ Every target table header and cell should use the matching column key:
 <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
 ```
 
+Users can drag resize handles to change widths. They can also double-click a resize handle to auto-fit the column to the currently rendered cells. Auto-fit writes the result back as the normal column `width`, so the value is saved with the preset.
+
+## I want long text to be clipped, wrapped, or ellipsized
+
+Use `overflow:` on the column definition.
+
+```ruby
+columns = [
+  table_preferences_column(:customer_name, label: "得意先名", default_width: 200, overflow: :ellipsis),
+  table_preferences_column(:note, label: "備考", default_width: 320, overflow: :wrap),
+  table_preferences_column(:code, label: "コード", default_width: 120, overflow: :clip)
+]
+```
+
+Supported values:
+
+- `:ellipsis` or `:truncate`: keep one line, hide overflow, and show `...`
+- `:clip`: keep one line and hide overflow without `...`
+- `:wrap`: allow multiple lines
+- `:nowrap`: keep one line without clipping
+
+`default_truncate:` still enables ellipsis behavior for backward compatibility, but `overflow:` is clearer for new screens.
+
 ## I want fixed or pinned columns
 
 Use `fixed: true` or `pinned: true` on the column definition.
@@ -232,7 +255,8 @@ table_preferences_column(
   :customer_name,
   label: "得意先名",
   filter: { type: :text, param: :search_word },
-  sortable: true
+  sortable: true,
+  overflow: :ellipsis
 )
 ```
 
