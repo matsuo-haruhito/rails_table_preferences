@@ -24,11 +24,15 @@ module RailsTablePreferences
     validates RailsTablePreferences.configuration.user_foreign_key, presence: true, if: :owner_scope?
     validates :name, uniqueness: { scope: [:scope_type, :scope_key, RailsTablePreferences.configuration.user_foreign_key, :table_key] }
 
-    scope :for_user, ->(user) { where(scope_type: OWNER_SCOPE_TYPE, RailsTablePreferences.configuration.user_foreign_key => user) }
-    scope :shared, -> { where(scope_type: SHARED_SCOPE_TYPE) }
-    scope :for_role, ->(role_key) { where(scope_type: ROLE_SCOPE_TYPE, scope_key: role_key.to_s) }
-    scope :for_organization, ->(organization_key) { where(scope_type: ORGANIZATION_SCOPE_TYPE, scope_key: organization_key.to_s) }
-    scope :for_scope, ->(scope_type, scope_key = nil) { where(scope_type: scope_type.to_s, scope_key: scope_key.presence&.to_s) }
+    scope :for_user, ->(user) { where(scope_type: OWNER_SCOPE_TYPE, scope_key: "", RailsTablePreferences.configuration.user_foreign_key => user) }
+    scope :shared, -> { where(scope_type: SHARED_SCOPE_TYPE, scope_key: "", RailsTablePreferences.configuration.user_foreign_key => nil) }
+    scope :for_role, ->(role_key) { where(scope_type: ROLE_SCOPE_TYPE, scope_key: role_key.to_s, RailsTablePreferences.configuration.user_foreign_key => nil) }
+    scope :for_organization, ->(organization_key) { where(scope_type: ORGANIZATION_SCOPE_TYPE, scope_key: organization_key.to_s, RailsTablePreferences.configuration.user_foreign_key => nil) }
+    scope :for_scope, ->(scope_type, scope_key = nil) do
+      normalized_scope_type = scope_type.to_s.presence || OWNER_SCOPE_TYPE
+      normalized_scope_key = [OWNER_SCOPE_TYPE, SHARED_SCOPE_TYPE].include?(normalized_scope_type) ? "" : scope_key.to_s
+      where(scope_type: normalized_scope_type, scope_key: normalized_scope_key)
+    end
     scope :for_table, ->(table_key) { where(table_key: table_key.to_s) }
     scope :defaults, -> { where(default_flag: true) }
     scope :available_to, ->(user:, scope_context: {}) do
@@ -44,18 +48,24 @@ module RailsTablePreferences
       relation
     end
 
-    before_validation :set_default_name, :set_default_settings, :set_default_scope_type
+    before_validation :set_default_name, :set_default_settings, :set_default_scope_type, :set_default_scope_key
 
     def self.find_for(user:, table_key:, name: "default", scope_type: OWNER_SCOPE_TYPE, scope_key: nil)
-      for_scope(scope_type, scope_key).where(RailsTablePreferences.configuration.user_foreign_key => scope_type.to_s == OWNER_SCOPE_TYPE ? user : nil).for_table(table_key).find_by(name: name.to_s)
+      relation = for_scope(scope_type, scope_key).where(RailsTablePreferences.configuration.user_foreign_key => scope_type.to_s == OWNER_SCOPE_TYPE ? user : nil)
+      relation.for_table(table_key).find_by(name: name.to_s)
     end
 
     def self.find_or_initialize_for(user:, table_key:, name: "default", scope_type: OWNER_SCOPE_TYPE, scope_key: nil)
-      for_scope(scope_type, scope_key).where(RailsTablePreferences.configuration.user_foreign_key => scope_type.to_s == OWNER_SCOPE_TYPE ? user : nil).for_table(table_key).find_or_initialize_by(name: name.to_s)
+      relation = for_scope(scope_type, scope_key).where(RailsTablePreferences.configuration.user_foreign_key => scope_type.to_s == OWNER_SCOPE_TYPE ? user : nil)
+      relation.for_table(table_key).find_or_initialize_by(name: name.to_s)
     end
 
     def self.default_for(user:, table_key:, scope_context: {})
       available_to(user: user, scope_context: scope_context).for_table(table_key).defaults.order(Arel.sql(scope_priority_case), :name).first || find_for(user: user, table_key: table_key, name: "default")
+    end
+
+    def self.available_named_preference(user:, table_key:, name:, scope_context: {})
+      available_to(user: user, scope_context: scope_context).for_table(table_key).where(name: name.to_s).order(Arel.sql(scope_priority_case), :name).first
     end
 
     def shared?
@@ -108,6 +118,10 @@ module RailsTablePreferences
 
     def set_default_scope_type
       self.scope_type = OWNER_SCOPE_TYPE if scope_type.blank?
+    end
+
+    def set_default_scope_key
+      self.scope_key = "" if [OWNER_SCOPE_TYPE, SHARED_SCOPE_TYPE].include?(scope_type)
     end
   end
 end
