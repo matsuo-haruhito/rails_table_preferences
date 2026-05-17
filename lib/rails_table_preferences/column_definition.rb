@@ -123,7 +123,10 @@ module RailsTablePreferences
     def column_comment
       return unless model.respond_to?(:columns_hash)
 
-      model.columns_hash[key]&.comment.presence
+      column = model.columns_hash[key]
+      return unless column.respond_to?(:comment)
+
+      column.comment.presence
     end
 
     def normalized_model_name
