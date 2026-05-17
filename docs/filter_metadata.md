@@ -6,40 +6,57 @@ This document describes the neutral metadata that can be attached to column defi
 
 ## Column metadata
 
-Columns can declare filter metadata and sortability:
+Columns can declare filter metadata, sortability, and display metadata such as overflow behavior:
 
 ```ruby
 columns = [
   table_preferences_column(
     :customer_name,
-    model_name: :order,
+    label: "得意先名",
     filter: { type: :text, operators: %i[contains equals blank] },
-    sortable: true
+    sortable: true,
+    overflow: :ellipsis
   ),
   table_preferences_column(
     :status,
-    model_name: :order,
+    label: "状態",
     filter: { type: :select, options: ["未出荷", "出荷済", "保留"] },
     sortable: true
   ),
   table_preferences_column(
     :delivery_date,
-    model_name: :order,
+    label: "納品日",
     filter: { type: :date, operators: %i[equals gteq lteq between] },
     sortable: true
+  ),
+  table_preferences_column(
+    :note,
+    label: "備考",
+    filter: true,
+    overflow: :wrap
   )
 ]
 ```
 
+You can also omit `label:` when the label is resolved through `i18n_key:` or a database column comment via `model:`.
+
 Shorthands are available:
 
 ```ruby
-table_preferences_column(:customer_name, filter: true)    # { "type" => "text" }
-table_preferences_column(:status, filter: :select)        # { "type" => "select" }
-table_preferences_column(:internal_note, filter: false)   # no filter metadata
+table_preferences_column(:customer_name, label: "得意先名", filter: true)                         # { "type" => "text" }
+table_preferences_column(:status, label: "状態", filter: :select)                                 # { "type" => "select" }
+table_preferences_column(:customer_name, label: "得意先名", overflow: :truncate)                   # overflow: "ellipsis"
+table_preferences_column(:internal_note, label: "内部メモ", filter: false, overflow: :wrap)        # no filter metadata, wrapped text
 ```
 
-The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render. It is not a query definition.
+The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
+
+Supported overflow values are:
+
+- `:ellipsis` or `:truncate`: single-line hidden overflow with `...`
+- `:clip`: single-line hidden overflow without `...`
+- `:wrap`: multi-line wrapping
+- `:nowrap`: single-line overflow without clipping
 
 ## Sort UI
 
@@ -68,7 +85,7 @@ The header also receives `aria-sort` and a minimal visual indicator:
 - descending: `▼`
 - none: no indicator
 
-The sort click handler ignores clicks from filter buttons, resize handles, buttons, inputs, selects, and textareas so it does not interfere with filtering, resizing, or other controls.
+The sort click handler ignores clicks from filter buttons, resize handles, buttons, inputs, selects, and textareas so it does not interfere with filtering, resizing, or other controls. Double-clicking a resize handle auto-fits column width and stores the result as normal width state; it does not change filter or sort state.
 
 ## Mapping to existing controller params
 
@@ -86,14 +103,18 @@ For these applications, add plain param names to the column metadata:
 columns = [
   table_preferences_column(
     :customer_name,
-    filter: { type: :text, param: :search_word }
+    label: "得意先名",
+    filter: { type: :text, param: :search_word },
+    overflow: :ellipsis
   ),
   table_preferences_column(
     :status,
+    label: "状態",
     filter: { type: :select, values_param: :statuses, options: ["未出荷", "出荷済"] }
   ),
   table_preferences_column(
     :delivery_date,
+    label: "納品日",
     filter: { type: :date, from_param: :from_date, to_param: :to_date },
     sortable: true
   )
@@ -153,7 +174,7 @@ Invalid filters without an operator are dropped. Invalid sorts without a key, wi
 
 ## Ignored columns
 
-When `ignored_columns` or per-column `ignored: true` is used, saved filters and sorts for those columns are also removed from `settings_json`.
+When `ignored_columns`, per-column `ignored: true`, or unresolved labels are used, saved filters and sorts for those columns are also removed from `settings_json`.
 
 This prevents hidden columns from being reintroduced through an old saved preference.
 

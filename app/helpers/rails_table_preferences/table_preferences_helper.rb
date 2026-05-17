@@ -158,7 +158,7 @@ module RailsTablePreferences
       "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
-    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       ColumnDefinition.new(
         key: key,
         label: label,
@@ -169,7 +169,11 @@ module RailsTablePreferences
         default_order: default_order,
         default_width: default_width,
         default_truncate: default_truncate,
+        default_overflow: default_overflow,
+        overflow: overflow,
         pinned: pinned,
+        fixed: fixed,
+        group: group,
         ignored: ignored,
         ignore: ignore,
         filter: filter,
@@ -283,6 +287,32 @@ module RailsTablePreferences
 
     def table_preferences_column_hash(column)
       RailsTablePreferences::Adapters::ColumnLike.call(column)
+      case column
+      when ColumnDefinition
+        column.to_h
+      when Hash
+        ColumnDefinition.new(
+          key: column.fetch(:key, column["key"]),
+          label: column.fetch(:label, column["label"]),
+          model: column.fetch(:model, column["model"]),
+          model_name: column.fetch(:model_name, column["model_name"]),
+          i18n_key: column.fetch(:i18n_key, column["i18n_key"]),
+          default_visible: column.fetch(:default_visible, column.fetch("default_visible", column.fetch(:visible, column.fetch("visible", true)))),
+          default_order: column.fetch(:default_order, column.fetch("default_order", column.fetch(:order, column.fetch("order", nil)))),
+          default_width: column.fetch(:default_width, column.fetch("default_width", column.fetch(:width, column.fetch("width", nil)))),
+          default_truncate: column.fetch(:default_truncate, column.fetch("default_truncate", column.fetch(:truncate, column.fetch("truncate", nil)))),
+          default_overflow: column.fetch(:default_overflow, column.fetch("default_overflow", column.fetch(:overflow, column.fetch("overflow", nil)))),
+          pinned: column.fetch(:pinned, column.fetch("pinned", false)),
+          fixed: column.fetch(:fixed, column.fetch("fixed", nil)),
+          ignored: column.fetch(:ignored, column.fetch("ignored", false)),
+          ignore: column.fetch(:ignore, column.fetch("ignore", nil)),
+          filter: column.fetch(:filter, column.fetch("filter", nil)),
+          sortable: column.fetch(:sortable, column.fetch("sortable", nil)),
+          sort_param: column.fetch(:sort_param, column.fetch("sort_param", nil))
+        ).to_h
+      else
+        table_preferences_column(column)
+      end
     end
 
     def table_preferences_hidden_field_tags(params_hash, namespace: nil, prefix: nil)
