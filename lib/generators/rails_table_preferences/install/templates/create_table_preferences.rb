@@ -11,7 +11,7 @@ class CreateTablePreferences < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :table_preferences, [:<%= owner_foreign_key %>, :table_key, :name], unique: true
-    add_index :table_preferences, [:<%= owner_foreign_key %>, :table_key, :default_flag]
+    add_index :table_preferences, [:<%= owner_foreign_key %>, :table_key, :name], unique: true, name: "idx_table_preferences_owner_table_name"
+    add_index :table_preferences, [:<%= owner_foreign_key %>, :table_key, :default_flag], name: "idx_table_preferences_owner_table_default"
   end
 end
