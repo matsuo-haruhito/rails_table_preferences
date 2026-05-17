@@ -12,22 +12,34 @@ Symptoms:
 
 Check:
 
-1. The controller file exists in the host application:
+1. Choose the controller registration path for your frontend stack.
+
+   With the default `stimulus-rails` manifest loader, the copied controller should exist in the host application:
 
    ```text
    app/javascript/controllers/rails_table_preferences_controller.js
    ```
 
-2. The controller is registered as `rails-table-preferences`.
+   Files under `app/javascript/controllers` are usually registered automatically.
 
-   With the default `stimulus-rails` manifest loader, this usually happens automatically for files under `app/javascript/controllers`.
+   With Vite / `app/frontend/entrypoints/application.js`, register the packaged controller explicitly:
 
-   With jsbundling or a custom Stimulus setup, register it manually:
+   ```js
+   import { Application } from "@hotwired/stimulus"
+   import RailsTablePreferencesController from "rails_table_preferences/controller"
+
+   const application = Application.start()
+   application.register("rails-table-preferences", RailsTablePreferencesController)
+   ```
+
+   With jsbundling or another custom Stimulus setup that uses the copied file, register it manually:
 
    ```js
    import RailsTablePreferencesController from "./controllers/rails_table_preferences_controller"
    application.register("rails-table-preferences", RailsTablePreferencesController)
    ```
+
+2. The controller is registered as `rails-table-preferences`.
 
 3. The rendered editor or table includes:
 
@@ -40,6 +52,8 @@ Check:
    ```bash
    node --check app/javascript/controllers/rails_table_preferences_controller.js
    ```
+
+See also [JavaScript entrypoints](javascript_entrypoints.md).
 
 ## Save returns 404
 
@@ -393,7 +407,7 @@ Pass a preset name explicitly when the screen should use a specific preset:
 
 ## Need to customize the UI
 
-The default ERB, CSS, and JavaScript are intentionally copy-based.
+The default ERB, CSS, and JavaScript are intentionally copy-based, while Vite apps can import the packaged controller entrypoint directly.
 
 Copy views:
 
@@ -413,4 +427,4 @@ Copy JavaScript controller:
 bin/rails generate rails_table_preferences:javascript
 ```
 
-Host applications can edit the copied files freely.
+Host applications can edit copied files freely, or register their own controller as `rails-table-preferences`.
