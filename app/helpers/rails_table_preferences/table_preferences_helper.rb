@@ -57,7 +57,7 @@ module RailsTablePreferences
       "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
-    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil)
+    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil)
       ColumnDefinition.new(
         key: key,
         label: label,
@@ -70,7 +70,9 @@ module RailsTablePreferences
         default_truncate: default_truncate,
         pinned: pinned,
         ignored: ignored,
-        ignore: ignore
+        ignore: ignore,
+        filter: filter,
+        sortable: sortable
       ).to_h
     end
 
@@ -92,7 +94,9 @@ module RailsTablePreferences
 
       allowed_keys = allowed_columns.map { |column| column["key"].to_s }.to_set
       normalized_settings.merge(
-        "columns" => normalized_settings.fetch("columns", []).select { |column| allowed_keys.include?(column["key"].to_s) }
+        "columns" => normalized_settings.fetch("columns", []).select { |column| allowed_keys.include?(column["key"].to_s) },
+        "filters" => normalized_settings.fetch("filters", {}).select { |key, _condition| allowed_keys.include?(key.to_s) },
+        "sorts" => normalized_settings.fetch("sorts", []).select { |sort| allowed_keys.include?(sort["key"].to_s) }
       )
     end
 
@@ -115,7 +119,9 @@ module RailsTablePreferences
           default_truncate: column.fetch(:default_truncate, column.fetch("default_truncate", column.fetch(:truncate, column.fetch("truncate", nil)))),
           pinned: column.fetch(:pinned, column.fetch("pinned", false)),
           ignored: column.fetch(:ignored, column.fetch("ignored", false)),
-          ignore: column.fetch(:ignore, column.fetch("ignore", nil))
+          ignore: column.fetch(:ignore, column.fetch("ignore", nil)),
+          filter: column.fetch(:filter, column.fetch("filter", nil)),
+          sortable: column.fetch(:sortable, column.fetch("sortable", nil))
         ).to_h
       else
         table_preferences_column(column)
