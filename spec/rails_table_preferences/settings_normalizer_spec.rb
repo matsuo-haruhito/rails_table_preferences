@@ -70,5 +70,94 @@ RSpec.describe RailsTablePreferences::SettingsNormalizer do
 
       expect(described_class.call(settings)["columns"]).to eq([])
     end
+
+    it "normalizes filters into the neutral adapter format" do
+      settings = {
+        filters: {
+          customer_name: { operator: :contains, value: "山田" },
+          status: { predicate: :in, values: %w[未出荷 出荷済] },
+          delivery_date: { operator: :between, from: "2026-01-01", to: "2026-01-31" }
+        }
+      }
+
+      expect(described_class.call(settings)["filters"]).to eq(
+        "customer_name" => {
+          "operator" => "contains",
+          "value" => "山田"
+        },
+        "status" => {
+          "operator" => "in",
+          "values" => %w[未出荷 出荷済]
+        },
+        "delivery_date" => {
+          "operator" => "between",
+          "from" => "2026-01-01",
+          "to" => "2026-01-31"
+        }
+      )
+    end
+
+    it "drops filters without an operator" do
+      settings = {
+        filters: {
+          customer_name: { value: "山田" },
+          status: { operator: :equals, value: "出荷済" }
+        }
+      }
+
+      expect(described_class.call(settings)["filters"]).to eq(
+        "status" => {
+          "operator" => "equals",
+          "value" => "出荷済"
+        }
+      )
+    end
+
+    it "normalizes scalar filter values into values arrays for multi-value operators" do
+      settings = {
+        filters: {
+          status: { operator: :in, values: "出荷済" }
+        }
+      }
+
+      expect(described_class.call(settings)["filters"]).to eq(
+        "status" => {
+          "operator" => "in",
+          "values" => ["出荷済"]
+        }
+      )
+    end
+
+    it "normalizes sorts" do
+      settings = {
+        sorts: [
+          { key: :delivery_date, direction: :DESC },
+          { column: :customer_code, dir: :asc }
+        ]
+      }
+
+      expect(described_class.call(settings)["sorts"]).to eq(
+        [
+          { "key" => "delivery_date", "direction" => "desc" },
+          { "key" => "customer_code", "direction" => "asc" }
+        ]
+      )
+    end
+
+    it "drops invalid sorts" do
+      settings = {
+        sorts: [
+          { key: :delivery_date, direction: :sideways },
+          { direction: :asc },
+          { key: :customer_code, direction: :asc }
+        ]
+      }
+
+      expect(described_class.call(settings)["sorts"]).to eq(
+        [
+          { "key" => "customer_code", "direction" => "asc" }
+        ]
+      )
+    end
   end
 end
