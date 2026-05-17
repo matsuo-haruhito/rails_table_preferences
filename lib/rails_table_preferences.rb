@@ -6,6 +6,7 @@ require "rails_table_preferences/column_definition"
 require "rails_table_preferences/settings_normalizer"
 require "rails_table_preferences/legacy_column_adjustment_importer"
 require "rails_table_preferences/adapters/ransack"
+require "rails_table_preferences/adapters/controller_params"
 require "rails_table_preferences/engine"
 
 module RailsTablePreferences
