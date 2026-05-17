@@ -25,11 +25,10 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('filterToLabel: { type: String, default: "終了" }')
   end
 
-  it "builds editor rows with localized Stimulus values" do
-    expect(source).to include('${this.escapeHtml(this.orderLabelValue)}')
-    expect(source).to include('${this.escapeHtml(this.widthLabelValue)}')
-    expect(source).to include('${this.escapeHtml(this.truncateLabelValue)}')
-    expect(source).to include('${this.escapeHtml(this.dragLabelValue)}')
+  it "defaults sort UI labels to Japanese" do
+    expect(source).to include('sortAscLabel: { type: String, default: "昇順" }')
+    expect(source).to include('sortDescLabel: { type: String, default: "降順" }')
+    expect(source).to include('sortClearLabel: { type: String, default: "並び替え解除" }')
   end
 
   it "restricts column display effects to the table element" do
@@ -54,8 +53,10 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("reorderSensitivity")
   end
 
-  it "does not start table dragging from filter buttons" do
-    expect(source).to include('event.target.closest("[data-rails-table-preferences-filter-button]")')
+  it "does not start table dragging from header controls" do
+    expect(source).to include("shouldIgnoreHeaderAction(target)")
+    expect(source).to include('target.closest("[data-rails-table-preferences-filter-button]")')
+    expect(source).to include('target.closest("[data-rails-table-preferences-resize-handle]")')
   end
 
   it "supports column resize with a widened hit area" do
@@ -87,5 +88,14 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('case "select"')
     expect(source).to include('case "boolean"')
     expect(source).to include('return ["contains", "equals", "starts_with", "ends_with", "blank", "present"]')
+  end
+
+  it "supports sortable header click UI" do
+    expect(source).to include("installSortControls()")
+    expect(source).to include("toggleSortFromHeader(event, cell, column)")
+    expect(source).to include("syncSortStates()")
+    expect(source).to include("sortFor(key)")
+    expect(source).to include('indicator.textContent = sort?.direction === "asc" ? "▲"')
+    expect(source).to include('cell.setAttribute("aria-sort"')
   end
 end
