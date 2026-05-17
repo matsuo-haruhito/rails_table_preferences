@@ -12,31 +12,33 @@ Columns can declare filter metadata and sortability:
 columns = [
   table_preferences_column(
     :customer_name,
-    model_name: :order,
+    label: "得意先名",
     filter: { type: :text, operators: %i[contains equals blank] },
     sortable: true
   ),
   table_preferences_column(
     :status,
-    model_name: :order,
+    label: "状態",
     filter: { type: :select, options: ["未出荷", "出荷済", "保留"] },
     sortable: true
   ),
   table_preferences_column(
     :delivery_date,
-    model_name: :order,
+    label: "納品日",
     filter: { type: :date, operators: %i[equals gteq lteq between] },
     sortable: true
   )
 ]
 ```
 
+You can also omit `label:` when the label is resolved through `i18n_key:` or a database column comment via `model:`.
+
 Shorthands are available:
 
 ```ruby
-table_preferences_column(:customer_name, filter: true)    # { "type" => "text" }
-table_preferences_column(:status, filter: :select)        # { "type" => "select" }
-table_preferences_column(:internal_note, filter: false)   # no filter metadata
+table_preferences_column(:customer_name, label: "得意先名", filter: true)    # { "type" => "text" }
+table_preferences_column(:status, label: "状態", filter: :select)            # { "type" => "select" }
+table_preferences_column(:internal_note, label: "内部メモ", filter: false)   # no filter metadata
 ```
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render. It is not a query definition.
@@ -86,14 +88,17 @@ For these applications, add plain param names to the column metadata:
 columns = [
   table_preferences_column(
     :customer_name,
+    label: "得意先名",
     filter: { type: :text, param: :search_word }
   ),
   table_preferences_column(
     :status,
+    label: "状態",
     filter: { type: :select, values_param: :statuses, options: ["未出荷", "出荷済"] }
   ),
   table_preferences_column(
     :delivery_date,
+    label: "納品日",
     filter: { type: :date, from_param: :from_date, to_param: :to_date },
     sortable: true
   )
@@ -153,7 +158,7 @@ Invalid filters without an operator are dropped. Invalid sorts without a key, wi
 
 ## Ignored columns
 
-When `ignored_columns` or per-column `ignored: true` is used, saved filters and sorts for those columns are also removed from `settings_json`.
+When `ignored_columns`, per-column `ignored: true`, or unresolved labels are used, saved filters and sorts for those columns are also removed from `settings_json`.
 
 This prevents hidden columns from being reintroduced through an old saved preference.
 
