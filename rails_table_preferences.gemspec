@@ -8,18 +8,24 @@ Gem::Specification.new do |spec|
   spec.authors = ["Haruhito Matsuo"]
   spec.email = ["matsuo@scrumsoftware.co.jp"]
 
-  spec.summary = "User-specific table display preferences for Rails applications."
-  spec.description = "Rails Table Preferences saves and restores user-specific table display settings such as column visibility, order, width, and truncation."
+  spec.summary = "Table display preferences for Rails applications."
+  spec.description = "Rails Table Preferences saves and restores table display settings such as column visibility, order, width, truncation, filters, sorts, presets, fixed columns, groups, and export column order."
   spec.homepage = "https://github.com/matsuo-haruhito/rails_table_preferences"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
-  spec.metadata["changelog_uri"] = "#{spec.homepage}/releases"
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
+  spec.metadata["documentation_uri"] = "#{spec.homepage}/blob/main/docs/index.md"
 
   spec.files = Dir.chdir(__dir__) do
-    Dir["{app,config,lib}/**/*", "LICENSE", "README.md"]
+    Dir[
+      "{app,config,docs,lib}/**/*",
+      "CHANGELOG.md",
+      "LICENSE",
+      "README.md"
+    ].select { |path| File.file?(path) }
   end
 
   spec.require_paths = ["lib"]
