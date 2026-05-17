@@ -16,9 +16,9 @@ RSpec.describe RailsTablePreferences::Controller do
     end
   end
   let(:controller) { controller_class.new(owner) }
-  let(:scope) { instance_double("ActiveRecord::Relation") }
-  let(:default_scope) { instance_double("ActiveRecord::Relation") }
-  let(:ordered_default_scope) { instance_double("ActiveRecord::Relation") }
+  let(:scope) { double("Preference scope") }
+  let(:default_scope) { double("Default preference scope") }
+  let(:ordered_default_scope) { double("Ordered default preference scope") }
 
   before do
     RailsTablePreferences.configuration.current_user_method = :current_user
