@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, or documentation files are missing.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, or documentation files are missing.
 
 A successful run prints a message like:
 
@@ -59,6 +59,8 @@ app/controllers/concerns/rails_table_preferences/controller.rb
 app/helpers/rails_table_preferences/table_preferences_helper.rb
 app/helpers/rails_table_preferences/column_options_helper.rb
 app/javascript/controllers/rails_table_preferences_controller.js
+app/javascript/rails_table_preferences/controller.js
+app/javascript/rails_table_preferences/index.js
 app/views/rails_table_preferences/_editor.html.erb
 config/routes.rb
 lib/generators/rails_table_preferences/install/install_generator.rb
@@ -74,6 +76,7 @@ lib/rails_table_preferences.rb
 lib/rails_table_preferences/export_payload.rb
 lib/rails_table_preferences/package_verifier.rb
 lib/rails_table_preferences/settings_normalizer.rb
+package.json
 README.md
 CHANGELOG.md
 LICENSE
@@ -85,7 +88,7 @@ Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIR
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, rake tasks, changelog, or docs usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, or docs usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
