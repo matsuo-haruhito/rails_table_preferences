@@ -36,6 +36,52 @@ Every target table header and cell should use the matching column key:
 <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
 ```
 
+## I want fixed or pinned columns
+
+Use `fixed: true` or `pinned: true` on the column definition.
+
+```ruby
+columns = [
+  table_preferences_column(:order_no, label: "受注番号", fixed: true, default_width: 120),
+  table_preferences_column(:customer_name, label: "得意先名", default_width: 240)
+]
+```
+
+`fixed:` is an alias for `pinned:`. The default stylesheet provides sticky-column CSS hooks, but the host app owns final scroll-container and offset polish.
+
+See [Fixed columns and column groups](fixed_columns_and_groups.md).
+
+## I want grouped table headers or grouped export headers
+
+Use `group:` metadata and `table_preferences_column_groups`.
+
+```ruby
+columns = [
+  table_preferences_column(:customer_code, label: "得意先コード", group: { key: :customer, label: "得意先情報" }),
+  table_preferences_column(:customer_name, label: "得意先名", group: { key: :customer, label: "得意先情報" }),
+  table_preferences_column(:delivery_date, label: "納品日", group: { key: :delivery, label: "配送情報" })
+]
+```
+
+```erb
+<thead>
+  <tr>
+    <% table_preferences_column_groups(columns).each do |group| %>
+      <th colspan="<%= group["colspan"] %>"><%= group["label"] %></th>
+    <% end %>
+  </tr>
+  <tr>
+    <% table_preferences_columns(columns).each do |column| %>
+      <th data-rails-table-preferences-column-key="<%= column["key"] %>"><%= column["label"] %></th>
+    <% end %>
+  </tr>
+</thead>
+```
+
+Column groups are metadata. Rails Table Preferences helps normalize and group them, but the host app owns the final table header markup.
+
+See [Fixed columns and column groups](fixed_columns_and_groups.md).
+
 ## I want to save multiple named presets
 
 Use the bundled editor as-is.
@@ -57,6 +103,35 @@ When no `name:` is given, preference lookup uses this order:
 1. The preset with `default_flag = true`
 2. The preset named `default`
 3. Empty normalized settings
+
+## I want shared, role, or organization default presets
+
+Use scoped presets.
+
+Configure a scope context method only when the application needs shared, role, or organization preset resolution:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.scope_context_method = :table_preference_scope_context
+end
+```
+
+```ruby
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    {
+      roles: current_user.roles.pluck(:key),
+      organization: current_user.organization_id
+    }
+  end
+end
+```
+
+Default resolution priority is owner, role, organization, shared, then owner `default` fallback.
+
+See [Scoped presets](scoped_presets.md).
 
 ## I want users to hide columns, but some columns must never appear in the editor
 
@@ -215,6 +290,22 @@ table_preferences_column(:delivery_date, sortable: true, sort_param: :delivery_o
 
 Header click cycles through ascending, descending, and no sort. The host application must apply the resulting sort param.
 
+## I want exports to follow saved column settings
+
+Use `rails_table_preference_export_payload` in the controller.
+
+```ruby
+payload = rails_table_preference_export_payload(
+  table_key: :orders,
+  columns: columns,
+  name: params[:table_preference_name]
+)
+```
+
+The payload gives the host app ordered columns, column keys, headers, and metadata. Rails Table Preferences does not generate the CSV or Excel file.
+
+See [Export integration](export_integration.md).
+
 ## I want to customize the editor markup
 
 Use the views generator:
@@ -342,6 +433,7 @@ Rails Table Preferences owns:
 - saved column settings
 - saved filter/sort UI state
 - adapter params for existing host app search code
+- export column payloads
 
 The host application owns:
 
