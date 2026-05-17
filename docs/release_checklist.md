@@ -59,7 +59,7 @@ gem contents pkg/rails_table_preferences-*.gem --all
 
 See [Package verification](package_verification.md) for the required file list and manual inspection commands.
 
-Pay special attention to generator templates and copied assets. Missing templates usually appear only when a host app runs a generator.
+Pay special attention to generator templates, copied assets, `package.json`, and package JavaScript entrypoints. Missing templates or entrypoints usually appear only when a host app runs a generator or imports the gem through a JS bundler.
 
 ## 5. Install generator checks
 
@@ -83,9 +83,20 @@ Confirm:
 - [ ] `--skip-javascript` skips JavaScript copying.
 - [ ] `--skip-stylesheets` skips stylesheet copying.
 - [ ] `--with-demo` copies the demo controller and view.
-- [ ] Post-install messages are accurate.
+- [ ] Post-install messages are accurate for both `stimulus-rails` and Vite / `app/frontend` setups.
 
-## 6. Demo and sandbox checks
+## 6. JavaScript entrypoint checks
+
+For frontend integration, confirm:
+
+- [ ] `app/javascript/controllers/rails_table_preferences_controller.js` is packaged for copy-based `stimulus-rails` use.
+- [ ] `app/javascript/rails_table_preferences/controller.js` is packaged for `rails_table_preferences/controller` imports.
+- [ ] `app/javascript/rails_table_preferences/index.js` is packaged for package-root imports.
+- [ ] `package.json` is packaged and exposes `.` and `./controller` exports.
+- [ ] A Vite / `app/frontend/entrypoints/application.js` host app can register `rails_table_preferences/controller` as `rails-table-preferences`.
+- [ ] A default `stimulus-rails` host app still works with the copied controller.
+
+## 7. Demo and sandbox checks
 
 Run through the demo or sandbox flow:
 
@@ -125,7 +136,7 @@ See also:
 - [Sandbox Rails app verification](sandbox.md)
 - [Manual QA checklist](manual_qa.md)
 
-## 7. API and controller behavior checks
+## 8. API and controller behavior checks
 
 Confirm the mounted engine JSON API still behaves as expected:
 
@@ -153,7 +164,7 @@ Confirm controller integration behavior:
 - [ ] `rails_table_preference_export_payload` returns ordered export columns and headers.
 - [ ] Private current-owner methods work.
 
-## 8. Documentation checks
+## 9. Documentation checks
 
 Check the main user paths:
 
@@ -169,13 +180,15 @@ Check the main user paths:
 - [ ] README links to Manual QA.
 - [ ] README links to Release checklist.
 - [ ] README links to Package verification.
+- [ ] README links to JavaScript entrypoints.
 - [ ] `docs/index.md` links to all major docs.
 - [ ] Installation docs mention engine mount.
+- [ ] Installation docs mention Vite / `app/frontend` controller registration.
 - [ ] Demo docs clearly say the demo route must be added manually.
-- [ ] Troubleshooting covers Stimulus, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
+- [ ] Troubleshooting covers Stimulus, Vite entrypoints, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
 - [ ] Responsibility boundary is clear: host app owns database search, authorization, complex sticky layout polish, export file generation, and shared preset admin UI.
 
-## 9. Backward compatibility checks
+## 10. Backward compatibility checks
 
 If changing settings structure, helper options, or JSON API shape, confirm:
 
@@ -186,7 +199,7 @@ If changing settings structure, helper options, or JSON API shape, confirm:
 - [ ] Existing Ransack adapter behavior is preserved.
 - [ ] Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
 
-## 10. Release notes
+## 11. Release notes
 
 Before publishing, summarize:
 
@@ -197,7 +210,7 @@ Before publishing, summarize:
 - [ ] Known limitations.
 - [ ] Upgrade notes for existing users.
 
-## 11. Publish or tag
+## 12. Publish or tag
 
 When everything is ready:
 
