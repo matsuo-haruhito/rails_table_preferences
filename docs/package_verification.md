@@ -10,7 +10,27 @@ bundle exec rake build
 
 This should create a `.gem` file under `pkg/`.
 
-## Inspect package contents
+## Automated verification
+
+Run the package verification task:
+
+```bash
+bundle exec rake package:verify
+```
+
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, or documentation files are missing.
+
+A successful run prints a message like:
+
+```text
+Package verification passed: rails_table_preferences-0.1.0.alpha.gem
+```
+
+If required files are missing, the task prints the missing paths and exits with failure.
+
+## Manual inspection
+
+The automated task is the normal gate. Manual inspection is still useful before tagging a release.
 
 List the packaged files:
 
@@ -29,7 +49,7 @@ find tmp/package_check -maxdepth 4 -type f | sort
 
 ## Required files
 
-Confirm the package includes at least:
+The verification task checks that the package includes at least:
 
 ```text
 app/assets/stylesheets/rails_table_preferences.css
@@ -44,24 +64,28 @@ config/routes.rb
 lib/generators/rails_table_preferences/install/install_generator.rb
 lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb
 lib/generators/rails_table_preferences/install/templates/initializer.rb
-lib/generators/rails_table_preferences/install/templates/demo_controller.rb
-lib/generators/rails_table_preferences/install/templates/demo_index.html.erb
+lib/generators/rails_table_preferences/install/templates/demo/orders_controller.rb
+lib/generators/rails_table_preferences/install/templates/demo/index.html.erb
 lib/generators/rails_table_preferences/javascript/javascript_generator.rb
 lib/generators/rails_table_preferences/stylesheets/stylesheets_generator.rb
 lib/generators/rails_table_preferences/views/views_generator.rb
 lib/tasks/rails_table_preferences.rake
 lib/rails_table_preferences.rb
 lib/rails_table_preferences/export_payload.rb
+lib/rails_table_preferences/package_verifier.rb
 lib/rails_table_preferences/settings_normalizer.rb
 README.md
 CHANGELOG.md
 LICENSE
 docs/index.md
+docs/package_verification.md
 ```
+
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`.
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, rake tasks, or docs usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, rake tasks, changelog, or docs usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
@@ -71,6 +95,7 @@ CI runs:
 bundle exec rspec
 node --check app/javascript/controllers/rails_table_preferences_controller.js
 bundle exec rake build
+bundle exec rake package:verify
 ```
 
 Manual package inspection is still recommended before tagging a release.
