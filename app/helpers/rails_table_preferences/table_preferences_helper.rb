@@ -57,7 +57,7 @@ module RailsTablePreferences
       "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
-    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil)
+    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       ColumnDefinition.new(
         key: key,
         label: label,
@@ -72,7 +72,8 @@ module RailsTablePreferences
         ignored: ignored,
         ignore: ignore,
         filter: filter,
-        sortable: sortable
+        sortable: sortable,
+        sort_param: sort_param
       ).to_h
     end
 
@@ -155,7 +156,8 @@ module RailsTablePreferences
           ignored: column.fetch(:ignored, column.fetch("ignored", false)),
           ignore: column.fetch(:ignore, column.fetch("ignore", nil)),
           filter: column.fetch(:filter, column.fetch("filter", nil)),
-          sortable: column.fetch(:sortable, column.fetch("sortable", nil))
+          sortable: column.fetch(:sortable, column.fetch("sortable", nil)),
+          sort_param: column.fetch(:sort_param, column.fetch("sort_param", nil))
         ).to_h
       else
         table_preferences_column(column)
