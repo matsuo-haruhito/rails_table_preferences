@@ -192,6 +192,44 @@ The key must match the `table_preferences_column` key:
 table_preferences_column(:customer_name, label: "得意先名")
 ```
 
+## Double-click auto-fit does not change the expected width
+
+Symptoms:
+
+- Double-clicking the resize handle changes little or not at all.
+- The fitted width is too small or too large.
+
+Auto-fit measures the cells currently rendered in the browser, not all database rows. On paginated, lazy-loaded, or virtualized tables, it fits the visible page only.
+
+The generated width is clamped by Stimulus values:
+
+- `resizeAutoFitMinWidth`
+- `resizeAutoFitMaxWidth`
+- `resizeAutoFitPadding`
+
+Override those data values on the rendered table/editor wrapper if the host app needs different bounds.
+
+## Long text is clipped, wrapped, or ellipsized differently than expected
+
+Symptoms:
+
+- Text wraps when you expected a single line.
+- Text is clipped without `...`.
+- Text overflows outside the cell.
+
+Use `overflow:` on the column definition:
+
+```ruby
+table_preferences_column(:customer_name, label: "得意先名", default_width: 200, overflow: :ellipsis)
+table_preferences_column(:note, label: "備考", default_width: 320, overflow: :wrap)
+table_preferences_column(:code, label: "コード", default_width: 120, overflow: :clip)
+table_preferences_column(:external_id, label: "外部ID", default_width: 180, overflow: :nowrap)
+```
+
+Supported values are `:ellipsis`/`:truncate`, `:clip`, `:wrap`, and `:nowrap`. `default_truncate:` still enables ellipsis behavior for backward compatibility.
+
+Host application CSS can still override inline or class-based behavior. Check local table styles if the configured overflow mode is not reflected.
+
 ## A column is missing from the editor
 
 Symptoms:
