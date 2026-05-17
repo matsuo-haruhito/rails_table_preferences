@@ -34,7 +34,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - Support saved filter and sort UI state without becoming a query builder.
 - Provide Rails helpers, controller helpers, a small JSON API, and a bundled Stimulus controller.
 - Keep compatibility with existing `ColumnAdjustment`-style implementations.
-- Allow host applications to customize ERB, CSS, JavaScript, and locales.
+- Allow host applications to customize ERB, CSS, JavaScript, and column-label resolution.
 - Integrate with existing controller params, Ransack, host application search objects, and export code.
 
 ## Supported versions
@@ -135,6 +135,7 @@ Included in v0.1 scope:
 - Column group metadata and grouping helper
 - Multiple presets and default presets
 - Ignored columns
+- Configurable column labels through explicit labels, explicit i18n keys, database column comments, and optional locale/humanize fallbacks
 - Filter metadata and filter panel UI foundation
 - Sort metadata and sortable header click UI
 - Controller params and Ransack adapters
@@ -181,7 +182,7 @@ Included scope:
 - Apply, Save, Save as new, Delete, and Reset actions
 - Read-only handling for non-owner presets in the normal editor path
 - Ignored columns
-- Column labels through explicit labels and host app locales
+- Configurable column labels through explicit labels, explicit i18n keys, database column comments, and optional locale/humanize fallbacks
 - Filter metadata and saved filter UI state
 - Sort metadata and sortable header click UI
 - Plain controller params adapter
@@ -315,6 +316,8 @@ Default configuration:
 RailsTablePreferences.configure do |config|
   config.table_name = "table_preferences"
   config.owner_model = :users
+  config.label_resolution = %i[label i18n_key column_comment]
+  config.unresolved_label_behavior = :hide
   config.parent_controller_class_name = "ApplicationController"
   config.current_user_method = :current_user
   config.scope_context_method = nil
@@ -370,25 +373,39 @@ The first implementation assumes a primary application database. Applications wi
 
 ## Column definitions
 
-Column labels are resolved in this order:
+Column labels are the user-facing names shown in the preference editor. By default they are resolved in this order:
 
 1. Explicit `label:`
 2. Explicit `i18n_key:`
-3. `activerecord.attributes.<model_name>.<column>`
-4. `activemodel.attributes.<model_name>.<column>`
-5. `attributes.<column>`
-6. `column.to_s.humanize`
+3. Database column comment from `model.columns_hash[key].comment`
+
+If no label can be resolved, the column is hidden from Rails Table Preferences, the same as `ignored: true`. This prevents columns that have not been marked as user-facing from appearing in the editor.
 
 Examples:
 
 ```ruby
 columns = [
-  table_preferences_column(:order_no, model_name: :order, fixed: true, default_width: 120),
-  table_preferences_column(:customer_code, model_name: :order, group: { key: :customer, label: "得意先情報" }),
+  table_preferences_column(:order_no, label: "受注番号", fixed: true, default_width: 120),
+  table_preferences_column(:customer_code, model: Order, group: { key: :customer, label: "得意先情報" }),
   table_preferences_column(:customer_name, model: Order, group: { key: :customer, label: "得意先情報" }),
   table_preferences_column(:delivery_date, i18n_key: "orders.index.columns.delivery_date", sortable: true),
   table_preferences_column(:memo, label: "備考", filter: { type: :text, param: :memo })
 ]
+```
+
+Host apps that want Rails-style attribute locale keys can opt in by adding the locale rules:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[
+    label
+    i18n_key
+    column_comment
+    activerecord_attribute_i18n
+    activemodel_attribute_i18n
+    attribute_i18n
+  ]
+end
 ```
 
 Host app locale example:
@@ -406,15 +423,25 @@ ja:
         delivery_date: 納品日
 ```
 
+If you want unresolved columns to use the old permissive fallback style, add `:humanize` or set `unresolved_label_behavior`:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[label i18n_key column_comment humanize]
+  # or:
+  config.unresolved_label_behavior = :humanize
+end
+```
+
 ## Ignored columns
 
 Use ignored columns for fields that should not appear in the user-facing column editor, even if the table or saved settings contain them.
 
 ```ruby
 columns = [
-  table_preferences_column(:customer_code, model_name: :order),
-  table_preferences_column(:internal_cost, model_name: :order, ignored: true),
-  table_preferences_column(:secret_note, model_name: :order, ignore: true)
+  table_preferences_column(:customer_code, label: "得意先コード"),
+  table_preferences_column(:internal_cost, label: "内部原価", ignored: true),
+  table_preferences_column(:secret_note, label: "秘密メモ", ignore: true)
 ]
 ```
 
@@ -427,6 +454,8 @@ Or pass a render-time blacklist:
   ignored_columns: [:internal_cost, :secret_note]
 ) %>
 ```
+
+Columns whose labels cannot be resolved are also removed from the editor and settings payloads by default.
 
 Ignored columns are removed from `columns_json` and are also filtered out of the initial `settings_json`. This prevents old saved preferences from reintroducing a column that the host application has since hidden from users.
 
@@ -446,11 +475,13 @@ Example column metadata:
 columns = [
   table_preferences_column(
     :customer_name,
+    label: "得意先名",
     filter: { type: :text, param: :search_word },
     sortable: true
   ),
   table_preferences_column(
     :delivery_date,
+    label: "納品日",
     filter: { type: :date, from_param: :from_date, to_param: :to_date },
     sortable: true
   )
@@ -635,9 +666,9 @@ Current helper direction:
 
 ```erb
 <% columns = [
-  table_preferences_column(:order_no, model_name: :order, default_order: 10, default_width: 120, fixed: true),
-  table_preferences_column(:customer_code, model_name: :order, default_order: 20, default_width: 120, group: { key: :customer, label: "Customer" }),
-  table_preferences_column(:customer_name, model_name: :order, default_order: 30, default_width: 240, default_truncate: 30, group: { key: :customer, label: "Customer" })
+  table_preferences_column(:order_no, label: "Order No.", default_order: 10, default_width: 120, fixed: true),
+  table_preferences_column(:customer_code, label: "Customer Code", default_order: 20, default_width: 120, group: { key: :customer, label: "Customer" }),
+  table_preferences_column(:customer_name, label: "Customer Name", default_order: 30, default_width: 240, default_truncate: 30, group: { key: :customer, label: "Customer" })
 ] %>
 
 <%= table_preferences_editor(table_key: :orders, columns: columns, title: "Order table settings") %>
