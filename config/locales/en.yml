@@ -1,0 +1,16 @@
+en:
+  rails_table_preferences:
+    editor:
+      preset_select: Saved presets
+      preset: Preset
+      default_preset: Use as default
+      apply: Apply
+      save: Save
+      save_as_new: Save as new
+      delete: Delete
+      reset: Reset
+      order: Order
+      width: Width
+      truncate: Truncate
+      drag_to_reorder: Drag to reorder
+      resize_column: Resize column
