@@ -187,6 +187,107 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
     end
   end
 
+  describe "#table_preferences_params" do
+    it "returns controller params adapter output" do
+      params = helper.table_preferences_params(
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "山田" },
+            status: { operator: :in, values: %w[未出荷 出荷済] }
+          },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [
+          { key: :customer_name, filter: { param: :search_word } },
+          { key: :status, filter: { values_param: :statuses } },
+          { key: :delivery_date, sort_param: :delivery_on }
+        ]
+      )
+
+      expect(params).to eq(
+        "search_word" => "山田",
+        "statuses" => %w[未出荷 出荷済],
+        "sort" => "-delivery_on"
+      )
+    end
+
+    it "returns Ransack adapter output" do
+      params = helper.table_preferences_params(
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "山田" } },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [:customer_name, :delivery_date],
+        adapter: :ransack
+      )
+
+      expect(params).to eq(
+        "customer_name_cont" => "山田",
+        "s" => ["delivery_date desc"]
+      )
+    end
+
+    it "filters ignored columns before converting params" do
+      params = helper.table_preferences_params(
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "山田" },
+            secret_note: { operator: :contains, value: "hidden" }
+          },
+          sorts: [
+            { key: :secret_note, direction: :desc }
+          ]
+        },
+        columns: [
+          { key: :customer_name, filter: { param: :search_word } },
+          { key: :secret_note, filter: true, sortable: true }
+        ],
+        ignored_columns: [:secret_note]
+      )
+
+      expect(params).to eq("search_word" => "山田")
+    end
+  end
+
+  describe "#table_preferences_hidden_fields" do
+    it "renders hidden fields for scalar, array, and sort params" do
+      html = helper.table_preferences_hidden_fields(
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "山田" },
+            status: { operator: :in, values: %w[未出荷 出荷済] }
+          },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [
+          { key: :customer_name, filter: { param: :search_word } },
+          { key: :status, filter: { values_param: :statuses } },
+          { key: :delivery_date, sort_param: :delivery_on }
+        ]
+      )
+
+      expect(html).to include('type="hidden" name="search_word" value="山田"')
+      expect(html).to include('type="hidden" name="statuses[]" value="未出荷"')
+      expect(html).to include('type="hidden" name="statuses[]" value="出荷済"')
+      expect(html).to include('type="hidden" name="sort" value="-delivery_on"')
+    end
+
+    it "renders namespaced hidden fields" do
+      html = helper.table_preferences_hidden_fields(
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "山田" } },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [:customer_name, :delivery_date],
+        adapter: :ransack,
+        namespace: :q
+      )
+
+      expect(html).to include('type="hidden" name="q[customer_name_cont]" value="山田"')
+      expect(html).to include('type="hidden" name="q[s][]" value="delivery_date desc"')
+    end
+  end
+
   describe "#table_preferences_editor" do
     it "renders an editor container with action buttons" do
       html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
