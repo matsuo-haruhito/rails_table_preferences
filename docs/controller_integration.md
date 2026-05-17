@@ -8,13 +8,20 @@ The helpers do not execute searches. They resolve saved preferences and convert 
 
 The engine includes `RailsTablePreferences::Controller` into `ActionController::Base`.
 
-Available helpers:
+Available controller helpers:
 
 ```ruby
 rails_table_preference(table_key:, name: nil, owner: nil)
 rails_table_preference_settings(table_key:, name: nil, owner: nil, fallback: {})
 rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, adapter: :controller_params, sort_param: "sort")
 rails_table_preference_merged_params(params_source = params, **options)
+```
+
+Available view helpers:
+
+```ruby
+table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort")
+table_preferences_hidden_fields(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
 ```
 
 ## Preference resolution
@@ -100,6 +107,52 @@ preference_params = rails_table_preference_params(
 )
 ```
 
+## Hidden fields for existing search forms
+
+Use `table_preferences_hidden_fields` when a normal search form should submit saved preference filters/sorts alongside user-entered search params.
+
+```erb
+<%= form_with url: warehouse_stocks_path, method: :get do %>
+  <%= text_field_tag :search_word, params[:search_word] %>
+
+  <%= table_preferences_hidden_fields(
+    settings: @table_preference_settings,
+    columns: columns
+  ) %>
+
+  <%= submit_tag "Search" %>
+<% end %>
+```
+
+This renders ordinary hidden fields:
+
+```html
+<input type="hidden" name="search_word" value="山田">
+<input type="hidden" name="statuses[]" value="未出荷">
+<input type="hidden" name="statuses[]" value="出荷済">
+<input type="hidden" name="sort" value="-delivery_date">
+```
+
+Use `namespace:` for nested params such as Ransack's `q`:
+
+```erb
+<%= table_preferences_hidden_fields(
+  settings: @table_preference_settings,
+  columns: columns,
+  adapter: :ransack,
+  namespace: :q
+) %>
+```
+
+Example output:
+
+```html
+<input type="hidden" name="q[customer_name_cont]" value="山田">
+<input type="hidden" name="q[s][]" value="delivery_date desc">
+```
+
+`table_preferences_params` returns the same converted params as a Ruby hash when hidden fields are not needed.
+
 ## Merging helper
 
 Use `rails_table_preference_merged_params` when the action simply needs a params-like hash with saved preference params overlaid:
@@ -157,6 +210,7 @@ Rails Table Preferences is responsible for:
 - resolving the saved preference
 - normalizing settings
 - converting saved filter/sort settings to params
+- rendering optional hidden fields for existing forms
 
 The host application remains responsible for:
 
