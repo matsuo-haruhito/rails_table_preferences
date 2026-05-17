@@ -1,0 +1,16 @@
+ja:
+  rails_table_preferences:
+    editor:
+      preset_select: 保存済み設定
+      preset: 設定名
+      default_preset: 標準設定にする
+      apply: 適用
+      save: 保存
+      save_as_new: 別名で保存
+      delete: 削除
+      reset: リセット
+      order: 表示順
+      width: 列幅
+      truncate: 省略文字数
+      drag_to_reorder: ドラッグして並び替え
+      resize_column: 列幅を変更
