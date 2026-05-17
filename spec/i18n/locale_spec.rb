@@ -21,6 +21,12 @@ RSpec.describe "locale files" do
       expect(I18n.t("rails_table_preferences.editor.truncate")).to eq("省略文字数")
       expect(I18n.t("rails_table_preferences.editor.drag_to_reorder")).to eq("ドラッグして並び替え")
       expect(I18n.t("rails_table_preferences.editor.resize_column")).to eq("列幅を変更")
+      expect(I18n.t("rails_table_preferences.editor.filter")).to eq("絞り込み")
+      expect(I18n.t("rails_table_preferences.editor.filter_operator")).to eq("条件")
+      expect(I18n.t("rails_table_preferences.editor.filter_value")).to eq("値")
+      expect(I18n.t("rails_table_preferences.editor.filter_from")).to eq("開始")
+      expect(I18n.t("rails_table_preferences.editor.filter_to")).to eq("終了")
+      expect(I18n.t("rails_table_preferences.editor.filter_clear")).to eq("クリア")
     end
   end
 
@@ -39,6 +45,12 @@ RSpec.describe "locale files" do
       expect(I18n.t("rails_table_preferences.editor.truncate")).to eq("Truncate")
       expect(I18n.t("rails_table_preferences.editor.drag_to_reorder")).to eq("Drag to reorder")
       expect(I18n.t("rails_table_preferences.editor.resize_column")).to eq("Resize column")
+      expect(I18n.t("rails_table_preferences.editor.filter")).to eq("Filter")
+      expect(I18n.t("rails_table_preferences.editor.filter_operator")).to eq("Operator")
+      expect(I18n.t("rails_table_preferences.editor.filter_value")).to eq("Value")
+      expect(I18n.t("rails_table_preferences.editor.filter_from")).to eq("From")
+      expect(I18n.t("rails_table_preferences.editor.filter_to")).to eq("To")
+      expect(I18n.t("rails_table_preferences.editor.filter_clear")).to eq("Clear")
     end
   end
 end
