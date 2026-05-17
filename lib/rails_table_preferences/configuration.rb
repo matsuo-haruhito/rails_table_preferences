@@ -44,7 +44,9 @@ module RailsTablePreferences
                   :current_user_method,
                   :scope_context_method,
                   :mount_path,
-                  :editor_partial
+                  :editor_partial,
+                  :resource_table_partial,
+                  :tree_resource_table_partial
 
     attr_reader :user_class_name,
                 :user_foreign_key,
@@ -61,6 +63,8 @@ module RailsTablePreferences
       @scope_context_method = nil
       @mount_path = "/rails_table_preferences"
       @editor_partial = "rails_table_preferences/editor"
+      @resource_table_partial = "rails_table_preferences/resource_table"
+      @tree_resource_table_partial = "rails_table_preferences/tree_resource_table"
       @label_resolution = %i[label i18n_key column_comment]
       @unresolved_label_behavior = :hide
     end
