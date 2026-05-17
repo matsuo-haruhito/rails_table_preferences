@@ -70,13 +70,52 @@ Define the table columns in the controller, helper, or another view-friendly pla
 
 ```ruby
 @table_columns = [
-  table_preferences_column(:order_no, model_name: :order, default_width: 120),
-  table_preferences_column(:customer_name, model_name: :order, default_width: 240, default_truncate: 30),
-  table_preferences_column(:delivery_date, model_name: :order, default_width: 140)
+  table_preferences_column(:order_no, label: "受注番号", default_width: 120),
+  table_preferences_column(:customer_name, label: "得意先名", default_width: 240, default_truncate: 30),
+  table_preferences_column(:delivery_date, label: "納品日", default_width: 140)
 ]
 ```
 
-For Japanese labels, add host app locale entries:
+Column labels are the user-facing names shown in the preference editor. By default, Rails Table Preferences resolves them in this order:
+
+1. `label:` passed to `table_preferences_column`
+2. `i18n_key:` passed to `table_preferences_column`
+3. database column comment from `model.columns_hash[key].comment`
+
+If no label can be resolved, the column is hidden from Rails Table Preferences, the same as `ignored: true`. This avoids exposing columns that have not been marked as user-facing.
+
+You can use database comments by passing an Active Record model class:
+
+```ruby
+@table_columns = [
+  table_preferences_column(:order_no, model: Order, default_width: 120),
+  table_preferences_column(:customer_name, model: Order, default_width: 240, default_truncate: 30),
+  table_preferences_column(:delivery_date, model: Order, default_width: 140)
+]
+```
+
+You can also resolve one column through a custom translation key:
+
+```ruby
+table_preferences_column(:customer_name, i18n_key: "orders.index.columns.customer_name")
+```
+
+For host apps that want Rails-style attribute locale keys, add those rules in the initializer:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[
+    label
+    i18n_key
+    column_comment
+    activerecord_attribute_i18n
+    activemodel_attribute_i18n
+    attribute_i18n
+  ]
+end
+```
+
+Then add host app locale entries:
 
 ```yaml
 ja:
@@ -88,10 +127,14 @@ ja:
         delivery_date: 納品日
 ```
 
-You can also pass labels explicitly:
+If you prefer the old permissive fallback style, include `:humanize` or set the unresolved behavior:
 
 ```ruby
-table_preferences_column(:customer_name, label: "得意先名")
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[label i18n_key column_comment humanize]
+  # or:
+  config.unresolved_label_behavior = :humanize
+end
 ```
 
 ## 5. Render the editor and table
@@ -137,14 +180,14 @@ Filters and sorts are saved as UI state. The host application is still responsib
 @table_columns = [
   table_preferences_column(
     :customer_name,
-    model_name: :order,
+    label: "得意先名",
     filter: { type: :text, param: :search_word },
     sortable: true,
     default_width: 240
   ),
   table_preferences_column(
     :delivery_date,
-    model_name: :order,
+    label: "納品日",
     filter: { type: :date, from_param: :from_date, to_param: :to_date },
     sortable: true,
     default_width: 140
@@ -181,7 +224,7 @@ Existing search form integration example:
 Use `ignored: true` for columns that should not appear in the user-facing editor:
 
 ```ruby
-table_preferences_column(:internal_cost, model_name: :order, ignored: true)
+table_preferences_column(:internal_cost, label: "Internal Cost", ignored: true)
 ```
 
 Or pass a blacklist when rendering:
@@ -193,6 +236,8 @@ Or pass a blacklist when rendering:
   ignored_columns: [:internal_cost]
 ) %>
 ```
+
+Columns whose labels cannot be resolved are also treated as ignored by default.
 
 Ignored columns are removed from Rails Table Preferences settings, but the host application must also avoid rendering sensitive data in HTML.
 
