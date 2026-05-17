@@ -8,7 +8,8 @@
   tree: tree,
   root_items: tree.root_items,
   row_partial: "rails_table_preferences/tree_resource_table_row",
-  ui_config: ui_config
+  ui_config: ui_config,
+  row_locals: { table_state: table_state }
 ) %>
 
 <%= table_preferences_editor(
@@ -35,6 +36,6 @@
     </tr>
   </thead>
   <tbody>
-    <%= tree_view_rows(render_state, locals: { table_state: table_state }) %>
+    <%= tree_view_rows(render_state) %>
   </tbody>
 <% end %>
