@@ -36,7 +36,9 @@ ActiveRecord::Schema.define do
   end
 
   create_table :table_preferences, force: true do |t|
-    t.references :user, null: false
+    t.references :user, null: true
+    t.string :scope_type, null: false, default: "owner"
+    t.string :scope_key, null: false, default: ""
     t.string :table_key, null: false
     t.string :name, null: false, default: "default"
     t.json :settings, null: false
@@ -44,7 +46,7 @@ ActiveRecord::Schema.define do
     t.timestamps
   end
 
-  add_index :table_preferences, [:user_id, :table_key, :name], unique: true
+  add_index :table_preferences, [:scope_type, :scope_key, :user_id, :table_key, :name], unique: true, name: "idx_table_preferences_scope_table_name"
 end
 
 class User < ActiveRecord::Base
