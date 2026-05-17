@@ -2,7 +2,7 @@
 
 Use this checklist before asking host application users to try Rails Table Preferences in a real workflow.
 
-The automated suite covers Ruby behavior, generator output, request behavior, helper output, adapters, and source-level JavaScript invariants. Manual QA focuses on browser behavior, host app integration, and visual/UX issues that are difficult to verify with the current test suite.
+The automated suite covers Ruby behavior, generator output, request behavior, helper output, adapters, and source-level JavaScript invariants. Manual QA focuses on browser behavior, host app integration, accessibility, and visual/UX issues that are difficult to verify with the current test suite.
 
 ## 1. Environment and installation
 
@@ -59,7 +59,20 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Delete a non-default preset.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
 
-## 6. API and network behavior
+## 6. Scoped preset behavior
+
+- [ ] Create or seed a shared preset and confirm it appears in the preset selector.
+- [ ] Create or seed a role preset and confirm it appears only for matching role context.
+- [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
+- [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
+- [ ] Confirm owner default is preferred over role, organization, and shared defaults.
+- [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
+- [ ] Confirm shared presets are selectable by normal users.
+- [ ] Confirm shared/role/organization presets are not deleted from the normal user-facing editor.
+- [ ] Confirm saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
+- [ ] Confirm host app authorization protects any admin UI for shared/role/organization preset management.
+
+## 7. API and network behavior
 
 Use browser devtools while saving/loading presets.
 
@@ -72,7 +85,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm authenticated requests do not redirect to the login page.
 - [ ] Confirm API failures show enough browser/log detail to diagnose.
 
-## 7. Filter UI behavior
+## 8. Filter UI behavior
 
 - [ ] Add a text filter column and confirm the filter button appears.
 - [ ] Open the filter panel.
@@ -86,7 +99,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm filter panel layering is not clipped by the surrounding layout.
 - [ ] Confirm opening one filter panel closes or does not visually conflict with another.
 
-## 8. Sort UI behavior
+## 9. Sort UI behavior
 
 - [ ] Add `sortable: true` to a column.
 - [ ] Click the header and confirm ascending sort state is shown.
@@ -97,7 +110,31 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm dragging/resizing a header does not accidentally toggle sort.
 - [ ] Confirm `aria-sort` changes appropriately.
 
-## 9. Controller params integration
+## 10. Fixed columns and column groups
+
+- [ ] Add `fixed: true` or `pinned: true` to a column.
+- [ ] Confirm pinned cells receive pinned/fixed class and data hooks.
+- [ ] Confirm the pinned column remains visible while horizontally scrolling the table container.
+- [ ] Confirm multiple pinned columns do not overlap in the tested layout.
+- [ ] Resize a pinned column and confirm pinned offsets are still correct.
+- [ ] Reorder columns and confirm pinned offsets are recalculated.
+- [ ] Hide a pinned column and confirm later pinned columns shift correctly.
+- [ ] Add `group:` metadata to columns.
+- [ ] Use `table_preferences_column_groups` in grouped header markup and confirm `colspan` values are correct.
+- [ ] Confirm leaf header cells still have `data-rails-table-preferences-column-key`.
+
+## 11. Export integration
+
+- [ ] Use `rails_table_preference_export_payload` in a controller.
+- [ ] Confirm hidden columns are excluded by default.
+- [ ] Confirm `include_hidden: true` includes hidden columns when intended.
+- [ ] Confirm exported column order follows saved display order.
+- [ ] Confirm exported headers use the expected labels.
+- [ ] Confirm `export_key` is used when display key and export method differ.
+- [ ] Confirm group metadata is available for grouped CSV/Excel headers.
+- [ ] Confirm host app authorization decides whether sensitive values are exportable.
+
+## 12. Controller params integration
 
 - [ ] Use `rails_table_preference_params` in a controller.
 - [ ] Confirm saved text filter state becomes the expected host app param.
@@ -107,7 +144,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm `sort_param:` maps a display column key to the host app sort key.
 - [ ] Confirm the host app search layer executes the final merged params.
 
-## 10. Existing search form integration
+## 13. Existing search form integration
 
 - [ ] Add `table_preferences_hidden_fields` to an existing search form.
 - [ ] Confirm hidden fields are generated for saved filters.
@@ -116,7 +153,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm normal user-entered search params still work.
 - [ ] Confirm saved preference params and user-entered params merge in the intended precedence order.
 
-## 11. Ransack integration
+## 14. Ransack integration
 
 - [ ] Use `adapter: :ransack` in a controller.
 - [ ] Confirm text filters become expected Ransack predicates.
@@ -125,7 +162,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Use `table_preferences_hidden_fields` with `namespace: :q`.
 - [ ] Confirm generated hidden fields use `q[...]` names.
 
-## 12. Ignored columns and sensitive fields
+## 15. Ignored columns and sensitive fields
 
 - [ ] Mark a column with `ignored: true` and confirm it does not appear in the editor.
 - [ ] Pass `ignored_columns:` and confirm matching columns do not appear in the editor.
@@ -133,7 +170,21 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm the host application does not render sensitive ignored columns in HTML.
 - [ ] Confirm authorization/query selection still protects sensitive values server-side.
 
-## 13. Customization
+## 16. Accessibility baseline
+
+- [ ] Confirm all editor controls can receive keyboard focus.
+- [ ] Confirm focus order is understandable.
+- [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
+- [ ] Confirm filter buttons expose a useful accessible label.
+- [ ] Confirm active filter buttons update `aria-pressed`.
+- [ ] Confirm sortable headers update `aria-sort`.
+- [ ] Confirm resize handles expose a useful accessible label.
+- [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
+- [ ] Confirm read-only scoped presets disable destructive/default controls.
+- [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs.
+- [ ] Confirm custom host app colors meet the application's contrast requirements.
+
+## 17. Customization
 
 - [ ] Run `bin/rails generate rails_table_preferences:views`.
 - [ ] Edit the copied ERB partial and confirm the app uses it.
@@ -144,7 +195,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm host app can skip JavaScript copying when providing its own controller.
 - [ ] Confirm host app can skip stylesheet copying when providing its own CSS.
 
-## 14. Browser and layout checks
+## 18. Browser and layout checks
 
 - [ ] Check the screen in Chrome or Edge.
 - [ ] Check the screen at a narrow desktop width.
@@ -155,7 +206,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm column width controls remain usable.
 - [ ] Confirm table operation hit areas do not interfere with normal table links/buttons.
 
-## 15. Regression checklist from early implementation issues
+## 19. Regression checklist from early implementation issues
 
 - [ ] Column width changes apply to the table, not to editor cards.
 - [ ] Editor row card widths do not unexpectedly mirror table column widths.
@@ -163,7 +214,7 @@ Use browser devtools while saving/loading presets.
 - [ ] The settings dialog/editor remains visible after CSS changes.
 - [ ] Table drag, resize, filter, and sort interactions do not block each other.
 - [ ] Saved filter/sort state survives editor apply operations.
-- [ ] Current column metadata overrides stale saved metadata for labels, filters, and sortable state.
+- [ ] Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
 
 ## Sign-off
 
