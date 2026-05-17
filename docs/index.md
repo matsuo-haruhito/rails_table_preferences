@@ -5,6 +5,7 @@ This directory contains focused documentation for Rails Table Preferences.
 ## Start here
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
+- [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
@@ -22,11 +23,12 @@ This directory contains focused documentation for Rails Table Preferences.
 3. Define table columns with `table_preferences_column`.
 4. Render `table_preferences_editor` and `table_preferences_table_tag`.
 5. Add `filter:` and `sortable: true` metadata where needed.
-6. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-7. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-8. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
-9. Verify the feature in a sandbox Rails app.
-10. Run the manual QA checklist before asking real users to try the feature.
+6. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, and customization options.
+7. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+8. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+9. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
+10. Verify the feature in a sandbox Rails app.
+11. Run the manual QA checklist before asking real users to try the feature.
 
 ## Responsibility boundary
 
