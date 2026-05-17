@@ -21,5 +21,7 @@ RSpec.describe RailsTablePreferences::Generators::StylesheetsGenerator, type: :g
     expect(stylesheet_path.read).to include(".rails-table-preferences-editor__row")
     expect(stylesheet_path.read).to include("grid-template-columns")
     expect(stylesheet_path.read).to include("text-overflow: ellipsis")
+    expect(stylesheet_path.read).to include(".rails-table-preferences-filter-button")
+    expect(stylesheet_path.read).to include(".rails-table-preferences-filter-panel")
   end
 end
