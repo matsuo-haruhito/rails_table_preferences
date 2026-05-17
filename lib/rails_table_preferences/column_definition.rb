@@ -9,6 +9,7 @@ module RailsTablePreferences
                 :default_width,
                 :default_truncate,
                 :pinned,
+                :group,
                 :ignored,
                 :filter,
                 :sortable,
@@ -17,7 +18,7 @@ module RailsTablePreferences
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       @key = key.to_s
       @model = model
       @model_name = model_name
@@ -27,7 +28,8 @@ module RailsTablePreferences
       @default_order = integer_or_nil(default_order)
       @default_width = integer_or_nil(default_width)
       @default_truncate = integer_or_nil(default_truncate)
-      @pinned = ActiveModel::Type::Boolean.new.cast(pinned)
+      @pinned = ActiveModel::Type::Boolean.new.cast(fixed.nil? ? pinned : fixed)
+      @group = normalize_group(group)
       @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore)
       @filter = normalize_filter(filter)
       @sortable = normalize_sortable(sortable)
@@ -43,6 +45,7 @@ module RailsTablePreferences
         "width" => default_width,
         "truncate" => default_truncate,
         "pinned" => pinned,
+        "group" => group,
         "ignored" => ignored,
         "filter" => filter,
         "sortable" => sortable,
@@ -83,6 +86,20 @@ module RailsTablePreferences
         model.model_name.i18n_key.to_s
       elsif model.present?
         model.to_s.underscore
+      end
+    end
+
+    def normalize_group(value)
+      case value
+      when nil
+        nil
+      when Hash
+        value.deep_stringify_keys.compact.tap do |attributes|
+          attributes["key"] = attributes["key"].to_s if attributes["key"].present?
+          attributes["label"] = attributes["label"].to_s if attributes["label"].present?
+        end
+      else
+        { "key" => value.to_s, "label" => value.to_s }
       end
     end
 
