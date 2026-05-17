@@ -1,6 +1,8 @@
 # JavaScript controller notes
 
-The bundled Stimulus controller is intentionally copy-based. Host applications can edit the copied file or replace it with another controller registered as `rails-table-preferences`.
+The bundled Stimulus controller is intentionally small and replaceable. Host applications can use the packaged entrypoint, edit the copied file, or replace it with another controller registered as `rails-table-preferences`.
+
+For import paths and Vite / `app/frontend` setup, see [JavaScript entrypoints](javascript_entrypoints.md).
 
 ## Responsibilities
 
@@ -76,7 +78,7 @@ Use the Ruby helpers and adapters for that part:
 
 ## Source-level safety specs
 
-The project includes source-level specs for the Stimulus controller. These are not a replacement for browser/system specs, but they guard important invariants while browser tests are not yet being run.
+The project includes source-level specs for the Stimulus controller and package entrypoints. These are not a replacement for browser/system specs, but they guard important invariants while browser tests are not yet being run.
 
 Important invariants include:
 
@@ -86,3 +88,4 @@ Important invariants include:
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
 - document listeners and detached filter panels are cleaned up
+- `rails_table_preferences/controller` continues to export the bundled controller for Vite and other JS bundlers
