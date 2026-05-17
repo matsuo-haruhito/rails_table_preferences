@@ -71,7 +71,7 @@ Define the table columns in the controller, helper, or another view-friendly pla
 ```ruby
 @table_columns = [
   table_preferences_column(:order_no, label: "受注番号", default_width: 120),
-  table_preferences_column(:customer_name, label: "得意先名", default_width: 240, default_truncate: 30),
+  table_preferences_column(:customer_name, label: "得意先名", default_width: 240, overflow: :ellipsis),
   table_preferences_column(:delivery_date, label: "納品日", default_width: 140)
 ]
 ```
@@ -89,7 +89,7 @@ You can use database comments by passing an Active Record model class:
 ```ruby
 @table_columns = [
   table_preferences_column(:order_no, model: Order, default_width: 120),
-  table_preferences_column(:customer_name, model: Order, default_width: 240, default_truncate: 30),
+  table_preferences_column(:customer_name, model: Order, default_width: 240, overflow: :ellipsis),
   table_preferences_column(:delivery_date, model: Order, default_width: 140)
 ]
 ```
@@ -172,7 +172,30 @@ end
 
 The `data-rails-table-preferences-column-key` values must match the keys passed to `table_preferences_column`.
 
-## 6. Add filter and sort metadata when needed
+Users can drag resize handles to change widths. Double-clicking a resize handle auto-fits the column to the currently rendered cells, similar to spreadsheet applications. The resulting width is stored as the normal column `width` setting when the preference is saved.
+
+## 6. Configure overflow behavior when needed
+
+Use `overflow:` to control what happens when text is wider than the configured column width:
+
+```ruby
+@table_columns = [
+  table_preferences_column(:customer_name, label: "得意先名", default_width: 200, overflow: :ellipsis),
+  table_preferences_column(:note, label: "備考", default_width: 320, overflow: :wrap),
+  table_preferences_column(:code, label: "コード", default_width: 120, overflow: :clip)
+]
+```
+
+Supported values:
+
+- `:ellipsis` or `:truncate`: single-line hidden overflow with `...`
+- `:clip`: single-line hidden overflow without `...`
+- `:wrap`: multi-line wrapping
+- `:nowrap`: single-line overflow without clipping
+
+`default_truncate:` remains available as a backward-compatible way to enable ellipsis behavior.
+
+## 7. Add filter and sort metadata when needed
 
 Filters and sorts are saved as UI state. The host application is still responsible for executing database searches.
 
@@ -183,7 +206,8 @@ Filters and sorts are saved as UI state. The host application is still responsib
     label: "得意先名",
     filter: { type: :text, param: :search_word },
     sortable: true,
-    default_width: 240
+    default_width: 240,
+    overflow: :ellipsis
   ),
   table_preferences_column(
     :delivery_date,
@@ -219,7 +243,7 @@ Existing search form integration example:
 ) %>
 ```
 
-## 7. Hide columns from the preference UI
+## 8. Hide columns from the preference UI
 
 Use `ignored: true` for columns that should not appear in the user-facing editor:
 
