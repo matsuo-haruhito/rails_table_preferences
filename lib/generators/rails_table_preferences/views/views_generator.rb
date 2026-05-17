@@ -10,7 +10,7 @@ module RailsTablePreferences
       desc "Copies Rails Table Preferences view templates into the host application for customization."
 
       def copy_editor_partial
-        template "_editor.html.erb", "app/views/rails_table_preferences/_editor.html.erb"
+        copy_file "_editor.html.erb", "app/views/rails_table_preferences/_editor.html.erb"
       end
     end
   end
