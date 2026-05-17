@@ -1,0 +1,3 @@
+import RailsTablePreferencesController from "../controllers/rails_table_preferences_controller"
+
+export default RailsTablePreferencesController

@@ -98,6 +98,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(source).to include("mount RailsTablePreferences::Engine")
     expect(source).to include("rails_table_preferences.css")
     expect(source).to include("Stimulus controller")
+    expect(source).to include("rails_table_preferences/controller")
     expect(source).to include("with_demo")
     expect(source).to include("rails_table_preferences_demo/orders#index")
   end

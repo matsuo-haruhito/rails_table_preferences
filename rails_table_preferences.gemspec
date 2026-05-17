@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
       "{app,config,docs,lib}/**/*",
       "CHANGELOG.md",
       "LICENSE",
+      "package.json",
       "README.md"
     ].select { |path| File.file?(path) }
   end

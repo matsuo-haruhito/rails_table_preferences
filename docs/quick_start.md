@@ -47,6 +47,26 @@ Run the migration:
 bin/rails db:migrate
 ```
 
+### Vite / app/frontend entrypoint registration
+
+When your app uses `app/frontend/entrypoints/application.js` instead of the default `stimulus-rails` controller manifest, register the controller explicitly from the gem entrypoint:
+
+```js
+import { Application } from "@hotwired/stimulus"
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+
+const application = Application.start()
+application.register("rails-table-preferences", RailsTablePreferencesController)
+```
+
+The `rails_table_preferences` package also exports the controller as a named export:
+
+```js
+import { RailsTablePreferencesController } from "rails_table_preferences"
+```
+
+The generator still copies `app/javascript/controllers/rails_table_preferences_controller.js` for Rails apps that rely on `stimulus-rails` default manifests. Vite apps can use the package entrypoint above to avoid depending on that copied path from `app/frontend`.
+
 ## 3. Mount the engine
 
 Add the JSON API route used by the bundled editor:
