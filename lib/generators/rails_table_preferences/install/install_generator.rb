@@ -53,6 +53,28 @@ module RailsTablePreferences
         invoke "rails_table_preferences:stylesheets"
       end
 
+      def show_post_install_message
+        say "\nRails Table Preferences installed.", :green
+        say "\nNext steps:"
+        say "  1. Run: bin/rails db:migrate"
+        say "  2. Mount the engine in config/routes.rb:"
+        say "       mount RailsTablePreferences::Engine, at: \"/rails_table_preferences\""
+
+        unless options[:skip_stylesheets]
+          say "  3. Ensure app/assets/stylesheets/rails_table_preferences.css is loaded by your application stylesheet."
+          say "     For Sprockets, add this if needed:"
+          say "       *= require rails_table_preferences"
+          say "     For Sass/CSS bundling, import the copied file from your application stylesheet."
+        end
+
+        unless options[:skip_javascript]
+          say "  4. Ensure the Stimulus controller is registered."
+          say "     stimulus-rails default manifests usually register app/javascript/controllers/*_controller.js automatically."
+        end
+
+        say ""
+      end
+
       def owner_class_name
         owner_model.classify
       end
