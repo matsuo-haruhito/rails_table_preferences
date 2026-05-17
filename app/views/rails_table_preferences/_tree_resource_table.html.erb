@@ -1,0 +1,40 @@
+<% unless defined?(TreeView::Tree) %>
+  <% raise "tree_resource_table_for requires the tree_view gem" %>
+<% end %>
+
+<% tree = TreeView::Tree.new(records: records, parent_id_method: parent_id_method) %>
+<% ui_config = TreeView::UiConfigBuilder.new(context: self, node_prefix: table_key).build_static %>
+<% render_state = TreeView::RenderState.new(
+  tree: tree,
+  root_items: tree.root_items,
+  row_partial: "rails_table_preferences/tree_resource_table_row",
+  ui_config: ui_config
+) %>
+
+<%= table_preferences_editor(
+  table_key: table_key,
+  name: name,
+  settings: settings,
+  columns: columns
+) %>
+
+<%= table_preferences_table_tag(
+  table_key: table_key,
+  name: name,
+  settings: settings,
+  columns: columns,
+  class: ["tree-view-table", "rails-table-preferences-tree-resource-table", options[:class]].compact.join(" ")
+) do %>
+  <thead>
+    <tr>
+      <% table_state.fetch("visible_columns").each do |column| %>
+        <th data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
+          <%= column["label"] || column.fetch("key") %>
+        </th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <%= tree_view_rows(render_state, locals: { table_state: table_state }) %>
+  </tbody>
+<% end %>
