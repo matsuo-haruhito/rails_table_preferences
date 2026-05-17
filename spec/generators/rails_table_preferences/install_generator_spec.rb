@@ -26,14 +26,26 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(file("app/views/rails_table_preferences_demo/orders/index.html.erb")).not_to exist
   end
 
+  it "uses scoped preference columns in the generated migration" do
+    run_generator
+
+    migration = generated_migration.read
+
+    expect(migration).to include("t.references :user, null: true")
+    expect(migration).to include("t.string :scope_type")
+    expect(migration).to include("t.string :scope_key")
+    expect(migration).to include("[:scope_type, :scope_key, :user_id, :table_key, :name]")
+    expect(migration).to include("idx_table_preferences_scope_table_name")
+  end
+
   it "uses the configured owner model in the generated migration and initializer" do
     run_generator %w[--owner-model customers]
 
     migration = generated_migration.read
     initializer = file("config/initializers/rails_table_preferences.rb").read
 
-    expect(migration).to include("t.references :customer")
-    expect(migration).to include("[:customer_id, :table_key, :name]")
+    expect(migration).to include("t.references :customer, null: true")
+    expect(migration).to include("[:scope_type, :scope_key, :customer_id, :table_key, :name]")
     expect(initializer).to include("config.owner_model = :customers")
   end
 
@@ -42,8 +54,8 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
     migration = generated_migration.read
 
-    expect(migration).to include("t.references :member, null: false, foreign_key: { to_table: :customers }")
-    expect(migration).to include("add_index :table_preferences, [:member_id, :table_key, :name]")
+    expect(migration).to include("t.references :member, null: true, foreign_key: { to_table: :customers }")
+    expect(migration).to include("[:scope_type, :scope_key, :member_id, :table_key, :name]")
   end
 
   it "can skip JavaScript copying" do
