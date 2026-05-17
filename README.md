@@ -41,7 +41,7 @@ bin/rails generate rails_table_preferences:install
 bin/rails db:migrate
 ```
 
-The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb` and copies the bundled Stimulus controller to `app/javascript/controllers/rails_table_preferences_controller.js`.
+The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb`, copies the bundled Stimulus controller to `app/javascript/controllers/rails_table_preferences_controller.js`, and copies the default stylesheet to `app/assets/stylesheets/rails_table_preferences.css`.
 
 If preferences should belong to a model other than `User`, pass an owner model. The value can be singular or plural:
 
@@ -62,10 +62,17 @@ Skip JavaScript copying when the host app wants to provide or register its own c
 bin/rails generate rails_table_preferences:install --skip-javascript
 ```
 
-You can also copy only the JavaScript controller later:
+Skip stylesheet copying when the host app wants to provide all styles itself:
+
+```bash
+bin/rails generate rails_table_preferences:install --skip-stylesheets
+```
+
+You can also copy only the JavaScript controller or stylesheet later:
 
 ```bash
 bin/rails generate rails_table_preferences:javascript
+bin/rails generate rails_table_preferences:stylesheets
 ```
 
 Mount the engine when using the bundled JSON API:
@@ -361,7 +368,19 @@ preference_url, collection_url, data_attributes
 
 ### CSS
 
-The gem intentionally keeps styling minimal. Host applications can style the emitted classes directly:
+The default stylesheet is copy-based and intentionally minimal. It provides a stable grid layout for the editor rows so Japanese column labels, numeric inputs, and narrow dialogs do not overlap.
+
+```bash
+bin/rails generate rails_table_preferences:stylesheets
+```
+
+The file is copied to:
+
+```text
+app/assets/stylesheets/rails_table_preferences.css
+```
+
+Host applications can freely edit or override the copied stylesheet. Main class hooks:
 
 ```text
 rails-table-preferences-editor
