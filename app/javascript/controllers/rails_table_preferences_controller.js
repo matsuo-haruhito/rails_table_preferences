@@ -1,14 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Applies and edits saved table display preferences for a server-rendered table.
-//
-// Expected table markup:
-//   <table data-controller="rails-table-preferences" ...>
-//     <th data-rails-table-preferences-column-key="customer_code">...</th>
-//     <td data-rails-table-preferences-column-key="customer_code">...</td>
-//   </table>
-//
-// The same controller can also be used with the editor helper.
 export default class extends Controller {
   static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset"]
 
@@ -32,7 +24,10 @@ export default class extends Controller {
     filterOperatorLabel: { type: String, default: "条件" },
     filterValueLabel: { type: String, default: "値" },
     filterFromLabel: { type: String, default: "開始" },
-    filterToLabel: { type: String, default: "終了" }
+    filterToLabel: { type: String, default: "終了" },
+    sortAscLabel: { type: String, default: "昇順" },
+    sortDescLabel: { type: String, default: "降順" },
+    sortClearLabel: { type: String, default: "並び替え解除" }
   }
 
   connect() {
@@ -48,6 +43,7 @@ export default class extends Controller {
     this.installResizeHandles()
     this.installTableColumnDragHandles()
     this.installFilterControls()
+    this.installSortControls()
     this.refreshPresetOptions()
   }
 
@@ -58,72 +54,51 @@ export default class extends Controller {
 
   apply() {
     this.applyColumnOrder()
-    this.columnsFromSettings.forEach((column) => {
-      this.applyColumn(column)
-    })
+    this.columnsFromSettings.forEach((column) => this.applyColumn(column))
     this.syncEditorWidthInputs()
     this.syncFilterButtonStates()
+    this.syncSortStates()
   }
 
   applyFromEditor(event) {
     if (event) event.preventDefault()
-
     this.settingsValue = this.settingsFromEditor()
     this.apply()
   }
 
   async saveFromEditor(event) {
     if (event) event.preventDefault()
-
     this.settingsValue = this.settingsFromEditor()
     await this.save()
   }
 
   async createPresetFromEditor(event) {
     if (event) event.preventDefault()
-
     this.settingsValue = this.settingsFromEditor()
     const response = await fetch(this.collectionUrlValue, {
       method: "POST",
       headers: this.jsonHeaders,
       body: JSON.stringify({ name: this.currentPresetName, settings: this.settingsValue, default: this.defaultPresetChecked })
     })
-
-    if (!response.ok) {
-      throw new Error(`Failed to create table preference preset: ${response.status}`)
-    }
-
+    if (!response.ok) throw new Error(`Failed to create table preference preset: ${response.status}`)
     const payload = await response.json()
-    this.nameValue = payload.name
-    this.urlValue = this.preferenceUrl(payload.name)
-    this.setPresetNameInput(payload.name)
-    this.setDefaultPresetInput(payload.default)
-    this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
-    this.renderEditor()
-    this.apply()
+    this.applyPreferencePayload(payload)
     await this.refreshPresetOptions()
   }
 
   async deletePreset(event) {
     if (event) event.preventDefault()
-
     const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "DELETE",
-      headers: {
-        "Accept": "application/json",
-        "X-CSRF-Token": this.csrfToken
-      }
+      headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
     })
-
-    if (!response.ok && response.status !== 204) {
-      throw new Error(`Failed to delete table preference preset: ${response.status}`)
-    }
-
+    if (!response.ok && response.status !== 204) throw new Error(`Failed to delete table preference preset: ${response.status}`)
     this.nameValue = "default"
     this.urlValue = this.preferenceUrl("default")
     this.setPresetNameInput("default")
     this.setDefaultPresetInput(false)
     this.settingsValue = this.defaultSettings
+    this.closeFilterPanel()
     this.renderEditor()
     this.apply()
     await this.refreshPresetOptions()
@@ -131,31 +106,18 @@ export default class extends Controller {
 
   async save(event) {
     if (event) event.preventDefault()
-
     const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "PATCH",
       headers: this.jsonHeaders,
       body: JSON.stringify({ settings: this.settingsValue, default: this.defaultPresetChecked })
     })
-
-    if (!response.ok) {
-      throw new Error(`Failed to save table preferences: ${response.status}`)
-    }
-
-    const payload = await response.json()
-    this.nameValue = payload.name
-    this.urlValue = this.preferenceUrl(payload.name)
-    this.setPresetNameInput(payload.name)
-    this.setDefaultPresetInput(payload.default)
-    this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
-    this.renderEditor()
-    this.apply()
+    if (!response.ok) throw new Error(`Failed to save table preferences: ${response.status}`)
+    this.applyPreferencePayload(await response.json())
     await this.refreshPresetOptions()
   }
 
   resetEditor(event) {
     if (event) event.preventDefault()
-
     this.settingsValue = this.defaultSettings
     this.closeFilterPanel()
     this.renderEditor()
@@ -164,17 +126,12 @@ export default class extends Controller {
 
   async loadPresets() {
     const response = await fetch(this.collectionUrlValue, { headers: { "Accept": "application/json" } })
-
-    if (!response.ok) {
-      throw new Error(`Failed to load table preference presets: ${response.status}`)
-    }
-
+    if (!response.ok) throw new Error(`Failed to load table preference presets: ${response.status}`)
     return response.json()
   }
 
   async refreshPresetOptions() {
     if (!this.hasPresetSelectTarget) return
-
     const payload = await this.loadPresets()
     this.presets = payload.preferences || []
     this.renderPresetOptions()
@@ -182,17 +139,9 @@ export default class extends Controller {
 
   renderPresetOptions() {
     if (!this.hasPresetSelectTarget) return
-
     this.presetSelectTarget.innerHTML = ""
-
-    if (this.presets.length === 0) {
-      this.presetSelectTarget.appendChild(this.buildPresetOption(this.currentPresetName, false))
-    } else {
-      this.presets.forEach((preset) => {
-        this.presetSelectTarget.appendChild(this.buildPresetOption(preset.name, preset.default === true))
-      })
-    }
-
+    const presets = this.presets.length ? this.presets : [{ name: this.currentPresetName, default: false }]
+    presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset.name, preset.default === true)))
     this.presetSelectTarget.value = this.currentPresetName
   }
 
@@ -206,15 +155,13 @@ export default class extends Controller {
 
   async selectPreset(event) {
     if (event) event.preventDefault()
-
     const name = this.presetSelectTarget.value || "default"
     const response = await fetch(this.preferenceUrl(name), { headers: { "Accept": "application/json" } })
+    if (!response.ok) throw new Error(`Failed to load table preference preset: ${response.status}`)
+    this.applyPreferencePayload(await response.json())
+  }
 
-    if (!response.ok) {
-      throw new Error(`Failed to load table preference preset: ${response.status}`)
-    }
-
-    const payload = await response.json()
+  applyPreferencePayload(payload) {
     this.nameValue = payload.name
     this.urlValue = this.preferenceUrl(payload.name)
     this.setPresetNameInput(payload.name)
@@ -227,13 +174,8 @@ export default class extends Controller {
 
   renderEditor() {
     if (!this.hasEditorRowsTarget) return
-
     this.editorRowsTarget.innerHTML = ""
-
-    this.columnsFromSettings.forEach((column) => {
-      this.editorRowsTarget.appendChild(this.buildEditorRow(column))
-    })
-
+    this.columnsFromSettings.forEach((column) => this.editorRowsTarget.appendChild(this.buildEditorRow(column)))
     this.refreshEditorOrderInputs()
   }
 
@@ -246,27 +188,16 @@ export default class extends Controller {
     row.addEventListener("dragover", this.dragEditorRowOver.bind(this))
     row.addEventListener("drop", this.dropEditorRow.bind(this))
     row.addEventListener("dragend", this.dragEditorRowEnd.bind(this))
-
     row.innerHTML = `
       <button type="button" class="rails-table-preferences-editor__drag-handle" draggable="false" aria-label="${this.escapeHtml(this.dragLabelValue)}" title="${this.escapeHtml(this.dragLabelValue)}">↕</button>
       <label class="rails-table-preferences-editor__visible">
         <input type="checkbox" data-field="visible" ${column.visible === false ? "" : "checked"}>
         <span>${this.escapeHtml(column.label || column.key)}</span>
       </label>
-      <label>
-        ${this.escapeHtml(this.orderLabelValue)}
-        <input type="number" data-field="order" value="${column.order ?? ""}" inputmode="numeric">
-      </label>
-      <label>
-        ${this.escapeHtml(this.widthLabelValue)}
-        <input type="number" data-field="width" value="${column.width ?? ""}" inputmode="numeric">
-      </label>
-      <label>
-        ${this.escapeHtml(this.truncateLabelValue)}
-        <input type="number" data-field="truncate" value="${column.truncate ?? ""}" inputmode="numeric">
-      </label>
+      <label>${this.escapeHtml(this.orderLabelValue)}<input type="number" data-field="order" value="${column.order ?? ""}" inputmode="numeric"></label>
+      <label>${this.escapeHtml(this.widthLabelValue)}<input type="number" data-field="width" value="${column.width ?? ""}" inputmode="numeric"></label>
+      <label>${this.escapeHtml(this.truncateLabelValue)}<input type="number" data-field="truncate" value="${column.truncate ?? ""}" inputmode="numeric"></label>
     `
-
     return row
   }
 
@@ -280,18 +211,11 @@ export default class extends Controller {
 
   dragEditorRowOver(event) {
     event.preventDefault()
-
     const targetRow = event.currentTarget
     if (!this.draggedEditorRow || targetRow === this.draggedEditorRow) return
-
     const placement = this.editorRowPlacement(event, targetRow)
-
-    if (placement === "before") {
-      this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow)
-    } else {
-      this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow.nextSibling)
-    }
-
+    if (placement === "before") this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow)
+    else this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow.nextSibling)
     this.refreshEditorOrderInputs()
   }
 
@@ -312,23 +236,15 @@ export default class extends Controller {
     const rows = this.editorRows
     const draggedIndex = rows.indexOf(this.draggedEditorRow)
     const targetIndex = rows.indexOf(row)
-
     if (draggedIndex >= 0 && targetIndex >= 0) {
-      if (draggedIndex < targetIndex) {
-        return offset > rect.height * this.reorderActivationRatio ? "after" : "before"
-      }
-
-      if (draggedIndex > targetIndex) {
-        return offset < rect.height * (1 - this.reorderActivationRatio) ? "before" : "after"
-      }
+      if (draggedIndex < targetIndex) return offset > rect.height * this.reorderActivationRatio ? "after" : "before"
+      if (draggedIndex > targetIndex) return offset < rect.height * (1 - this.reorderActivationRatio) ? "before" : "after"
     }
-
     return offset < rect.height / 2 ? "before" : "after"
   }
 
   refreshEditorOrderInputs() {
     if (!this.hasEditorRowsTarget) return
-
     this.editorRows.forEach((row, index) => {
       const orderInput = row.querySelector('[data-field="order"]')
       if (orderInput) orderInput.value = String((index + 1) * 10)
@@ -337,10 +253,8 @@ export default class extends Controller {
 
   syncEditorWidthInputs() {
     if (!this.hasEditorRowsTarget) return
-
     this.editorRows.forEach((row) => {
-      const key = row.dataset.railsTablePreferencesColumnKey
-      const column = this.columnByKey(key)
+      const column = this.columnByKey(row.dataset.railsTablePreferencesColumnKey)
       const widthInput = row.querySelector('[data-field="width"]')
       if (widthInput && column?.width) widthInput.value = String(column.width)
     })
@@ -349,7 +263,6 @@ export default class extends Controller {
   installResizeHandles() {
     this.headerCells.forEach((cell) => {
       if (cell.querySelector("[data-rails-table-preferences-resize-handle]")) return
-
       const handle = document.createElement("button")
       handle.type = "button"
       handle.className = "rails-table-preferences-resize-handle"
@@ -357,16 +270,13 @@ export default class extends Controller {
       handle.setAttribute("aria-label", `${this.resizeLabelValue}: ${cell.dataset.railsTablePreferencesColumnKey}`)
       handle.addEventListener("mousedown", this.startColumnResize.bind(this))
       handle.addEventListener("click", (event) => event.preventDefault())
-
       this.applyResizeHandleHitArea(cell, handle)
       cell.appendChild(handle)
     })
   }
 
   applyResizeHandleHitArea(cell, handle) {
-    const existingPosition = window.getComputedStyle(cell).position
-    if (existingPosition === "static") cell.style.position = "relative"
-
+    if (window.getComputedStyle(cell).position === "static") cell.style.position = "relative"
     handle.style.position = "absolute"
     handle.style.top = "0"
     handle.style.right = "0"
@@ -383,19 +293,13 @@ export default class extends Controller {
   startColumnResize(event) {
     event.preventDefault()
     event.stopPropagation()
-
     const headerCell = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
     if (!headerCell) return
-
-    const key = headerCell.dataset.railsTablePreferencesColumnKey
-    const currentWidth = headerCell.getBoundingClientRect().width
-
     this.resizingColumn = {
-      key,
+      key: headerCell.dataset.railsTablePreferencesColumnKey,
       startX: event.clientX,
-      startWidth: currentWidth
+      startWidth: headerCell.getBoundingClientRect().width
     }
-
     this.boundResizeColumn = this.resizeColumn.bind(this)
     this.boundStopColumnResize = this.stopColumnResize.bind(this)
     document.addEventListener("mousemove", this.boundResizeColumn)
@@ -404,7 +308,6 @@ export default class extends Controller {
 
   resizeColumn(event) {
     if (!this.resizingColumn) return
-
     const width = Math.max(40, Math.round(this.resizingColumn.startWidth + event.clientX - this.resizingColumn.startX))
     this.updateColumnSetting(this.resizingColumn.key, { width })
     this.applyColumn(this.columnByKey(this.resizingColumn.key))
@@ -417,21 +320,15 @@ export default class extends Controller {
   }
 
   uninstallDocumentResizeListeners() {
-    if (this.boundResizeColumn) {
-      document.removeEventListener("mousemove", this.boundResizeColumn)
-      this.boundResizeColumn = null
-    }
-
-    if (this.boundStopColumnResize) {
-      document.removeEventListener("mouseup", this.boundStopColumnResize)
-      this.boundStopColumnResize = null
-    }
+    if (this.boundResizeColumn) document.removeEventListener("mousemove", this.boundResizeColumn)
+    if (this.boundStopColumnResize) document.removeEventListener("mouseup", this.boundStopColumnResize)
+    this.boundResizeColumn = null
+    this.boundStopColumnResize = null
   }
 
   installTableColumnDragHandles() {
     this.headerCells.forEach((cell) => {
       if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") return
-
       cell.draggable = true
       cell.dataset.railsTablePreferencesTableDragInstalled = "true"
       cell.classList.add("rails-table-preferences-table-column-draggable")
@@ -443,29 +340,23 @@ export default class extends Controller {
   }
 
   startTableColumnDrag(event) {
-    if (event.target.closest("[data-rails-table-preferences-resize-handle]") || event.target.closest("[data-rails-table-preferences-filter-button]")) {
+    if (this.shouldIgnoreHeaderAction(event.target)) {
       event.preventDefault()
       return
     }
-
-    const cell = event.currentTarget
-    const key = cell.dataset.railsTablePreferencesColumnKey
+    const key = event.currentTarget.dataset.railsTablePreferencesColumnKey
     if (!key) return
-
     this.draggedTableColumnKey = key
-    cell.classList.add("rails-table-preferences-table-column--dragging")
+    event.currentTarget.classList.add("rails-table-preferences-table-column--dragging")
     event.dataTransfer.effectAllowed = "move"
     event.dataTransfer.setData("text/plain", key)
   }
 
   dragTableColumnOver(event) {
     event.preventDefault()
-
-    const targetCell = event.currentTarget
-    const targetKey = targetCell.dataset.railsTablePreferencesColumnKey
+    const targetKey = event.currentTarget.dataset.railsTablePreferencesColumnKey
     if (!this.draggedTableColumnKey || !targetKey || targetKey === this.draggedTableColumnKey) return
-
-    const placement = this.tableColumnPlacement(event, targetCell)
+    const placement = this.tableColumnPlacement(event, event.currentTarget)
     this.moveColumnInSettings(this.draggedTableColumnKey, targetKey, placement)
     this.applyColumnOrder()
   }
@@ -487,17 +378,10 @@ export default class extends Controller {
     const columns = this.orderedColumnsFromSettings
     const draggedIndex = columns.findIndex((column) => column.key === this.draggedTableColumnKey)
     const targetIndex = columns.findIndex((column) => column.key === cell.dataset.railsTablePreferencesColumnKey)
-
     if (draggedIndex >= 0 && targetIndex >= 0) {
-      if (draggedIndex < targetIndex) {
-        return offset > rect.width * this.reorderActivationRatio ? "after" : "before"
-      }
-
-      if (draggedIndex > targetIndex) {
-        return offset < rect.width * (1 - this.reorderActivationRatio) ? "before" : "after"
-      }
+      if (draggedIndex < targetIndex) return offset > rect.width * this.reorderActivationRatio ? "after" : "before"
+      if (draggedIndex > targetIndex) return offset < rect.width * (1 - this.reorderActivationRatio) ? "before" : "after"
     }
-
     return offset < rect.width / 2 ? "before" : "after"
   }
 
@@ -506,16 +390,72 @@ export default class extends Controller {
     const draggedIndex = columns.findIndex((column) => column.key === draggedKey)
     const targetIndex = columns.findIndex((column) => column.key === targetKey)
     if (draggedIndex < 0 || targetIndex < 0) return
-
     const [draggedColumn] = columns.splice(draggedIndex, 1)
     const adjustedTargetIndex = columns.findIndex((column) => column.key === targetKey)
-    const insertIndex = placement === "before" ? adjustedTargetIndex : adjustedTargetIndex + 1
-    columns.splice(insertIndex, 0, draggedColumn)
+    columns.splice(placement === "before" ? adjustedTargetIndex : adjustedTargetIndex + 1, 0, draggedColumn)
+    this.settingsValue = { ...this.settingsValue, columns: columns.map((column, index) => ({ ...column, order: (index + 1) * 10 })) }
+  }
 
-    this.settingsValue = {
-      ...this.settingsValue,
-      columns: columns.map((column, index) => ({ ...column, order: (index + 1) * 10 }))
-    }
+  installSortControls() {
+    this.headerCells.forEach((cell) => {
+      const key = cell.dataset.railsTablePreferencesColumnKey
+      const column = this.columnDefinitionByKey(key)
+      if (column?.sortable !== true) return
+      if (cell.dataset.railsTablePreferencesSortInstalled === "true") return
+      cell.dataset.railsTablePreferencesSortInstalled = "true"
+      cell.classList.add("rails-table-preferences-sortable-column")
+      cell.addEventListener("click", (event) => this.toggleSortFromHeader(event, cell, column))
+      if (!cell.querySelector("[data-rails-table-preferences-sort-indicator]")) {
+        const indicator = document.createElement("span")
+        indicator.className = "rails-table-preferences-sort-indicator"
+        indicator.dataset.railsTablePreferencesSortIndicator = "true"
+        indicator.setAttribute("aria-hidden", "true")
+        cell.appendChild(indicator)
+      }
+    })
+    this.syncSortStates()
+  }
+
+  toggleSortFromHeader(event, cell, column) {
+    if (this.shouldIgnoreHeaderAction(event.target)) return
+    if (this.draggedTableColumnKey || this.resizingColumn) return
+    event.preventDefault()
+    const current = this.sortFor(column.key)
+    let nextSorts = []
+    if (!current) nextSorts = [{ key: column.key, direction: "asc" }]
+    else if (current.direction === "asc") nextSorts = [{ key: column.key, direction: "desc" }]
+    this.settingsValue = { ...this.settingsValue, sorts: nextSorts }
+    this.syncSortStates()
+  }
+
+  syncSortStates() {
+    this.headerCells.forEach((cell) => {
+      const key = cell.dataset.railsTablePreferencesColumnKey
+      const sort = this.sortFor(key)
+      const indicator = cell.querySelector("[data-rails-table-preferences-sort-indicator]")
+      cell.classList.toggle("rails-table-preferences-sortable-column--sorted", Boolean(sort))
+      cell.setAttribute("aria-sort", sort?.direction === "asc" ? "ascending" : sort?.direction === "desc" ? "descending" : "none")
+      if (indicator) indicator.textContent = sort?.direction === "asc" ? "▲" : sort?.direction === "desc" ? "▼" : ""
+      if (cell.dataset.railsTablePreferencesSortInstalled === "true") {
+        const label = sort?.direction === "asc" ? this.sortDescLabelValue : sort?.direction === "desc" ? this.sortClearLabelValue : this.sortAscLabelValue
+        cell.title = label
+      }
+    })
+  }
+
+  sortFor(key) {
+    return (this.settingsValue?.sorts || []).find((sort) => sort.key === key)
+  }
+
+  shouldIgnoreHeaderAction(target) {
+    return Boolean(
+      target.closest("[data-rails-table-preferences-resize-handle]") ||
+      target.closest("[data-rails-table-preferences-filter-button]") ||
+      target.closest("button") ||
+      target.closest("input") ||
+      target.closest("select") ||
+      target.closest("textarea")
+    )
   }
 
   installFilterControls() {
@@ -524,7 +464,6 @@ export default class extends Controller {
       const column = this.columnDefinitionByKey(key)
       if (!column?.filter) return
       if (cell.querySelector("[data-rails-table-preferences-filter-button]")) return
-
       const button = document.createElement("button")
       button.type = "button"
       button.className = "rails-table-preferences-filter-button"
@@ -536,29 +475,20 @@ export default class extends Controller {
       button.addEventListener("mousedown", (event) => event.stopPropagation())
       button.addEventListener("dragstart", (event) => event.preventDefault())
       button.addEventListener("click", (event) => this.toggleFilterPanel(event, cell, column))
-
       cell.appendChild(button)
     })
-
     this.syncFilterButtonStates()
   }
 
   toggleFilterPanel(event, headerCell, column) {
     event.preventDefault()
     event.stopPropagation()
-
-    const key = column.key
-    if (this.filterPanel?.dataset.railsTablePreferencesColumnKey === key) {
-      this.closeFilterPanel()
-      return
-    }
-
-    this.openFilterPanel(headerCell, column)
+    if (this.filterPanel?.dataset.railsTablePreferencesColumnKey === column.key) this.closeFilterPanel()
+    else this.openFilterPanel(headerCell, column)
   }
 
   openFilterPanel(headerCell, column) {
     this.closeFilterPanel()
-
     const panel = document.createElement("div")
     panel.className = "rails-table-preferences-filter-panel"
     panel.dataset.railsTablePreferencesColumnKey = column.key
@@ -572,14 +502,11 @@ export default class extends Controller {
       this.clearFilter(column.key)
     })
     panel.addEventListener("click", (event) => event.stopPropagation())
-
     document.body.appendChild(panel)
     this.positionFilterPanel(panel, headerCell)
     this.filterPanel = panel
     this.boundCloseFilterPanel = (event) => {
-      if (!panel.contains(event.target) && !event.target.closest("[data-rails-table-preferences-filter-button]")) {
-        this.closeFilterPanel()
-      }
+      if (!panel.contains(event.target) && !event.target.closest("[data-rails-table-preferences-filter-button]")) this.closeFilterPanel()
     }
     document.addEventListener("click", this.boundCloseFilterPanel)
   }
@@ -589,7 +516,6 @@ export default class extends Controller {
     const condition = this.filterConditionFor(column.key)
     const operators = this.filterOperatorsFor(filter)
     const selectedOperator = condition.operator || operators[0] || "contains"
-
     return `
       <div class="rails-table-preferences-filter-panel__title">${this.escapeHtml(column.label || column.key)}</div>
       <label class="rails-table-preferences-filter-panel__field">
@@ -608,38 +534,17 @@ export default class extends Controller {
 
   filterValueHtml(filter, condition, selectedOperator) {
     if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
-
     if (selectedOperator === "between") {
       return `
-        <label class="rails-table-preferences-filter-panel__field">
-          ${this.escapeHtml(this.filterFromLabelValue)}
-          <input type="${this.filterInputType(filter)}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}">
-        </label>
-        <label class="rails-table-preferences-filter-panel__field">
-          ${this.escapeHtml(this.filterToLabelValue)}
-          <input type="${this.filterInputType(filter)}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}">
-        </label>
+        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${this.filterInputType(filter)}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"></label>
+        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${this.filterInputType(filter)}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"></label>
       `
     }
-
     if (filter.type === "select" && Array.isArray(filter.options)) {
       const values = new Set(Array(condition.values || condition.value || []).map(String))
-      return `
-        <label class="rails-table-preferences-filter-panel__field">
-          ${this.escapeHtml(this.filterValueLabelValue)}
-          <select data-field="values" multiple>
-            ${filter.options.map((option) => `<option value="${this.escapeHtml(option)}" ${values.has(String(option)) ? "selected" : ""}>${this.escapeHtml(option)}</option>`).join("")}
-          </select>
-        </label>
-      `
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<select data-field="values" multiple>${filter.options.map((option) => `<option value="${this.escapeHtml(option)}" ${values.has(String(option)) ? "selected" : ""}>${this.escapeHtml(option)}</option>`).join("")}</select></label>`
     }
-
-    return `
-      <label class="rails-table-preferences-filter-panel__field">
-        ${this.escapeHtml(this.filterValueLabelValue)}
-        <input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}">
-      </label>
-    `
+    return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"></label>`
   }
 
   positionFilterPanel(panel, headerCell) {
@@ -653,26 +558,20 @@ export default class extends Controller {
   applyFilterPanel(key, panel) {
     const operator = panel.querySelector("[data-field='operator']")?.value
     if (!operator) return
-
     const condition = { operator }
-
     if (operator === "between") {
       const from = panel.querySelector("[data-field='from']")?.value
       const to = panel.querySelector("[data-field='to']")?.value
       if (from) condition.from = from
       if (to) condition.to = to
-    } else if (["blank", "present", "true", "false"].includes(operator)) {
-      // Operator-only conditions intentionally have no value.
-    } else {
+    } else if (!["blank", "present", "true", "false"].includes(operator)) {
       const valuesSelect = panel.querySelector("[data-field='values']")
-      if (valuesSelect) {
-        condition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
-      } else {
+      if (valuesSelect) condition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
+      else {
         const value = panel.querySelector("[data-field='value']")?.value
         if (value) condition.value = value
       }
     }
-
     this.updateFilterCondition(key, condition)
     this.closeFilterPanel()
     this.apply()
@@ -687,25 +586,14 @@ export default class extends Controller {
   }
 
   updateFilterCondition(key, condition) {
-    this.settingsValue = {
-      ...this.settingsValue,
-      filters: {
-        ...(this.settingsValue?.filters || {}),
-        [key]: condition
-      }
-    }
+    this.settingsValue = { ...this.settingsValue, filters: { ...(this.settingsValue?.filters || {}), [key]: condition } }
   }
 
   closeFilterPanel() {
-    if (this.boundCloseFilterPanel) {
-      document.removeEventListener("click", this.boundCloseFilterPanel)
-      this.boundCloseFilterPanel = null
-    }
-
-    if (this.filterPanel) {
-      this.filterPanel.remove()
-      this.filterPanel = null
-    }
+    if (this.boundCloseFilterPanel) document.removeEventListener("click", this.boundCloseFilterPanel)
+    this.boundCloseFilterPanel = null
+    if (this.filterPanel) this.filterPanel.remove()
+    this.filterPanel = null
   }
 
   syncFilterButtonStates() {
@@ -713,7 +601,6 @@ export default class extends Controller {
       const key = cell.dataset.railsTablePreferencesColumnKey
       const button = cell.querySelector("[data-rails-table-preferences-filter-button]")
       if (!button) return
-
       const active = this.filterConditionFor(key).operator
       button.classList.toggle("rails-table-preferences-filter-button--active", Boolean(active))
       button.setAttribute("aria-pressed", active ? "true" : "false")
@@ -726,53 +613,23 @@ export default class extends Controller {
 
   filterOperatorsFor(filter) {
     if (Array.isArray(filter.operators) && filter.operators.length > 0) return filter.operators.map(String)
-
     switch (filter.type) {
-      case "number":
-        return ["equals", "gteq", "lteq", "gt", "lt", "blank", "present"]
-      case "date":
-        return ["equals", "gteq", "lteq", "between", "blank", "present"]
-      case "select":
-        return ["in", "not_in", "blank", "present"]
-      case "boolean":
-        return ["true", "false", "blank", "present"]
-      default:
-        return ["contains", "equals", "starts_with", "ends_with", "blank", "present"]
+      case "number": return ["equals", "gteq", "lteq", "gt", "lt", "blank", "present"]
+      case "date": return ["equals", "gteq", "lteq", "between", "blank", "present"]
+      case "select": return ["in", "not_in", "blank", "present"]
+      case "boolean": return ["true", "false", "blank", "present"]
+      default: return ["contains", "equals", "starts_with", "ends_with", "blank", "present"]
     }
   }
 
   filterInputType(filter) {
-    switch (filter.type) {
-      case "number":
-        return "number"
-      case "date":
-        return "date"
-      default:
-        return "text"
-    }
+    if (filter.type === "number") return "number"
+    if (filter.type === "date") return "date"
+    return "text"
   }
 
   filterOperatorText(operator) {
-    const labels = {
-      contains: "含む",
-      not_contains: "含まない",
-      equals: "一致",
-      not_equals: "不一致",
-      starts_with: "で始まる",
-      ends_with: "で終わる",
-      in: "いずれか",
-      not_in: "以外",
-      gt: "より大きい",
-      gteq: "以上",
-      lt: "より小さい",
-      lteq: "以下",
-      between: "範囲",
-      blank: "空白",
-      present: "空白以外",
-      true: "はい",
-      false: "いいえ"
-    }
-
+    const labels = { contains: "含む", not_contains: "含まない", equals: "一致", not_equals: "不一致", starts_with: "で始まる", ends_with: "で終わる", in: "いずれか", not_in: "以外", gt: "より大きい", gteq: "以上", lt: "より小さい", lteq: "以下", between: "範囲", blank: "空白", present: "空白以外", true: "はい", false: "いいえ" }
     return labels[operator] || operator
   }
 
@@ -780,15 +637,14 @@ export default class extends Controller {
     this.renderEditor()
     this.syncEditorWidthInputs()
     this.syncFilterButtonStates()
+    this.syncSortStates()
   }
 
   settingsFromEditor() {
     if (!this.hasEditorRowsTarget) return this.settingsValue
-
     const columns = this.editorRows.map((row, index) => {
       const key = row.dataset.railsTablePreferencesColumnKey
       const current = this.columnByKey(key) || {}
-
       return {
         key,
         visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
@@ -798,36 +654,23 @@ export default class extends Controller {
         pinned: current.pinned === true
       }
     })
-
-    return {
-      ...this.settingsValue,
-      columns,
-      filters: this.settingsValue?.filters || {},
-      sorts: this.settingsValue?.sorts || []
-    }
+    return { ...this.settingsValue, columns, filters: this.settingsValue?.filters || {}, sorts: this.settingsValue?.sorts || [] }
   }
 
   applyColumn(column) {
     if (!column) return
-
-    const key = column.key
-    const cells = this.cellsFor(key)
-
-    cells.forEach((cell) => {
+    this.cellsFor(column.key).forEach((cell) => {
       cell.hidden = column.visible === false
-
       cell.style.width = ""
       cell.style.maxWidth = ""
       cell.style.overflow = ""
       cell.style.textOverflow = ""
       cell.style.whiteSpace = ""
       delete cell.dataset.railsTablePreferencesTruncate
-
       if (column.width) {
         cell.style.width = `${column.width}px`
         cell.style.maxWidth = `${column.width}px`
       }
-
       if (column.truncate) {
         cell.dataset.railsTablePreferencesTruncate = column.truncate
         cell.style.overflow = "hidden"
@@ -840,14 +683,8 @@ export default class extends Controller {
 
   applyColumnOrder() {
     const orderedKeys = this.orderedColumnsFromSettings.map((column) => column.key)
-
     this.tableRows.forEach((row) => {
-      const keyedCells = new Map(
-        Array.from(row.children)
-          .filter((cell) => cell.dataset.railsTablePreferencesColumnKey)
-          .map((cell) => [cell.dataset.railsTablePreferencesColumnKey, cell])
-      )
-
+      const keyedCells = new Map(Array.from(row.children).filter((cell) => cell.dataset.railsTablePreferencesColumnKey).map((cell) => [cell.dataset.railsTablePreferencesColumnKey, cell]))
       orderedKeys.forEach((key) => {
         const cell = keyedCells.get(key)
         if (cell) row.appendChild(cell)
@@ -857,17 +694,7 @@ export default class extends Controller {
 
   buildDefaultSettings() {
     return {
-      columns: this.columnsValue.map((column, index) => ({
-        key: column.key,
-        label: column.label || column.key,
-        visible: column.visible !== false,
-        order: column.order ?? (index + 1) * 10,
-        width: column.width,
-        truncate: column.truncate,
-        pinned: column.pinned === true,
-        filter: column.filter,
-        sortable: column.sortable
-      })),
+      columns: this.columnsValue.map((column, index) => ({ key: column.key, label: column.label || column.key, visible: column.visible !== false, order: column.order ?? (index + 1) * 10, width: column.width, truncate: column.truncate, pinned: column.pinned === true, filter: column.filter, sortable: column.sortable })),
       filters: {},
       sorts: []
     }
@@ -875,35 +702,15 @@ export default class extends Controller {
 
   mergeSettings(defaultSettings, savedSettings) {
     const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))
-
     const columns = defaultSettings.columns.map((defaultColumn, index) => {
       const savedColumn = savedColumns.get(defaultColumn.key) || {}
-
-      return {
-        ...defaultColumn,
-        ...savedColumn,
-        label: defaultColumn.label,
-        filter: defaultColumn.filter,
-        sortable: defaultColumn.sortable,
-        order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10,
-        visible: savedColumn.visible ?? defaultColumn.visible
-      }
+      return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }
     })
-
-    return {
-      columns,
-      filters: savedSettings?.filters || {},
-      sorts: savedSettings?.sorts || []
-    }
+    return { columns, filters: savedSettings?.filters || {}, sorts: savedSettings?.sorts || [] }
   }
 
   updateColumnSetting(key, attributes) {
-    this.settingsValue = {
-      ...this.settingsValue,
-      columns: this.columnsFromSettings.map((column) => (
-        column.key === key ? { ...column, ...attributes } : column
-      ))
-    }
+    this.settingsValue = { ...this.settingsValue, columns: this.columnsFromSettings.map((column) => column.key === key ? { ...column, ...attributes } : column) }
   }
 
   preferenceUrl(name) {
@@ -921,7 +728,6 @@ export default class extends Controller {
   cellsFor(key) {
     const table = this.tableElement
     if (!table) return []
-
     return table.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
   }
 
@@ -939,7 +745,6 @@ export default class extends Controller {
 
   integerValue(value) {
     if (value === undefined || value === null || value === "") return null
-
     const integer = Number.parseInt(value, 10)
     return Number.isNaN(integer) ? null : integer
   }
@@ -950,71 +755,17 @@ export default class extends Controller {
     return span.innerHTML
   }
 
-  get columnsFromSettings() {
-    return this.settingsValue?.columns || []
-  }
-
-  get orderedColumnsFromSettings() {
-    return this.columnsFromSettings.slice().sort((left, right) => this.orderValue(left) - this.orderValue(right))
-  }
-
-  get normalizedResizeHandleWidth() {
-    const value = Number(this.resizeHandleWidthValue)
-    return Number.isFinite(value) && value > 0 ? value : 10
-  }
-
-  get normalizedReorderSensitivity() {
-    const value = Number(this.reorderSensitivityValue)
-    return Number.isFinite(value) && value > 0 ? value : 1
-  }
-
-  get reorderActivationRatio() {
-    return Math.max(0.25, Math.min(0.5, 0.5 / this.normalizedReorderSensitivity))
-  }
-
-  get currentPresetName() {
-    if (!this.hasPresetNameTarget) return this.nameValue || "default"
-
-    return this.presetNameTarget.value.trim() || "default"
-  }
-
-  get defaultPresetChecked() {
-    return this.hasDefaultPresetTarget ? this.defaultPresetTarget.checked : false
-  }
-
-  get editorRows() {
-    if (!this.hasEditorRowsTarget) return []
-
-    return Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]"))
-  }
-
-  get tableElement() {
-    return this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table")
-  }
-
-  get headerCells() {
-    const table = this.tableElement
-    if (!table) return []
-
-    return Array.from(table.querySelectorAll("th[data-rails-table-preferences-column-key]"))
-  }
-
-  get tableRows() {
-    const table = this.tableElement
-    if (!table) return []
-
-    return table.querySelectorAll("tr")
-  }
-
-  get jsonHeaders() {
-    return {
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-      "X-CSRF-Token": this.csrfToken
-    }
-  }
-
-  get csrfToken() {
-    return document.querySelector("meta[name='csrf-token']")?.content || ""
-  }
+  get columnsFromSettings() { return this.settingsValue?.columns || [] }
+  get orderedColumnsFromSettings() { return this.columnsFromSettings.slice().sort((left, right) => this.orderValue(left) - this.orderValue(right)) }
+  get normalizedResizeHandleWidth() { const value = Number(this.resizeHandleWidthValue); return Number.isFinite(value) && value > 0 ? value : 10 }
+  get normalizedReorderSensitivity() { const value = Number(this.reorderSensitivityValue); return Number.isFinite(value) && value > 0 ? value : 1 }
+  get reorderActivationRatio() { return Math.max(0.25, Math.min(0.5, 0.5 / this.normalizedReorderSensitivity)) }
+  get currentPresetName() { return this.hasPresetNameTarget ? (this.presetNameTarget.value.trim() || "default") : (this.nameValue || "default") }
+  get defaultPresetChecked() { return this.hasDefaultPresetTarget ? this.defaultPresetTarget.checked : false }
+  get editorRows() { return this.hasEditorRowsTarget ? Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]")) : [] }
+  get tableElement() { return this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table") }
+  get headerCells() { const table = this.tableElement; return table ? Array.from(table.querySelectorAll("th[data-rails-table-preferences-column-key]")) : [] }
+  get tableRows() { const table = this.tableElement; return table ? table.querySelectorAll("tr") : [] }
+  get jsonHeaders() { return { "Accept": "application/json", "Content-Type": "application/json", "X-CSRF-Token": this.csrfToken } }
+  get csrfToken() { return document.querySelector("meta[name='csrf-token']")?.content || "" }
 }
