@@ -100,6 +100,40 @@ module RailsTablePreferences
       )
     end
 
+    def table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort")
+      normalized_columns = table_preferences_columns(columns, ignored_columns: ignored_columns)
+      normalized_settings = table_preferences_settings(settings, allowed_columns: normalized_columns)
+
+      case adapter.to_sym
+      when :controller_params, :plain_params, :params
+        RailsTablePreferences::Adapters::ControllerParams.to_params(
+          filters: normalized_settings["filters"],
+          sorts: normalized_settings["sorts"],
+          columns: normalized_columns,
+          sort_param: sort_param
+        )
+      when :ransack
+        RailsTablePreferences::Adapters::Ransack.to_params(
+          filters: normalized_settings["filters"],
+          sorts: normalized_settings["sorts"]
+        )
+      else
+        raise ArgumentError, "Unsupported table preference adapter: #{adapter.inspect}"
+      end
+    end
+
+    def table_preferences_hidden_fields(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
+      params_hash = table_preferences_params(
+        settings: settings,
+        columns: columns,
+        ignored_columns: ignored_columns,
+        adapter: adapter,
+        sort_param: sort_param
+      )
+
+      safe_join(table_preferences_hidden_field_tags(params_hash, namespace: namespace))
+    end
+
     private
 
     def table_preferences_column_hash(column)
@@ -126,6 +160,31 @@ module RailsTablePreferences
       else
         table_preferences_column(column)
       end
+    end
+
+    def table_preferences_hidden_field_tags(params_hash, namespace: nil, prefix: nil)
+      params_hash.flat_map do |key, value|
+        field_name = table_preferences_field_name(key, namespace: namespace, prefix: prefix)
+
+        case value
+        when Hash
+          table_preferences_hidden_field_tags(value, namespace: nil, prefix: field_name)
+        when Array
+          value.reject(&:blank?).map do |item|
+            hidden_field_tag("#{field_name}[]", item, id: nil)
+          end
+        else
+          value.blank? ? [] : hidden_field_tag(field_name, value, id: nil)
+        end
+      end
+    end
+
+    def table_preferences_field_name(key, namespace: nil, prefix: nil)
+      key = key.to_s
+      return "#{prefix}[#{key}]" if prefix.present?
+      return "#{namespace}[#{key}]" if namespace.present?
+
+      key
     end
   end
 end
