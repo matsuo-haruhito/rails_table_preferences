@@ -5,6 +5,7 @@ This directory contains focused documentation for Rails Table Preferences.
 ## Start here
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
+- [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
@@ -23,8 +24,9 @@ This directory contains focused documentation for Rails Table Preferences.
 5. Add `filter:` and `sortable: true` metadata where needed.
 6. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
 7. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-8. Verify the feature in a sandbox Rails app.
-9. Run the manual QA checklist before asking real users to try the feature.
+8. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
+9. Verify the feature in a sandbox Rails app.
+10. Run the manual QA checklist before asking real users to try the feature.
 
 ## Responsibility boundary
 
