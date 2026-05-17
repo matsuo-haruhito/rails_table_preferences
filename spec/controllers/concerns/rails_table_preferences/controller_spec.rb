@@ -10,6 +10,8 @@ RSpec.describe RailsTablePreferences::Controller do
         @owner = owner
       end
 
+      private
+
       def current_user
         @owner
       end
@@ -28,6 +30,13 @@ RSpec.describe RailsTablePreferences::Controller do
 
   describe "#rails_table_preference" do
     it "finds an explicitly named preference" do
+      preference = instance_double(RailsTablePreferences::Preference)
+      allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
+
+      expect(controller.rails_table_preference(table_key: :orders, name: :inspection)).to eq(preference)
+    end
+
+    it "supports a private current user method" do
       preference = instance_double(RailsTablePreferences::Preference)
       allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
 
