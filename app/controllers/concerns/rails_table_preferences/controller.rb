@@ -56,6 +56,26 @@ module RailsTablePreferences
       )
     end
 
+    # Returns an ordered export payload for CSV, Excel, or report generation.
+    #
+    # Rails Table Preferences does not generate the export file. The host app can
+    # use this payload to decide which columns and headers to export.
+    def rails_table_preference_export_payload(table_key:, columns:, name: nil, owner: nil, scope_context: nil, include_hidden: false, fallback: {})
+      settings = rails_table_preference_settings(
+        table_key: table_key,
+        name: name,
+        owner: owner,
+        scope_context: scope_context,
+        fallback: fallback
+      )
+
+      RailsTablePreferences::ExportPayload.call(
+        settings: settings,
+        columns: columns,
+        include_hidden: include_hidden
+      )
+    end
+
     # Convenience method for apps that want to merge saved preference filters into
     # the current controller params before passing them to a model search method.
     def rails_table_preference_merged_params(params_source = params, **options)
