@@ -9,6 +9,9 @@ It is designed for business applications with many index tables, where users nee
 Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Demo screen generator](docs/demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
+- [Sandbox Rails app verification](docs/sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
+- [Manual QA checklist](docs/manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Practical examples](docs/examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
 - [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort params to existing Rails controllers.
@@ -55,6 +58,21 @@ bin/rails db:migrate
 ```
 
 The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb`, copies the bundled Stimulus controller to `app/javascript/controllers/rails_table_preferences_controller.js`, and copies the default stylesheet to `app/assets/stylesheets/rails_table_preferences.css`.
+
+For a lightweight local browser verification screen, add `--with-demo`:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-demo
+```
+
+Then add a route for the copied demo screen:
+
+```ruby
+# config/routes.rb
+get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"
+```
+
+See [Demo screen generator](docs/demo.md) and [Sandbox Rails app verification](docs/sandbox.md) for the full local verification flow.
 
 If preferences should belong to a model other than `User`, pass an owner model. The value can be singular or plural:
 
@@ -680,7 +698,7 @@ The same checks are run by the GitHub Actions CI workflow.
 
 ## Development status
 
-This gem is in active initial development. The current test suite passes locally with `124 examples, 0 failures`, and the bundled Stimulus controller passes `node --check`.
+This gem is in active initial development. The current test suite passes locally with `125 examples, 0 failures`, and the bundled Stimulus controller passes `node --check`.
 
 ## License
 
