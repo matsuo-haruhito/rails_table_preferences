@@ -61,6 +61,8 @@ module RailsTablePreferences
     end
 
     def default_param?
+      return false unless params.key?(:default)
+
       ActiveModel::Type::Boolean.new.cast(params[:default])
     end
 
