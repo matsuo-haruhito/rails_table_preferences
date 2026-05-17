@@ -26,7 +26,12 @@ module RailsTablePreferences
                    default: false,
                    desc: "Skip copying the Stimulus controller into app/javascript/controllers."
 
-      desc "Copies Rails Table Preferences migrations, initializer, and JavaScript into the host application."
+      class_option :skip_stylesheets,
+                   type: :boolean,
+                   default: false,
+                   desc: "Skip copying the default stylesheet into app/assets/stylesheets."
+
+      desc "Copies Rails Table Preferences migrations, initializer, JavaScript, and stylesheets into the host application."
 
       def copy_initializer
         template "initializer.rb", "config/initializers/rails_table_preferences.rb"
@@ -40,6 +45,12 @@ module RailsTablePreferences
         return if options[:skip_javascript]
 
         invoke "rails_table_preferences:javascript"
+      end
+
+      def copy_stylesheets
+        return if options[:skip_stylesheets]
+
+        invoke "rails_table_preferences:stylesheets"
       end
 
       def owner_class_name
