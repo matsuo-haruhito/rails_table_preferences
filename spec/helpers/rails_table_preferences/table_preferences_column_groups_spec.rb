@@ -2,12 +2,13 @@
 
 RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
   describe "#table_preferences_column_groups" do
-    it "groups columns by group metadata" do
+    it "groups normalized columns by group metadata" do
       columns = [
         helper.table_preferences_column(:customer_code, label: "得意先コード", group: { key: :customer, label: "得意先情報" }),
         helper.table_preferences_column(:customer_name, label: "得意先名", group: { key: :customer, label: "得意先情報" }),
         helper.table_preferences_column(:delivery_date, label: "納品日", group: { key: :delivery, label: "配送情報" })
       ]
+      normalized_columns = helper.table_preferences_columns(columns)
 
       groups = helper.table_preferences_column_groups(columns)
 
@@ -16,13 +17,13 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
           {
             "key" => "customer",
             "label" => "得意先情報",
-            "columns" => columns.first(2),
+            "columns" => normalized_columns.first(2),
             "colspan" => 2
           },
           {
             "key" => "delivery",
             "label" => "配送情報",
-            "columns" => [columns.last],
+            "columns" => [normalized_columns.last],
             "colspan" => 1
           }
         ]
