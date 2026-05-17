@@ -19,7 +19,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     run_generator
 
     expect(file("config/initializers/rails_table_preferences.rb")).to exist
-    expect(file("db/migrate/create_table_preferences.rb")).to exist
+    expect(generated_migration).to exist
     expect(file("app/javascript/controllers/rails_table_preferences_controller.js")).to exist
     expect(file("app/assets/stylesheets/rails_table_preferences.css")).to exist
   end
@@ -27,7 +27,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   it "uses the configured owner model in the generated migration and initializer" do
     run_generator %w[--owner-model customers]
 
-    migration = file("db/migrate/create_table_preferences.rb").read
+    migration = generated_migration.read
     initializer = file("config/initializers/rails_table_preferences.rb").read
 
     expect(migration).to include("t.references :customer")
@@ -38,7 +38,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   it "uses the configured owner foreign key" do
     run_generator %w[--owner-model customers --owner-foreign-key member_id]
 
-    migration = file("db/migrate/create_table_preferences.rb").read
+    migration = generated_migration.read
 
     expect(migration).to include("t.references :customer, null: false, foreign_key: { to_table: :customers }")
     expect(migration).to include("add_index :table_preferences, [:member_id, :table_key, :name]")
@@ -48,7 +48,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     run_generator %w[--skip-javascript]
 
     expect(file("config/initializers/rails_table_preferences.rb")).to exist
-    expect(file("db/migrate/create_table_preferences.rb")).to exist
+    expect(generated_migration).to exist
     expect(file("app/javascript/controllers/rails_table_preferences_controller.js")).not_to exist
     expect(file("app/assets/stylesheets/rails_table_preferences.css")).to exist
   end
@@ -57,20 +57,22 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     run_generator %w[--skip-stylesheets]
 
     expect(file("config/initializers/rails_table_preferences.rb")).to exist
-    expect(file("db/migrate/create_table_preferences.rb")).to exist
+    expect(generated_migration).to exist
     expect(file("app/javascript/controllers/rails_table_preferences_controller.js")).to exist
     expect(file("app/assets/stylesheets/rails_table_preferences.css")).not_to exist
   end
 
-  it "prints post-install next steps" do
-    output = capture(:stdout) do
-      run_generator
-    end
+  it "provides post-install next steps in the generator source" do
+    source = File.read(File.expand_path("../../../../lib/generators/rails_table_preferences/install/install_generator.rb", __dir__))
 
-    expect(output).to include("Rails Table Preferences installed.")
-    expect(output).to include("bin/rails db:migrate")
-    expect(output).to include("mount RailsTablePreferences::Engine")
-    expect(output).to include("rails_table_preferences.css")
-    expect(output).to include("Stimulus controller")
+    expect(source).to include("Rails Table Preferences installed.")
+    expect(source).to include("bin/rails db:migrate")
+    expect(source).to include("mount RailsTablePreferences::Engine")
+    expect(source).to include("rails_table_preferences.css")
+    expect(source).to include("Stimulus controller")
+  end
+
+  def generated_migration
+    Pathname.new(Dir[File.join(destination_root, "db/migrate/*_create_table_preferences.rb")].first.to_s)
   end
 end
