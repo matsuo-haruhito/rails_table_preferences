@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: RSpec, JavaScript syntax, and gem build
+    name: RSpec, JavaScript syntax, gem build, and package verification
     runs-on: ubuntu-latest
 
     steps:
@@ -34,3 +34,6 @@ jobs:
 
       - name: Build gem package
         run: bundle exec rake build
+
+      - name: Verify gem package contents
+        run: bundle exec rake package:verify
