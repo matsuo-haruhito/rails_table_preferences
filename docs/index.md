@@ -10,6 +10,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
 - [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
@@ -36,10 +37,11 @@ This directory contains focused documentation for Rails Table Preferences.
 10. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
 11. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
 12. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-13. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
-14. Verify the feature in a sandbox Rails app.
-15. Run the manual QA checklist before asking real users to try the feature.
-16. Before release, run the release checklist and package verification guide.
+13. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+14. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
+15. Verify the feature in a sandbox Rails app.
+16. Run the manual QA checklist before asking real users to try the feature.
+17. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
@@ -60,7 +62,7 @@ Host applications own:
 
 - actual database search execution
 - authorization
-- joins and association search logic
+- joins and association logic
 - business-specific query behavior
 - semantic page/table structure around the generated controls
 - sticky column offset and scroll-container polish for complex layouts
