@@ -10,11 +10,13 @@ module RailsTablePreferences
                 :default_truncate,
                 :pinned,
                 :ignored,
+                :filter,
+                :sortable,
                 :model,
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil)
+    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil)
       @key = key.to_s
       @model = model
       @model_name = model_name
@@ -26,6 +28,8 @@ module RailsTablePreferences
       @default_truncate = integer_or_nil(default_truncate)
       @pinned = ActiveModel::Type::Boolean.new.cast(pinned)
       @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore)
+      @filter = normalize_filter(filter)
+      @sortable = normalize_sortable(sortable)
     end
 
     def to_h
@@ -37,7 +41,9 @@ module RailsTablePreferences
         "width" => default_width,
         "truncate" => default_truncate,
         "pinned" => pinned,
-        "ignored" => ignored
+        "ignored" => ignored,
+        "filter" => filter,
+        "sortable" => sortable
       }.compact
     end
 
@@ -75,6 +81,27 @@ module RailsTablePreferences
       elsif model.present?
         model.to_s.underscore
       end
+    end
+
+    def normalize_filter(value)
+      case value
+      when true
+        { "type" => "text" }
+      when false, nil
+        nil
+      when Symbol, String
+        { "type" => value.to_s }
+      when Hash
+        value.deep_stringify_keys.compact
+      else
+        nil
+      end
+    end
+
+    def normalize_sortable(value)
+      return nil if value.nil?
+
+      ActiveModel::Type::Boolean.new.cast(value)
     end
 
     def integer_or_nil(value)
