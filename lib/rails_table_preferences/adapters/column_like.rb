@@ -49,6 +49,8 @@ module RailsTablePreferences
           default_order: attributes.fetch("default_order", attributes["order"]),
           default_width: attributes.fetch("default_width", attributes["width"]),
           default_truncate: attributes.fetch("default_truncate", attributes["truncate"]),
+          default_overflow: attributes.fetch("default_overflow", attributes["overflow"]),
+          overflow: attributes["overflow"],
           pinned: attributes.fetch("pinned", false),
           fixed: attributes["fixed"],
           group: attributes["group"],
