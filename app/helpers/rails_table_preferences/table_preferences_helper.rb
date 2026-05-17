@@ -46,15 +46,16 @@ module RailsTablePreferences
       }
     end
 
-    def resource_table_for(records, model: nil, table_key: nil, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, partial: nil, **options)
-      model ||= table_preferences_model_for(records)
+    def resource_table_for(records, model: nil, table_key: nil, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, profile: nil, partial: nil, **options)
+      model ||= table_preferences_model_for(records, profile: profile)
       table_key ||= model.model_name.route_key
-      columns = RailsTablePreferences::Adapters::ActiveRecordColumns.call(
+      columns = table_preferences_resource_columns(
         model: model,
         only: only,
         except: except,
         include_id: include_id,
-        include_associations: include_associations
+        include_associations: include_associations,
+        profile: profile
       )
       table_state = table_preferences_state(settings: settings, columns: columns)
 
@@ -66,19 +67,21 @@ module RailsTablePreferences
         settings: table_preferences_settings(settings, allowed_columns: columns),
         columns: columns,
         table_state: table_state,
+        profile: profile,
         options: options
       }
     end
 
-    def tree_resource_table_for(records, model: nil, table_key: nil, parent_id_method: :parent_id, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, partial: nil, **options)
-      model ||= table_preferences_model_for(records)
+    def tree_resource_table_for(records, model: nil, table_key: nil, parent_id_method: :parent_id, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, profile: nil, partial: nil, **options)
+      model ||= table_preferences_model_for(records, profile: profile)
       table_key ||= "#{model.model_name.route_key}_tree"
-      columns = RailsTablePreferences::Adapters::ActiveRecordColumns.call(
+      columns = table_preferences_resource_columns(
         model: model,
         only: only,
         except: except,
         include_id: include_id,
-        include_associations: include_associations
+        include_associations: include_associations,
+        profile: profile
       )
       table_state = table_preferences_state(settings: settings, columns: columns)
 
@@ -91,6 +94,7 @@ module RailsTablePreferences
         settings: table_preferences_settings(settings, allowed_columns: columns),
         columns: columns,
         table_state: table_state,
+        profile: profile,
         options: options
       }
     end
@@ -108,6 +112,39 @@ module RailsTablePreferences
 
     def table_preferences_value(record, column)
       RailsTablePreferences::ValueResolver.call(record, column, view_context: self)
+    end
+
+    def table_preferences_filter_input(form:, column:, method: nil, fallback: nil)
+      filter = table_preferences_filter_metadata(column)
+      return fallback unless filter
+
+      type = filter.fetch("type", nil)
+      rendered = RailsTablePreferences.configuration.filter_renderers.call(
+        type,
+        form: form,
+        method: method || filter["method"] || column["key"],
+        filter: filter,
+        column: column,
+        view_context: self
+      )
+      rendered || fallback
+    end
+
+    def table_preferences_cell_editor(form:, record:, column:, method: nil, fallback: nil)
+      editor = table_preferences_editor_metadata(column)
+      return fallback unless editor
+
+      type = editor.fetch("type", nil)
+      rendered = RailsTablePreferences.configuration.editor_renderers.call(
+        type,
+        form: form,
+        record: record,
+        method: method || editor["method"] || column["key"],
+        editor: editor,
+        column: column,
+        view_context: self
+      )
+      rendered || fallback
     end
 
     def table_preferences_preference_url(table_key:, name: "default")
@@ -201,12 +238,47 @@ module RailsTablePreferences
 
     private
 
-    def table_preferences_model_for(records)
+    def table_preferences_model_for(records, profile: nil)
+      return profile.model if profile.respond_to?(:model) && profile.model
       return records.klass if records.respond_to?(:klass)
       first_record = records.respond_to?(:first) ? records.first : nil
       return first_record.class if first_record
 
       raise ArgumentError, "model: is required when records do not expose klass and are empty"
+    end
+
+    def table_preferences_resource_columns(model:, only:, except:, include_id:, include_associations:, profile:)
+      profile_class = table_preferences_profile_class(profile)
+      resolved_only = only || profile_class&.only_columns
+      resolved_except = Array(except) | Array(profile_class&.excluded_columns)
+      columns = RailsTablePreferences::Adapters::ActiveRecordColumns.call(
+        model: model,
+        only: resolved_only,
+        except: resolved_except,
+        include_id: include_id,
+        include_associations: include_associations
+      )
+
+      profile_class ? profile_class.apply(columns) : columns
+    end
+
+    def table_preferences_profile_class(profile)
+      return if profile.nil?
+      return profile.class unless profile.is_a?(Class)
+
+      profile
+    end
+
+    def table_preferences_filter_metadata(column)
+      filter = column["filter"] || column[:filter]
+      filter = filter.to_table_filter if filter.respond_to?(:to_table_filter)
+      filter.respond_to?(:to_h) ? filter.to_h.deep_stringify_keys : filter
+    end
+
+    def table_preferences_editor_metadata(column)
+      editor = column["editor"] || column[:editor]
+      editor = editor.to_table_cell_editor if editor.respond_to?(:to_table_cell_editor)
+      editor.respond_to?(:to_h) ? editor.to_h.deep_stringify_keys : editor
     end
 
     def table_preferences_column_hash(column)
