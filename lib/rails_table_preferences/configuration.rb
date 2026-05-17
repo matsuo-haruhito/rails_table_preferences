@@ -44,12 +44,16 @@ module RailsTablePreferences
                   :current_user_method,
                   :scope_context_method,
                   :mount_path,
-                  :editor_partial
+                  :editor_partial,
+                  :resource_table_partial,
+                  :tree_resource_table_partial
 
     attr_reader :user_class_name,
                 :user_foreign_key,
                 :label_resolution,
-                :unresolved_label_behavior
+                :unresolved_label_behavior,
+                :filter_renderers,
+                :editor_renderers
 
     def initialize
       @table_name = "table_preferences"
@@ -61,8 +65,12 @@ module RailsTablePreferences
       @scope_context_method = nil
       @mount_path = "/rails_table_preferences"
       @editor_partial = "rails_table_preferences/editor"
+      @resource_table_partial = "rails_table_preferences/resource_table"
+      @tree_resource_table_partial = "rails_table_preferences/tree_resource_table"
       @label_resolution = %i[label i18n_key column_comment]
       @unresolved_label_behavior = :hide
+      @filter_renderers = RailsTablePreferences::RendererRegistry.new
+      @editor_renderers = RailsTablePreferences::RendererRegistry.new
     end
 
     def label_resolution=(value)

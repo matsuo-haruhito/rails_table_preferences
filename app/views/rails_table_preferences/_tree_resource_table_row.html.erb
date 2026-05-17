@@ -1,0 +1,5 @@
+<% table_state.fetch("visible_columns").each do |column| %>
+  <td data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
+    <%= table_preferences_value(item, column) %>
+  </td>
+<% end %>

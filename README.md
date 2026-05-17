@@ -9,6 +9,7 @@ It is designed for business applications with many index tables, where users nee
 Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Resource table adapters](docs/resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and optionally connect TreeView or Rails Fields Kit.
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](docs/scoped_presets.md): owner, shared, role, and organization scoped presets.
 - [Fixed columns and column groups](docs/fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
