@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
+require "fileutils"
 require "active_record"
 require "action_controller/railtie"
 require "rspec/rails"
@@ -49,6 +50,8 @@ class User < ActiveRecord::Base
 end
 
 RSpec.configure do |config|
+  config.include FileUtils, type: :generator
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
