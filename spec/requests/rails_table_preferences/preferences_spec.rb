@@ -8,7 +8,7 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
   end
 
   describe "GET /rails_table_preferences/preferences/:table_key" do
-    it "returns preferences for the current user and table" do
+    it "returns preferences available to the current user and table" do
       RailsTablePreferences::Preference.create!(
         user: user,
         table_key: "orders",
@@ -22,11 +22,43 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
         name: "inspection",
         settings: { "columns" => [] }
       )
+      RailsTablePreferences::Preference.create!(
+        scope_type: "shared",
+        table_key: "orders",
+        name: "shared-default",
+        settings: { "columns" => [] }
+      )
 
       get "/rails_table_preferences/preferences/orders"
 
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)["preferences"].map { |preference| preference["name"] }).to eq(%w[default inspection])
+      preferences = JSON.parse(response.body)["preferences"]
+      expect(preferences.map { |preference| preference["name"] }).to eq(%w[default inspection shared-default])
+      expect(preferences.last["scope_type"]).to eq("shared")
+      expect(preferences.last["editable"]).to eq(false)
+    end
+
+    it "returns role and organization scoped preferences from the configured scope context" do
+      Thread.current[:rails_table_preferences_scope_context] = { roles: ["admin"], organization: "tokyo" }
+      RailsTablePreferences::Preference.create!(
+        scope_type: "role",
+        scope_key: "admin",
+        table_key: "orders",
+        name: "admin-view",
+        settings: { "columns" => [] }
+      )
+      RailsTablePreferences::Preference.create!(
+        scope_type: "organization",
+        scope_key: "tokyo",
+        table_key: "orders",
+        name: "tokyo-view",
+        settings: { "columns" => [] }
+      )
+
+      get "/rails_table_preferences/preferences/orders"
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["preferences"].map { |preference| preference["name"] }).to eq(%w[admin-view tokyo-view])
     end
   end
 
@@ -35,10 +67,12 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       get "/rails_table_preferences/preferences/orders/default"
 
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)).to eq(
+      expect(JSON.parse(response.body)).to include(
         "table_key" => "orders",
         "name" => "default",
         "default" => false,
+        "scope_type" => "owner",
+        "editable" => true,
         "settings" => {
           "columns" => [],
           "filters" => {},
@@ -46,10 +80,52 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
         }
       )
     end
+
+    it "resolves shared defaults when owner default does not exist" do
+      RailsTablePreferences::Preference.create!(
+        scope_type: "shared",
+        table_key: "orders",
+        name: "default",
+        default_flag: true,
+        settings: { "columns" => [{ "key" => "shared_column" }] }
+      )
+
+      get "/rails_table_preferences/preferences/orders/default"
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["scope_type"]).to eq("shared")
+      expect(json["editable"]).to eq(false)
+      expect(json["settings"]["columns"].first["key"]).to eq("shared_column")
+    end
+
+    it "prefers owner defaults over shared defaults" do
+      RailsTablePreferences::Preference.create!(
+        scope_type: "shared",
+        table_key: "orders",
+        name: "default",
+        default_flag: true,
+        settings: { "columns" => [{ "key" => "shared_column" }] }
+      )
+      RailsTablePreferences::Preference.create!(
+        user: user,
+        table_key: "orders",
+        name: "default",
+        default_flag: true,
+        settings: { "columns" => [{ "key" => "owner_column" }] }
+      )
+
+      get "/rails_table_preferences/preferences/orders/default"
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["scope_type"]).to eq("owner")
+      expect(json["settings"]["columns"].first["key"]).to eq("owner_column")
+    end
   end
 
   describe "POST /rails_table_preferences/preferences/:table_key" do
-    it "creates a named preference" do
+    it "creates a named owner preference by default" do
       post "/rails_table_preferences/preferences/orders", params: {
         name: "inspection",
         settings: {
@@ -66,10 +142,30 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       expect(response).to have_http_status(:created)
       preference = RailsTablePreferences::Preference.find_for(user: user, table_key: "orders", name: "inspection")
       expect(preference).to be_present
+      expect(preference.scope_type).to eq("owner")
       expect(preference.settings["columns"].first["key"]).to eq("customer_code")
     end
 
-    it "clears other default flags when creating a new default" do
+    it "creates a shared preference when requested" do
+      post "/rails_table_preferences/preferences/orders", params: {
+        name: "team-default",
+        scope_type: "shared",
+        settings: { columns: [] }
+      }
+
+      expect(response).to have_http_status(:created)
+      preference = RailsTablePreferences::Preference.find_for(
+        user: user,
+        table_key: "orders",
+        name: "team-default",
+        scope_type: "shared"
+      )
+      expect(preference).to be_present
+      expect(preference.user).to be_nil
+      expect(preference.scope_type).to eq("shared")
+    end
+
+    it "clears other default flags in the same scope when creating a new default" do
       existing = RailsTablePreferences::Preference.create!(
         user: user,
         table_key: "orders",
