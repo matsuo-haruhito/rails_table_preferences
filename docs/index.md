@@ -4,6 +4,7 @@ This directory contains focused documentation for Rails Table Preferences.
 
 ## Start here
 
+- [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
 - [Controller integration](controller_integration.md): how to resolve saved preferences and pass filter/sort params to existing Rails controllers.
