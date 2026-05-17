@@ -1,8 +1,8 @@
 # Rails Table Preferences
 
-Rails Table Preferences is a Rails engine/gem for saving and restoring user-specific table display preferences in Rails applications.
+Rails Table Preferences is a Rails engine/gem for saving and restoring table display preferences in Rails applications.
 
-It is designed for business applications with many index tables, where users need to customize visible columns, column order, column width, text truncation, filter UI state, and sort UI state per table.
+It is designed for business applications with many index tables, where users need to customize visible columns, column order, column width, text truncation, filter UI state, sort UI state, presets, fixed columns, and export column order per table.
 
 ## Documentation
 
@@ -10,26 +10,31 @@ Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
+- [Scoped presets](docs/scoped_presets.md): owner, shared, role, and organization scoped presets.
+- [Fixed columns and column groups](docs/fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
+- [Export integration](docs/export_integration.md): reuse saved column visibility, order, labels, and metadata for CSV, Excel, or report exports.
+- [Accessibility baseline](docs/accessibility.md): accessibility hooks provided by the bundled editor/controller and host app responsibilities.
 - [Demo screen generator](docs/demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](docs/sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Manual QA checklist](docs/manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Release checklist](docs/release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
 - [Practical examples](docs/examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
-- [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
-- [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort params to existing Rails controllers.
+- [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
+- [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort/export params to existing Rails controllers.
 - [Filter metadata](docs/filter_metadata.md): declaring filterable/sortable columns and understanding neutral filter/sort settings.
 - [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
 - [JavaScript controller notes](docs/javascript_controller.md): bundled Stimulus controller responsibilities and safety boundaries.
 
 ## Goals
 
-- Save table display preferences per owner model, usually a user
-- Support column visibility, order, width, and truncation
-- Support saved filter and sort UI state without becoming a query builder
-- Provide Rails helpers and Stimulus controllers
-- Keep compatibility with existing `ColumnAdjustment`-style implementations
-- Allow host applications to customize ERB, CSS, JavaScript, and locales
-- Integrate with existing controller params, Ransack, or host application search objects
+- Save table display preferences per owner model, usually a user.
+- Support column visibility, order, width, truncation, fixed/pinned metadata, and column group metadata.
+- Support multiple named presets, default presets, shared presets, role defaults, and organization defaults.
+- Support saved filter and sort UI state without becoming a query builder.
+- Provide Rails helpers, controller helpers, a small JSON API, and a bundled Stimulus controller.
+- Keep compatibility with existing `ColumnAdjustment`-style implementations.
+- Allow host applications to customize ERB, CSS, JavaScript, and locales.
+- Integrate with existing controller params, Ransack, host application search objects, and export code.
 
 ## Supported versions
 
@@ -46,20 +51,28 @@ Rails 7.0 is expected to work, but Rails 7.1+ is recommended.
 
 Ruby 3.1+ is required.
 
-## Installation direction
+## Installation
 
 Rails Table Preferences stores table preferences in the host application's primary database using a normal Rails migration.
-
-It does not use a separate schema file such as `db/queue_schema.rb`. The preference records are application data linked to an owner model, not infrastructure data like a job queue.
-
-Planned installation flow:
 
 ```bash
 bin/rails generate rails_table_preferences:install
 bin/rails db:migrate
 ```
 
-The generator copies a regular migration into the host application's `db/migrate` directory so the table appears in the application's normal `schema.rb` or `structure.sql`. It also creates `config/initializers/rails_table_preferences.rb`, copies the bundled Stimulus controller to `app/javascript/controllers/rails_table_preferences_controller.js`, and copies the default stylesheet to `app/assets/stylesheets/rails_table_preferences.css`.
+The generator creates:
+
+- `config/initializers/rails_table_preferences.rb`
+- `db/migrate/*_create_table_preferences.rb`
+- `app/javascript/controllers/rails_table_preferences_controller.js`
+- `app/assets/stylesheets/rails_table_preferences.css`
+
+Mount the engine when using the bundled JSON API:
+
+```ruby
+# config/routes.rb
+mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
+```
 
 For a lightweight local browser verification screen, add `--with-demo`:
 
@@ -89,15 +102,10 @@ bin/rails generate rails_table_preferences:install --owner-model client
 bin/rails generate rails_table_preferences:install --owner-model customers --owner-foreign-key member_id
 ```
 
-Skip JavaScript copying when the host app wants to provide or register its own controller:
+Skip copied assets when the host app wants to provide its own implementation:
 
 ```bash
 bin/rails generate rails_table_preferences:install --skip-javascript
-```
-
-Skip stylesheet copying when the host app wants to provide all styles itself:
-
-```bash
 bin/rails generate rails_table_preferences:install --skip-stylesheets
 ```
 
@@ -108,39 +116,39 @@ bin/rails generate rails_table_preferences:javascript
 bin/rails generate rails_table_preferences:stylesheets
 ```
 
-Mount the engine when using the bundled JSON API:
-
-```ruby
-# config/routes.rb
-mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
-```
-
 ## Current scope
 
-The first implementation focuses on extracting and generalizing the `ColumnAdjustment`-style table display settings used in existing Rails applications.
+The current implementation includes the former v0.2 roadmap items in the initial v0.1 release target.
 
-Included in the current scope:
+Included in v0.1 scope:
 
 - Table-specific display settings
 - Owner-specific preference persistence
+- Shared presets
+- Role and organization scoped presets/defaults
 - Column visibility
 - Column order
 - Column width
 - Text truncation metadata
+- Fixed/pinned column metadata and CSS/JS hooks
+- Column group metadata and grouping helper
 - Multiple presets and default presets
 - Ignored columns
 - Filter metadata and filter panel UI foundation
 - Sort metadata and sortable header click UI
 - Controller params and Ransack adapters
 - Controller/view helpers for existing search forms
+- Export payload helper for CSV, Excel, and report generation in the host app
+- Baseline accessibility hooks for generated controls
 - Rails engine structure
 - View helpers
+- Controller helpers
 - Stimulus controller
 - Install, JavaScript, stylesheet, view, and demo generators
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
 - Local demo and sandbox verification guidance
-- Manual QA, troubleshooting, decision guide, and release checklist documentation
+- Manual QA, troubleshooting, decision guide, scoped preset, fixed column, export, accessibility, and release checklist documentation
 
 ## Out of scope
 
@@ -154,8 +162,9 @@ Rails Table Preferences intentionally does not try to become:
 - An authorization system
 - An automatic association/join inference system
 - A pagination abstraction
-- A CSV export abstraction
+- A CSV/Excel file generator
 - A React or Vue component library
+- A complete admin UI for managing shared, role, or organization presets
 
 ## Roadmap
 
@@ -165,11 +174,11 @@ This is the current target version. It is intended to be usable in real Rails ap
 
 Included scope:
 
-- Column visibility, order, width, and truncation
-- Owner-specific preference persistence
-- Multiple named presets per table
-- Default preset support
+- Column visibility, order, width, truncation, fixed/pinned metadata, and column group metadata
+- Owner, shared, role, and organization scoped presets
+- Default preset resolution across owner, role, organization, and shared scopes
 - Apply, Save, Save as new, Delete, and Reset actions
+- Read-only handling for non-owner presets in the normal editor path
 - Ignored columns
 - Column labels through explicit labels and host app locales
 - Filter metadata and saved filter UI state
@@ -177,6 +186,7 @@ Included scope:
 - Plain controller params adapter
 - Ransack adapter
 - Hidden fields helper for existing search forms
+- Export payload helper for host app CSV/Excel/report code
 - Rails helpers and Stimulus integration
 - JSON API for preference and preset persistence
 - Migration, install, JavaScript, stylesheet, view, and demo generators
@@ -184,7 +194,7 @@ Included scope:
 - Owner model and owner foreign key generator/configuration options
 - Existing `ColumnAdjustment` compatibility and import guidance
 - Copy-based ERB, CSS, and JavaScript customization path
-- Quick start, practical examples, troubleshooting, demo, sandbox, decision guide, manual QA, and release checklist docs
+- Quick start, practical examples, troubleshooting, demo, sandbox, decision guide, scoped presets, fixed columns/groups, export integration, accessibility baseline, manual QA, and release checklist docs
 
 Remaining before tagging v0.1:
 
@@ -194,36 +204,28 @@ Remaining before tagging v0.1:
 - Do one final sandbox/demo verification pass
 - Review README/docs consistency against the released behavior
 
-### v0.2: Advanced preference distribution and table layout features
-
-Not yet implemented.
-
-Planned scope:
-
-- Shared presets
-- Role, organization, or tenant-level default presets
-- Fixed or pinned columns
-- Column groups
-- Export integration hooks
-- Accessibility improvements beyond the current baseline
-- Stronger release automation and broader Rails version matrix, if needed
-
 ### Later candidates
 
 These are possible future directions, not committed release promises:
 
 - More adapter examples for Datagrid, Filterrific, or host application search objects
 - Richer filter widgets through integration with other UI helper gems
+- A dedicated admin UI for shared, role, or organization preset management
 - Optional browser/system test harness if maintenance cost is justified
+- Broader Rails version matrix if needed
 - Additional Japanese documentation for main user workflows
 
-## Data model direction
+## Data model
 
-The preferred long-term model is an owner-specific table preference record. By default the owner model is `User`, but it can be changed to `Customer`, `Client`, `Account`, or another application model.
+The preferred model is an owner-aware table preference record with optional broader scopes.
+
+By default the owner model is `User`, but it can be changed to `Customer`, `Client`, `Account`, or another application model.
 
 ```ruby
 create_table :table_preferences do |t|
-  t.references :user, null: false, foreign_key: true
+  t.references :user, null: true, foreign_key: true
+  t.string :scope_type, null: false, default: "owner"
+  t.string :scope_key
   t.string :table_key, null: false
   t.string :name, null: false, default: "default"
   t.json :settings, null: false
@@ -231,18 +233,33 @@ create_table :table_preferences do |t|
   t.timestamps
 end
 
-add_index :table_preferences, [:user_id, :table_key, :name], unique: true
+add_index :table_preferences,
+          [:scope_type, :scope_key, :user_id, :table_key, :name],
+          unique: true,
+          name: "idx_table_preferences_scope_table_name"
 ```
+
+`scope_type` can be:
+
+- `owner`: personal preset for the owner record.
+- `shared`: global preset available to all owners.
+- `role`: role-specific preset, matched through `scope_context_method`.
+- `organization`: organization-specific preset, matched through `scope_context_method`.
+
+The owner reference is nullable because shared, role, and organization presets are not owned by a single user.
 
 With `--owner-model customers`, the generated migration uses `customer_id` instead of `user_id`:
 
 ```ruby
 create_table :table_preferences do |t|
-  t.references :customer, null: false, foreign_key: true
+  t.references :customer, null: true, foreign_key: true
   # ...
 end
 
-add_index :table_preferences, [:customer_id, :table_key, :name], unique: true
+add_index :table_preferences,
+          [:scope_type, :scope_key, :customer_id, :table_key, :name],
+          unique: true,
+          name: "idx_table_preferences_scope_table_name"
 ```
 
 The settings payload includes column display preferences plus neutral filter and sort UI state:
@@ -299,6 +316,7 @@ RailsTablePreferences.configure do |config|
   config.owner_model = :users
   config.parent_controller_class_name = "ApplicationController"
   config.current_user_method = :current_user
+  config.scope_context_method = nil
   config.mount_path = "/rails_table_preferences"
   config.editor_partial = "rails_table_preferences/editor"
 end
@@ -328,9 +346,28 @@ config.owner_foreign_key = :member_id
 config.user_foreign_key = :member_id
 ```
 
+Configure `scope_context_method` when shared, role, or organization presets should be resolved from the current request context:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.scope_context_method = :table_preference_scope_context
+end
+
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    {
+      roles: current_user.roles.pluck(:key),
+      organization: current_user.organization_id
+    }
+  end
+end
+```
+
 The first implementation assumes a primary application database. Applications with different owner model names can configure the owner model and foreign key before using the model. If the engine is mounted at a different path, set `mount_path` to the same value.
 
-## Column labels and host app locales
+## Column definitions
 
 Column labels are resolved in this order:
 
@@ -345,10 +382,11 @@ Examples:
 
 ```ruby
 columns = [
-  table_preferences_column(:customer_code, model_name: :order),
-  table_preferences_column(:customer_name, model: Order),
-  table_preferences_column(:delivery_date, i18n_key: "orders.index.columns.delivery_date"),
-  table_preferences_column(:memo, label: "備考")
+  table_preferences_column(:order_no, model_name: :order, fixed: true, default_width: 120),
+  table_preferences_column(:customer_code, model_name: :order, group: { key: :customer, label: "得意先情報" }),
+  table_preferences_column(:customer_name, model: Order, group: { key: :customer, label: "得意先情報" }),
+  table_preferences_column(:delivery_date, i18n_key: "orders.index.columns.delivery_date", sortable: true),
+  table_preferences_column(:memo, label: "備考", filter: { type: :text, param: :memo })
 ]
 ```
 
@@ -371,8 +409,6 @@ ja:
 
 Use ignored columns for fields that should not appear in the user-facing column editor, even if the table or saved settings contain them.
 
-Per-column form:
-
 ```ruby
 columns = [
   table_preferences_column(:customer_code, model_name: :order),
@@ -381,7 +417,7 @@ columns = [
 ]
 ```
 
-Blacklist form:
+Or pass a render-time blacklist:
 
 ```erb
 <%= table_preferences_editor(
@@ -389,18 +425,9 @@ Blacklist form:
   columns: columns,
   ignored_columns: [:internal_cost, :secret_note]
 ) %>
-
-<%= table_preferences_table_tag(
-  table_key: :orders,
-  columns: columns,
-  ignored_columns: [:internal_cost, :secret_note],
-  class: "table"
-) do %>
-  ...
-<% end %>
 ```
 
-Ignored columns are removed from `columns_json` and are also filtered out of the initial `settings_json`. This prevents an old saved preference from reintroducing a column that the host application has since hidden from users.
+Ignored columns are removed from `columns_json` and are also filtered out of the initial `settings_json`. This prevents old saved preferences from reintroducing a column that the host application has since hidden from users.
 
 This is a UI/display protection mechanism. Sensitive values should still be protected by normal authorization, query selection, and view rendering rules in the host application.
 
@@ -453,6 +480,24 @@ Existing search form integration:
 ) %>
 ```
 
+## Export integration
+
+Rails Table Preferences does not generate CSV, Excel, or report files, but it can provide an ordered export payload:
+
+```ruby
+payload = rails_table_preference_export_payload(
+  table_key: :orders,
+  columns: columns,
+  name: params[:table_preference_name]
+)
+
+payload["column_keys"]
+payload["headers"]
+payload["columns"]
+```
+
+See [Export integration](docs/export_integration.md).
+
 ## Host app customization
 
 ### ERB
@@ -485,16 +530,9 @@ You can also provide a custom partial per call:
 ) %>
 ```
 
-The partial receives these locals:
-
-```text
-table_key, name, title, settings, columns, settings_json, columns_json,
-preference_url, collection_url, data_attributes
-```
-
 ### CSS
 
-The default stylesheet is copy-based and intentionally minimal. It provides a stable grid layout for the editor rows so Japanese column labels, numeric inputs, and narrow dialogs do not overlap.
+The default stylesheet is copy-based and intentionally minimal.
 
 ```bash
 bin/rails generate rails_table_preferences:stylesheets
@@ -506,23 +544,7 @@ The file is copied to:
 app/assets/stylesheets/rails_table_preferences.css
 ```
 
-Host applications can freely edit or override the copied stylesheet. Main class hooks:
-
-```text
-rails-table-preferences-editor
-rails-table-preferences-editor__title
-rails-table-preferences-editor__preset
-rails-table-preferences-editor__default-preset
-rails-table-preferences-editor__rows
-rails-table-preferences-editor__actions
-rails-table-preferences-editor__row
-rails-table-preferences-editor__drag-handle
-rails-table-preferences-resize-handle
-rails-table-preferences-filter-button
-rails-table-preferences-filter-panel
-rails-table-preferences-sortable-column
-rails-table-preferences-sort-indicator
-```
+Host applications can freely edit or override the copied stylesheet.
 
 ### JavaScript
 
@@ -547,23 +569,13 @@ If the host application wants to maintain its own JavaScript implementation, ski
 bin/rails generate rails_table_preferences:install --skip-javascript
 ```
 
+Rails Table Preferences does not require importmap-specific setup.
+
 See [JavaScript controller notes](docs/javascript_controller.md) for the bundled controller's responsibilities and event boundaries.
 
-The controller contract is the data attributes emitted by the helper/partial:
+## JSON API
 
-```text
-data-rails-table-preferences-table-key-value
-data-rails-table-preferences-name-value
-data-rails-table-preferences-url-value
-data-rails-table-preferences-collection-url-value
-data-rails-table-preferences-settings-value
-data-rails-table-preferences-columns-value
-data-rails-table-preferences-column-key
-```
-
-## Current API foundation
-
-The mounted engine exposes a small JSON API for one owner's table preferences and presets.
+The mounted engine exposes a small JSON API for available table preferences and presets.
 
 ```http
 GET    /rails_table_preferences/preferences/:table_key
@@ -574,7 +586,7 @@ PUT    /rails_table_preferences/preferences/:table_key/:name
 DELETE /rails_table_preferences/preferences/:table_key/:name
 ```
 
-`name` is optional for single-preset operations and defaults to `default`. `POST` accepts `name`, `settings`, and optional `default`. `PATCH` and `PUT` also accept optional `default` to mark the preset as the default for that table. When one preset is marked default, other presets for the same owner and table are cleared.
+`name` is optional for single-preset operations and defaults to `default`. `POST` accepts `name`, `scope_type`, `scope_key`, `settings`, and optional `default`. `PATCH` and `PUT` also accept optional `default` to mark a preset as the default for that table and scope.
 
 Example request body:
 
@@ -589,45 +601,30 @@ Example request body:
         "visible": true,
         "order": 10,
         "width": 120,
-        "truncate": 20
+        "truncate": 20,
+        "pinned": false
       }
     ]
   }
 }
 ```
 
-Example single preference response:
+Example response:
 
 ```json
 {
   "table_key": "orders",
   "name": "default",
   "default": false,
+  "scope_type": "owner",
+  "scope_key": "",
+  "scope_label": "owner",
+  "editable": true,
   "settings": {
     "columns": [],
     "filters": {},
     "sorts": []
   }
-}
-```
-
-Example collection response:
-
-```json
-{
-  "table_key": "orders",
-  "preferences": [
-    {
-      "table_key": "orders",
-      "name": "default",
-      "default": true,
-      "settings": {
-        "columns": [],
-        "filters": {},
-        "sorts": []
-      }
-    }
-  ]
 }
 ```
 
@@ -637,9 +634,9 @@ Current helper direction:
 
 ```erb
 <% columns = [
-  table_preferences_column(:order_no, model_name: :order, default_order: 10, default_width: 120),
-  table_preferences_column(:customer_code, model_name: :order, default_order: 20, default_width: 120),
-  table_preferences_column(:customer_name, model_name: :order, default_order: 30, default_width: 240, default_truncate: 30)
+  table_preferences_column(:order_no, model_name: :order, default_order: 10, default_width: 120, fixed: true),
+  table_preferences_column(:customer_code, model_name: :order, default_order: 20, default_width: 120, group: { key: :customer, label: "Customer" }),
+  table_preferences_column(:customer_name, model_name: :order, default_order: 30, default_width: 240, default_truncate: 30, group: { key: :customer, label: "Customer" })
 ] %>
 
 <%= table_preferences_editor(table_key: :orders, columns: columns, title: "Order table settings") %>
@@ -664,15 +661,7 @@ Current helper direction:
 <% end %>
 ```
 
-The bundled Stimulus controller applies saved `visible`, `order`, `width`, and `truncate` values to cells marked with `data-rails-table-preferences-column-key`. The editor helper renders a preset selector, preset name input, default checkbox, Apply, Save, Save as new, Delete, and Reset buttons for the same settings payload.
-
-The preset selector loads existing presets for the current table. Selecting a preset fetches that preset, merges it with the current column definitions, and applies it to the table. The preset name input controls the current preset name. Use Save to update the current preset, Save as new to create a named preset, Delete to remove it, and the default checkbox to mark a preset as the table default.
-
-The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
-
-Header cells receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
-
-Filterable header cells receive a filter button. Sortable header cells can be clicked to cycle through ascending, descending, and no sort.
+The bundled Stimulus controller applies saved `visible`, `order`, `width`, `truncate`, `pinned`, filter, and sort state to cells marked with `data-rails-table-preferences-column-key`.
 
 ## Legacy ColumnAdjustment import
 
@@ -727,7 +716,7 @@ The same checks are run by the GitHub Actions CI workflow.
 
 ## Development status
 
-This gem is in active initial development. The current test suite passes locally with `125 examples, 0 failures`, and the bundled Stimulus controller passes `node --check`.
+This gem is in active initial development. The current test suite is expected to pass locally, and the bundled Stimulus controller should pass `node --check`.
 
 ## License
 
