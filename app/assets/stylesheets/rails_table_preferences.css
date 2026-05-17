@@ -68,6 +68,11 @@
   border-radius: 0.5rem;
 }
 
+.rails-table-preferences-editor__row--pinned,
+.rails-table-preferences-editor__row--fixed {
+  border-inline-start-width: 0.375rem;
+}
+
 .rails-table-preferences-editor__row--dragging,
 .rails-table-preferences-table-column--dragging {
   opacity: 0.65;
@@ -222,6 +227,23 @@
   min-height: 2.25rem;
   padding: 0.25rem 0.75rem;
   font: inherit;
+}
+
+.rails-table-preferences-pinned,
+.rails-table-preferences-fixed,
+[data-rails-table-preferences-pinned="true"],
+[data-rails-table-preferences-fixed="true"] {
+  position: sticky;
+  left: var(--rails-table-preferences-pinned-left, 0px);
+  z-index: 2;
+  background: var(--rails-table-preferences-pinned-background, canvas);
+}
+
+th.rails-table-preferences-pinned,
+th.rails-table-preferences-fixed,
+th[data-rails-table-preferences-pinned="true"],
+th[data-rails-table-preferences-fixed="true"] {
+  z-index: 3;
 }
 
 @media (max-width: 64rem) {
