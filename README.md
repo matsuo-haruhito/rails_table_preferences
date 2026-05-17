@@ -9,9 +9,11 @@ It is designed for business applications with many index tables, where users nee
 Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Demo screen generator](docs/demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](docs/sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Manual QA checklist](docs/manual_qa.md): browser and host application checks to run before asking real users to try the feature.
+- [Release checklist](docs/release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
 - [Practical examples](docs/examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
 - [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort params to existing Rails controllers.
@@ -134,9 +136,11 @@ Included in the current scope:
 - Rails engine structure
 - View helpers
 - Stimulus controller
-- Install, JavaScript, stylesheet, and view generators
+- Install, JavaScript, stylesheet, view, and demo generators
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
+- Local demo and sandbox verification guidance
+- Manual QA, troubleshooting, decision guide, and release checklist documentation
 
 ## Out of scope
 
@@ -153,40 +157,65 @@ Rails Table Preferences intentionally does not try to become:
 - A CSV export abstraction
 - A React or Vue component library
 
-## Planned roadmap
+## Roadmap
 
-### v0.1: Column display preferences
+### v0.1: Initial usable release
+
+This is the current target version. It is intended to be usable in real Rails applications after local sandbox/manual verification.
+
+Included scope:
 
 - Column visibility, order, width, and truncation
-- Owner-specific persistence
+- Owner-specific preference persistence
+- Multiple named presets per table
+- Default preset support
+- Apply, Save, Save as new, Delete, and Reset actions
+- Ignored columns
+- Column labels through explicit labels and host app locales
+- Filter metadata and saved filter UI state
+- Sort metadata and sortable header click UI
+- Plain controller params adapter
+- Ransack adapter
+- Hidden fields helper for existing search forms
 - Rails helpers and Stimulus integration
-- Migration and install generators
-- Existing `ColumnAdjustment` compatibility guidance
+- JSON API for preference and preset persistence
+- Migration, install, JavaScript, stylesheet, view, and demo generators
+- `--with-demo`, `--skip-javascript`, and `--skip-stylesheets` install options
+- Owner model and owner foreign key generator/configuration options
+- Existing `ColumnAdjustment` compatibility and import guidance
+- Copy-based ERB, CSS, and JavaScript customization path
+- Quick start, practical examples, troubleshooting, demo, sandbox, decision guide, manual QA, and release checklist docs
 
-### v0.2: Presets and preference management
+Remaining before tagging v0.1:
 
-- Multiple presets per table
-- Default preset
-- Duplicate, delete, and reset actions
-- Clearer owner/table/preset data model
+- Add `CHANGELOG.md`
+- Run `bundle exec rake build` and inspect package contents
+- Confirm CI is green on the release commit
+- Do one final sandbox/demo verification pass
+- Review README/docs consistency against the released behavior
 
-### v0.3: Filter and sort UI state
+### v0.2: Advanced preference distribution and table layout features
 
-- Column filter UI
-- Text, number, date, boolean, blank, and non-blank filters
-- Saved filter conditions
-- Sortable header click UI
-- Normalized filter/sort params for Rails controllers
-- Ransack adapter and plain controller params adapter
+Not yet implemented.
 
-### v0.4 and later
+Planned scope:
 
 - Shared presets
-- Role or organization defaults
-- Fixed columns
+- Role, organization, or tenant-level default presets
+- Fixed or pinned columns
 - Column groups
-- Export integration
-- Accessibility improvements
+- Export integration hooks
+- Accessibility improvements beyond the current baseline
+- Stronger release automation and broader Rails version matrix, if needed
+
+### Later candidates
+
+These are possible future directions, not committed release promises:
+
+- More adapter examples for Datagrid, Filterrific, or host application search objects
+- Richer filter widgets through integration with other UI helper gems
+- Optional browser/system test harness if maintenance cost is justified
+- Additional Japanese documentation for main user workflows
 
 ## Data model direction
 
