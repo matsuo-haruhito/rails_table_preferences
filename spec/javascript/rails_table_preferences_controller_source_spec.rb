@@ -15,6 +15,16 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
   end
 
+  it "defaults filter UI labels to Japanese" do
+    expect(source).to include('filterLabel: { type: String, default: "絞り込み" }')
+    expect(source).to include('filterApplyLabel: { type: String, default: "適用" }')
+    expect(source).to include('filterClearLabel: { type: String, default: "クリア" }')
+    expect(source).to include('filterOperatorLabel: { type: String, default: "条件" }')
+    expect(source).to include('filterValueLabel: { type: String, default: "値" }')
+    expect(source).to include('filterFromLabel: { type: String, default: "開始" }')
+    expect(source).to include('filterToLabel: { type: String, default: "終了" }')
+  end
+
   it "builds editor rows with localized Stimulus values" do
     expect(source).to include('${this.escapeHtml(this.orderLabelValue)}')
     expect(source).to include('${this.escapeHtml(this.widthLabelValue)}')
@@ -44,11 +54,38 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("reorderSensitivity")
   end
 
+  it "does not start table dragging from filter buttons" do
+    expect(source).to include('event.target.closest("[data-rails-table-preferences-filter-button]")')
+  end
+
   it "supports column resize with a widened hit area" do
     expect(source).to include("resizeHandleWidth: { type: Number, default: 10 }")
     expect(source).to include("applyResizeHandleHitArea(cell, handle)")
     expect(source).to include("handle.style.width = `${this.normalizedResizeHandleWidth}px`")
     expect(source).to include("startColumnResize(event)")
     expect(source).to include("resizeColumn(event)")
+  end
+
+  it "installs filter buttons for filterable columns" do
+    expect(source).to include("installFilterControls()")
+    expect(source).to include("column?.filter")
+    expect(source).to include('button.dataset.railsTablePreferencesFilterButton = "true"')
+    expect(source).to include("toggleFilterPanel(event, cell, column)")
+  end
+
+  it "builds filter panels and stores neutral filter conditions" do
+    expect(source).to include("filterPanelHtml(column)")
+    expect(source).to include("filterValueHtml(filter, condition, selectedOperator)")
+    expect(source).to include("applyFilterPanel(key, panel)")
+    expect(source).to include("updateFilterCondition(key, condition)")
+    expect(source).to include("filters: this.settingsValue?.filters || {}")
+  end
+
+  it "supports common filter types and operators" do
+    expect(source).to include('case "number"')
+    expect(source).to include('case "date"')
+    expect(source).to include('case "select"')
+    expect(source).to include('case "boolean"')
+    expect(source).to include('return ["contains", "equals", "starts_with", "ends_with", "blank", "present"]')
   end
 end
