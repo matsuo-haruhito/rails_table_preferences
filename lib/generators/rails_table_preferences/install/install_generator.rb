@@ -31,6 +31,11 @@ module RailsTablePreferences
                    default: false,
                    desc: "Skip copying the default stylesheet into app/assets/stylesheets."
 
+      class_option :with_demo,
+                   type: :boolean,
+                   default: false,
+                   desc: "Copy a lightweight demo controller and view for local browser verification."
+
       desc "Copies Rails Table Preferences migrations, initializer, JavaScript, and stylesheets into the host application."
 
       def copy_initializer
@@ -53,6 +58,13 @@ module RailsTablePreferences
         invoke "rails_table_preferences:stylesheets"
       end
 
+      def copy_demo
+        return unless options[:with_demo]
+
+        copy_file "demo/orders_controller.rb", "app/controllers/rails_table_preferences_demo/orders_controller.rb"
+        copy_file "demo/index.html.erb", "app/views/rails_table_preferences_demo/orders/index.html.erb"
+      end
+
       def show_post_install_message
         say "\nRails Table Preferences installed.", :green
         say "\nNext steps:"
@@ -70,6 +82,13 @@ module RailsTablePreferences
         unless options[:skip_javascript]
           say "  4. Ensure the Stimulus controller is registered."
           say "     stimulus-rails default manifests usually register app/javascript/controllers/*_controller.js automatically."
+        end
+
+        if options[:with_demo]
+          say "  5. Add this route if you want to open the copied demo screen:"
+          say "       get \"/rails_table_preferences_demo/orders\", to: \"rails_table_preferences_demo/orders#index\""
+          say "     The demo uses the configured current-user method and the table_preferences table."
+          say "     Remove the copied demo controller/view before production release if they are not needed."
         end
 
         say ""
