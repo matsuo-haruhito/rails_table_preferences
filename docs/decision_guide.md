@@ -16,10 +16,21 @@ Example:
 
 ```ruby
 columns = [
-  table_preferences_column(:order_no, model_name: :order, default_width: 120),
-  table_preferences_column(:customer_name, model_name: :order, default_width: 240)
+  table_preferences_column(:order_no, label: "受注番号", default_width: 120),
+  table_preferences_column(:customer_name, label: "得意先名", default_width: 240)
 ]
 ```
+
+You can also use database column comments by passing an Active Record model class:
+
+```ruby
+columns = [
+  table_preferences_column(:order_no, model: Order, default_width: 120),
+  table_preferences_column(:customer_name, model: Order, default_width: 240)
+]
+```
+
+By default, columns whose labels cannot be resolved are treated as ignored and do not appear in the editor.
 
 ```erb
 <%= table_preferences_editor(table_key: :orders, columns: columns) %>
@@ -141,8 +152,8 @@ Per-column form:
 
 ```ruby
 columns = [
-  table_preferences_column(:customer_name, model_name: :order),
-  table_preferences_column(:internal_cost, model_name: :order, ignored: true)
+  table_preferences_column(:customer_name, label: "得意先名"),
+  table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
 ]
 ```
 
@@ -160,16 +171,34 @@ Ignored columns are removed from Rails Table Preferences settings and editor pay
 
 ## I want Japanese column labels
 
-Prefer host app locale entries or explicit labels.
+Use explicit labels, explicit i18n keys, or database column comments. The default label resolution order is:
 
-Use `model_name:` or `model:` when the label should come from Active Record/Active Model translations:
+1. `label:`
+2. `i18n_key:`
+3. `model.columns_hash[key].comment` when `model:` is an Active Record model class
 
 ```ruby
-table_preferences_column(:customer_name, model_name: :order)
+table_preferences_column(:customer_name, label: "得意先名")
+table_preferences_column(:delivery_date, i18n_key: "orders.index.columns.delivery_date")
 table_preferences_column(:customer_code, model: Order)
 ```
 
-Host app locale example:
+Host apps that want Rails-style attribute translations can add those rules in the initializer:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.label_resolution = %i[
+    label
+    i18n_key
+    column_comment
+    activerecord_attribute_i18n
+    activemodel_attribute_i18n
+    attribute_i18n
+  ]
+end
+```
+
+Then add host app locale entries:
 
 ```yaml
 ja:
@@ -177,12 +206,6 @@ ja:
     attributes:
       order:
         customer_name: 得意先名
-```
-
-Use `label:` when the screen needs a fixed label:
-
-```ruby
-table_preferences_column(:customer_name, label: "得意先名")
 ```
 
 ## I want filter and sort UI state, but my controller already has search(params)
@@ -207,6 +230,7 @@ Declare the mapping on each column:
 ```ruby
 table_preferences_column(
   :customer_name,
+  label: "得意先名",
   filter: { type: :text, param: :search_word },
   sortable: true
 )
@@ -268,6 +292,7 @@ Use filter metadata on columns, but do not call `rails_table_preference_params` 
 ```ruby
 table_preferences_column(
   :status,
+  label: "状態",
   filter: { type: :select, param: :status, options: ["未出荷", "出荷済"] }
 )
 ```
@@ -279,13 +304,13 @@ The UI state can be saved and restored without affecting the database results un
 Set `sortable: true` on the column.
 
 ```ruby
-table_preferences_column(:delivery_date, sortable: true)
+table_preferences_column(:delivery_date, label: "納品日", sortable: true)
 ```
 
 Use `sort_param:` when the display column key differs from the host application's sort key:
 
 ```ruby
-table_preferences_column(:delivery_date, sortable: true, sort_param: :delivery_on)
+table_preferences_column(:delivery_date, label: "納品日", sortable: true, sort_param: :delivery_on)
 ```
 
 Header click cycles through ascending, descending, and no sort. The host application must apply the resulting sort param.
