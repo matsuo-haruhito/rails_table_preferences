@@ -57,6 +57,36 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       )
     end
 
+    it "includes filter and sortable metadata in columns JSON" do
+      attributes = helper.table_preferences_data_attributes(
+        table_key: :orders,
+        columns: [
+          helper.table_preferences_column(
+            :customer_name,
+            label: "得意先名",
+            filter: { type: :text, operators: %i[contains equals blank] },
+            sortable: true
+          )
+        ]
+      )
+
+      expect(JSON.parse(attributes[:rails_table_preferences_columns_value])).to eq(
+        [
+          {
+            "key" => "customer_name",
+            "label" => "得意先名",
+            "visible" => true,
+            "pinned" => false,
+            "filter" => {
+              "type" => "text",
+              "operators" => %w[contains equals blank]
+            },
+            "sortable" => true
+          }
+        ]
+      )
+    end
+
     it "excludes ignored columns from columns and saved settings" do
       attributes = helper.table_preferences_data_attributes(
         table_key: :orders,
@@ -71,12 +101,25 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
             { key: "customer_code", visible: true, order: 10 },
             { key: "internal_cost", visible: true, order: 20 },
             { key: "secret_note", visible: true, order: 30 }
+          ],
+          filters: {
+            customer_code: { operator: :contains, value: "001" },
+            internal_cost: { operator: :gteq, value: 100 },
+            secret_note: { operator: :contains, value: "hidden" }
+          },
+          sorts: [
+            { key: :customer_code, direction: :asc },
+            { key: :internal_cost, direction: :desc },
+            { key: :secret_note, direction: :asc }
           ]
         }
       )
 
+      settings = JSON.parse(attributes[:rails_table_preferences_settings_value])
       expect(JSON.parse(attributes[:rails_table_preferences_columns_value]).map { |column| column["key"] }).to eq(["customer_code"])
-      expect(JSON.parse(attributes[:rails_table_preferences_settings_value])["columns"].map { |column| column["key"] }).to eq(["customer_code"])
+      expect(settings["columns"].map { |column| column["key"] }).to eq(["customer_code"])
+      expect(settings["filters"].keys).to eq(["customer_code"])
+      expect(settings["sorts"].map { |sort| sort["key"] }).to eq(["customer_code"])
     end
   end
 
@@ -89,6 +132,22 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         "order" => 10,
         "pinned" => false,
         "ignored" => false
+      )
+    end
+
+    it "builds a filterable and sortable column definition hash" do
+      expect(
+        helper.table_preferences_column(
+          :status,
+          label: "状態",
+          filter: :select,
+          sortable: true
+        )
+      ).to include(
+        "key" => "status",
+        "label" => "状態",
+        "filter" => { "type" => "select" },
+        "sortable" => true
       )
     end
 
@@ -112,6 +171,19 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
       expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
       expect(columns.first).not_to have_key("ignored")
+    end
+
+    it "preserves filter and sortable metadata from hash definitions" do
+      columns = helper.table_preferences_columns(
+        [
+          { key: :customer_name, filter: { type: :text }, sortable: true }
+        ]
+      )
+
+      expect(columns.first).to include(
+        "filter" => { "type" => "text" },
+        "sortable" => true
+      )
     end
   end
 
