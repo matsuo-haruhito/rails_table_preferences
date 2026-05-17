@@ -13,9 +13,7 @@ module RailsTablePreferences
     end
 
     def call
-      if formatter.respond_to?(:call)
-        return call_formatter
-      end
+      return call_formatter if formatter.respond_to?(:call)
 
       value = raw_value
       format_value(value)
@@ -77,7 +75,9 @@ module RailsTablePreferences
     end
 
     def boolean_label(value)
-      I18n.t("rails_table_preferences.boolean.#{value ? "true" : "false"}", default: value ? "Yes" : "No")
+      label_key = value ? "true" : "false"
+      default = value ? "Yes" : "No"
+      I18n.t("rails_table_preferences.boolean.#{label_key}", default: default)
     end
 
     def time_like?(value)
