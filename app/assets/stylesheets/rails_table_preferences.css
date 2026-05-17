@@ -145,6 +145,69 @@
   cursor: col-resize;
 }
 
+.rails-table-preferences-filter-button {
+  margin-left: 0.375rem;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0 0.375rem;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rails-table-preferences-filter-button--active {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.rails-table-preferences-filter-panel {
+  box-sizing: border-box;
+  display: grid;
+  gap: 0.75rem;
+  min-width: 16rem;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  background: canvas;
+  color: canvastext;
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.15);
+}
+
+.rails-table-preferences-filter-panel__title {
+  font-weight: 700;
+}
+
+.rails-table-preferences-filter-panel__field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.rails-table-preferences-filter-panel__field input,
+.rails-table-preferences-filter-panel__field select {
+  max-width: 100%;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+}
+
+.rails-table-preferences-filter-panel__field select[multiple] {
+  min-height: 6rem;
+}
+
+.rails-table-preferences-filter-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.rails-table-preferences-filter-panel__actions button {
+  min-height: 2.25rem;
+  padding: 0.25rem 0.75rem;
+  font: inherit;
+}
+
 @media (max-width: 64rem) {
   .rails-table-preferences-editor__row {
     grid-template-columns: minmax(14rem, 1fr) 7rem 8rem 9rem;
