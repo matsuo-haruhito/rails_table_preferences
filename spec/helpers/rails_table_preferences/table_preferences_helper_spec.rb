@@ -135,6 +135,33 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include("rails-table-preferences-target=\"defaultPreset\"")
     end
 
+    it "renders localized default labels for Japanese users" do
+      I18n.with_locale(:ja) do
+        html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+
+        expect(html).to include("保存済み設定")
+        expect(html).to include("設定名")
+        expect(html).to include("標準設定にする")
+        expect(html).to include("適用")
+        expect(html).to include("保存")
+        expect(html).to include("別名で保存")
+        expect(html).to include("削除")
+        expect(html).to include("リセット")
+      end
+    end
+
+    it "passes localized labels to the Stimulus controller" do
+      I18n.with_locale(:ja) do
+        html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+
+        expect(html).to include("rails-table-preferences-order-label-value=\"表示順\"")
+        expect(html).to include("rails-table-preferences-width-label-value=\"列幅\"")
+        expect(html).to include("rails-table-preferences-truncate-label-value=\"省略文字数\"")
+        expect(html).to include("rails-table-preferences-drag-label-value=\"ドラッグして並び替え\"")
+        expect(html).to include("rails-table-preferences-resize-label-value=\"列幅を変更\"")
+      end
+    end
+
     it "renders a preset name input" do
       html = helper.table_preferences_editor(table_key: :orders, name: "inspection", columns: [:customer_code])
 
