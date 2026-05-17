@@ -124,4 +124,28 @@ RSpec.describe RailsTablePreferences::Controller do
       )
     end
   end
+
+  describe "#rails_table_preference_export_payload" do
+    it "returns an export payload from the resolved settings" do
+      preference = instance_double(
+        RailsTablePreferences::Preference,
+        settings: {
+          columns: [
+            { key: :customer_name, visible: true, order: 10 },
+            { key: :order_no, visible: true, order: 20 }
+          ]
+        }
+      )
+      columns = [
+        { key: :order_no, label: "Order No." },
+        { key: :customer_name, label: "Customer" }
+      ]
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
+
+      payload = controller.rails_table_preference_export_payload(table_key: :orders, name: :inspection, columns: columns)
+
+      expect(payload["column_keys"]).to eq(%w[customer_name order_no])
+      expect(payload["headers"]).to eq(["Customer", "Order No."])
+    end
+  end
 end
