@@ -7,6 +7,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
+- [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Controller integration](controller_integration.md): how to resolve saved preferences and pass filter/sort params to existing Rails controllers.
 - [Filter metadata](filter_metadata.md): how to declare filterable/sortable columns and how neutral filter/sort settings are stored.
 - [Filter adapters](filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
@@ -21,6 +22,7 @@ This directory contains focused documentation for Rails Table Preferences.
 5. Add `filter:` and `sortable: true` metadata where needed.
 6. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
 7. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+8. Run the manual QA checklist before asking real users to try the feature.
 
 ## Responsibility boundary
 
