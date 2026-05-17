@@ -2,6 +2,7 @@
 
 require "bundler/setup"
 require "fileutils"
+require "pathname"
 require "active_record"
 require "action_controller/railtie"
 require "rspec/rails"
@@ -49,8 +50,15 @@ end
 class User < ActiveRecord::Base
 end
 
+module GeneratorSpecHelpers
+  def file(path)
+    Pathname.new(destination_root).join(path)
+  end
+end
+
 RSpec.configure do |config|
   config.include FileUtils, type: :generator
+  config.include GeneratorSpecHelpers, type: :generator
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
