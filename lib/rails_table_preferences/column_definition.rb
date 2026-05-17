@@ -12,11 +12,12 @@ module RailsTablePreferences
                 :ignored,
                 :filter,
                 :sortable,
+                :sort_param,
                 :model,
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil)
+    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, pinned: false, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       @key = key.to_s
       @model = model
       @model_name = model_name
@@ -30,6 +31,7 @@ module RailsTablePreferences
       @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore)
       @filter = normalize_filter(filter)
       @sortable = normalize_sortable(sortable)
+      @sort_param = sort_param&.to_s
     end
 
     def to_h
@@ -43,7 +45,8 @@ module RailsTablePreferences
         "pinned" => pinned,
         "ignored" => ignored,
         "filter" => filter,
-        "sortable" => sortable
+        "sortable" => sortable,
+        "sort_param" => sort_param
       }.compact
     end
 
@@ -92,9 +95,15 @@ module RailsTablePreferences
       when Symbol, String
         { "type" => value.to_s }
       when Hash
-        value.deep_stringify_keys.compact
+        normalize_filter_hash(value)
       else
         nil
+      end
+    end
+
+    def normalize_filter_hash(value)
+      value.deep_stringify_keys.compact.tap do |attributes|
+        attributes["type"] = attributes["type"].to_s if attributes["type"].present?
       end
     end
 
