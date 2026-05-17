@@ -7,22 +7,37 @@ module RailsTablePreferences
     # Returns the saved preference for the given table.
     #
     # Resolution rule:
-    # - explicit name: use that preset name
+    # - explicit name: use the first available preset with that name
     # - no name: use default_flag=true first
-    # - fallback: use name="default"
+    # - fallback: use owner name="default"
     # - missing preference: return nil
-    def rails_table_preference(table_key:, name: nil, owner: nil)
+    #
+    # Available presets are resolved in this priority order:
+    # owner, role, organization, shared.
+    def rails_table_preference(table_key:, name: nil, owner: nil, scope_context: nil)
       owner ||= rails_table_preferences_current_owner
       return unless owner
 
-      scope = RailsTablePreferences::Preference.for_user(owner).for_table(table_key)
-      return scope.find_by(name: name.to_s) if name.present?
+      scope_context = rails_table_preferences_scope_context if scope_context.nil?
 
-      scope.defaults.order(:name).first || scope.find_by(name: "default")
+      if name.present?
+        return RailsTablePreferences::Preference.available_named_preference(
+          user: owner,
+          table_key: table_key,
+          name: name,
+          scope_context: scope_context
+        )
+      end
+
+      RailsTablePreferences::Preference.default_for(
+        user: owner,
+        table_key: table_key,
+        scope_context: scope_context
+      )
     end
 
-    def rails_table_preference_settings(table_key:, name: nil, owner: nil, fallback: {})
-      preference = rails_table_preference(table_key: table_key, name: name, owner: owner)
+    def rails_table_preference_settings(table_key:, name: nil, owner: nil, scope_context: nil, fallback: {})
+      preference = rails_table_preference(table_key: table_key, name: name, owner: owner, scope_context: scope_context)
       RailsTablePreferences::SettingsNormalizer.call(preference&.settings || fallback || {})
     end
 
@@ -31,8 +46,8 @@ module RailsTablePreferences
     # adapter: :controller_params returns a plain params hash suitable for existing
     #   search(params) / order_by(params[:sort]) style controllers.
     # adapter: :ransack returns Ransack-compatible params.
-    def rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, adapter: :controller_params, sort_param: "sort")
-      settings = rails_table_preference_settings(table_key: table_key, name: name, owner: owner)
+    def rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort")
+      settings = rails_table_preference_settings(table_key: table_key, name: name, owner: owner, scope_context: scope_context)
       rails_table_preference_adapter_params(
         adapter: adapter,
         settings: settings,
@@ -71,6 +86,15 @@ module RailsTablePreferences
 
     def rails_table_preferences_current_owner
       send(RailsTablePreferences.configuration.current_user_method)
+    end
+
+    def rails_table_preferences_scope_context
+      method_name = RailsTablePreferences.configuration.scope_context_method
+      return {} if method_name.blank?
+      return {} unless respond_to?(method_name, true)
+
+      context = send(method_name)
+      context.respond_to?(:to_h) ? context.to_h : {}
     end
 
     def rails_table_preferences_hash_from_params(params_source)
