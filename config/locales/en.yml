@@ -14,3 +14,9 @@ en:
       truncate: Truncate
       drag_to_reorder: Drag to reorder
       resize_column: Resize column
+      filter: Filter
+      filter_operator: Operator
+      filter_value: Value
+      filter_from: From
+      filter_to: To
+      filter_clear: Clear
