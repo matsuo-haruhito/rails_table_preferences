@@ -7,7 +7,7 @@ module RailsTablePreferences
     isolate_namespace RailsTablePreferences
 
     rake_tasks do
-      load File.expand_path("../../tasks/rails_table_preferences.rake", __dir__)
+      load File.expand_path("../tasks/rails_table_preferences.rake", __dir__)
     end
 
     initializer "rails_table_preferences.load_controller_extensions" do
