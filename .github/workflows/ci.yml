@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: RSpec and JavaScript syntax check
+    name: RSpec, JavaScript syntax, and gem build
     runs-on: ubuntu-latest
 
     steps:
@@ -31,3 +31,6 @@ jobs:
 
       - name: Check JavaScript syntax
         run: node --check app/javascript/controllers/rails_table_preferences_controller.js
+
+      - name: Build gem package
+        run: bundle exec rake build
