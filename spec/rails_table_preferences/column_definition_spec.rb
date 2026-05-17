@@ -37,6 +37,56 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       expect(definition.to_h["ignored"]).to eq(true)
     end
 
+    it "includes normalized filter metadata" do
+      definition = described_class.new(
+        key: :customer_name,
+        label: "得意先名",
+        filter: {
+          type: :text,
+          operators: %i[contains equals blank]
+        }
+      )
+
+      expect(definition.to_h).to include(
+        "key" => "customer_name",
+        "label" => "得意先名",
+        "filter" => {
+          "type" => "text",
+          "operators" => %i[contains equals blank]
+        }
+      )
+    end
+
+    it "accepts true as a text filter shorthand" do
+      definition = described_class.new(key: :customer_name, filter: true)
+
+      expect(definition.to_h["filter"]).to eq("type" => "text")
+    end
+
+    it "accepts a symbol as a filter type shorthand" do
+      definition = described_class.new(key: :status, filter: :select)
+
+      expect(definition.to_h["filter"]).to eq("type" => "select")
+    end
+
+    it "omits filter metadata when disabled" do
+      definition = described_class.new(key: :internal_note, filter: false)
+
+      expect(definition.to_h).not_to have_key("filter")
+    end
+
+    it "includes sortable metadata when explicitly configured" do
+      definition = described_class.new(key: :delivery_date, sortable: "1")
+
+      expect(definition.to_h["sortable"]).to eq(true)
+    end
+
+    it "omits sortable metadata when not configured" do
+      definition = described_class.new(key: :delivery_date)
+
+      expect(definition.to_h).not_to have_key("sortable")
+    end
+
     it "uses an explicit label first" do
       I18n.backend.store_translations(:en, attributes: { customer_code: "Localized customer code" })
 
