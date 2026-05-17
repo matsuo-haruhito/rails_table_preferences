@@ -16,6 +16,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Release checklist](release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
+- [Package verification](package_verification.md): build and inspect the gem package before tagging or publishing a release.
 - [Controller integration](controller_integration.md): how to resolve saved preferences and pass filter/sort params to existing Rails controllers.
 - [Filter metadata](filter_metadata.md): how to declare filterable/sortable columns and how neutral filter/sort settings are stored.
 - [Filter adapters](filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
@@ -38,6 +39,7 @@ This directory contains focused documentation for Rails Table Preferences.
 13. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
 14. Verify the feature in a sandbox Rails app.
 15. Run the manual QA checklist before asking real users to try the feature.
+16. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
