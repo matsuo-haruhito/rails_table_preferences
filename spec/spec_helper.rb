@@ -12,6 +12,10 @@ class ApplicationController < ActionController::Base
   def current_user
     Thread.current[:rails_table_preferences_current_user]
   end
+
+  def table_preference_scope_context
+    Thread.current[:rails_table_preferences_scope_context] || {}
+  end
 end
 
 class TestApplication < Rails::Application
@@ -75,13 +79,16 @@ RSpec.configure do |config|
 
   config.before do
     RailsTablePreferences.configuration = RailsTablePreferences::Configuration.new
+    RailsTablePreferences.configuration.scope_context_method = :table_preference_scope_context
     RailsTablePreferences::Preference.table_name = RailsTablePreferences.configuration.table_name
     RailsTablePreferences::Preference.delete_all
     User.delete_all
     Thread.current[:rails_table_preferences_current_user] = nil
+    Thread.current[:rails_table_preferences_scope_context] = nil
   end
 
   config.after do
     Thread.current[:rails_table_preferences_current_user] = nil
+    Thread.current[:rails_table_preferences_scope_context] = nil
   end
 end
