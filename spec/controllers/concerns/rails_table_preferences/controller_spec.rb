@@ -2,6 +2,7 @@
 
 RSpec.describe RailsTablePreferences::Controller do
   let(:owner) { instance_double("User", id: 1) }
+  let(:scope_context) { { roles: ["admin"], organization: "tokyo" } }
   let(:controller_class) do
     Class.new do
       include RailsTablePreferences::Controller
@@ -15,51 +16,55 @@ RSpec.describe RailsTablePreferences::Controller do
       def current_user
         @owner
       end
+
+      def table_preference_scope_context
+        { roles: ["admin"], organization: "tokyo" }
+      end
     end
   end
   let(:controller) { controller_class.new(owner) }
-  let(:scope) { double("Preference scope") }
-  let(:default_scope) { double("Default preference scope") }
-  let(:ordered_default_scope) { double("Ordered default preference scope") }
 
   before do
     RailsTablePreferences.configuration.current_user_method = :current_user
-    allow(RailsTablePreferences::Preference).to receive(:for_user).with(owner).and_return(scope)
-    allow(scope).to receive(:for_table).with(:orders).and_return(scope)
+    RailsTablePreferences.configuration.scope_context_method = :table_preference_scope_context
   end
 
   describe "#rails_table_preference" do
-    it "finds an explicitly named preference" do
+    it "finds an explicitly named available preference" do
       preference = instance_double(RailsTablePreferences::Preference)
-      allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
 
       expect(controller.rails_table_preference(table_key: :orders, name: :inspection)).to eq(preference)
+      expect(RailsTablePreferences::Preference).to have_received(:available_named_preference).with(
+        user: owner,
+        table_key: :orders,
+        name: :inspection,
+        scope_context: scope_context
+      )
     end
 
-    it "supports a private current user method" do
+    it "uses scoped default preference resolution when no name is given" do
       preference = instance_double(RailsTablePreferences::Preference)
-      allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
-
-      expect(controller.rails_table_preference(table_key: :orders, name: :inspection)).to eq(preference)
-    end
-
-    it "uses default_flag first when no name is given" do
-      preference = instance_double(RailsTablePreferences::Preference)
-      allow(scope).to receive(:defaults).and_return(default_scope)
-      allow(default_scope).to receive(:order).with(:name).and_return(ordered_default_scope)
-      allow(ordered_default_scope).to receive(:first).and_return(preference)
+      allow(RailsTablePreferences::Preference).to receive(:default_for).and_return(preference)
 
       expect(controller.rails_table_preference(table_key: :orders)).to eq(preference)
+      expect(RailsTablePreferences::Preference).to have_received(:default_for).with(
+        user: owner,
+        table_key: :orders,
+        scope_context: scope_context
+      )
     end
 
-    it "falls back to name default" do
+    it "accepts an explicit scope context override" do
       preference = instance_double(RailsTablePreferences::Preference)
-      allow(scope).to receive(:defaults).and_return(default_scope)
-      allow(default_scope).to receive(:order).with(:name).and_return(ordered_default_scope)
-      allow(ordered_default_scope).to receive(:first).and_return(nil)
-      allow(scope).to receive(:find_by).with(name: "default").and_return(preference)
+      allow(RailsTablePreferences::Preference).to receive(:default_for).and_return(preference)
 
-      expect(controller.rails_table_preference(table_key: :orders)).to eq(preference)
+      expect(controller.rails_table_preference(table_key: :orders, scope_context: { roles: ["manager"] })).to eq(preference)
+      expect(RailsTablePreferences::Preference).to have_received(:default_for).with(
+        user: owner,
+        table_key: :orders,
+        scope_context: { roles: ["manager"] }
+      )
     end
   end
 
@@ -68,15 +73,15 @@ RSpec.describe RailsTablePreferences::Controller do
       preference = instance_double(
         RailsTablePreferences::Preference,
         settings: {
-          filters: { customer_name: { operator: :contains, value: "山田" } },
+          filters: { customer_name: { operator: :contains, value: "Yamada" } },
           sorts: [{ key: :delivery_date, direction: :DESC }]
         }
       )
-      allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
 
       expect(controller.rails_table_preference_settings(table_key: :orders, name: :inspection)).to eq(
         "columns" => [],
-        "filters" => { "customer_name" => { "operator" => "contains", "value" => "山田" } },
+        "filters" => { "customer_name" => { "operator" => "contains", "value" => "Yamada" } },
         "sorts" => [{ "key" => "delivery_date", "direction" => "desc" }]
       )
     end
@@ -87,7 +92,7 @@ RSpec.describe RailsTablePreferences::Controller do
       preference = instance_double(
         RailsTablePreferences::Preference,
         settings: {
-          filters: { customer_name: { operator: :contains, value: "山田" } },
+          filters: { customer_name: { operator: :contains, value: "Yamada" } },
           sorts: [{ key: :delivery_date, direction: :desc }]
         }
       )
@@ -95,10 +100,10 @@ RSpec.describe RailsTablePreferences::Controller do
         { key: :customer_name, filter: { param: :search_word } },
         { key: :delivery_date, sort_param: :delivery_on }
       ]
-      allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
 
       expect(controller.rails_table_preference_params(table_key: :orders, name: :inspection, columns: columns)).to eq(
-        "search_word" => "山田",
+        "search_word" => "Yamada",
         "sort" => "-delivery_on"
       )
     end
@@ -107,14 +112,14 @@ RSpec.describe RailsTablePreferences::Controller do
       preference = instance_double(
         RailsTablePreferences::Preference,
         settings: {
-          filters: { customer_name: { operator: :contains, value: "山田" } },
+          filters: { customer_name: { operator: :contains, value: "Yamada" } },
           sorts: [{ key: :delivery_date, direction: :desc }]
         }
       )
-      allow(scope).to receive(:find_by).with(name: "inspection").and_return(preference)
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
 
       expect(controller.rails_table_preference_params(table_key: :orders, name: :inspection, columns: [], adapter: :ransack)).to eq(
-        "customer_name_cont" => "山田",
+        "customer_name_cont" => "Yamada",
         "s" => ["delivery_date desc"]
       )
     end
