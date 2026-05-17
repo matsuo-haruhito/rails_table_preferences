@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
+  before do
+    RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
+  end
+
   describe "#table_preferences_preference_url" do
     it "builds a URL using the configured mount path" do
       RailsTablePreferences.configuration.mount_path = "/preferences_engine"
@@ -151,7 +155,8 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       )
     end
 
-    it "uses locale-backed labels" do
+    it "uses locale-backed labels when locale rules are configured" do
+      RailsTablePreferences.configuration.label_resolution = %i[activerecord_attribute_i18n]
       I18n.backend.store_translations(:en, activerecord: { attributes: { order: { customer_code: "Customer Code from locale" } } })
 
       expect(helper.table_preferences_column(:customer_code, model_name: :order)["label"]).to eq("Customer Code from locale")
@@ -171,6 +176,19 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
       expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
       expect(columns.first).not_to have_key("ignored")
+    end
+
+    it "filters unresolved labels when unresolved labels are hidden" do
+      RailsTablePreferences.configuration.unresolved_label_behavior = :hide
+
+      columns = helper.table_preferences_columns(
+        [
+          { key: :customer_code, label: "Customer Code" },
+          { key: :internal_cost }
+        ]
+      )
+
+      expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
     end
 
     it "preserves filter and sortable metadata from hash definitions" do
