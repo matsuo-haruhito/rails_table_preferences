@@ -25,13 +25,21 @@ export default class extends Controller {
     widthLabel: { type: String, default: "列幅" },
     truncateLabel: { type: String, default: "省略文字数" },
     dragLabel: { type: String, default: "ドラッグして並び替え" },
-    resizeLabel: { type: String, default: "列幅を変更" }
+    resizeLabel: { type: String, default: "列幅を変更" },
+    filterLabel: { type: String, default: "絞り込み" },
+    filterApplyLabel: { type: String, default: "適用" },
+    filterClearLabel: { type: String, default: "クリア" },
+    filterOperatorLabel: { type: String, default: "条件" },
+    filterValueLabel: { type: String, default: "値" },
+    filterFromLabel: { type: String, default: "開始" },
+    filterToLabel: { type: String, default: "終了" }
   }
 
   connect() {
     this.draggedEditorRow = null
     this.draggedTableColumnKey = null
     this.resizingColumn = null
+    this.filterPanel = null
     this.presets = []
     this.defaultSettings = this.buildDefaultSettings()
     this.settingsValue = this.mergeSettings(this.defaultSettings, this.settingsValue || {})
@@ -39,11 +47,13 @@ export default class extends Controller {
     this.apply()
     this.installResizeHandles()
     this.installTableColumnDragHandles()
+    this.installFilterControls()
     this.refreshPresetOptions()
   }
 
   disconnect() {
     this.uninstallDocumentResizeListeners()
+    this.closeFilterPanel()
   }
 
   apply() {
@@ -52,6 +62,7 @@ export default class extends Controller {
       this.applyColumn(column)
     })
     this.syncEditorWidthInputs()
+    this.syncFilterButtonStates()
   }
 
   applyFromEditor(event) {
@@ -146,6 +157,7 @@ export default class extends Controller {
     if (event) event.preventDefault()
 
     this.settingsValue = this.defaultSettings
+    this.closeFilterPanel()
     this.renderEditor()
     this.apply()
   }
@@ -208,6 +220,7 @@ export default class extends Controller {
     this.setPresetNameInput(payload.name)
     this.setDefaultPresetInput(payload.default)
     this.settingsValue = this.mergeSettings(this.defaultSettings, payload.settings)
+    this.closeFilterPanel()
     this.renderEditor()
     this.apply()
   }
@@ -430,7 +443,7 @@ export default class extends Controller {
   }
 
   startTableColumnDrag(event) {
-    if (event.target.closest("[data-rails-table-preferences-resize-handle]")) {
+    if (event.target.closest("[data-rails-table-preferences-resize-handle]") || event.target.closest("[data-rails-table-preferences-filter-button]")) {
       event.preventDefault()
       return
     }
@@ -505,9 +518,268 @@ export default class extends Controller {
     }
   }
 
+  installFilterControls() {
+    this.headerCells.forEach((cell) => {
+      const key = cell.dataset.railsTablePreferencesColumnKey
+      const column = this.columnDefinitionByKey(key)
+      if (!column?.filter) return
+      if (cell.querySelector("[data-rails-table-preferences-filter-button]")) return
+
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "rails-table-preferences-filter-button"
+      button.dataset.railsTablePreferencesFilterButton = "true"
+      button.dataset.railsTablePreferencesColumnKey = key
+      button.setAttribute("aria-label", `${this.filterLabelValue}: ${column.label || key}`)
+      button.title = `${this.filterLabelValue}: ${column.label || key}`
+      button.textContent = "▾"
+      button.addEventListener("mousedown", (event) => event.stopPropagation())
+      button.addEventListener("dragstart", (event) => event.preventDefault())
+      button.addEventListener("click", (event) => this.toggleFilterPanel(event, cell, column))
+
+      cell.appendChild(button)
+    })
+
+    this.syncFilterButtonStates()
+  }
+
+  toggleFilterPanel(event, headerCell, column) {
+    event.preventDefault()
+    event.stopPropagation()
+
+    const key = column.key
+    if (this.filterPanel?.dataset.railsTablePreferencesColumnKey === key) {
+      this.closeFilterPanel()
+      return
+    }
+
+    this.openFilterPanel(headerCell, column)
+  }
+
+  openFilterPanel(headerCell, column) {
+    this.closeFilterPanel()
+
+    const panel = document.createElement("div")
+    panel.className = "rails-table-preferences-filter-panel"
+    panel.dataset.railsTablePreferencesColumnKey = column.key
+    panel.innerHTML = this.filterPanelHtml(column)
+    panel.querySelector("[data-action='apply-filter']")?.addEventListener("click", (event) => {
+      event.preventDefault()
+      this.applyFilterPanel(column.key, panel)
+    })
+    panel.querySelector("[data-action='clear-filter']")?.addEventListener("click", (event) => {
+      event.preventDefault()
+      this.clearFilter(column.key)
+    })
+    panel.addEventListener("click", (event) => event.stopPropagation())
+
+    document.body.appendChild(panel)
+    this.positionFilterPanel(panel, headerCell)
+    this.filterPanel = panel
+    this.boundCloseFilterPanel = (event) => {
+      if (!panel.contains(event.target) && !event.target.closest("[data-rails-table-preferences-filter-button]")) {
+        this.closeFilterPanel()
+      }
+    }
+    document.addEventListener("click", this.boundCloseFilterPanel)
+  }
+
+  filterPanelHtml(column) {
+    const filter = column.filter || {}
+    const condition = this.filterConditionFor(column.key)
+    const operators = this.filterOperatorsFor(filter)
+    const selectedOperator = condition.operator || operators[0] || "contains"
+
+    return `
+      <div class="rails-table-preferences-filter-panel__title">${this.escapeHtml(column.label || column.key)}</div>
+      <label class="rails-table-preferences-filter-panel__field">
+        ${this.escapeHtml(this.filterOperatorLabelValue)}
+        <select data-field="operator">
+          ${operators.map((operator) => `<option value="${this.escapeHtml(operator)}" ${operator === selectedOperator ? "selected" : ""}>${this.escapeHtml(this.filterOperatorText(operator))}</option>`).join("")}
+        </select>
+      </label>
+      ${this.filterValueHtml(filter, condition, selectedOperator)}
+      <div class="rails-table-preferences-filter-panel__actions">
+        <button type="button" data-action="apply-filter">${this.escapeHtml(this.filterApplyLabelValue)}</button>
+        <button type="button" data-action="clear-filter">${this.escapeHtml(this.filterClearLabelValue)}</button>
+      </div>
+    `
+  }
+
+  filterValueHtml(filter, condition, selectedOperator) {
+    if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
+
+    if (selectedOperator === "between") {
+      return `
+        <label class="rails-table-preferences-filter-panel__field">
+          ${this.escapeHtml(this.filterFromLabelValue)}
+          <input type="${this.filterInputType(filter)}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}">
+        </label>
+        <label class="rails-table-preferences-filter-panel__field">
+          ${this.escapeHtml(this.filterToLabelValue)}
+          <input type="${this.filterInputType(filter)}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}">
+        </label>
+      `
+    }
+
+    if (filter.type === "select" && Array.isArray(filter.options)) {
+      const values = new Set(Array(condition.values || condition.value || []).map(String))
+      return `
+        <label class="rails-table-preferences-filter-panel__field">
+          ${this.escapeHtml(this.filterValueLabelValue)}
+          <select data-field="values" multiple>
+            ${filter.options.map((option) => `<option value="${this.escapeHtml(option)}" ${values.has(String(option)) ? "selected" : ""}>${this.escapeHtml(option)}</option>`).join("")}
+          </select>
+        </label>
+      `
+    }
+
+    return `
+      <label class="rails-table-preferences-filter-panel__field">
+        ${this.escapeHtml(this.filterValueLabelValue)}
+        <input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}">
+      </label>
+    `
+  }
+
+  positionFilterPanel(panel, headerCell) {
+    const rect = headerCell.getBoundingClientRect()
+    panel.style.position = "absolute"
+    panel.style.top = `${window.scrollY + rect.bottom + 4}px`
+    panel.style.left = `${window.scrollX + rect.left}px`
+    panel.style.zIndex = "1000"
+  }
+
+  applyFilterPanel(key, panel) {
+    const operator = panel.querySelector("[data-field='operator']")?.value
+    if (!operator) return
+
+    const condition = { operator }
+
+    if (operator === "between") {
+      const from = panel.querySelector("[data-field='from']")?.value
+      const to = panel.querySelector("[data-field='to']")?.value
+      if (from) condition.from = from
+      if (to) condition.to = to
+    } else if (["blank", "present", "true", "false"].includes(operator)) {
+      // Operator-only conditions intentionally have no value.
+    } else {
+      const valuesSelect = panel.querySelector("[data-field='values']")
+      if (valuesSelect) {
+        condition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
+      } else {
+        const value = panel.querySelector("[data-field='value']")?.value
+        if (value) condition.value = value
+      }
+    }
+
+    this.updateFilterCondition(key, condition)
+    this.closeFilterPanel()
+    this.apply()
+  }
+
+  clearFilter(key) {
+    const filters = { ...(this.settingsValue?.filters || {}) }
+    delete filters[key]
+    this.settingsValue = { ...this.settingsValue, filters }
+    this.closeFilterPanel()
+    this.apply()
+  }
+
+  updateFilterCondition(key, condition) {
+    this.settingsValue = {
+      ...this.settingsValue,
+      filters: {
+        ...(this.settingsValue?.filters || {}),
+        [key]: condition
+      }
+    }
+  }
+
+  closeFilterPanel() {
+    if (this.boundCloseFilterPanel) {
+      document.removeEventListener("click", this.boundCloseFilterPanel)
+      this.boundCloseFilterPanel = null
+    }
+
+    if (this.filterPanel) {
+      this.filterPanel.remove()
+      this.filterPanel = null
+    }
+  }
+
+  syncFilterButtonStates() {
+    this.headerCells.forEach((cell) => {
+      const key = cell.dataset.railsTablePreferencesColumnKey
+      const button = cell.querySelector("[data-rails-table-preferences-filter-button]")
+      if (!button) return
+
+      const active = this.filterConditionFor(key).operator
+      button.classList.toggle("rails-table-preferences-filter-button--active", Boolean(active))
+      button.setAttribute("aria-pressed", active ? "true" : "false")
+    })
+  }
+
+  filterConditionFor(key) {
+    return this.settingsValue?.filters?.[key] || {}
+  }
+
+  filterOperatorsFor(filter) {
+    if (Array.isArray(filter.operators) && filter.operators.length > 0) return filter.operators.map(String)
+
+    switch (filter.type) {
+      case "number":
+        return ["equals", "gteq", "lteq", "gt", "lt", "blank", "present"]
+      case "date":
+        return ["equals", "gteq", "lteq", "between", "blank", "present"]
+      case "select":
+        return ["in", "not_in", "blank", "present"]
+      case "boolean":
+        return ["true", "false", "blank", "present"]
+      default:
+        return ["contains", "equals", "starts_with", "ends_with", "blank", "present"]
+    }
+  }
+
+  filterInputType(filter) {
+    switch (filter.type) {
+      case "number":
+        return "number"
+      case "date":
+        return "date"
+      default:
+        return "text"
+    }
+  }
+
+  filterOperatorText(operator) {
+    const labels = {
+      contains: "含む",
+      not_contains: "含まない",
+      equals: "一致",
+      not_equals: "不一致",
+      starts_with: "で始まる",
+      ends_with: "で終わる",
+      in: "いずれか",
+      not_in: "以外",
+      gt: "より大きい",
+      gteq: "以上",
+      lt: "より小さい",
+      lteq: "以下",
+      between: "範囲",
+      blank: "空白",
+      present: "空白以外",
+      true: "はい",
+      false: "いいえ"
+    }
+
+    return labels[operator] || operator
+  }
+
   refreshEditorFromSettings() {
     this.renderEditor()
     this.syncEditorWidthInputs()
+    this.syncFilterButtonStates()
   }
 
   settingsFromEditor() {
@@ -592,7 +864,9 @@ export default class extends Controller {
         order: column.order ?? (index + 1) * 10,
         width: column.width,
         truncate: column.truncate,
-        pinned: column.pinned === true
+        pinned: column.pinned === true,
+        filter: column.filter,
+        sortable: column.sortable
       })),
       filters: {},
       sorts: []
@@ -609,6 +883,8 @@ export default class extends Controller {
         ...defaultColumn,
         ...savedColumn,
         label: defaultColumn.label,
+        filter: defaultColumn.filter,
+        sortable: defaultColumn.sortable,
         order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10,
         visible: savedColumn.visible ?? defaultColumn.visible
       }
@@ -651,6 +927,10 @@ export default class extends Controller {
 
   columnByKey(key) {
     return this.columnsFromSettings.find((column) => column.key === key)
+  }
+
+  columnDefinitionByKey(key) {
+    return this.columnsValue.find((column) => column.key === key) || this.columnByKey(key)
   }
 
   orderValue(column) {
