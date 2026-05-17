@@ -29,6 +29,7 @@ module RailsTablePreferences
       "lib/rails_table_preferences/export_payload.rb",
       "lib/rails_table_preferences/package_verifier.rb",
       "lib/rails_table_preferences/settings_normalizer.rb",
+      "package.json",
       "README.md",
       "CHANGELOG.md",
       "LICENSE",
