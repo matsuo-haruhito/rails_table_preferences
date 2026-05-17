@@ -61,7 +61,7 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       )
     end
 
-    it "includes filter and sortable metadata in columns JSON" do
+    it "includes filter, sortable, and overflow metadata in columns JSON" do
       attributes = helper.table_preferences_data_attributes(
         table_key: :orders,
         columns: [
@@ -69,7 +69,8 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
             :customer_name,
             label: "得意先名",
             filter: { type: :text, operators: %i[contains equals blank] },
-            sortable: true
+            sortable: true,
+            overflow: :ellipsis
           )
         ]
       )
@@ -81,6 +82,7 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
             "label" => "得意先名",
             "visible" => true,
             "pinned" => false,
+            "overflow" => "ellipsis",
             "filter" => {
               "type" => "text",
               "operators" => %w[contains equals blank]
@@ -139,19 +141,21 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       )
     end
 
-    it "builds a filterable and sortable column definition hash" do
+    it "builds a filterable, sortable, and overflow-aware column definition hash" do
       expect(
         helper.table_preferences_column(
           :status,
           label: "状態",
           filter: :select,
-          sortable: true
+          sortable: true,
+          overflow: :wrap
         )
       ).to include(
         "key" => "status",
         "label" => "状態",
         "filter" => { "type" => "select" },
-        "sortable" => true
+        "sortable" => true,
+        "overflow" => "wrap"
       )
     end
 
@@ -191,16 +195,17 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
     end
 
-    it "preserves filter and sortable metadata from hash definitions" do
+    it "preserves filter, sortable, and overflow metadata from hash definitions" do
       columns = helper.table_preferences_columns(
         [
-          { key: :customer_name, filter: { type: :text }, sortable: true }
+          { key: :customer_name, filter: { type: :text }, sortable: true, overflow: :clip }
         ]
       )
 
       expect(columns.first).to include(
         "filter" => { "type" => "text" },
-        "sortable" => true
+        "sortable" => true,
+        "overflow" => "clip"
       )
     end
   end
