@@ -8,6 +8,9 @@ It is designed for business applications with many index tables, where users nee
 
 Focused documentation is available under [`docs/`](docs/index.md):
 
+- [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Practical examples](docs/examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
+- [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, and customization issues.
 - [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort params to existing Rails controllers.
 - [Filter metadata](docs/filter_metadata.md): declaring filterable/sortable columns and understanding neutral filter/sort settings.
 - [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
