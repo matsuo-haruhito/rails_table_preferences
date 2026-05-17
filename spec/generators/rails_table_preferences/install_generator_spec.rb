@@ -40,7 +40,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
     migration = generated_migration.read
 
-    expect(migration).to include("t.references :customer, null: false, foreign_key: { to_table: :customers }")
+    expect(migration).to include("t.references :member, null: false, foreign_key: { to_table: :customers }")
     expect(migration).to include("add_index :table_preferences, [:member_id, :table_key, :name]")
   end
 
@@ -63,7 +63,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   end
 
   it "provides post-install next steps in the generator source" do
-    source = File.read(File.expand_path("../../../../lib/generators/rails_table_preferences/install/install_generator.rb", __dir__))
+    source = File.read(File.expand_path("../../../lib/generators/rails_table_preferences/install/install_generator.rb", __dir__))
 
     expect(source).to include("Rails Table Preferences installed.")
     expect(source).to include("bin/rails db:migrate")
