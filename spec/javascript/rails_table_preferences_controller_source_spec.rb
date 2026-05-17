@@ -56,6 +56,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("label: defaultColumn.label")
     expect(source).to include("filter: defaultColumn.filter")
     expect(source).to include("sortable: defaultColumn.sortable")
+    expect(source).to include("pinned: defaultColumn.pinned")
   end
 
   it "supports direct table header reordering" do
@@ -127,5 +128,27 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("if (column?.sortable !== true) return")
     expect(source).to include("if (this.shouldIgnoreHeaderAction(event.target)) return")
     expect(source).to include("if (this.draggedTableColumnKey || this.resizingColumn) return")
+  end
+
+  it "applies pinned column classes, data attributes, and left offsets" do
+    expect(source).to include("syncPinnedColumnOffsets()")
+    expect(source).to include('cell.classList.toggle("rails-table-preferences-pinned", column.pinned === true)')
+    expect(source).to include('cell.dataset.railsTablePreferencesPinned = "true"')
+    expect(source).to include('cell.style.setProperty("--rails-table-preferences-pinned-left", `${left}px`)')
+  end
+
+  it "treats non-owner presets as read-only in the normal editor path" do
+    expect(source).to include("currentPreferenceEditable")
+    expect(source).to include("payload.editable !== false")
+    expect(source).to include("syncPresetEditingState()")
+    expect(source).to include("if (!this.currentPreferenceEditable) return this.createPresetFromEditor()")
+    expect(source).to include("button.disabled = !editable")
+  end
+
+  it "labels preset options with scope metadata" do
+    expect(source).to include("buildPresetOption(preset)")
+    expect(source).to include("preset.scope_label || preset.scope_type || \"owner\"")
+    expect(source).to include('option.dataset.scopeType = preset.scope_type || "owner"')
+    expect(source).to include('option.dataset.editable = preset.editable === false ? "false" : "true"')
   end
 end
