@@ -8,7 +8,8 @@ The goal is to catch packaging, generator, documentation, and host-application i
 
 - [ ] Decide the target version.
 - [ ] Update the version constant if needed.
-- [ ] Update `CHANGELOG.md` with user-facing changes.
+- [ ] Move `CHANGELOG.md` entries from `[Unreleased]` to the target version section.
+- [ ] Confirm `CHANGELOG.md` covers user-facing changes, migration changes, generator changes, JavaScript/CSS changes, and known limitations.
 - [ ] Confirm the README and docs describe the released behavior, not planned behavior.
 - [ ] Confirm examples use the current public API names.
 
@@ -55,6 +56,7 @@ Then inspect the built gem or unpack it locally and confirm it includes:
 - [ ] `lib/generators/**/*`
 - [ ] `lib/tasks/**/*`
 - [ ] `docs/**/*`
+- [ ] `CHANGELOG.md`
 - [ ] `README.md`
 - [ ] `LICENSE`
 - [ ] `rails_table_preferences.gemspec`
@@ -74,6 +76,8 @@ Confirm:
 
 - [ ] Initializer is created.
 - [ ] Migration is created with valid index names.
+- [ ] Migration includes `scope_type` and `scope_key`.
+- [ ] Migration uses a nullable owner reference for shared, role, and organization presets.
 - [ ] Migration runs on SQLite.
 - [ ] Migration uses the configured owner model and foreign key when options are passed.
 - [ ] JavaScript controller is copied by default.
@@ -114,6 +118,8 @@ Confirm:
 - [ ] Reload restores saved settings.
 - [ ] Filter panel opens.
 - [ ] Sortable header click cycles sort state.
+- [ ] Fixed/pinned column hooks are present when configured.
+- [ ] Read-only scoped presets do not expose destructive normal-user controls.
 
 See also:
 
@@ -132,12 +138,21 @@ Confirm the mounted engine JSON API still behaves as expected:
 - [ ] `PUT /rails_table_preferences/preferences/:table_key/:name`
 - [ ] `DELETE /rails_table_preferences/preferences/:table_key/:name`
 
+Confirm scoped preference behavior:
+
+- [ ] Owner presets are editable by the owner.
+- [ ] Shared presets can be selected by users.
+- [ ] Role presets are available only when the scope context matches.
+- [ ] Organization presets are available only when the scope context matches.
+- [ ] Default resolution prefers owner, then role, then organization, then shared.
+
 Confirm controller integration behavior:
 
 - [ ] `rails_table_preference_settings` returns normalized settings.
 - [ ] `rails_table_preference_params` returns plain controller params by default.
 - [ ] `rails_table_preference_params(adapter: :ransack)` returns Ransack params.
 - [ ] `rails_table_preference_merged_params` merges with host controller params.
+- [ ] `rails_table_preference_export_payload` returns ordered export columns and headers.
 - [ ] Private current-owner methods work.
 
 ## 8. Documentation checks
@@ -146,15 +161,20 @@ Check the main user paths:
 
 - [ ] README links to Quick start.
 - [ ] README links to Decision guide.
+- [ ] README links to Scoped presets.
+- [ ] README links to Fixed columns and column groups.
+- [ ] README links to Export integration.
+- [ ] README links to Accessibility baseline.
 - [ ] README links to Demo screen generator.
 - [ ] README links to Sandbox verification.
 - [ ] README links to Troubleshooting.
 - [ ] README links to Manual QA.
+- [ ] README links to Release checklist.
 - [ ] `docs/index.md` links to all major docs.
 - [ ] Installation docs mention engine mount.
 - [ ] Demo docs clearly say the demo route must be added manually.
-- [ ] Troubleshooting covers Stimulus, CSS, CSRF, auth, current user, filter/sort, and ignored columns.
-- [ ] Responsibility boundary is clear: host app owns database search and authorization.
+- [ ] Troubleshooting covers Stimulus, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
+- [ ] Responsibility boundary is clear: host app owns database search, authorization, complex sticky layout polish, export file generation, and shared preset admin UI.
 
 ## 9. Backward compatibility checks
 
@@ -165,6 +185,7 @@ If changing settings structure, helper options, or JSON API shape, confirm:
 - [ ] Missing filters/sorts normalize to empty neutral values.
 - [ ] Existing controller params adapter behavior is preserved.
 - [ ] Existing Ransack adapter behavior is preserved.
+- [ ] Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
 
 ## 10. Release notes
 
