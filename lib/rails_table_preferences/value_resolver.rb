@@ -43,11 +43,33 @@ module RailsTablePreferences
     end
 
     def raw_value
-      if record.respond_to?(key)
-        record.public_send(key)
-      elsif record.class.respond_to?(:reflect_on_association) && record.class.reflect_on_association(key.to_sym)
-        record.public_send(key)
+      return read_attribute_value if active_record_attribute?
+      return record.public_send(key) if association_reader?
+      return record.public_send(key) if zero_arity_public_reader?
+    end
+
+    def active_record_attribute?
+      record.respond_to?(:has_attribute?) && record.has_attribute?(key)
+    end
+
+    def read_attribute_value
+      if record.respond_to?(:read_attribute)
+        record.read_attribute(key)
+      else
+        record[key]
       end
+    end
+
+    def association_reader?
+      record.class.respond_to?(:reflect_on_association) && record.class.reflect_on_association(key.to_sym) && record.respond_to?(key)
+    end
+
+    def zero_arity_public_reader?
+      return false unless record.respond_to?(key)
+
+      record.method(key).arity.zero?
+    rescue NameError
+      false
     end
 
     def format_value(value)
@@ -67,7 +89,7 @@ module RailsTablePreferences
       i18n_method = "#{key}_i18n"
       return record.public_send(i18n_method) if record.respond_to?(i18n_method)
 
-      record.public_send(key)
+      raw_value
     end
 
     def boolean_attribute?
