@@ -4,6 +4,7 @@ module RailsTablePreferencesDemo
   class OrdersController < ApplicationController
     helper RailsTablePreferences::TablePreferencesHelper
     include RailsTablePreferences::Controller
+    include RailsTablePreferences::TablePreferencesHelper
 
     def index
       @table_columns = table_columns
