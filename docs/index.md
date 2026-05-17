@@ -9,6 +9,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets and default resolution.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
+- [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
 - [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
@@ -33,9 +34,10 @@ This directory contains focused documentation for Rails Table Preferences.
 9. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
 10. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
 11. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-12. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
-13. Verify the feature in a sandbox Rails app.
-14. Run the manual QA checklist before asking real users to try the feature.
+12. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+13. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
+14. Verify the feature in a sandbox Rails app.
+15. Run the manual QA checklist before asking real users to try the feature.
 
 ## Responsibility boundary
 
@@ -50,6 +52,7 @@ Rails Table Preferences owns:
 - filter/sort UI state
 - adapter params for host applications or search gems
 - export column payloads derived from saved display preferences
+- baseline accessibility hooks for generated controls
 
 Host applications own:
 
@@ -57,6 +60,7 @@ Host applications own:
 - authorization
 - joins and association search logic
 - business-specific query behavior
+- semantic page/table structure around the generated controls
 - sticky column offset and scroll-container polish for complex layouts
 - grouped table header markup
 - CSV, Excel, and report file generation
