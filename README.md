@@ -646,9 +646,38 @@ USER_ID=1 bin/rails rails_table_preferences:legacy:import_column_adjustments
 
 The importer reads `setting_name`, `table_name`, and `value`, accepts legacy column keys such as `column_name`, `display_flag`, and `display_order`, and stores normalized settings in `table_preferences`.
 
+## Development
+
+Install dependencies:
+
+```bash
+bundle install
+```
+
+Run the Ruby test suite:
+
+```bash
+bundle exec rspec
+```
+
+Check the bundled Stimulus controller for JavaScript syntax errors:
+
+```bash
+node --check app/javascript/controllers/rails_table_preferences_controller.js
+```
+
+The current minimum local verification before pushing changes is:
+
+```bash
+bundle exec rspec
+node --check app/javascript/controllers/rails_table_preferences_controller.js
+```
+
+The same checks are run by the GitHub Actions CI workflow.
+
 ## Development status
 
-This gem is in active initial development. Tests and CI are being prepared, but they have not yet been run in this implementation pass.
+This gem is in active initial development. The current test suite passes locally with `124 examples, 0 failures`, and the bundled Stimulus controller passes `node --check`.
 
 ## License
 
