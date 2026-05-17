@@ -14,3 +14,9 @@ ja:
       truncate: 省略文字数
       drag_to_reorder: ドラッグして並び替え
       resize_column: 列幅を変更
+      filter: 絞り込み
+      filter_operator: 条件
+      filter_value: 値
+      filter_from: 開始
+      filter_to: 終了
+      filter_clear: クリア
