@@ -2,16 +2,26 @@
 
 Rails Table Preferences is a Rails engine/gem for saving and restoring user-specific table display preferences in Rails applications.
 
-It is designed for business applications with many index tables, where users need to customize visible columns, column order, column width, and text truncation per table.
+It is designed for business applications with many index tables, where users need to customize visible columns, column order, column width, text truncation, filter UI state, and sort UI state per table.
+
+## Documentation
+
+Focused documentation is available under [`docs/`](docs/index.md):
+
+- [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort params to existing Rails controllers.
+- [Filter metadata](docs/filter_metadata.md): declaring filterable/sortable columns and understanding neutral filter/sort settings.
+- [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
+- [JavaScript controller notes](docs/javascript_controller.md): bundled Stimulus controller responsibilities and safety boundaries.
 
 ## Goals
 
 - Save table display preferences per owner model, usually a user
 - Support column visibility, order, width, and truncation
+- Support saved filter and sort UI state without becoming a query builder
 - Provide Rails helpers and Stimulus controllers
 - Keep compatibility with existing `ColumnAdjustment`-style implementations
 - Allow host applications to customize ERB, CSS, JavaScript, and locales
-- Start small and allow future support for Excel-like filters and saved sorts
+- Integrate with existing controller params, Ransack, or host application search objects
 
 ## Supported versions
 
@@ -82,11 +92,11 @@ Mount the engine when using the bundled JSON API:
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
 
-## Initial scope
+## Current scope
 
-The first version focuses on extracting and generalizing the `ColumnAdjustment`-style table display settings used in existing Rails applications.
+The first implementation focuses on extracting and generalizing the `ColumnAdjustment`-style table display settings used in existing Rails applications.
 
-Included in the initial scope:
+Included in the current scope:
 
 - Table-specific display settings
 - Owner-specific preference persistence
@@ -94,28 +104,33 @@ Included in the initial scope:
 - Column order
 - Column width
 - Text truncation metadata
+- Multiple presets and default presets
+- Ignored columns
+- Filter metadata and filter panel UI foundation
+- Sort metadata and sortable header click UI
+- Controller params and Ransack adapters
+- Controller/view helpers for existing search forms
 - Rails engine structure
 - View helpers
-- Stimulus controllers
-- Install generator
+- Stimulus controller
+- Install, JavaScript, stylesheet, and view generators
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
 
-## Out of scope for the first version
+## Out of scope
 
-The following features are intentionally left for later versions:
+Rails Table Preferences intentionally does not try to become:
 
-- Excel-like column filters
-- Complex query generation
-- Saved search conditions
-- Saved sort conditions
-- CSV export integration
-- Pagination abstraction
-- DataTables-like full grid replacement
-- React or Vue components
-- Shared administrator presets
-- Tenant-wide default views
-- Application-specific permission logic
+- A generic ActiveRecord query builder
+- A Ransack replacement
+- A Datagrid replacement
+- A Filterrific replacement
+- A DataTables replacement
+- An authorization system
+- An automatic association/join inference system
+- A pagination abstraction
+- A CSV export abstraction
+- A React or Vue component library
 
 ## Planned roadmap
 
@@ -134,12 +149,14 @@ The following features are intentionally left for later versions:
 - Duplicate, delete, and reset actions
 - Clearer owner/table/preset data model
 
-### v0.3: Excel-like filters
+### v0.3: Filter and sort UI state
 
 - Column filter UI
 - Text, number, date, boolean, blank, and non-blank filters
 - Saved filter conditions
-- Normalized filter params for Rails controllers
+- Sortable header click UI
+- Normalized filter/sort params for Rails controllers
+- Ransack adapter and plain controller params adapter
 
 ### v0.4 and later
 
@@ -178,7 +195,7 @@ end
 add_index :table_preferences, [:customer_id, :table_key, :name], unique: true
 ```
 
-The settings payload is expected to evolve from column display preferences to include filters and sorts:
+The settings payload includes column display preferences plus neutral filter and sort UI state:
 
 ```json
 {
@@ -192,8 +209,18 @@ The settings payload is expected to evolve from column display preferences to in
       "pinned": false
     }
   ],
-  "filters": {},
-  "sorts": []
+  "filters": {
+    "customer_name": {
+      "operator": "contains",
+      "value": "山田"
+    }
+  },
+  "sorts": [
+    {
+      "key": "delivery_date",
+      "direction": "desc"
+    }
+  ]
 }
 ```
 
@@ -327,6 +354,55 @@ Ignored columns are removed from `columns_json` and are also filtered out of the
 
 This is a UI/display protection mechanism. Sensitive values should still be protected by normal authorization, query selection, and view rendering rules in the host application.
 
+## Filters and sorts
+
+Filters and sorts are treated as UI state and adapter params, not as database query execution. See:
+
+- [Filter metadata](docs/filter_metadata.md)
+- [Filter adapters](docs/filter_adapters.md)
+- [Controller integration](docs/controller_integration.md)
+
+Example column metadata:
+
+```ruby
+columns = [
+  table_preferences_column(
+    :customer_name,
+    filter: { type: :text, param: :search_word },
+    sortable: true
+  ),
+  table_preferences_column(
+    :delivery_date,
+    filter: { type: :date, from_param: :from_date, to_param: :to_date },
+    sortable: true
+  )
+]
+```
+
+Existing controller params integration:
+
+```ruby
+preference_params = rails_table_preference_params(
+  table_key: :warehouse_stocks,
+  columns: columns
+)
+
+merged_params = params.to_unsafe_h.merge(preference_params)
+
+@warehouse_stocks = WarehouseStock
+  .search(merged_params)
+  .order_by(merged_params["sort"] || params[:sort])
+```
+
+Existing search form integration:
+
+```erb
+<%= table_preferences_hidden_fields(
+  settings: @table_preference_settings,
+  columns: columns
+) %>
+```
+
 ## Host app customization
 
 ### ERB
@@ -392,6 +468,10 @@ rails-table-preferences-editor__actions
 rails-table-preferences-editor__row
 rails-table-preferences-editor__drag-handle
 rails-table-preferences-resize-handle
+rails-table-preferences-filter-button
+rails-table-preferences-filter-panel
+rails-table-preferences-sortable-column
+rails-table-preferences-sort-indicator
 ```
 
 ### JavaScript
@@ -416,6 +496,8 @@ If the host application wants to maintain its own JavaScript implementation, ski
 ```bash
 bin/rails generate rails_table_preferences:install --skip-javascript
 ```
+
+See [JavaScript controller notes](docs/javascript_controller.md) for the bundled controller's responsibilities and event boundaries.
 
 The controller contract is the data attributes emitted by the helper/partial:
 
@@ -501,21 +583,6 @@ Example collection response:
 
 ## Usage direction
 
-The final API should keep application code small and explicit.
-
-Controller-side DSL example:
-
-```ruby
-class OrdersController < ApplicationController
-  table_preferences_for :orders do
-    column :order_no, label: "Order No.", default_width: 120
-    column :customer_code, label: "Customer Code", default_width: 120
-    column :customer_name, label: "Customer Name", default_width: 240, truncate: 30
-    column :created_at, label: "Created At", default_width: 160
-  end
-end
-```
-
 Current helper direction:
 
 ```erb
@@ -553,7 +620,9 @@ The preset selector loads existing presets for the current table. Selecting a pr
 
 The editor rows are draggable. Drag a row up or down to reorder columns; the `order` inputs are automatically renumbered in steps of 10. Click Apply to update the current table without saving, or Save to persist the new order.
 
-Header cells also receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
+Header cells receive a resize handle. Drag the handle horizontally to update the column width. The width is applied immediately, synchronized back to the editor width field, and persisted on Save.
+
+Filterable header cells receive a filter button. Sortable header cells can be clicked to cycle through ascending, descending, and no sort.
 
 ## Legacy ColumnAdjustment import
 
@@ -579,7 +648,7 @@ The importer reads `setting_name`, `table_name`, and `value`, accepts legacy col
 
 ## Development status
 
-This gem is in the initial planning and skeleton stage.
+This gem is in active initial development. Tests and CI are being prepared, but they have not yet been run in this implementation pass.
 
 ## License
 
