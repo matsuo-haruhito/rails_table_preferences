@@ -50,6 +50,8 @@ end
 
 The method may be public or private. If no method is configured, the context is empty.
 
+Role and organization preset matching is string-based. Use the same stable identifiers in `scope_key` that the configured scope context method returns.
+
 ## Default resolution order
 
 When no preset name is explicitly requested, Rails Table Preferences resolves defaults in this order:
@@ -144,6 +146,67 @@ For user-facing screens:
 - users should save personal changes as owner presets
 - non-owner presets should not be overwritten from the regular editor
 - host applications may provide a separate admin screen for managing shared, role, or organization presets
+
+## Minimal operating patterns
+
+The following patterns keep the bundled editor simple while still giving the host application a clear place to manage non-owner presets.
+
+### 1. Seed a shared baseline
+
+A seed task, migration, or one-off setup script can bootstrap one shared default per table by storing the same payload shape that the JSON API accepts:
+
+```ruby
+shared_default_payload = {
+  name: "operations-default",
+  default: true,
+  scope_type: "shared",
+  settings: {
+    columns: [],
+    filters: {},
+    sorts: []
+  }
+}
+```
+
+Use that payload when the host app creates the generated preference record or when it calls the same host-app path that administrators use for shared presets. The important part is that the record is stored as `scope_type: "shared"` and marked `default: true` only when it should win before owner presets exist.
+
+### 2. Give administrators a separate write path
+
+Regular end users should still save personal presets from the bundled editor. Shared, role, and organization presets work better when the host app exposes an explicit admin form, service object, or maintenance script that sets `scope_type` and, when needed, `scope_key`.
+
+A minimal strong-parameters shape looks like this:
+
+```ruby
+params.require(:preset).permit(
+  :name,
+  :default,
+  :scope_type,
+  :scope_key,
+  settings: {}
+)
+```
+
+Typical `scope_key` values are stable business identifiers such as role keys (`"admin"`) or organization IDs/slugs (`"tokyo"`). The host app remains responsible for deciding who may create or update each key.
+
+### 3. Split the regular editor and the admin flow on purpose
+
+| Surface | Who uses it | What it should save |
+| --- | --- | --- |
+| Bundled editor | Normal end users | Owner presets only |
+| Admin form or seed path | Administrators, setup tasks, support scripts | Shared, role, and organization presets |
+| Resolver path | Every request | Whatever presets are available from owner + scope context |
+
+A practical rule of thumb is: let users read every available preset, but only let the regular editor write owner presets. Put shared, role, and organization writes behind an app-specific admin flow.
+
+### 4. Keep `scope_context_method` and admin inputs aligned
+
+The `scope_context_method` decides which non-owner presets are available for the current request. If the method returns role keys and an organization ID, the admin flow should store those same kinds of values in `scope_key`.
+
+That keeps three things consistent:
+
+- the seed/default data you create up front
+- the admin UI or service object that edits scoped presets later
+- the runtime resolver that decides which scoped presets the current owner can use
 
 ## Authorization boundary
 
