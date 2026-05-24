@@ -24,6 +24,8 @@ const application = Application.start()
 application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
 
+If the host app already starts Stimulus elsewhere, reuse that existing `application` and only add `application.register(...)` here. Do not call `Application.start()` a second time from the same host app.
+
 The package root also exposes the same controller as a named export:
 
 ```js
@@ -31,6 +33,37 @@ import { RailsTablePreferencesController } from "rails_table_preferences"
 ```
 
 Use the package entrypoint when the host app should not depend on a copied controller path under `app/javascript/controllers` from an `app/frontend` entrypoint.
+
+### Resolve the gem entrypoint explicitly
+
+Vite does not automatically resolve `app/javascript` files that live inside a Ruby gem. When the host app imports `rails_table_preferences` or `rails_table_preferences/controller`, add an alias or an equivalent bundler resolver that points those specifiers at the installed gem.
+
+A minimal `vite.config.ts` example looks like this:
+
+```ts
+import { execSync } from "node:child_process"
+import { fileURLToPath } from "node:url"
+import { defineConfig } from "vite"
+
+function gemPath(name: string) {
+  return execSync(`bundle show ${name}`, { encoding: "utf-8" }).trim()
+}
+
+function gemJavaScriptPath(name: string, entrypoint: string) {
+  return fileURLToPath(new URL(`app/javascript/${entrypoint}`, `file://${gemPath(name)}/`))
+}
+
+export default defineConfig({
+  resolve: {
+    alias: [
+      { find: /^rails_table_preferences$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/index.js") },
+      { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/controller.js") }
+    ]
+  }
+})
+```
+
+Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files.
 
 ## Custom controller path
 

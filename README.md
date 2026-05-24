@@ -87,10 +87,34 @@ const application = Application.start()
 application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
 
+If the host app already starts Stimulus elsewhere, reuse that existing `application` and only add `application.register(...)` here. Do not call `Application.start()` a second time from the same host app.
+
 The package root also exposes a named export:
 
 ```js
 import { RailsTablePreferencesController } from "rails_table_preferences"
+```
+
+When using Vite or another JS bundler, make sure the host app can resolve the gem's packaged `app/javascript/rails_table_preferences/*` files. A minimal Vite alias looks like this:
+
+```ts
+import { execSync } from "node:child_process"
+import { fileURLToPath } from "node:url"
+
+function gemPath(name: string) {
+  return execSync(`bundle show ${name}`, { encoding: "utf-8" }).trim()
+}
+
+function gemJavaScriptPath(name: string, entrypoint: string) {
+  return fileURLToPath(new URL(`app/javascript/${entrypoint}`, `file://${gemPath(name)}/`))
+}
+
+resolve: {
+  alias: [
+    { find: /^rails_table_preferences$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/index.js") },
+    { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/controller.js") }
+  ]
+}
 ```
 
 See [JavaScript entrypoints](docs/javascript_entrypoints.md) for the default `stimulus-rails`, Vite, and custom bundler registration paths.
@@ -638,6 +662,10 @@ import RailsTablePreferencesController from "rails_table_preferences/controller"
 application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
 
+If the host app already starts Stimulus in another file, reuse that same `application` and only add `application.register(...)` in the current entrypoint.
+
+Vite does not resolve Ruby gem `app/javascript` files automatically. Add aliases or an equivalent resolver for `rails_table_preferences` and `rails_table_preferences/controller` so the bundler can find the packaged gem entrypoints.
+
 For jsbundling or a custom Stimulus setup that uses the copied file, import and register the copied controller manually:
 
 ```js
@@ -653,7 +681,7 @@ bin/rails generate rails_table_preferences:install --skip-javascript
 
 Rails Table Preferences does not require importmap-specific setup.
 
-See [JavaScript entrypoints](docs/javascript_entrypoints.md) for import paths and [JavaScript controller notes](docs/javascript_controller.md) for the bundled controller's responsibilities and event boundaries.
+See [JavaScript entrypoints](docs/javascript_entrypoints.md) for import paths and resolver examples, and [JavaScript controller notes](docs/javascript_controller.md) for the bundled controller's responsibilities and event boundaries.
 
 ## JSON API
 
