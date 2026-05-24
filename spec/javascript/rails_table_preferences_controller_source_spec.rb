@@ -13,6 +13,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('truncateLabel: { type: String, default: "省略文字数" }')
     expect(source).to include('dragLabel: { type: String, default: "ドラッグして並び替え" }')
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
+    expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
   end
 
   it "defaults filter UI labels to Japanese" do
@@ -143,6 +144,13 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("syncPresetEditingState()")
     expect(source).to include("if (!this.currentPreferenceEditable) return this.createPresetFromEditor()")
     expect(source).to include("button.disabled = !editable")
+  end
+
+  it "confirms editable preset deletion before issuing DELETE" do
+    expect(source).to include("if (!this.confirmDeletePreset()) return")
+    expect(source).to include("confirmDeletePreset()")
+    expect(source).to include("const message = this.deleteConfirmLabelValue?.trim()")
+    expect(source).to include("return window.confirm(message)")
   end
 
   it "labels preset options with scope metadata" do
