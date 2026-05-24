@@ -73,6 +73,86 @@ Custom partials can then call:
 
 A column filter or editor may also be an object that responds to `to_table_filter` or `to_table_cell_editor`.
 
+## Rails Fields Kit end-to-end example
+
+When the host app wants Rails Table Preferences to describe filter/editor metadata and Rails Fields Kit to render the actual controls, keep the flow in three steps:
+
+1. declare table column metadata
+2. register renderer mappings
+3. call the renderer helpers from the table partial
+
+### 1. Declare metadata in the table profile
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  column :customer_id,
+         label: "Customer",
+         filter: RailsFieldsKit::TableFilterInput.combobox(
+           :customer_id,
+           url: "/customers.json",
+           selected_url: "/customers/selected.json",
+           value_field: "id",
+           label_field: "name"
+         )
+
+  column :status,
+         label: "Status",
+         editor: RailsFieldsKit::TableCellInput.enum_select(:status)
+end
+```
+
+The important part is that the profile stores metadata objects such as `RailsFieldsKit::TableFilterInput.combobox(...)` and `RailsFieldsKit::TableCellInput.enum_select(...)`. Rails Table Preferences keeps those objects as column metadata; it does not render the HTML yet.
+
+### 2. Register renderer mappings in the host app
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.filter_renderers.register("rails_fields_kit") do |form:, method:, filter:, **|
+    form.rfk_combobox(method, **filter.fetch("options", {}).symbolize_keys)
+  end
+
+  config.editor_renderers.register("rails_fields_kit") do |form:, method:, editor:, **|
+    form.rfk_enum_select(method, **editor.fetch("options", {}).symbolize_keys)
+  end
+end
+```
+
+If the metadata uses a different Rails Fields Kit field type, map that type to the matching `rfk_*` helper here.
+
+### 3. Render from the table partial
+
+```erb
+<% columns.each do |column| %>
+  <th>
+    <%= column["label"] %>
+    <%= table_preferences_filter_input(form: form, column: column) %>
+  </th>
+<% end %>
+
+<% @orders.each do |order| %>
+  <tr>
+    <% columns.each do |column| %>
+      <td>
+        <%= table_preferences_value(order, column) %>
+        <%= table_preferences_cell_editor(form: form, record: order, column: column) %>
+      </td>
+    <% end %>
+  </tr>
+<% end %>
+```
+
+`table_preferences_filter_input` and `table_preferences_cell_editor` read the column metadata, pick the registered renderer, and call the matching Rails Fields Kit helper.
+
+### Responsibility split
+
+- Rails Table Preferences owns column metadata, saved table state, partial helper entrypoints, and renderer registry lookup.
+- Rails Fields Kit owns the concrete form helper HTML and Stimulus/Tom Select behavior behind `rfk_*` helpers.
+- The host app owns the final partial layout, route URLs, and any controller/query behavior behind the rendered inputs.
+
+This split keeps the table gem independent from a specific form helper library while still giving the host app a copyable end-to-end path.
+
 ## TreeView integration
 
 When the `tree_view` gem is installed, a tree table can use the same inferred column set:
