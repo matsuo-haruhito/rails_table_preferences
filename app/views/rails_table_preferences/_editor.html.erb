@@ -4,6 +4,8 @@
 <% editor_id_prefix = "rails-table-preferences-#{editor_id_key}" %>
 <% preset_select_id = "#{editor_id_prefix}-preset-select" %>
 <% preset_name_id = "#{editor_id_prefix}-preset-name" %>
+<% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
+<% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
 
 <div data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
@@ -27,6 +29,7 @@
      data-rails-table-preferences-sort-asc-label-value="<%= t("rails_table_preferences.editor.sort_asc", default: "昇順") %>"
      data-rails-table-preferences-sort-desc-label-value="<%= t("rails_table_preferences.editor.sort_desc", default: "降順") %>"
      data-rails-table-preferences-sort-clear-label-value="<%= t("rails_table_preferences.editor.sort_clear", default: "並び替え解除") %>"
+     data-rails-table-preferences-delete-confirm-label-value="<%= delete_confirm_label %>"
      class="rails-table-preferences-editor">
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
@@ -57,7 +60,10 @@
     <button type="button" data-action="rails-table-preferences#applyFromEditor"><%= t("rails_table_preferences.editor.apply", default: "適用") %></button>
     <button type="button" data-action="rails-table-preferences#saveFromEditor"><%= t("rails_table_preferences.editor.save", default: "保存") %></button>
     <button type="button" data-action="rails-table-preferences#createPresetFromEditor"><%= t("rails_table_preferences.editor.save_as_new", default: "別名で保存") %></button>
-    <button type="button" data-action="rails-table-preferences#deletePreset"><%= t("rails_table_preferences.editor.delete", default: "削除") %></button>
+    <button type="button"
+            data-action="rails-table-preferences#deletePreset"
+            title="<%= delete_confirm_label %>"
+            aria-label="<%= "#{delete_label}: #{delete_confirm_label}" %>"><%= delete_label %></button>
     <button type="button" data-action="rails-table-preferences#resetEditor"><%= t("rails_table_preferences.editor.reset", default: "リセット") %></button>
   </div>
 </div>
