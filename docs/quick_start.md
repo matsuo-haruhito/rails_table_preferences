@@ -192,6 +192,45 @@ end
 
 The `data-rails-table-preferences-column-key` values must match the keys passed to `table_preferences_column`.
 
+### Applying preferences to an existing HTML table
+
+`table_preferences_table_tag(...)` remains the default path because it emits the controller wiring and target table together. You can still use Rails Table Preferences when the host app already owns the `<table>` markup, for example after Markdown/HTML rewrite, an existing partial, or another server-rendered table builder.
+
+Use this DOM contract:
+
+1. Keep a stable `table_key` per logical screen/template, not per record id or request param.
+2. Mount one `rails-table-preferences` controller root per managed table.
+3. Put the target `<table>` inside that root, or make the root itself the `<table>`.
+4. Add `data-rails-table-preferences-column-key` to each managed `th` / `td`.
+5. Leave unmanaged columns without that data attribute.
+
+Minimal table markup example:
+
+```erb
+<table class="table">
+  <thead>
+    <tr>
+      <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+      <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+      <th>備考</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+        <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
+        <td><%= order.note %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+```
+
+In this example, `order_no` and `customer_name` remain under Rails Table Preferences control, while `備考` stays a normal host-app column.
+
+If you bypass the bundled table helper entirely, the controller root must still receive the same core values as the normal helper output: `tableKey`, `collectionUrl`, `url`, `columns`, and `settings`. See [JavaScript controller notes](javascript_controller.md) for the exact data attributes and controller-side rules.
+
 Users can drag resize handles to change widths. Double-clicking a resize handle auto-fits the column to the currently rendered cells, similar to spreadsheet applications. The resulting width is stored as the normal column `width` setting when the preference is saved.
 
 ## 6. Configure overflow behavior when needed

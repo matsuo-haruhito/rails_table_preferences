@@ -53,6 +53,43 @@ return table.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.e
 
 It should not apply display, width, or truncation changes by querying the entire controller element.
 
+## Minimal DOM contract for helper-free tables
+
+When a host app keeps its own `<table>` markup, the bundled controller still works as long as the DOM contract stays intact.
+
+- The controller root may be the `<table>` itself, or another element that contains the target `<table>`.
+- When the root is not a table, the controller uses the first nested `<table>` as its target table.
+- Managed headers and cells must expose matching `data-rails-table-preferences-column-key` values.
+- Sort, filter, resize, reorder, and pinned-column behavior only apply to managed headers/cells inside that target table.
+- Columns without `data-rails-table-preferences-column-key` stay under normal host-app control.
+
+This is the supported path for server-rendered tables that come from an existing partial, Markdown/HTML rewrite, or another renderer that cannot directly use `table_preferences_table_tag(...)`.
+
+## Manual root values when bypassing the table helper
+
+If the host app mounts the controller root manually instead of using the bundled table helper, provide the same core values that the controller reads from normal helper output:
+
+- `data-controller="rails-table-preferences"`
+- `data-rails-table-preferences-table-key-value`
+- `data-rails-table-preferences-collection-url-value`
+- `data-rails-table-preferences-url-value`
+- `data-rails-table-preferences-columns-value`
+- `data-rails-table-preferences-settings-value`
+
+Optional UI labels such as `data-rails-table-preferences-filter-label-value` and `data-rails-table-preferences-sort-asc-label-value` can also be overridden when the host app needs localized copy different from the defaults.
+
+## Stable table_key guideline
+
+Use a `table_key` that identifies the logical screen or template, not a transient record id, request param, or DOM-generated UUID.
+
+Good examples:
+
+- `orders_index`
+- `document_markdown_preview`
+- `admin_customer_exports`
+
+Avoid keys that change per request or per row, because saved presets, column order, and width history are keyed to that value.
+
 ## Saved column metadata rule
 
 Current column definitions from the host application should remain authoritative for labels, filter metadata, and sortable metadata. Saved preference records may contain old column settings, so merge logic should preserve current definitions for:
