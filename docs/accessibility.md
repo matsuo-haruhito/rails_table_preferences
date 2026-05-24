@@ -16,6 +16,7 @@ The bundled editor and Stimulus controller provide:
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
 - keyboard-focusable buttons and inputs through native HTML elements
+- per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; host apps can pass `editor_instance_key:` when they want deterministic ids in copied/customized views
 
 ## Sortable headers
 
@@ -100,7 +101,7 @@ Before releasing a screen, check:
 - The preset select, preset name, default checkbox, and action buttons are labeled.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
-- Read-only scoped presets disable destructive actions.
+- Read-only scoped presets disable destructive/default controls.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
 - Custom colors still meet the host application's contrast requirements.

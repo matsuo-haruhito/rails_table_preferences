@@ -34,6 +34,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm every target header and cell has the matching `data-rails-table-preferences-column-key`.
 - [ ] Confirm Japanese column labels are shown when host app locale entries are present.
 - [ ] Confirm explicit `label:` values override locale lookup.
+- [ ] Render two editors on one page and confirm each preset label focuses the matching select/input.
 
 ## 4. Display preference behavior
 
@@ -217,17 +218,3 @@ Use browser devtools while saving/loading presets.
 - [ ] Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
 
 ## Sign-off
-
-Record the result before asking real users to try the feature:
-
-```text
-Rails app:
-Rails version:
-Ruby version:
-Browser:
-Owner model:
-Mount path:
-QA date:
-QA result:
-Known issues:
-```

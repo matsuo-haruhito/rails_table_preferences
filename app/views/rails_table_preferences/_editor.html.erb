@@ -1,3 +1,10 @@
+<% editor_instance_key = local_assigns[:editor_instance_key].presence || SecureRandom.hex(4) %>
+<% editor_id_key = [table_key, name, editor_instance_key].compact.map { |value| value.to_s.parameterize(separator: "-") }.reject(&:blank?).join("-") %>
+<% editor_id_key = "editor" if editor_id_key.blank? %>
+<% editor_id_prefix = "rails-table-preferences-#{editor_id_key}" %>
+<% preset_select_id = "#{editor_id_prefix}-preset-select" %>
+<% preset_name_id = "#{editor_id_prefix}-preset-name" %>
+
 <div data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
      data-rails-table-preferences-name-value="<%= name %>"
@@ -24,16 +31,16 @@
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
   <div class="rails-table-preferences-editor__preset">
-    <label for="rails-table-preferences-preset-select"><%= t("rails_table_preferences.editor.preset_select", default: "保存済み設定") %></label>
-    <select id="rails-table-preferences-preset-select"
+    <label for="<%= preset_select_id %>"><%= t("rails_table_preferences.editor.preset_select", default: "保存済み設定") %></label>
+    <select id="<%= preset_select_id %>"
             data-rails-table-preferences-target="presetSelect"
             data-action="rails-table-preferences#selectPreset">
       <option value="<%= name %>"><%= name %></option>
     </select>
 
-    <label for="rails-table-preferences-preset-name"><%= t("rails_table_preferences.editor.preset", default: "設定名") %></label>
+    <label for="<%= preset_name_id %>"><%= t("rails_table_preferences.editor.preset", default: "設定名") %></label>
     <input type="text"
-           id="rails-table-preferences-preset-name"
+           id="<%= preset_name_id %>"
            value="<%= name %>"
            data-rails-table-preferences-target="presetName">
 
