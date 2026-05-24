@@ -8,6 +8,7 @@ en:
       save: Save
       save_as_new: Save as new
       delete: Delete
+      delete_confirm: Delete this saved preset?
       reset: Reset
       order: Order
       width: Width
