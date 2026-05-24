@@ -358,6 +358,16 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       end
     end
 
+    it "passes a localized delete confirmation and accessible label to the delete button" do
+      I18n.with_locale(:ja) do
+        html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+
+        expect(html).to include("rails-table-preferences-delete-confirm-label-value=\"この保存済み設定を削除します。よろしいですか？\"")
+        expect(html).to include("title=\"この保存済み設定を削除します。よろしいですか？\"")
+        expect(html).to include("aria-label=\"削除: この保存済み設定を削除します。よろしいですか？\"")
+      end
+    end
+
     it "renders a preset name input" do
       html = helper.table_preferences_editor(table_key: :orders, name: "inspection", columns: [:customer_code])
 

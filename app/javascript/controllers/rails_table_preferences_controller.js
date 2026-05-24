@@ -30,7 +30,8 @@ export default class extends Controller {
     filterToLabel: { type: String, default: "終了" },
     sortAscLabel: { type: String, default: "昇順" },
     sortDescLabel: { type: String, default: "降順" },
-    sortClearLabel: { type: String, default: "並び替え解除" }
+    sortClearLabel: { type: String, default: "並び替え解除" },
+    deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }
   }
 
   connect() {
@@ -95,6 +96,7 @@ export default class extends Controller {
   async deletePreset(event) {
     if (event) event.preventDefault()
     if (!this.currentPreferenceEditable) return
+    if (!this.confirmDeletePreset()) return
     const response = await fetch(this.preferenceUrl(this.currentPresetName), {
       method: "DELETE",
       headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
@@ -850,6 +852,13 @@ export default class extends Controller {
 
   preferenceUrl(name) {
     return `${this.collectionUrlValue}/${encodeURIComponent(name || "default")}`
+  }
+
+  confirmDeletePreset() {
+    const message = this.deleteConfirmLabelValue?.trim()
+    if (!message) return true
+    if (typeof window === "undefined" || typeof window.confirm !== "function") return true
+    return window.confirm(message)
   }
 
   setPresetNameInput(name) {
