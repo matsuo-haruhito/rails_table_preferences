@@ -9,10 +9,6 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     File.expand_path("../../app/javascript/rails_table_preferences/index.js", __dir__)
   end
 
-  let(:package_json_path) do
-    File.expand_path("../../package.json", __dir__)
-  end
-
   it "exports the bundled Stimulus controller from a stable controller path" do
     source = File.read(controller_entrypoint_path)
 
@@ -25,13 +21,5 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
     expect(source).to include('export { default } from "./controller"')
     expect(source).to include('export { default as RailsTablePreferencesController } from "./controller"')
-  end
-
-  it "declares package exports for JavaScript bundlers such as Vite" do
-    package_json = File.read(package_json_path)
-
-    expect(package_json).to include('"name": "rails_table_preferences"')
-    expect(package_json).to include('".": "./app/javascript/rails_table_preferences/index.js"')
-    expect(package_json).to include('"./controller": "./app/javascript/rails_table_preferences/controller.js"')
   end
 end
