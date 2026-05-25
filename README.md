@@ -195,7 +195,7 @@ Included in v0.1 scope:
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
 - Local demo and sandbox verification guidance
-- Manual QA, troubleshooting, decision guide, scoped preset, fixed column, export, accessibility, release checklist, and package verification documentation
+- Manual QA, troubleshooting, decision guide, scoped presets, fixed column, export, accessibility, release checklist, and package verification documentation
 
 ## Out of scope
 
@@ -823,7 +823,7 @@ node --check app/javascript/controllers/rails_table_preferences_controller.js
 bundle exec rake build
 ```
 
-The same checks are run by the GitHub Actions CI workflow. Before tagging or publishing a release, also inspect the built package with [Package verification](docs/package_verification.md).
+The GitHub Actions workflow runs the same full check set on Ruby 3.3. On pull requests it also runs a Ruby 3.1 representative lane for `bundle exec rspec`, `bundle exec rake build`, and `bundle exec rake package:verify` so the documented Ruby floor is exercised before merge. Before tagging or publishing a release, also inspect the built package with [Package verification](docs/package_verification.md).
 
 ## Development status
 
