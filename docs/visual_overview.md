@@ -2,11 +2,11 @@
 
 This page gives a quick visual reference for the bundled demo surface before you copy the demo files into a host application.
 
-The illustrations below are representative examples of the generated editor and table layout. They are meant to show the default UI coverage, not to prescribe host-app branding.
+The screenshots below are static captures of the bundled demo layout and table states. They are meant to show the default UI coverage without implying host-app branding.
 
 ## Editor and preset flow
 
-![Representative demo screen showing the preset editor above an orders table with pinned columns and active filters.](images/visual-overview-editor-and-table.svg)
+![Bundled demo screen showing the preset editor above an orders table with pinned columns and an open filter panel.](images/visual-overview-editor-and-table.svg)
 
 What this view highlights:
 
@@ -17,7 +17,7 @@ What this view highlights:
 
 ## Filter, sort, and fixed-column context
 
-![Representative table state showing pinned order columns, active sort, and visible filter controls.](images/visual-overview-filter-and-pinned-columns.svg)
+![Bundled demo table state showing pinned order columns, active sort, and visible filter controls.](images/visual-overview-filter-and-pinned-columns.svg)
 
 What this view highlights:
 
@@ -28,5 +28,5 @@ What this view highlights:
 
 ## Notes
 
-- The exact visual polish comes from the host application after copying the ERB, CSS, or Stimulus controller.
+- The exact visual polish still comes from the host application after copying the ERB, CSS, or Stimulus controller.
 - Use the [Demo screen generator](demo.md) when you want to reproduce these states inside a sandbox app and verify behavior in a real browser.
