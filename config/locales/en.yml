@@ -12,13 +12,21 @@ en:
       status_region: Save status
       loading_status: Loading saved settings...
       loaded_status: Saved settings loaded.
+      loading_failed_status: Could not load the saved preset.
       saving_status: Saving settings...
       saved_status: Settings saved.
+      saving_failed_status: Could not save the current preset.
       saving_as_new_status: Saving new settings...
       saved_as_new_status: New settings saved.
+      saving_as_new_failed_status: Could not save a new preset.
       deleting_status: Deleting saved settings...
       deleted_status: Saved settings deleted.
+      deleting_failed_status: Could not delete the saved preset.
       operation_failed_status: Could not complete the table preference action.
+      preset_scope_owner_label: owner
+      preset_scope_shared_label: Shared
+      preset_scope_role_label: Role
+      preset_scope_organization_label: Organization
       reset: Reset
       order: Order
       width: Width
