@@ -71,23 +71,29 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-## Role scoped preset example
+## Scoped preset examples
 
-The generated demo seeds three example presets for the demo table:
+The generated demo seeds four example presets for the demo table:
 
 - `owner-compact` as a personal owner preset
 - `shared-baseline` as a shared preset
 - `operations-default` as a role-scoped preset with `scope_key: "operations"`
+- `tokyo-default` as an organization-scoped preset with `scope_key: "tokyo"`
 
 The demo controller resolves the initial screen with:
 
 ```ruby
-{ roles: ["operations"] }
+{
+  roles: ["operations"],
+  organization: "tokyo"
+}
 ```
 
-That lets you confirm role-default resolution without building a separate admin UI first.
+That lets you confirm both role-scoped and organization-scoped preset availability without building a separate admin UI first.
 
-To make the bundled preset API expose the same role preset in the selector and load/save flow, point `scope_context_method` at an application method that returns the same role key:
+The generated role and organization presets are both marked as defaults, so the copied demo also shows the normal default resolution order in practice: role default wins before organization default when both contexts are present.
+
+To make the bundled preset API expose the same scoped presets in the selector and load/save flow, point `scope_context_method` at an application method that returns the same role and organization keys:
 
 ```ruby
 RailsTablePreferences.configure do |config|
@@ -98,12 +104,15 @@ class ApplicationController < ActionController::Base
   private
 
   def table_preference_scope_context
-    { roles: ["operations"] }
+    {
+      roles: ["operations"],
+      organization: "tokyo"
+    }
   end
 end
 ```
 
-Host apps can replace `"operations"` with their own stable role identifiers later. The important part is that the configured method returns the same kind of key that the role-scoped preset stores in `scope_key`.
+Host apps can replace `"operations"` and `"tokyo"` with their own stable identifiers later. The important part is that the configured method returns the same kind of keys that the scoped presets store in `scope_key`.
 
 ## Sample data shape
 
@@ -133,7 +142,7 @@ The generated demo screen includes:
 - sortable header metadata
 - ignored column metadata
 - existing search form hidden fields
-- owner/shared/role preset examples for scoped preset verification
+- owner/shared/role/organization preset examples for scoped preset verification
 - varied sample rows so filter/sort/preset differences are visible at a glance
 
 For the accessibility-side contract behind these checks, see [Accessibility baseline](accessibility.md).
@@ -158,8 +167,9 @@ On the demo screen, confirm:
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
 - [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
-- [ ] The copied demo explains that `operations-default` is resolved from `{ roles: ["operations"] }`.
-- [ ] After configuring `scope_context_method`, the preset selector can distinguish owner, shared, and role-scoped examples.
+- [ ] The copied demo explains that `operations-default` and `tokyo-default` are available from `{ roles: ["operations"], organization: "tokyo" }`.
+- [ ] When both scoped defaults exist, the first render still follows owner > role > organization > shared default resolution.
+- [ ] After configuring `scope_context_method`, the preset selector can distinguish owner, shared, role-scoped, and organization-scoped examples.
 - [ ] The mixed sample rows make status filter, delivery-date sort, amount sort, and preset column differences easy to notice.
 
 ## Production note
