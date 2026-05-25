@@ -201,6 +201,139 @@ View form integration:
 <% end %>
 ```
 
+## Example: admin page with a create form, editor, and list table
+
+Use this pattern when one management screen needs all three responsibilities at once:
+
+- create or update a business record
+- save table display preferences
+- browse the current record list
+
+Keep those responsibilities as separate form submissions even when they appear on the same page.
+
+Controller:
+
+```ruby
+class Admin::DocumentSetsController < ApplicationController
+  def index
+    @document_set = DocumentSet.new
+    @table_columns = document_set_table_columns
+
+    preference_params = rails_table_preference_params(
+      table_key: :admin_document_sets,
+      name: params[:table_preference_name],
+      columns: @table_columns
+    )
+
+    merged_params = params.to_unsafe_h.merge(preference_params)
+
+    @document_sets = DocumentSet
+      .search(merged_params)
+      .order_by(merged_params["sort"] || params[:sort])
+      .page(params[:page])
+  end
+
+  def create
+    @document_set = DocumentSet.new(document_set_params)
+
+    if @document_set.save
+      redirect_to admin_document_sets_path, notice: "作成しました"
+    else
+      @table_columns = document_set_table_columns
+      @document_sets = DocumentSet.search(params).page(params[:page])
+      render :index, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def document_set_table_columns
+    [
+      table_preferences_column(:code, label: "セットコード", sortable: true, default_width: 160),
+      table_preferences_column(:name, label: "セット名", sortable: true, default_width: 240),
+      table_preferences_column(:document_count, label: "文書数", sortable: true, default_width: 120),
+      table_preferences_column(
+        :updated_at,
+        label: "更新日時",
+        sortable: true,
+        filter: { type: :date, from_param: :from_updated_at, to_param: :to_updated_at },
+        default_width: 180
+      )
+    ]
+  end
+
+  def document_set_params
+    params.require(:document_set).permit(:code, :name)
+  end
+end
+```
+
+View composition:
+
+```erb
+<%= form_with model: @document_set, url: admin_document_sets_path do |f| %>
+  <%= f.text_field :code, placeholder: "セットコード" %>
+  <%= f.text_field :name, placeholder: "セット名" %>
+  <%= f.submit "登録" %>
+<% end %>
+
+<%= table_preferences_editor(
+  table_key: :admin_document_sets,
+  name: params[:table_preference_name] || "default",
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  title: "一覧の表示設定"
+) %>
+
+<%= form_with url: admin_document_sets_path, method: :get do %>
+  <%= text_field_tag :search_word, params[:search_word], placeholder: "セット名で検索" %>
+  <%= hidden_field_tag :table_preference_name, params[:table_preference_name] if params[:table_preference_name].present? %>
+
+  <%= table_preferences_hidden_fields(
+    settings: @table_preference_settings,
+    columns: @table_columns
+  ) %>
+
+  <%= submit_tag "検索" %>
+<% end %>
+
+<%= table_preferences_table_tag(
+  table_key: :admin_document_sets,
+  name: params[:table_preference_name] || "default",
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  class: "table"
+) do %>
+  <thead>
+    <tr>
+      <th data-rails-table-preferences-column-key="code">セットコード</th>
+      <th data-rails-table-preferences-column-key="name">セット名</th>
+      <th data-rails-table-preferences-column-key="document_count">文書数</th>
+      <th data-rails-table-preferences-column-key="updated_at">更新日時</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @document_sets.each do |document_set| %>
+      <tr>
+        <td data-rails-table-preferences-column-key="code"><%= document_set.code %></td>
+        <td data-rails-table-preferences-column-key="name"><%= document_set.name %></td>
+        <td data-rails-table-preferences-column-key="document_count"><%= document_set.document_count %></td>
+        <td data-rails-table-preferences-column-key="updated_at"><%= l(document_set.updated_at) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+<% end %>
+```
+
+Why this split works:
+
+- the create form owns record validation and persistence
+- the editor owns only table display preferences and preset actions
+- the search form owns user-entered query params plus `table_preferences_hidden_fields(...)`
+- the table stays a normal host app list view and only opts into Rails Table Preferences through column keys
+
+If the page later adds CSV/export actions, keep those as another separate submission and pass only the params needed for export. See [Export integration](export_integration.md).
+
 ## Notes
 
 - Prefer `ignored: true` for columns that should never appear in the user-facing column editor.
