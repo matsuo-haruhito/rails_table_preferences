@@ -6,12 +6,16 @@ module RailsTablePreferencesDemo
     include RailsTablePreferences::Controller
     include RailsTablePreferences::TablePreferencesHelper
 
+    DEMO_TABLE_KEY = :rails_table_preferences_demo_orders
+    SHARED_PRESET_NAME = "共有ビュー"
+
     def index
+      ensure_demo_shared_preset!
       @table_columns = table_columns
-      @table_preference_settings = rails_table_preference_settings(table_key: :rails_table_preferences_demo_orders)
+      @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
 
       preference_params = rails_table_preference_params(
-        table_key: :rails_table_preferences_demo_orders,
+        table_key: DEMO_TABLE_KEY,
         columns: @table_columns
       )
 
@@ -112,6 +116,40 @@ module RailsTablePreferencesDemo
       Date.parse(value.to_s)
     rescue ArgumentError
       nil
+    end
+
+    def ensure_demo_shared_preset!
+      preference = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: nil,
+        table_key: DEMO_TABLE_KEY,
+        name: SHARED_PRESET_NAME,
+        scope_type: RailsTablePreferences::Preference::SHARED_SCOPE_TYPE
+      )
+      settings = shared_demo_preset_settings
+      return if preference.persisted? && preference.settings == settings && preference.default_flag == false
+
+      preference.settings = settings
+      preference.default_flag = false
+      preference.save!
+    end
+
+    def shared_demo_preset_settings
+      {
+        "columns" => [
+          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 120 },
+          { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
+          { "key" => "customer_name", "visible" => true, "order" => 30, "width" => 240, "truncate" => 24 },
+          { "key" => "delivery_date", "visible" => true, "order" => 40, "width" => 140 },
+          { "key" => "amount", "visible" => true, "order" => 50, "width" => 120 },
+          { "key" => "memo", "visible" => false, "order" => 60, "width" => 260, "truncate" => 24 }
+        ],
+        "filters" => {
+          "status" => { "operator" => "in", "values" => ["未出荷", "保留"] }
+        },
+        "sorts" => [
+          { "key" => "delivery_date", "direction" => "asc" }
+        ]
+      }
     end
   end
 end
