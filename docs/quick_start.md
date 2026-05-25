@@ -47,6 +47,33 @@ Run the migration:
 bin/rails db:migrate
 ```
 
+### If the host app does not use `User` / `current_user`
+
+When the host app uses another owner model or another current-owner method, set both in the initializer before trying the demo or bundled JSON API:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.owner_model = :customers
+  config.current_user_method = :current_customer
+end
+```
+
+The configured method must return a persisted record for the configured owner model. A minimal sandbox setup looks like this:
+
+```ruby
+class ApplicationController < ActionController::Base
+  helper_method :current_customer
+
+  private
+
+  def current_customer
+    Customer.first_or_create!(name: "Sandbox Customer")
+  end
+end
+```
+
+This matters for both the normal editor flow and the copied demo screen. `--with-demo` does not create the owner record for you; it reuses the same configured current-owner method as the rest of the gem.
+
 ### Vite / app/frontend entrypoint registration
 
 When your app uses `app/frontend/entrypoints/application.js` instead of the default `stimulus-rails` controller manifest, register the controller explicitly from the gem entrypoint:
