@@ -46,7 +46,8 @@ module RailsTablePreferencesDemo
           sortable: true
         ),
         table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
-        table_preferences_column(:memo, label: "備考", default_width: 260, default_truncate: 24),
+        table_preferences_column(:memo_ellipsis, label: "備考（省略）", default_width: 220, overflow: :ellipsis),
+        table_preferences_column(:memo_wrap, label: "備考（折返し）", default_width: 220, overflow: :wrap),
         table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
       ]
     end
@@ -60,7 +61,8 @@ module RailsTablePreferencesDemo
           status: "未出荷",
           amount: 12_000,
           internal_cost: 8_000,
-          memo: "長い備考テキストの表示確認用です。列幅と省略表示を確認できます。"
+          memo_ellipsis: "長い備考テキストの表示確認用です。ダブルクリック auto-fit と ellipsis overflow の違いを確認できます。",
+          memo_wrap: "長い備考テキストの表示確認用です。ダブルクリック auto-fit と wrap overflow の違いを確認できます。"
         },
         {
           order_no: "A002",
@@ -69,7 +71,8 @@ module RailsTablePreferencesDemo
           status: "出荷済",
           amount: 34_000,
           internal_cost: 21_000,
-          memo: "フィルター、ソート、列幅変更の確認に使うデモ行です。"
+          memo_ellipsis: "フィルター、ソート、列幅変更の確認に使うデモ行です。折返しなしの表示差分も見やすくしています。",
+          memo_wrap: "フィルター、ソート、列幅変更の確認に使うデモ行です。折返しありの表示差分も見やすくしています。"
         },
         {
           order_no: "A003",
@@ -78,7 +81,8 @@ module RailsTablePreferencesDemo
           status: "保留",
           amount: 56_000,
           internal_cost: 39_000,
-          memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
+          memo_ellipsis: "ヘッダドラッグと表示項目の並び替えを確認しつつ、細い列での省略表示も比較できます。",
+          memo_wrap: "ヘッダドラッグと表示項目の並び替えを確認しつつ、細い列での折返し表示も比較できます。"
         }
       ]
     end
