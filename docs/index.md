@@ -12,6 +12,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
+- [Visual overview](visual_overview.md): representative screenshots of the bundled editor and demo table states.
 - [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
