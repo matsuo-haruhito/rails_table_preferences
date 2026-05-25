@@ -19,6 +19,7 @@ en:
       deleting_status: Deleting saved settings...
       deleted_status: Saved settings deleted.
       operation_failed_status: Could not complete the table preference action.
+      dirty_status: You have unsaved changes.
       reset: Reset
       order: Order
       width: Width
