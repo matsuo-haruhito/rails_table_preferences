@@ -22,6 +22,8 @@ app/views/rails_table_preferences_demo/orders/index.html.erb
 
 The demo controller uses in-memory order rows for display. It does not create an orders table. Preference persistence still uses the normal `table_preferences` table and the mounted engine API.
 
+The copied rows intentionally include long-text columns, so you can verify header double-click auto-fit and overflow metadata without adding extra seed data.
+
 ## Add routes
 
 Mount the engine if it is not already mounted:
@@ -80,7 +82,8 @@ The generated demo screen includes:
 - column order
 - table-header drag ordering
 - column width resizing
-- truncation metadata
+- double-click auto-fit on header resize handles
+- truncation metadata and wrap overflow metadata on long-text columns
 - preset save/load/delete UI
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
@@ -102,6 +105,8 @@ On the demo screen, confirm:
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
+- [ ] Double-clicking the resize handle on `備考` auto-fits the column to the long text.
+- [ ] `備考` and `配送メモ` show different ellipsis/wrap overflow behavior.
 - [ ] Filter panel opens.
 - [ ] Header click cycles sort state.
 - [ ] Save persists settings.
