@@ -27,6 +27,8 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
 - [JavaScript entrypoints](docs/javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, and custom JS bundlers.
 - [JavaScript controller notes](docs/javascript_controller.md): bundled Stimulus controller responsibilities and safety boundaries.
+- [Product Profile](Product%20Profile.md): maintainer-facing summary of repository purpose, ownership boundaries, release stage, and the main docs map.
+- [AGENTS](AGENTS.md): maintainer workflow, source-of-truth order, and safe update rules for docs or behavior summaries.
 
 ## Goals
 
