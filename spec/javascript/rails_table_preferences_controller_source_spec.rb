@@ -89,6 +89,18 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("resizeColumn(event)")
   end
 
+  it "supports auto-fit from the resize handle with clamp and measurement helpers" do
+    expect(source).to include("resizeAutoFitPadding: { type: Number, default: 24 }")
+    expect(source).to include("resizeAutoFitMinWidth: { type: Number, default: 40 }")
+    expect(source).to include("resizeAutoFitMaxWidth: { type: Number, default: 640 }")
+    expect(source).to include('handle.addEventListener("dblclick", this.autoFitColumnFromHandle.bind(this))')
+    expect(source).to include("autoFitColumnFromHandle(event)")
+    expect(source).to include("autoFitWidthForColumn(key)")
+    expect(source).to include("measureAutoFitCellWidth(cell)")
+    expect(source).to include("cells.map((cell) => this.measureAutoFitCellWidth(cell))")
+    expect(source).to include("Math.max(this.normalizedResizeAutoFitMinWidth, Math.min(this.normalizedResizeAutoFitMaxWidth, Math.ceil(measured)))")
+  end
+
   it "installs filter buttons for filterable columns" do
     expect(source).to include("installFilterControls()")
     expect(source).to include("column?.filter")
