@@ -7,8 +7,8 @@ RSpec.describe "rails_table_preferences_controller.js" do
 
   let(:source) { File.read(source_path) }
 
-  it "defines a status target and defaults generated editor labels to Japanese" do
-    expect(source).to include('static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status"]')
+  it "defines status and dirty-state targets with Japanese default labels" do
+    expect(source).to include('static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status", "dirtyState"]')
     expect(source).to include('orderLabel: { type: String, default: "表示順" }')
     expect(source).to include('widthLabel: { type: String, default: "列幅" }')
     expect(source).to include('truncateLabel: { type: String, default: "省略文字数" }')
@@ -17,6 +17,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
     expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
     expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
+    expect(source).to include('dirtyStatusLabel: { type: String, default: "未保存の変更があります。" }')
   end
 
   it "defaults filter UI labels to Japanese" do
@@ -156,13 +157,25 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("return window.confirm(message)")
   end
 
-  it "updates a live status region and temporary busy state around async preset actions" do
+  it "updates status and dirty-state messaging around preset actions" do
     expect(source).to include("this.refreshPresetOptionsOnConnect()")
     expect(source).to include("withBusyStatus(callback,")
     expect(source).to include("setBusyState(busy)")
     expect(source).to include("setStatus(message)")
+    expect(source).to include("setDirtyState(message)")
+    expect(source).to include("syncDirtyState()")
+    expect(source).to include("markCurrentSettingsAsClean()")
+    expect(source).to include("serializeComparableSettings(payload)")
     expect(source).to include('this.element.querySelectorAll(".rails-table-preferences-editor__actions button")')
     expect(source).to include("console.error(error)")
+  end
+
+  it "tracks unsaved changes without changing preset persistence rules" do
+    expect(source).to include("installDirtyStateListeners()")
+    expect(source).to include('this.editorRowsTarget.addEventListener("input", sync)')
+    expect(source).to include('this.presetNameTarget.addEventListener("input", sync)')
+    expect(source).to include('defaultPreset: payload?.defaultPreset === true')
+    expect(source).to include('name: payload?.name || "default"')
   end
 
   it "labels preset options with scope metadata" do
