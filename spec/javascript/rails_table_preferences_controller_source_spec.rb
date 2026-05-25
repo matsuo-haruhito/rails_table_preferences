@@ -16,6 +16,10 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
     expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
+    expect(source).to include('loadingFailedStatusLabel: { type: String, default: "保存済み設定を読み込めませんでした。" }')
+    expect(source).to include('savingFailedStatusLabel: { type: String, default: "設定を保存できませんでした。" }')
+    expect(source).to include('savingAsNewFailedStatusLabel: { type: String, default: "新しい設定を保存できませんでした。" }')
+    expect(source).to include('deletingFailedStatusLabel: { type: String, default: "設定を削除できませんでした。" }')
     expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
   end
 
@@ -163,12 +167,21 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("setStatus(message)")
     expect(source).to include('this.element.querySelectorAll(".rails-table-preferences-editor__actions button")')
     expect(source).to include("console.error(error)")
+    expect(source).to include("errorLabel: this.loadingFailedStatusLabelValue")
+    expect(source).to include("errorLabel: this.savingFailedStatusLabelValue")
+    expect(source).to include("errorLabel: this.savingAsNewFailedStatusLabelValue")
+    expect(source).to include("errorLabel: this.deletingFailedStatusLabelValue")
   end
 
-  it "labels preset options with scope metadata" do
+  it "labels preset options with localized scope metadata" do
     expect(source).to include("buildPresetOption(preset)")
-    expect(source).to include("preset.scope_label || preset.scope_type || \"owner\"")
-    expect(source).to include('option.dataset.scopeType = preset.scope_type || "owner"')
+    expect(source).to include("const scopeType = this.scopeTypeFor(preset)")
+    expect(source).to include("preset.scope_label || this.localizedScopeLabel(scopeType)")
+    expect(source).to include("localizedScopeLabel(scopeType)")
+    expect(source).to include('case "shared": return this.presetScopeSharedLabelValue')
+    expect(source).to include('case "role": return this.presetScopeRoleLabelValue')
+    expect(source).to include('case "organization": return this.presetScopeOrganizationLabelValue')
+    expect(source).to include('option.dataset.scopeType = scopeType')
     expect(source).to include('option.dataset.editable = preset.editable === false ? "false" : "true"')
   end
 end
