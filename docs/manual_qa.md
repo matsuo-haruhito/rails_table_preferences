@@ -57,7 +57,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Update the named preset and confirm changes persist.
 - [ ] Mark a preset as default.
 - [ ] Reload without an explicit name and confirm the default preset loads.
-- [ ] Delete a non-default preset.
+- [ ] Delete a non-default preset and confirm the dialog names the target preset.
+- [ ] Try deleting a scoped preset and confirm the dialog also shows scope context when available.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, and action buttons.
