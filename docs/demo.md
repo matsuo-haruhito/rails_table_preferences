@@ -2,7 +2,7 @@
 
 Rails Table Preferences can copy a lightweight demo screen into a host application for local browser verification.
 
-Use this when you want to confirm the editor, table behavior, preference persistence, filters, and sortable headers before wiring the gem into a real business screen.
+Use this when you want to confirm the editor, table behavior, preference persistence, filters, sortable headers, fixed columns, and grouped header markup before wiring the gem into a real business screen.
 
 ## Generate demo files
 
@@ -81,6 +81,8 @@ The generated demo screen includes:
 - table-header drag ordering
 - column width resizing
 - truncation metadata
+- fixed/pinned column metadata with a horizontally scrollable example table
+- column group metadata with a grouped header row
 - preset save/load/delete UI
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
@@ -102,6 +104,8 @@ On the demo screen, confirm:
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
+- [ ] Horizontal scrolling still keeps the pinned order number column visible.
+- [ ] The grouped header row shows customer and delivery sections above the leaf columns.
 - [ ] Filter panel opens.
 - [ ] Header click cycles sort state.
 - [ ] Save persists settings.
@@ -140,3 +144,5 @@ Good first automated checks are:
 - save and reload restore settings
 - filter panel opens
 - sortable header changes sort state
+- pinned order number column remains visible during horizontal scroll
+- grouped header row renders above the customer and delivery leaf columns
