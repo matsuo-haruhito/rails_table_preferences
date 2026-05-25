@@ -7,14 +7,15 @@ RSpec.describe "rails_table_preferences_controller.js" do
 
   let(:source) { File.read(source_path) }
 
-  it "defines a status target and defaults generated editor labels to Japanese" do
-    expect(source).to include('static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status"]')
+  it "defines status and read-only hint targets and defaults generated editor labels to Japanese" do
+    expect(source).to include('static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status", "readOnlyHint"]')
     expect(source).to include('orderLabel: { type: String, default: "表示順" }')
     expect(source).to include('widthLabel: { type: String, default: "列幅" }')
     expect(source).to include('truncateLabel: { type: String, default: "省略文字数" }')
     expect(source).to include('dragLabel: { type: String, default: "ドラッグして並び替え" }')
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
+    expect(source).to include('readOnlyPresetHintLabel: { type: String, default: "この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。" }')
     expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
     expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
   end
@@ -147,6 +148,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("syncPresetEditingState()")
     expect(source).to include("if (!this.currentPreferenceEditable) return this.createPresetFromEditor()")
     expect(source).to include("button.disabled = !editable")
+    expect(source).to include("this.readOnlyHintTarget.hidden = !showReadOnlyHint")
   end
 
   it "confirms editable preset deletion before issuing DELETE" do
@@ -165,10 +167,16 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("console.error(error)")
   end
 
-  it "labels preset options with scope metadata" do
+  it "labels preset options with localized scope fallbacks and scope metadata" do
     expect(source).to include("buildPresetOption(preset)")
-    expect(source).to include("preset.scope_label || preset.scope_type || \"owner\"")
-    expect(source).to include('option.dataset.scopeType = preset.scope_type || "owner"')
+    expect(source).to include('const scopeType = preset.scope_type || "owner"')
+    expect(source).to include("const scopeLabel = preset.scope_label || this.scopeFallbackLabel(scopeType)")
+    expect(source).to include('const scopeMark = scopeType !== "owner" && scopeLabel ? ` [${scopeLabel}]` : ""')
+    expect(source).to include("scopeFallbackLabel(scopeType)")
+    expect(source).to include('case "shared": return this.scopeSharedLabelValue')
+    expect(source).to include('case "role": return this.scopeRoleLabelValue')
+    expect(source).to include('case "organization": return this.scopeOrganizationLabelValue')
+    expect(source).to include('option.dataset.scopeType = scopeType')
     expect(source).to include('option.dataset.editable = preset.editable === false ? "false" : "true"')
   end
 end
