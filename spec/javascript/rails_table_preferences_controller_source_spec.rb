@@ -7,13 +7,16 @@ RSpec.describe "rails_table_preferences_controller.js" do
 
   let(:source) { File.read(source_path) }
 
-  it "defaults generated editor labels to Japanese" do
+  it "defines a status target and defaults generated editor labels to Japanese" do
+    expect(source).to include('static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status"]')
     expect(source).to include('orderLabel: { type: String, default: "表示順" }')
     expect(source).to include('widthLabel: { type: String, default: "列幅" }')
     expect(source).to include('truncateLabel: { type: String, default: "省略文字数" }')
     expect(source).to include('dragLabel: { type: String, default: "ドラッグして並び替え" }')
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
+    expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
+    expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
   end
 
   it "defaults filter UI labels to Japanese" do
@@ -151,6 +154,15 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("confirmDeletePreset()")
     expect(source).to include("const message = this.deleteConfirmLabelValue?.trim()")
     expect(source).to include("return window.confirm(message)")
+  end
+
+  it "updates a live status region and temporary busy state around async preset actions" do
+    expect(source).to include("this.refreshPresetOptionsOnConnect()")
+    expect(source).to include("withBusyStatus(callback,")
+    expect(source).to include("setBusyState(busy)")
+    expect(source).to include("setStatus(message)")
+    expect(source).to include('this.element.querySelectorAll(".rails-table-preferences-editor__actions button")')
+    expect(source).to include("console.error(error)")
   end
 
   it "labels preset options with scope metadata" do
