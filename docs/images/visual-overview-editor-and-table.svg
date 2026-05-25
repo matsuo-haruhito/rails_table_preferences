@@ -1,0 +1,74 @@
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Rails Table Preferences visual overview</title>
+  <desc id="desc">A representative documentation image showing the preset editor above a table with pinned columns.</desc>
+  <rect width="1400" height="920" fill="#F5F7FB"/>
+  <rect x="72" y="56" width="1256" height="72" rx="20" fill="#FFFFFF" stroke="#D6DEEB"/>
+  <text x="108" y="101" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Rails Table Preferences</text>
+  <text x="108" y="123" fill="#58637A" font-family="Arial, sans-serif" font-size="16">Representative demo screen for presets, widths, order, and pinned columns</text>
+  <rect x="72" y="160" width="1256" height="278" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
+  <text x="108" y="210" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Preference editor</text>
+  <text x="108" y="238" fill="#58637A" font-family="Arial, sans-serif" font-size="16">Users can switch presets, tune visible columns, and save a shared default.</text>
+  <rect x="108" y="270" width="280" height="56" rx="14" fill="#F8FAFC" stroke="#CDD6E4"/>
+  <text x="130" y="304" fill="#283548" font-family="Arial, sans-serif" font-size="18" font-weight="700">Preset</text>
+  <text x="216" y="304" fill="#4D5B71" font-family="Arial, sans-serif" font-size="18">Ops morning review</text>
+  <rect x="410" y="270" width="136" height="56" rx="14" fill="#1D4ED8"/>
+  <text x="452" y="304" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">Save</text>
+  <rect x="562" y="270" width="168" height="56" rx="14" fill="#E6EEF9"/>
+  <text x="594" y="304" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="18" font-weight="700">Save as new</text>
+  <rect x="748" y="270" width="174" height="56" rx="14" fill="#ECFDF3" stroke="#B7E6CA"/>
+  <text x="776" y="304" fill="#166534" font-family="Arial, sans-serif" font-size="17" font-weight="700">Shared default on</text>
+  <rect x="108" y="352" width="574" height="54" rx="14" fill="#EFF6FF" stroke="#C8DAFF"/>
+  <text x="132" y="386" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Status</text>
+  <text x="206" y="386" fill="#35517A" font-family="Arial, sans-serif" font-size="17">Saved for the current account. Width and order updates are preserved.</text>
+  <rect x="720" y="270" width="572" height="136" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
+  <text x="748" y="304" fill="#283548" font-family="Arial, sans-serif" font-size="18" font-weight="700">Visible columns</text>
+  <rect x="748" y="326" width="150" height="34" rx="17" fill="#DBEAFE"/>
+  <text x="784" y="348" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="15" font-weight="700">order no.</text>
+  <rect x="910" y="326" width="124" height="34" rx="17" fill="#DBEAFE"/>
+  <text x="948" y="348" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="15" font-weight="700">status</text>
+  <rect x="1046" y="326" width="136" height="34" rx="17" fill="#DBEAFE"/>
+  <text x="1083" y="348" fill="#1E3A8A" font-family="Arial, sans-serif" font-size="15" font-weight="700">assignee</text>
+  <rect x="748" y="372" width="176" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="786" y="394" fill="#4338CA" font-family="Arial, sans-serif" font-size="15" font-weight="700">Pinned left</text>
+  <text x="888" y="394" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">order no.</text>
+  <rect x="72" y="474" width="1256" height="374" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
+  <text x="108" y="524" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Orders table preview</text>
+  <text x="108" y="552" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The demo table lets readers verify the sticky first column and understand how preferences affect the layout.</text>
+  <rect x="108" y="586" width="170" height="38" rx="19" fill="#EEF2FF"/>
+  <text x="138" y="611" fill="#4338CA" font-family="Arial, sans-serif" font-size="15" font-weight="700">Pinned: order no.</text>
+  <rect x="294" y="586" width="168" height="38" rx="19" fill="#EFF6FF"/>
+  <text x="326" y="611" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Sort: updated desc</text>
+  <rect x="108" y="646" width="170" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="278" y="646" width="184" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="462" y="646" width="160" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="622" y="646" width="206" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="828" y="646" width="220" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="1048" y="646" width="212" height="52" rx="12" fill="#EDF2F7"/>
+  <text x="132" y="679" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Order no.</text>
+  <text x="312" y="679" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Customer</text>
+  <text x="500" y="679" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Status</text>
+  <text x="656" y="679" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Assignee</text>
+  <text x="864" y="679" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Updated at</text>
+  <text x="1080" y="679" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Region</text>
+  <rect x="108" y="710" width="1152" height="48" rx="10" fill="#FFFFFF"/>
+  <rect x="108" y="758" width="1152" height="48" rx="10" fill="#F9FBFD"/>
+  <rect x="108" y="806" width="1152" height="48" rx="10" fill="#FFFFFF"/>
+  <text x="132" y="741" fill="#283548" font-family="Arial, sans-serif" font-size="15">SO-2048</text>
+  <text x="312" y="741" fill="#283548" font-family="Arial, sans-serif" font-size="15">Acme Supply</text>
+  <text x="500" y="741" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
+  <text x="656" y="741" fill="#283548" font-family="Arial, sans-serif" font-size="15">M. Sato</text>
+  <text x="864" y="741" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-20 09:14</text>
+  <text x="1080" y="741" fill="#283548" font-family="Arial, sans-serif" font-size="15">Kanto</text>
+  <text x="132" y="789" fill="#283548" font-family="Arial, sans-serif" font-size="15">SO-2041</text>
+  <text x="312" y="789" fill="#283548" font-family="Arial, sans-serif" font-size="15">Northwind Labs</text>
+  <text x="500" y="789" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Waiting</text>
+  <text x="656" y="789" fill="#283548" font-family="Arial, sans-serif" font-size="15">H. Matsuo</text>
+  <text x="864" y="789" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-19 17:42</text>
+  <text x="1080" y="789" fill="#283548" font-family="Arial, sans-serif" font-size="15">Kansai</text>
+  <text x="132" y="837" fill="#283548" font-family="Arial, sans-serif" font-size="15">SO-2037</text>
+  <text x="312" y="837" fill="#283548" font-family="Arial, sans-serif" font-size="15">Blue Harbor</text>
+  <text x="500" y="837" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">In transit</text>
+  <text x="656" y="837" fill="#283548" font-family="Arial, sans-serif" font-size="15">K. Iwata</text>
+  <text x="864" y="837" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-18 13:08</text>
+  <text x="1080" y="837" fill="#283548" font-family="Arial, sans-serif" font-size="15">Chubu</text>
+</svg>
