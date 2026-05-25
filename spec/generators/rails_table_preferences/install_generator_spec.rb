@@ -3,13 +3,9 @@
 require "generators/rails_table_preferences/install/install_generator"
 require "generators/rails_table_preferences/javascript/javascript_generator"
 require "generators/rails_table_preferences/stylesheets/stylesheets_generator"
-require "rails/generators/testing/behavior"
 
 RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :generator do
-  include Rails::Generators::Testing::Behavior
-
-  tests described_class
-  destination File.expand_path("../../tmp/generators/install", __dir__)
+  include FileUtils
 
   before do
     prepare_destination
@@ -101,6 +97,29 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(source).to include("rails_table_preferences/controller")
     expect(source).to include("with_demo")
     expect(source).to include("rails_table_preferences_demo/orders#index")
+  end
+
+  def destination_root
+    File.expand_path("../../tmp/generators/install", __dir__)
+  end
+
+  def prepare_destination
+    rm_rf(destination_root)
+    mkdir_p(destination_root)
+  end
+
+  def run_generator(args = [])
+    with_captured_stdout do
+      described_class.start(args, destination_root: destination_root)
+    end
+  end
+
+  def with_captured_stdout
+    original_stdout = $stdout
+    $stdout = StringIO.new
+    yield
+  ensure
+    $stdout = original_stdout
   end
 
   def generated_migration
