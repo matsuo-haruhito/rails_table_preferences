@@ -22,6 +22,8 @@ app/views/rails_table_preferences_demo/orders/index.html.erb
 
 The demo controller uses in-memory order rows for display. It does not create an orders table. Preference persistence still uses the normal `table_preferences` table and the mounted engine API.
 
+The generated screen also seeds one shared preset named `共有ビュー`. This gives you a minimal way to confirm that a normal owner can load a shared preset, cannot delete it from the normal editor, and saves changes back into an owner preset instead of overwriting the shared preset.
+
 ## Add routes
 
 Mount the engine if it is not already mounted:
@@ -82,6 +84,7 @@ The generated demo screen includes:
 - column width resizing
 - truncation metadata
 - preset save/load/delete UI
+- one shared preset example with read-only fallback behavior
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
 - text/date/select filter metadata
@@ -107,6 +110,10 @@ On the demo screen, confirm:
 - [ ] Save persists settings.
 - [ ] Reload restores saved settings.
 - [ ] Save as new creates another preset.
+- [ ] `共有ビュー [shared]` appears in the preset selector.
+- [ ] Selecting `共有ビュー [shared]` loads the shared preset and keeps the normal editor usable.
+- [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
+- [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
 - [ ] Delete removes a preset.
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
