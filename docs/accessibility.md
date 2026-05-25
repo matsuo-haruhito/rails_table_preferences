@@ -11,6 +11,7 @@ The bundled editor and Stimulus controller provide:
 - button elements for interactive controls
 - labels for generated editor inputs
 - configurable Japanese default labels
+- localized fallback scope labels for shared, role, and organization presets when the API payload does not provide `scope_label`
 - `aria-label` for drag handles, resize handles, and filter buttons
 - `aria-pressed` for active filter buttons
 - `aria-sort` for sortable table headers
@@ -80,6 +81,8 @@ The bundled controller disables destructive/default controls for read-only prese
 
 This prevents the regular user-facing editor from accidentally overwriting shared presets.
 
+The preset selector may show localized fallback labels such as `[共有]`, `[ロール]`, or `[組織]` when the payload exposes `scope_type` but not a host-app-provided `scope_label`.
+
 ## Status region and busy state
 
 The bundled editor now includes a lightweight status region for the main async preset actions:
@@ -88,7 +91,7 @@ The bundled editor now includes a lightweight status region for the main async p
 - saving the current settings
 - saving as a new preset
 - deleting the current preset
-- reporting a generic failure when one of those actions cannot complete
+- reporting operation-specific failure copy when one of those actions cannot complete
 
 The default markup uses a native live region:
 
@@ -103,7 +106,7 @@ The default markup uses a native live region:
 
 While those bundled async actions are in flight, the preset select, preset name, default checkbox, and action buttons are temporarily disabled to reduce duplicate submissions.
 
-Host applications can still replace or restyle this surface through the existing copy-based customization path when they need richer inline messaging or branded notifications.
+Host applications can still replace or restyle this surface through the existing copy-based customization path when they need richer inline messaging, branded notifications, or more specific scope labels than the bundled fallback text.
 
 ## Host application responsibilities
 
@@ -129,7 +132,9 @@ Before releasing a screen, check:
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Read-only scoped presets disable destructive/default controls.
+- Non-owner preset options expose readable scope labels.
 - Save/load/delete actions update the status region with understandable progress or result copy.
+- Action failures update the status region with copy that identifies which preset action failed.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
