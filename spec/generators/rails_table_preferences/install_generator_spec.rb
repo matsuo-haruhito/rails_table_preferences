@@ -86,8 +86,12 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view).to exist
     expect(controller.read).to include("module RailsTablePreferencesDemo")
     expect(controller.read).to include("rails_table_preferences_demo_orders")
+    expect(controller.read).to include("fixed: true")
+    expect(controller.read).to include("group: { key: :customer, label: \"得意先情報\" }")
     expect(view.read).to include("Rails Table Preferences Demo")
     expect(view.read).to include("table_preferences_editor")
+    expect(view.read).to include("<th colspan=\"2\">得意先情報</th>")
+    expect(view.read).to include("min-width: 1220px")
   end
 
   it "provides post-install next steps in the generator source" do
