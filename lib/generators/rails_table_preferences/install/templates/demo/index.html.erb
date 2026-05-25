@@ -5,6 +5,12 @@
   <code>table_preferences</code> table for preference persistence.
 </p>
 
+<p>
+  Try narrowing the <strong>備考（省略）</strong> and <strong>備考（折返し）</strong> columns,
+  then double-click a resize handle to auto-fit the current visible values.
+  The two columns use different overflow metadata so you can compare ellipsis and wrap behavior.
+</p>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
@@ -36,7 +42,8 @@
       <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
       <th data-rails-table-preferences-column-key="status">状態</th>
       <th data-rails-table-preferences-column-key="amount">金額</th>
-      <th data-rails-table-preferences-column-key="memo">備考</th>
+      <th data-rails-table-preferences-column-key="memo_ellipsis">備考（省略）</th>
+      <th data-rails-table-preferences-column-key="memo_wrap">備考（折返し）</th>
     </tr>
   </thead>
   <tbody>
@@ -47,7 +54,8 @@
         <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
         <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
         <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
-        <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+        <td data-rails-table-preferences-column-key="memo_ellipsis"><%= order[:memo_ellipsis] %></td>
+        <td data-rails-table-preferences-column-key="memo_wrap"><%= order[:memo_wrap] %></td>
       </tr>
     <% end %>
   </tbody>
