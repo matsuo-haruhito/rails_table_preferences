@@ -34,13 +34,21 @@ export default class extends Controller {
     deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" },
     loadingStatusLabel: { type: String, default: "設定を読み込み中です..." },
     loadedStatusLabel: { type: String, default: "設定を読み込みました。" },
+    loadingFailedStatusLabel: { type: String, default: "保存済み設定を読み込めませんでした。" },
     savingStatusLabel: { type: String, default: "設定を保存中です..." },
     savedStatusLabel: { type: String, default: "設定を保存しました。" },
+    savingFailedStatusLabel: { type: String, default: "設定を保存できませんでした。" },
     savingAsNewStatusLabel: { type: String, default: "新しい設定を保存中です..." },
     savedAsNewStatusLabel: { type: String, default: "新しい設定を保存しました。" },
+    savingAsNewFailedStatusLabel: { type: String, default: "新しい設定を保存できませんでした。" },
     deletingStatusLabel: { type: String, default: "設定を削除中です..." },
     deletedStatusLabel: { type: String, default: "設定を削除しました。" },
-    operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }
+    deletingFailedStatusLabel: { type: String, default: "設定を削除できませんでした。" },
+    operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" },
+    presetScopeOwnerLabel: { type: String, default: "owner" },
+    presetScopeSharedLabel: { type: String, default: "共有" },
+    presetScopeRoleLabel: { type: String, default: "ロール" },
+    presetScopeOrganizationLabel: { type: String, default: "組織" }
   }
 
   connect() {
@@ -106,7 +114,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.savingAsNewStatusLabelValue,
-      successLabel: this.savedAsNewStatusLabelValue
+      successLabel: this.savedAsNewStatusLabelValue,
+      errorLabel: this.savingAsNewFailedStatusLabelValue
     })
   }
 
@@ -134,7 +143,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.deletingStatusLabelValue,
-      successLabel: this.deletedStatusLabelValue
+      successLabel: this.deletedStatusLabelValue,
+      errorLabel: this.deletingFailedStatusLabelValue
     })
   }
 
@@ -153,7 +163,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.savingStatusLabelValue,
-      successLabel: this.savedStatusLabelValue
+      successLabel: this.savedStatusLabelValue,
+      errorLabel: this.savingFailedStatusLabelValue
     })
   }
 
@@ -183,7 +194,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.loadingStatusLabelValue,
-      successLabel: this.loadedStatusLabelValue
+      successLabel: this.loadedStatusLabelValue,
+      errorLabel: this.loadingFailedStatusLabelValue
     })
   }
 
@@ -198,14 +210,15 @@ export default class extends Controller {
   buildPresetOption(preset) {
     const option = document.createElement("option")
     const name = preset.name || "default"
-    const scopeLabel = preset.scope_label || preset.scope_type || "owner"
+    const scopeType = this.scopeTypeFor(preset)
+    const scopeLabel = preset.scope_label || this.localizedScopeLabel(scopeType)
     const defaultMark = preset.default === true ? " *" : ""
-    const scopeMark = scopeLabel && scopeLabel !== "owner" ? ` [${scopeLabel}]` : ""
+    const scopeMark = scopeLabel && scopeType !== "owner" ? ` [${scopeLabel}]` : ""
     option.value = name
     option.textContent = `${name}${scopeMark}${defaultMark}`
     option.dataset.default = preset.default === true ? "true" : "false"
     option.dataset.editable = preset.editable === false ? "false" : "true"
-    option.dataset.scopeType = preset.scope_type || "owner"
+    option.dataset.scopeType = scopeType
     option.dataset.scopeKey = preset.scope_key || ""
     return option
   }
@@ -220,7 +233,8 @@ export default class extends Controller {
       this.applyPreferencePayload(await response.json())
     }, {
       busyLabel: this.loadingStatusLabelValue,
-      successLabel: this.loadedStatusLabelValue
+      successLabel: this.loadedStatusLabelValue,
+      errorLabel: this.loadingFailedStatusLabelValue
     })
   }
 
@@ -963,6 +977,19 @@ export default class extends Controller {
 
   columnDefinitionByKey(key) {
     return this.columnsValue.find((column) => column.key === key) || this.columnByKey(key)
+  }
+
+  scopeTypeFor(preset) {
+    return preset.scope_type || "owner"
+  }
+
+  localizedScopeLabel(scopeType) {
+    switch (scopeType) {
+      case "shared": return this.presetScopeSharedLabelValue
+      case "role": return this.presetScopeRoleLabelValue
+      case "organization": return this.presetScopeOrganizationLabelValue
+      default: return this.presetScopeOwnerLabelValue
+    }
   }
 
   orderValue(column) {
