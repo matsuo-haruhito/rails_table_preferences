@@ -9,6 +9,8 @@ ja:
       save_as_new: 別名で保存
       delete: 削除
       delete_confirm: この保存済み設定を削除します。よろしいですか？
+      delete_confirm_named: 保存済み設定「%{preset_name}」を削除します。よろしいですか？
+      delete_confirm_scoped: "[%{scope_label}] の保存済み設定「%{preset_name}」を削除します。よろしいですか？"
       status_region: 保存状態
       loading_status: 設定を読み込み中です...
       loaded_status: 設定を読み込みました。
