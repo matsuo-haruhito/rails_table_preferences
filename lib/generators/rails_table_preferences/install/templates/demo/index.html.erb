@@ -5,6 +5,11 @@
   <code>table_preferences</code> table for preference persistence.
 </p>
 
+<p>
+  On a narrow viewport, scroll horizontally to confirm that the pinned order number column stays visible
+  while the grouped customer and delivery columns move.
+</p>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
@@ -23,32 +28,44 @@
   <%= submit_tag "検索" %>
 <% end %>
 
-<%= table_preferences_table_tag(
-  table_key: :rails_table_preferences_demo_orders,
-  settings: @table_preference_settings,
-  columns: @table_columns,
-  class: "table"
-) do %>
-  <thead>
-    <tr>
-      <th data-rails-table-preferences-column-key="order_no">受注番号</th>
-      <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
-      <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
-      <th data-rails-table-preferences-column-key="status">状態</th>
-      <th data-rails-table-preferences-column-key="amount">金額</th>
-      <th data-rails-table-preferences-column-key="memo">備考</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @orders.each do |order| %>
+<div style="overflow-x: auto;">
+  <%= table_preferences_table_tag(
+    table_key: :rails_table_preferences_demo_orders,
+    settings: @table_preference_settings,
+    columns: @table_columns,
+    class: "table",
+    style: "min-width: 1220px"
+  ) do %>
+    <thead>
       <tr>
-        <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
-        <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
-        <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
-        <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
-        <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
-        <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+        <th colspan="1">受注</th>
+        <th colspan="2">得意先情報</th>
+        <th colspan="2">配送情報</th>
+        <th colspan="1">金額</th>
+        <th colspan="1">備考</th>
       </tr>
-    <% end %>
-  </tbody>
-<% end %>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="customer_code">得意先コード</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
+        <th data-rails-table-preferences-column-key="status">状態</th>
+        <th data-rails-table-preferences-column-key="amount">金額</th>
+        <th data-rails-table-preferences-column-key="memo">備考</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
+          <td data-rails-table-preferences-column-key="customer_code"><%= order[:customer_code] %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
+          <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
+          <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
+          <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+          <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</div>
