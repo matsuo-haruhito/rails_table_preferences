@@ -59,6 +59,10 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Reload without an explicit name and confirm the default preset loads.
 - [ ] Delete a non-default preset.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
+- [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
+- [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, and action buttons.
+- [ ] Confirm those controls re-enable after success.
+- [ ] Trigger at least one API failure and confirm the generic failure status appears and the controls recover.
 
 ## 6. Scoped preset behavior
 
@@ -176,12 +180,14 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm all editor controls can receive keyboard focus.
 - [ ] Confirm focus order is understandable.
 - [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
+- [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
 - [ ] Confirm filter buttons expose a useful accessible label.
 - [ ] Confirm active filter buttons update `aria-pressed`.
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose a useful accessible label.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
+- [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
 - [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs.
 - [ ] Confirm custom host app colors meet the application's contrast requirements.
 
