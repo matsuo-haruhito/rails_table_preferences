@@ -6,6 +6,7 @@
 <% preset_name_id = "#{editor_id_prefix}-preset-name" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
+<% status_region_label = t("rails_table_preferences.editor.status_region", default: "保存状態") %>
 
 <div data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
@@ -30,6 +31,15 @@
      data-rails-table-preferences-sort-desc-label-value="<%= t("rails_table_preferences.editor.sort_desc", default: "降順") %>"
      data-rails-table-preferences-sort-clear-label-value="<%= t("rails_table_preferences.editor.sort_clear", default: "並び替え解除") %>"
      data-rails-table-preferences-delete-confirm-label-value="<%= delete_confirm_label %>"
+     data-rails-table-preferences-loading-status-label-value="<%= t("rails_table_preferences.editor.loading_status", default: "設定を読み込み中です...") %>"
+     data-rails-table-preferences-loaded-status-label-value="<%= t("rails_table_preferences.editor.loaded_status", default: "設定を読み込みました。") %>"
+     data-rails-table-preferences-saving-status-label-value="<%= t("rails_table_preferences.editor.saving_status", default: "設定を保存中です...") %>"
+     data-rails-table-preferences-saved-status-label-value="<%= t("rails_table_preferences.editor.saved_status", default: "設定を保存しました。") %>"
+     data-rails-table-preferences-saving-as-new-status-label-value="<%= t("rails_table_preferences.editor.saving_as_new_status", default: "新しい設定を保存中です...") %>"
+     data-rails-table-preferences-saved-as-new-status-label-value="<%= t("rails_table_preferences.editor.saved_as_new_status", default: "新しい設定を保存しました。") %>"
+     data-rails-table-preferences-deleting-status-label-value="<%= t("rails_table_preferences.editor.deleting_status", default: "設定を削除中です...") %>"
+     data-rails-table-preferences-deleted-status-label-value="<%= t("rails_table_preferences.editor.deleted_status", default: "設定を削除しました。") %>"
+     data-rails-table-preferences-operation-failed-status-label-value="<%= t("rails_table_preferences.editor.operation_failed_status", default: "設定の操作を完了できませんでした。") %>"
      class="rails-table-preferences-editor">
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
@@ -55,6 +65,12 @@
   </div>
 
   <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
+  <div class="rails-table-preferences-editor__status"
+       data-rails-table-preferences-target="status"
+       role="status"
+       aria-live="polite"
+       aria-atomic="true"
+       aria-label="<%= status_region_label %>"></div>
 
   <div class="rails-table-preferences-editor__actions">
     <button type="button" data-action="rails-table-preferences#applyFromEditor"><%= t("rails_table_preferences.editor.apply", default: "適用") %></button>

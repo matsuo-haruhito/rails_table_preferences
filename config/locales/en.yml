@@ -9,6 +9,16 @@ en:
       save_as_new: Save as new
       delete: Delete
       delete_confirm: Delete this saved preset?
+      status_region: Save status
+      loading_status: Loading saved settings...
+      loaded_status: Saved settings loaded.
+      saving_status: Saving settings...
+      saved_status: Settings saved.
+      saving_as_new_status: Saving new settings...
+      saved_as_new_status: New settings saved.
+      deleting_status: Deleting saved settings...
+      deleted_status: Saved settings deleted.
+      operation_failed_status: Could not complete the table preference action.
       reset: Reset
       order: Order
       width: Width

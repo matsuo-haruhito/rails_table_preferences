@@ -9,6 +9,16 @@ ja:
       save_as_new: 別名で保存
       delete: 削除
       delete_confirm: この保存済み設定を削除します。よろしいですか？
+      status_region: 保存状態
+      loading_status: 設定を読み込み中です...
+      loaded_status: 設定を読み込みました。
+      saving_status: 設定を保存中です...
+      saved_status: 設定を保存しました。
+      saving_as_new_status: 新しい設定を保存中です...
+      saved_as_new_status: 新しい設定を保存しました。
+      deleting_status: 設定を削除中です...
+      deleted_status: 設定を削除しました。
+      operation_failed_status: 設定の操作を完了できませんでした。
       reset: リセット
       order: 表示順
       width: 列幅

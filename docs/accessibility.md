@@ -15,6 +15,8 @@ The bundled editor and Stimulus controller provide:
 - `aria-pressed` for active filter buttons
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
+- a live `role="status"` region for bundled save/load/delete feedback
+- temporary busy-state disabling for preset controls and action buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; host apps can pass `editor_instance_key:` when they want deterministic ids in copied/customized views
 
@@ -78,6 +80,31 @@ The bundled controller disables destructive/default controls for read-only prese
 
 This prevents the regular user-facing editor from accidentally overwriting shared presets.
 
+## Status region and busy state
+
+The bundled editor now includes a lightweight status region for the main async preset actions:
+
+- loading saved settings
+- saving the current settings
+- saving as a new preset
+- deleting the current preset
+- reporting a generic failure when one of those actions cannot complete
+
+The default markup uses a native live region:
+
+```html
+<div
+  class="rails-table-preferences-editor__status"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true">
+</div>
+```
+
+While those bundled async actions are in flight, the preset select, preset name, default checkbox, and action buttons are temporarily disabled to reduce duplicate submissions.
+
+Host applications can still replace or restyle this surface through the existing copy-based customization path when they need richer inline messaging or branded notifications.
+
 ## Host application responsibilities
 
 The host application owns:
@@ -98,10 +125,12 @@ Before releasing a screen, check:
 
 - All editor controls can receive focus.
 - Focus order is understandable.
-- The preset select, preset name, default checkbox, and action buttons are labeled.
+- The preset select, preset name, default checkbox, action buttons, and status region are labeled.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Read-only scoped presets disable destructive/default controls.
+- Save/load/delete actions update the status region with understandable progress or result copy.
+- Async preset actions temporarily disable controls and re-enable them after completion.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
 - Custom colors still meet the host application's contrast requirements.

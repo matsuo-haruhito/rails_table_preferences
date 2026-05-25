@@ -368,6 +368,19 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       end
     end
 
+    it "renders a status region and localized async status labels" do
+      I18n.with_locale(:ja) do
+        html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+
+        expect(html).to include("rails-table-preferences-target=\"status\"")
+        expect(html).to include('role="status"')
+        expect(html).to include('aria-live="polite"')
+        expect(html).to include('aria-label="保存状態"')
+        expect(html).to include("rails-table-preferences-loading-status-label-value=\"設定を読み込み中です...\"")
+        expect(html).to include("rails-table-preferences-operation-failed-status-label-value=\"設定の操作を完了できませんでした。\"")
+      end
+    end
+
     it "renders a preset name input" do
       html = helper.table_preferences_editor(table_key: :orders, name: "inspection", columns: [:customer_code])
 
