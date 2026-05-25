@@ -27,8 +27,8 @@ RSpec.describe "rails_table_preferences/_editor.html.erb", type: :view do
     html = render_editor("left-pane") + render_editor("right-pane")
     fragment = Nokogiri::HTML.fragment(html)
 
-    preset_select_ids = fragment.css("select[data-rails-table-preferences-target='presetSelect']").map { |node| node.fetch("id") }
-    preset_name_ids = fragment.css("input[data-rails-table-preferences-target='presetName']").map { |node| node.fetch("id") }
+    preset_select_ids = fragment.css("select[data-rails-table-preferences-target='presetSelect']").map { |node| node["id"] }
+    preset_name_ids = fragment.css("input[data-rails-table-preferences-target='presetName']").map { |node| node["id"] }
 
     expect(preset_select_ids).to eq(
       [
