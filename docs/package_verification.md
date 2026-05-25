@@ -101,4 +101,6 @@ bundle exec rake build
 bundle exec rake package:verify
 ```
 
+The RSpec suite includes a JavaScript entrypoint smoke spec that loads the documented package root and controller entrypoints inside a minimal Node sandbox. That complements the syntax check and package file verification by guarding the export wiring itself.
+
 Manual package inspection is still recommended before tagging a release.
