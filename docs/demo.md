@@ -82,10 +82,14 @@ The generated demo screen includes:
 - column width resizing
 - truncation metadata
 - preset save/load/delete UI
+- bundled status feedback for async preset actions
+- temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
 - text/date/select filter metadata
 - sortable header metadata
 - ignored column metadata
 - existing search form hidden fields
+
+For the accessibility-side contract behind these checks, see [Accessibility baseline](accessibility.md).
 
 ## What to check manually
 
@@ -104,6 +108,9 @@ On the demo screen, confirm:
 - [ ] Reload restores saved settings.
 - [ ] Save as new creates another preset.
 - [ ] Delete removes a preset.
+- [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
+- [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
+- [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
 
 ## Production note
 
