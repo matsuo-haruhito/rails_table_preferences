@@ -6,6 +6,8 @@
 <% preset_name_id = "#{editor_id_prefix}-preset-name" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
+<% delete_confirm_named_label = t("rails_table_preferences.editor.delete_confirm_named", default: "保存済み設定「%{preset_name}」を削除します。よろしいですか？") %>
+<% delete_confirm_scoped_label = t("rails_table_preferences.editor.delete_confirm_scoped", default: "[%{scope_label}] の保存済み設定「%{preset_name}」を削除します。よろしいですか？") %>
 <% status_region_label = t("rails_table_preferences.editor.status_region", default: "保存状態") %>
 
 <div data-controller="rails-table-preferences"
@@ -31,6 +33,8 @@
      data-rails-table-preferences-sort-desc-label-value="<%= t("rails_table_preferences.editor.sort_desc", default: "降順") %>"
      data-rails-table-preferences-sort-clear-label-value="<%= t("rails_table_preferences.editor.sort_clear", default: "並び替え解除") %>"
      data-rails-table-preferences-delete-confirm-label-value="<%= delete_confirm_label %>"
+     data-rails-table-preferences-delete-confirm-named-label-value="<%= delete_confirm_named_label %>"
+     data-rails-table-preferences-delete-confirm-scoped-label-value="<%= delete_confirm_scoped_label %>"
      data-rails-table-preferences-loading-status-label-value="<%= t("rails_table_preferences.editor.loading_status", default: "設定を読み込み中です...") %>"
      data-rails-table-preferences-loaded-status-label-value="<%= t("rails_table_preferences.editor.loaded_status", default: "設定を読み込みました。") %>"
      data-rails-table-preferences-saving-status-label-value="<%= t("rails_table_preferences.editor.saving_status", default: "設定を保存中です...") %>"
