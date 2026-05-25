@@ -24,23 +24,29 @@ bundle exec rake build
 bundle exec rake package:verify
 ```
 
+Representative Rails compatibility checks are also useful before a release:
+
+```bash
+BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rspec
+BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rspec
+```
+
 Confirm:
 
 - [ ] RSpec passes.
 - [ ] JavaScript syntax check passes.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
+- [ ] Representative Rails 7.0 / 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
 ## 3. CI checks
 
 Confirm GitHub Actions passes for the release commit:
 
-- [ ] Ruby test job passes.
-- [ ] JavaScript syntax check passes.
-- [ ] Gem build step passes.
-- [ ] Package verification step passes.
-- [ ] Any future matrix jobs pass.
+- [ ] Default RSpec / JavaScript syntax / gem build / package verification job passes.
+- [ ] Representative PR Rails compatibility jobs for Rails 7.0 and Rails 8.0 pass.
+- [ ] Any additional release-time matrix jobs pass.
 
 ## 4. Gem package checks
 
