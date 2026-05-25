@@ -9,6 +9,8 @@ en:
       save_as_new: Save as new
       delete: Delete
       delete_confirm: Delete this saved preset?
+      delete_confirm_named: Delete the saved preset "%{preset_name}"?
+      delete_confirm_scoped: Delete the %{scope_label} preset "%{preset_name}"?
       status_region: Save status
       loading_status: Loading saved settings...
       loaded_status: Saved settings loaded.
