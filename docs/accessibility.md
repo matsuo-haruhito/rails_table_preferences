@@ -12,7 +12,8 @@ The bundled editor and Stimulus controller provide:
 - labels for generated editor inputs
 - configurable Japanese default labels
 - `aria-label` for drag handles, resize handles, and filter buttons
-- `aria-pressed` for active filter buttons
+- `aria-pressed` and `aria-expanded` for filter buttons
+- `aria-controls` from the open filter button to the current filter panel
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
 - a live `role="status"` region for bundled save/load/delete feedback
@@ -38,19 +39,23 @@ The controller updates the value as sort state changes:
 
 ## Filter buttons
 
-Filter buttons receive an `aria-label` and `aria-pressed`:
+Filter buttons receive an `aria-label`, `aria-pressed`, and `aria-expanded`:
 
 ```html
 <button
   type="button"
   class="rails-table-preferences-filter-button"
   aria-label="絞り込み: 得意先名"
-  aria-pressed="true">
+  aria-pressed="true"
+  aria-expanded="true"
+  aria-controls="rails-table-preferences-filter-panel-orders_index-customer_name">
   ▾
 </button>
 ```
 
 The pressed state reflects whether a filter condition is currently active for that column.
+
+When a bundled filter panel opens, the controller moves focus into the panel, supports `Escape` to close it, and returns focus to the triggering filter button for that keyboard dismissal path. To avoid detached floating UI, the bundled panel also closes on scroll or viewport resize instead of trying to stay open at a stale position.
 
 ## Resize handles
 
@@ -128,6 +133,10 @@ Before releasing a screen, check:
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
+- Filter buttons expose expanded state only while their panel is open.
+- Opening a filter panel moves focus into the first bundled field.
+- `Escape` closes the bundled filter panel and returns focus to the triggering filter button.
+- Scroll or viewport resize does not leave the bundled filter panel detached from its header context.
 - Read-only scoped presets disable destructive/default controls.
 - Save/load/delete actions update the status region with understandable progress or result copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
