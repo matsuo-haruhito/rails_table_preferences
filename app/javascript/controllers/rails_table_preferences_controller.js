@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Applies and edits saved table display preferences for a server-rendered table.
 export default class extends Controller {
-  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status"]
+  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status", "dirtyState"]
 
   static values = {
     tableKey: String,
@@ -40,7 +40,8 @@ export default class extends Controller {
     savedAsNewStatusLabel: { type: String, default: "新しい設定を保存しました。" },
     deletingStatusLabel: { type: String, default: "設定を削除中です..." },
     deletedStatusLabel: { type: String, default: "設定を削除しました。" },
-    operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }
+    operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" },
+    dirtyStatusLabel: { type: String, default: "未保存の変更があります。" }
   }
 
   connect() {
@@ -59,7 +60,9 @@ export default class extends Controller {
     this.installTableColumnDragHandles()
     this.installFilterControls()
     this.installSortControls()
+    this.installDirtyStateListeners()
     this.setStatus("")
+    this.markCurrentSettingsAsClean()
     this.refreshPresetOptionsOnConnect()
   }
 
@@ -81,11 +84,13 @@ export default class extends Controller {
     if (event) event.preventDefault()
     this.settingsValue = this.settingsFromEditor()
     this.apply()
+    this.syncDirtyState()
   }
 
   async saveFromEditor(event) {
     if (event) event.preventDefault()
     this.settingsValue = this.settingsFromEditor()
+    this.syncDirtyState()
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor()
     await this.save()
   }
@@ -93,6 +98,7 @@ export default class extends Controller {
   async createPresetFromEditor(event) {
     if (event) event.preventDefault()
     this.settingsValue = this.settingsFromEditor()
+    this.syncDirtyState()
 
     await this.withBusyStatus(async () => {
       const response = await fetch(this.collectionUrlValue, {
@@ -131,6 +137,7 @@ export default class extends Controller {
       this.renderEditor()
       this.apply()
       this.syncPresetEditingState()
+      this.markCurrentSettingsAsClean()
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.deletingStatusLabelValue,
@@ -163,6 +170,7 @@ export default class extends Controller {
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.syncDirtyState()
   }
 
   async loadPresets() {
@@ -235,6 +243,7 @@ export default class extends Controller {
     this.renderEditor()
     this.apply()
     this.syncPresetEditingState()
+    this.markCurrentSettingsAsClean()
   }
 
   syncPresetEditingState() {
@@ -263,6 +272,67 @@ export default class extends Controller {
   setStatus(message) {
     if (!this.hasStatusTarget) return
     this.statusTarget.textContent = message || ""
+  }
+
+  setDirtyState(message) {
+    if (!this.hasDirtyStateTarget) return
+    this.dirtyStateTarget.textContent = message || ""
+  }
+
+  syncDirtyState() {
+    const message = this.hasUnsavedChanges() ? this.dirtyStatusLabelValue : ""
+    this.setDirtyState(message)
+  }
+
+  hasUnsavedChanges() {
+    return this.serializeComparableSettings(this.currentDirtyStateSettings()) !== (this.cleanSettingsSnapshot || "")
+  }
+
+  currentDirtyStateSettings() {
+    return {
+      name: this.currentPresetName,
+      defaultPreset: this.defaultPresetChecked,
+      settings: this.hasEditorRowsTarget ? this.settingsFromEditor() : (this.settingsValue || this.defaultSettings)
+    }
+  }
+
+  markCurrentSettingsAsClean() {
+    this.cleanSettingsSnapshot = this.serializeComparableSettings({
+      name: this.currentPresetName,
+      defaultPreset: this.defaultPresetChecked,
+      settings: this.settingsValue || this.defaultSettings
+    })
+    this.syncDirtyState()
+  }
+
+  serializeComparableSettings(payload) {
+    const settings = payload?.settings || {}
+    return JSON.stringify({
+      name: payload?.name || "default",
+      defaultPreset: payload?.defaultPreset === true,
+      columns: (settings.columns || []).map((column) => ({
+        key: column.key,
+        visible: column.visible !== false,
+        order: this.integerValue(column.order),
+        width: this.integerValue(column.width),
+        truncate: this.integerValue(column.truncate),
+        pinned: column.pinned === true
+      })),
+      filters: settings.filters || {},
+      sorts: settings.sorts || []
+    })
+  }
+
+  installDirtyStateListeners() {
+    if (this.dirtyStateListenersInstalled) return
+    this.dirtyStateListenersInstalled = true
+    const sync = () => this.syncDirtyState()
+    if (this.hasEditorRowsTarget) {
+      this.editorRowsTarget.addEventListener("input", sync)
+      this.editorRowsTarget.addEventListener("change", sync)
+    }
+    if (this.hasPresetNameTarget) this.presetNameTarget.addEventListener("input", sync)
+    if (this.hasDefaultPresetTarget) this.defaultPresetTarget.addEventListener("change", sync)
   }
 
   handleOperationError(error, message = this.operationFailedStatusLabelValue) {
@@ -338,17 +408,20 @@ export default class extends Controller {
     if (placement === "before") this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow)
     else this.editorRowsTarget.insertBefore(this.draggedEditorRow, targetRow.nextSibling)
     this.refreshEditorOrderInputs()
+    this.syncDirtyState()
   }
 
   dropEditorRow(event) {
     event.preventDefault()
     this.refreshEditorOrderInputs()
+    this.syncDirtyState()
   }
 
   dragEditorRowEnd(event) {
     event.currentTarget.classList.remove("rails-table-preferences-editor__row--dragging")
     this.draggedEditorRow = null
     this.refreshEditorOrderInputs()
+    this.syncDirtyState()
   }
 
   editorRowPlacement(event, row) {
@@ -436,6 +509,7 @@ export default class extends Controller {
     this.applyColumn(this.columnByKey(this.resizingColumn.key))
     this.syncPinnedColumnOffsets()
     this.syncEditorWidthInputs()
+    this.syncDirtyState()
   }
 
   stopColumnResize() {
@@ -457,6 +531,7 @@ export default class extends Controller {
     this.applyColumn(this.columnByKey(key))
     this.syncPinnedColumnOffsets()
     this.syncEditorWidthInputs()
+    this.syncDirtyState()
   }
 
   autoFitWidthForColumn(key) {
@@ -527,6 +602,7 @@ export default class extends Controller {
     this.moveColumnInSettings(this.draggedTableColumnKey, targetKey, placement)
     this.applyColumnOrder()
     this.syncPinnedColumnOffsets()
+    this.syncDirtyState()
   }
 
   dropTableColumn(event) {
@@ -594,6 +670,7 @@ export default class extends Controller {
     else if (current.direction === "asc") nextSorts = [{ key: column.key, direction: "desc" }]
     this.settingsValue = { ...this.settingsValue, sorts: nextSorts }
     this.syncSortStates()
+    this.syncDirtyState()
   }
 
   syncSortStates() {
@@ -743,6 +820,7 @@ export default class extends Controller {
     this.updateFilterCondition(key, condition)
     this.closeFilterPanel()
     this.apply()
+    this.syncDirtyState()
   }
 
   clearFilter(key) {
@@ -751,6 +829,7 @@ export default class extends Controller {
     this.settingsValue = { ...this.settingsValue, filters }
     this.closeFilterPanel()
     this.apply()
+    this.syncDirtyState()
   }
 
   updateFilterCondition(key, condition) {
@@ -807,6 +886,7 @@ export default class extends Controller {
     this.syncPinnedColumnOffsets()
     this.syncFilterButtonStates()
     this.syncSortStates()
+    this.syncDirtyState()
   }
 
   settingsFromEditor() {
