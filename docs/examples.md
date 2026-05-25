@@ -133,6 +133,57 @@ View:
 <% end %>
 ```
 
+Optional export action for the same list screen:
+
+```ruby
+def export
+  columns = warehouse_stock_table_columns
+
+  preference_params = rails_table_preference_params(
+    table_key: :warehouse_stocks,
+    name: params[:table_preference_name],
+    columns: columns
+  )
+
+  merged_params = params.to_unsafe_h.merge(preference_params)
+
+  export_payload = rails_table_preference_export_payload(
+    table_key: :warehouse_stocks,
+    columns: columns,
+    name: params[:table_preference_name]
+  )
+
+  warehouse_stocks = WarehouseStock
+    .warehouse_stocks_each_items
+    .eager_load(:item, :warehouse)
+    .search(merged_params)
+    .order_by(merged_params["sort"] || params[:sort])
+
+  headers = export_payload["headers"]
+  rows = warehouse_stocks.map do |stock|
+    export_payload["columns"].map do |column|
+      stock.public_send(column["export_key"] || column["key"])
+    end
+  end
+
+  # Host app owns CSV/report generation.
+end
+```
+
+Export link that keeps the selected preset and current filters:
+
+```erb
+<%= link_to(
+  "CSV export",
+  export_warehouse_stocks_path(
+    request.query_parameters.merge(
+      table_preference_name: params[:table_preference_name],
+      format: :csv
+    )
+  )
+) %>
+```
+
 ## Example: customer shipment list with Ransack
 
 Controller:
@@ -208,3 +259,4 @@ View form integration:
 - Keep authorization, joins, allowed searchable fields, and business-specific query behavior in the host application.
 - Use `table_preferences_hidden_fields` when a normal search form should submit saved preference params.
 - Use `rails_table_preference_params` or `rails_table_preference_merged_params` when the controller should merge saved params directly.
+- When the same screen also has CSV/report export, forward `table_preference_name` and the current query params to the export action, then build headers/rows from `rails_table_preference_export_payload`.
