@@ -105,6 +105,17 @@ end
 
 Host apps can replace `"operations"` with their own stable role identifiers later. The important part is that the configured method returns the same kind of key that the role-scoped preset stores in `scope_key`.
 
+## Sample data shape
+
+The copied demo keeps the same lightweight in-memory approach, but the rows are intentionally varied:
+
+- both short and long memo text
+- `未出荷` / `出荷済` / `保留` statuses
+- past and future delivery dates
+- small and large amounts
+
+That mix makes it easier to see the effect of filter, sort, width, and preset changes without turning the generator into a full sample app.
+
 ## What the demo covers
 
 The generated demo screen includes:
@@ -123,6 +134,7 @@ The generated demo screen includes:
 - ignored column metadata
 - existing search form hidden fields
 - owner/shared/role preset examples for scoped preset verification
+- varied sample rows so filter/sort/preset differences are visible at a glance
 
 For the accessibility-side contract behind these checks, see [Accessibility baseline](accessibility.md).
 
@@ -148,6 +160,7 @@ On the demo screen, confirm:
 - [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
 - [ ] The copied demo explains that `operations-default` is resolved from `{ roles: ["operations"] }`.
 - [ ] After configuring `scope_context_method`, the preset selector can distinguish owner, shared, and role-scoped examples.
+- [ ] The mixed sample rows make status filter, delivery-date sort, amount sort, and preset column differences easy to notice.
 
 ## Production note
 
