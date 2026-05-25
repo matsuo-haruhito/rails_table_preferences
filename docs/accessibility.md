@@ -16,6 +16,7 @@ The bundled editor and Stimulus controller provide:
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
 - a live `role="status"` region for bundled save/load/delete feedback
+- a visible dirty-state helper text when the current editor state differs from the loaded preset
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; host apps can pass `editor_instance_key:` when they want deterministic ids in copied/customized views
@@ -103,6 +104,8 @@ The default markup uses a native live region:
 
 While those bundled async actions are in flight, the preset select, preset name, default checkbox, and action buttons are temporarily disabled to reduce duplicate submissions.
 
+The dirty-state helper text is intentionally visible but not a second live region. It is meant to give a persistent visual cue near the editor actions while leaving async save/load feedback to the dedicated status region.
+
 Host applications can still replace or restyle this surface through the existing copy-based customization path when they need richer inline messaging or branded notifications.
 
 ## Host application responsibilities
@@ -130,6 +133,7 @@ Before releasing a screen, check:
 - Active filters expose an active pressed state.
 - Read-only scoped presets disable destructive/default controls.
 - Save/load/delete actions update the status region with understandable progress or result copy.
+- The dirty-state helper text appears after user-owned changes and clears after loading or saving a preset.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
