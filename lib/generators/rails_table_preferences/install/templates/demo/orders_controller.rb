@@ -22,13 +22,21 @@ module RailsTablePreferencesDemo
 
     def table_columns
       [
-        table_preferences_column(:order_no, label: "受注番号", default_width: 120, sortable: true),
+        table_preferences_column(:order_no, label: "受注番号", default_width: 120, fixed: true, sortable: true),
+        table_preferences_column(
+          :customer_code,
+          label: "得意先コード",
+          default_width: 160,
+          group: { key: :customer, label: "得意先情報" },
+          sortable: true
+        ),
         table_preferences_column(
           :customer_name,
           label: "得意先名",
           default_width: 240,
           default_truncate: 24,
           filter: { type: :text, param: :search_word },
+          group: { key: :customer, label: "得意先情報" },
           sortable: true
         ),
         table_preferences_column(
@@ -36,6 +44,7 @@ module RailsTablePreferencesDemo
           label: "納品日",
           default_width: 140,
           filter: { type: :date, from_param: :from_delivery_date, to_param: :to_delivery_date },
+          group: { key: :delivery, label: "配送情報" },
           sortable: true
         ),
         table_preferences_column(
@@ -43,10 +52,11 @@ module RailsTablePreferencesDemo
           label: "状態",
           default_width: 120,
           filter: { type: :select, param: :status, options: ["未出荷", "出荷済", "保留"] },
+          group: { key: :delivery, label: "配送情報" },
           sortable: true
         ),
         table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
-        table_preferences_column(:memo, label: "備考", default_width: 260, default_truncate: 24),
+        table_preferences_column(:memo, label: "備考", default_width: 320, default_truncate: 24),
         table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
       ]
     end
@@ -55,6 +65,7 @@ module RailsTablePreferencesDemo
       [
         {
           order_no: "A001",
+          customer_code: "C-101",
           customer_name: "山田商事",
           delivery_date: Date.current,
           status: "未出荷",
@@ -64,6 +75,7 @@ module RailsTablePreferencesDemo
         },
         {
           order_no: "A002",
+          customer_code: "C-205",
           customer_name: "田中物流",
           delivery_date: Date.current + 1.day,
           status: "出荷済",
@@ -73,6 +85,7 @@ module RailsTablePreferencesDemo
         },
         {
           order_no: "A003",
+          customer_code: "C-330",
           customer_name: "佐藤食品",
           delivery_date: Date.current + 2.days,
           status: "保留",
