@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Applies and edits saved table display preferences for a server-rendered table.
 export default class extends Controller {
-  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset"]
+  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status"]
 
   static values = {
     tableKey: String,
@@ -31,10 +31,20 @@ export default class extends Controller {
     sortAscLabel: { type: String, default: "昇順" },
     sortDescLabel: { type: String, default: "降順" },
     sortClearLabel: { type: String, default: "並び替え解除" },
-    deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }
+    deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" },
+    loadingStatusLabel: { type: String, default: "設定を読み込み中です..." },
+    loadedStatusLabel: { type: String, default: "設定を読み込みました。" },
+    savingStatusLabel: { type: String, default: "設定を保存中です..." },
+    savedStatusLabel: { type: String, default: "設定を保存しました。" },
+    savingAsNewStatusLabel: { type: String, default: "新しい設定を保存中です..." },
+    savedAsNewStatusLabel: { type: String, default: "新しい設定を保存しました。" },
+    deletingStatusLabel: { type: String, default: "設定を削除中です..." },
+    deletedStatusLabel: { type: String, default: "設定を削除しました。" },
+    operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }
   }
 
   connect() {
+    this.busy = false
     this.draggedEditorRow = null
     this.draggedTableColumnKey = null
     this.resizingColumn = null
@@ -49,7 +59,8 @@ export default class extends Controller {
     this.installTableColumnDragHandles()
     this.installFilterControls()
     this.installSortControls()
-    this.refreshPresetOptions()
+    this.setStatus("")
+    this.refreshPresetOptionsOnConnect()
   }
 
   disconnect() {
@@ -82,50 +93,68 @@ export default class extends Controller {
   async createPresetFromEditor(event) {
     if (event) event.preventDefault()
     this.settingsValue = this.settingsFromEditor()
-    const response = await fetch(this.collectionUrlValue, {
-      method: "POST",
-      headers: this.jsonHeaders,
-      body: JSON.stringify({ name: this.currentPresetName, settings: this.settingsValue, default: this.defaultPresetChecked })
+
+    await this.withBusyStatus(async () => {
+      const response = await fetch(this.collectionUrlValue, {
+        method: "POST",
+        headers: this.jsonHeaders,
+        body: JSON.stringify({ name: this.currentPresetName, settings: this.settingsValue, default: this.defaultPresetChecked })
+      })
+      if (!response.ok) throw new Error(`Failed to create table preference preset: ${response.status}`)
+      const payload = await response.json()
+      this.applyPreferencePayload(payload)
+      await this.refreshPresetOptions()
+    }, {
+      busyLabel: this.savingAsNewStatusLabelValue,
+      successLabel: this.savedAsNewStatusLabelValue
     })
-    if (!response.ok) throw new Error(`Failed to create table preference preset: ${response.status}`)
-    const payload = await response.json()
-    this.applyPreferencePayload(payload)
-    await this.refreshPresetOptions()
   }
 
   async deletePreset(event) {
     if (event) event.preventDefault()
     if (!this.currentPreferenceEditable) return
     if (!this.confirmDeletePreset()) return
-    const response = await fetch(this.preferenceUrl(this.currentPresetName), {
-      method: "DELETE",
-      headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
+
+    await this.withBusyStatus(async () => {
+      const response = await fetch(this.preferenceUrl(this.currentPresetName), {
+        method: "DELETE",
+        headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
+      })
+      if (!response.ok && response.status !== 204) throw new Error(`Failed to delete table preference preset: ${response.status}`)
+      this.nameValue = "default"
+      this.urlValue = this.preferenceUrl("default")
+      this.currentPreferenceEditable = true
+      this.setPresetNameInput("default")
+      this.setDefaultPresetInput(false)
+      this.settingsValue = this.defaultSettings
+      this.closeFilterPanel()
+      this.renderEditor()
+      this.apply()
+      this.syncPresetEditingState()
+      await this.refreshPresetOptions()
+    }, {
+      busyLabel: this.deletingStatusLabelValue,
+      successLabel: this.deletedStatusLabelValue
     })
-    if (!response.ok && response.status !== 204) throw new Error(`Failed to delete table preference preset: ${response.status}`)
-    this.nameValue = "default"
-    this.urlValue = this.preferenceUrl("default")
-    this.currentPreferenceEditable = true
-    this.setPresetNameInput("default")
-    this.setDefaultPresetInput(false)
-    this.settingsValue = this.defaultSettings
-    this.closeFilterPanel()
-    this.renderEditor()
-    this.apply()
-    this.syncPresetEditingState()
-    await this.refreshPresetOptions()
   }
 
   async save(event) {
     if (event) event.preventDefault()
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor()
-    const response = await fetch(this.preferenceUrl(this.currentPresetName), {
-      method: "PATCH",
-      headers: this.jsonHeaders,
-      body: JSON.stringify({ settings: this.settingsValue, default: this.defaultPresetChecked })
+
+    await this.withBusyStatus(async () => {
+      const response = await fetch(this.preferenceUrl(this.currentPresetName), {
+        method: "PATCH",
+        headers: this.jsonHeaders,
+        body: JSON.stringify({ settings: this.settingsValue, default: this.defaultPresetChecked })
+      })
+      if (!response.ok) throw new Error(`Failed to save table preferences: ${response.status}`)
+      this.applyPreferencePayload(await response.json())
+      await this.refreshPresetOptions()
+    }, {
+      busyLabel: this.savingStatusLabelValue,
+      successLabel: this.savedStatusLabelValue
     })
-    if (!response.ok) throw new Error(`Failed to save table preferences: ${response.status}`)
-    this.applyPreferencePayload(await response.json())
-    await this.refreshPresetOptions()
   }
 
   resetEditor(event) {
@@ -147,6 +176,15 @@ export default class extends Controller {
     const payload = await this.loadPresets()
     this.presets = payload.preferences || []
     this.renderPresetOptions()
+  }
+
+  async refreshPresetOptionsOnConnect() {
+    await this.withBusyStatus(async () => {
+      await this.refreshPresetOptions()
+    }, {
+      busyLabel: this.loadingStatusLabelValue,
+      successLabel: this.loadedStatusLabelValue
+    })
   }
 
   renderPresetOptions() {
@@ -175,9 +213,15 @@ export default class extends Controller {
   async selectPreset(event) {
     if (event) event.preventDefault()
     const name = this.presetSelectTarget.value || "default"
-    const response = await fetch(this.preferenceUrl(name), { headers: { "Accept": "application/json" } })
-    if (!response.ok) throw new Error(`Failed to load table preference preset: ${response.status}`)
-    this.applyPreferencePayload(await response.json())
+
+    await this.withBusyStatus(async () => {
+      const response = await fetch(this.preferenceUrl(name), { headers: { "Accept": "application/json" } })
+      if (!response.ok) throw new Error(`Failed to load table preference preset: ${response.status}`)
+      this.applyPreferencePayload(await response.json())
+    }, {
+      busyLabel: this.loadingStatusLabelValue,
+      successLabel: this.loadedStatusLabelValue
+    })
   }
 
   applyPreferencePayload(payload) {
@@ -203,6 +247,44 @@ export default class extends Controller {
     this.element.querySelectorAll("[data-action~='rails-table-preferences#deletePreset']").forEach((button) => {
       button.disabled = !editable
     })
+  }
+
+  setBusyState(busy) {
+    this.busy = busy === true
+    if (this.hasPresetSelectTarget) this.presetSelectTarget.disabled = this.busy
+    if (this.hasPresetNameTarget) this.presetNameTarget.disabled = this.busy
+    if (this.hasDefaultPresetTarget) this.defaultPresetTarget.disabled = this.busy
+    this.element.querySelectorAll(".rails-table-preferences-editor__actions button").forEach((button) => {
+      button.disabled = this.busy
+    })
+    if (!this.busy) this.syncPresetEditingState()
+  }
+
+  setStatus(message) {
+    if (!this.hasStatusTarget) return
+    this.statusTarget.textContent = message || ""
+  }
+
+  handleOperationError(error, message = this.operationFailedStatusLabelValue) {
+    console.error(error)
+    this.setStatus(message)
+  }
+
+  async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
+    if (this.busy) return null
+    this.setBusyState(true)
+    if (busyLabel) this.setStatus(busyLabel)
+
+    try {
+      const result = await callback()
+      if (successLabel) this.setStatus(successLabel)
+      return result
+    } catch (error) {
+      this.handleOperationError(error, errorLabel)
+      return null
+    } finally {
+      this.setBusyState(false)
+    }
   }
 
   renderEditor() {
