@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 require "generators/rails_table_preferences/views/views_generator"
-require "rails/generators/test_case"
 
 RSpec.describe RailsTablePreferences::Generators::ViewsGenerator, type: :generator do
-  include Rails::Generators::Testing::Behavior
-
-  tests described_class
-  destination File.expand_path("../../tmp/generators/views", __dir__)
+  include FileUtils
 
   before do
     prepare_destination
@@ -23,5 +19,28 @@ RSpec.describe RailsTablePreferences::Generators::ViewsGenerator, type: :generat
     expect(partial_path.read).to include("data-rails-table-preferences-order-label-value=\"表示順\"")
     expect(partial_path.read).to include("保存済み設定")
     expect(partial_path.read).to include("別名で保存")
+  end
+
+  def destination_root
+    File.expand_path("../../tmp/generators/views", __dir__)
+  end
+
+  def prepare_destination
+    rm_rf(destination_root)
+    mkdir_p(destination_root)
+  end
+
+  def run_generator(args = [])
+    with_captured_stdout do
+      described_class.start(args, destination_root: destination_root)
+    end
+  end
+
+  def with_captured_stdout
+    original_stdout = $stdout
+    $stdout = StringIO.new
+    yield
+  ensure
+    $stdout = original_stdout
   end
 end
