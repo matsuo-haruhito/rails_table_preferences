@@ -11,10 +11,12 @@ The bundled editor and Stimulus controller provide:
 - button elements for interactive controls
 - labels for generated editor inputs
 - configurable Japanese default labels
+- localized fallback scope labels for preset options when the payload does not provide `scope_label`
 - `aria-label` for drag handles, resize handles, and filter buttons
 - `aria-pressed` for active filter buttons
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
+- a visible helper message when saving from a read-only preset will create a new owner preset instead of overwriting the shared preset
 - a live `role="status"` region for bundled save/load/delete feedback
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
@@ -76,9 +78,9 @@ For applications with stricter accessibility requirements, prefer documenting th
 
 Shared, role, and organization presets may be returned as `editable: false`.
 
-The bundled controller disables destructive/default controls for read-only presets and falls back to creating an owner preset when users save edits from the normal editor path.
+The bundled controller disables destructive/default controls for read-only presets, shows a short helper message about the save fallback, and falls back to creating an owner preset when users save edits from the normal editor path.
 
-This prevents the regular user-facing editor from accidentally overwriting shared presets.
+This prevents the regular user-facing editor from accidentally overwriting shared presets while keeping the next action understandable.
 
 ## Status region and busy state
 
@@ -129,6 +131,7 @@ Before releasing a screen, check:
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Read-only scoped presets disable destructive/default controls.
+- Read-only scoped presets show helper text that explains the save-as-owner fallback.
 - Save/load/delete actions update the status region with understandable progress or result copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - The table remains understandable when columns are hidden.
