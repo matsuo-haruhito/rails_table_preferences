@@ -40,6 +40,7 @@
      data-rails-table-preferences-deleting-status-label-value="<%= t("rails_table_preferences.editor.deleting_status", default: "設定を削除中です...") %>"
      data-rails-table-preferences-deleted-status-label-value="<%= t("rails_table_preferences.editor.deleted_status", default: "設定を削除しました。") %>"
      data-rails-table-preferences-operation-failed-status-label-value="<%= t("rails_table_preferences.editor.operation_failed_status", default: "設定の操作を完了できませんでした。") %>"
+     data-rails-table-preferences-dirty-status-label-value="<%= t("rails_table_preferences.editor.dirty_status", default: "未保存の変更があります。") %>"
      class="rails-table-preferences-editor">
   <div class="rails-table-preferences-editor__title"><%= title %></div>
 
@@ -63,6 +64,9 @@
       <%= t("rails_table_preferences.editor.default_preset", default: "標準設定にする") %>
     </label>
   </div>
+
+  <p class="rails-table-preferences-editor__dirty-state"
+     data-rails-table-preferences-target="dirtyState"></p>
 
   <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
   <div class="rails-table-preferences-editor__status"
