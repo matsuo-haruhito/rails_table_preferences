@@ -62,6 +62,7 @@ export default class extends Controller {
     this.installFilterControls()
     this.installSortControls()
     this.setStatus("")
+    this.syncPresetEditingState()
     this.refreshPresetOptionsOnConnect()
   }
 
@@ -195,6 +196,7 @@ export default class extends Controller {
     const presets = this.presets.length ? this.presets : [{ name: this.currentPresetName, default: false, editable: true }]
     presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset)))
     this.presetSelectTarget.value = this.currentPresetName
+    this.syncPresetEditingState()
   }
 
   buildPresetOption(preset) {
@@ -247,9 +249,24 @@ export default class extends Controller {
       button.disabled = false
       button.dataset.railsTablePreferencesNonEditableFallback = editable ? "false" : "true"
     })
-    this.element.querySelectorAll("[data-action~='rails-table-preferences#deletePreset']").forEach((button) => {
+    this.element.querySelectorAll("[data-action*='rails-table-preferences#deletePreset']").forEach((button) => {
       button.disabled = !editable
+      this.updateDeletePresetButtonContext(button)
     })
+  }
+
+  syncDeletePresetButtonContext() {
+    this.element.querySelectorAll("[data-action*='rails-table-preferences#deletePreset']").forEach((button) => {
+      this.updateDeletePresetButtonContext(button)
+    })
+  }
+
+  updateDeletePresetButtonContext(button) {
+    if (!button) return
+    const message = this.deletePresetConfirmationMessage()
+    const buttonLabel = button.textContent?.trim() || "削除"
+    button.title = message || buttonLabel
+    button.setAttribute("aria-label", message ? `${buttonLabel}: ${message}` : buttonLabel)
   }
 
   setBusyState(busy) {
