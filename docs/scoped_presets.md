@@ -188,6 +188,75 @@ params.require(:preset).permit(
 
 Typical `scope_key` values are stable business identifiers such as role keys (`"admin"`) or organization IDs/slugs (`"tokyo"`). The host app remains responsible for deciding who may create or update each key.
 
+### Copyable admin controller flow
+
+If the host app wants a small admin-only endpoint for shared, role, or organization presets, the current model/controller contracts are enough. The important part is that non-owner writes use `user: nil`, while the payload is normalized through `RailsTablePreferences::SettingsNormalizer`.
+
+```ruby
+class Admin::TablePresetTemplatesController < Admin::BaseController
+  before_action :require_table_preset_admin!
+
+  def create
+    preset = build_scoped_preset
+    clear_other_defaults(preset) if preset.default_flag?
+    preset.save!
+
+    redirect_to admin_table_preset_templates_path, notice: "Preset saved"
+  end
+
+  def update
+    preset = build_scoped_preset
+    clear_other_defaults(preset) if preset.default_flag?
+    preset.save!
+
+    redirect_to admin_table_preset_templates_path, notice: "Preset updated"
+  end
+
+  private
+
+  def build_scoped_preset
+    preset = RailsTablePreferences::Preference.find_or_initialize_for(
+      user: nil,
+      table_key: preset_payload[:table_key],
+      name: preset_payload[:name],
+      scope_type: preset_payload[:scope_type],
+      scope_key: preset_payload[:scope_key]
+    )
+
+    preset.user = nil
+    preset.scope_type = preset_payload[:scope_type]
+    preset.scope_key = preset_payload[:scope_key]
+    preset.default_flag = ActiveModel::Type::Boolean.new.cast(preset_payload[:default])
+    preset.settings = RailsTablePreferences::SettingsNormalizer.call(preset_payload[:settings])
+    preset
+  end
+
+  def preset_payload
+    raw = params.require(:preset)
+
+    {
+      table_key: raw[:table_key].to_s,
+      name: raw[:name].presence || "default",
+      scope_type: raw[:scope_type].presence || RailsTablePreferences::Preference::SHARED_SCOPE_TYPE,
+      scope_key: raw[:scope_key].presence,
+      default: raw[:default],
+      settings: raw[:settings].respond_to?(:to_unsafe_h) ? raw[:settings].to_unsafe_h : raw[:settings] || {}
+    }
+  end
+
+  def clear_other_defaults(preset)
+    RailsTablePreferences::Preference
+      .for_scope(preset.scope_type, preset.scope_key)
+      .where(user: nil)
+      .for_table(preset.table_key)
+      .where.not(id: preset.id)
+      .update_all(default_flag: false)
+  end
+end
+```
+
+This keeps the bundled `/preferences/...` JSON API focused on the regular editor flow while giving the host app a narrow place to enforce admin-only authorization, audit logging, or tenant-specific rules.
+
 ### 3. Split the regular editor and the admin flow on purpose
 
 | Surface | Who uses it | What it should save |
@@ -207,6 +276,31 @@ That keeps three things consistent:
 - the seed/default data you create up front
 - the admin UI or service object that edits scoped presets later
 - the runtime resolver that decides which scoped presets the current owner can use
+
+A simple alignment table helps avoid drift:
+
+| Runtime source | Example returned value | Stored `scope_type` | Stored `scope_key` |
+| --- | --- | --- | --- |
+| `current_user.roles.pluck(:key)` | `"operations"` | `role` | `"operations"` |
+| `current_user.organization.slug` | `"tokyo"` | `organization` | `"tokyo"` |
+
+For example, if the runtime context is:
+
+```ruby
+def table_preference_scope_context
+  {
+    roles: current_user.roles.pluck(:key),
+    organization: current_user.organization.slug
+  }
+end
+```
+
+then the admin write path should store matching values:
+
+```ruby
+{ scope_type: "role", scope_key: "operations" }
+{ scope_type: "organization", scope_key: "tokyo" }
+```
 
 ## Authorization boundary
 
