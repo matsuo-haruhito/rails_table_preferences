@@ -5,6 +5,12 @@
   <code>table_preferences</code> table for preference persistence.
 </p>
 
+<p>
+  Double-click the resize handle on <code>備考</code> to auto-fit a long-text column,
+  then compare <code>備考</code> (ellipsis) and <code>配送メモ</code> (wrap) to confirm
+  overflow metadata differences.
+</p>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
@@ -37,6 +43,7 @@
       <th data-rails-table-preferences-column-key="status">状態</th>
       <th data-rails-table-preferences-column-key="amount">金額</th>
       <th data-rails-table-preferences-column-key="memo">備考</th>
+      <th data-rails-table-preferences-column-key="shipping_note">配送メモ</th>
     </tr>
   </thead>
   <tbody>
@@ -48,6 +55,7 @@
         <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
         <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
         <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+        <td data-rails-table-preferences-column-key="shipping_note"><%= order[:shipping_note] %></td>
       </tr>
     <% end %>
   </tbody>
