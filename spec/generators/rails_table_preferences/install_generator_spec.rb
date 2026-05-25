@@ -3,7 +3,7 @@
 require "generators/rails_table_preferences/install/install_generator"
 require "generators/rails_table_preferences/javascript/javascript_generator"
 require "generators/rails_table_preferences/stylesheets/stylesheets_generator"
-require "rails/generators/testing/behavior"
+require "rails/generators/test_case"
 
 RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :generator do
   include Rails::Generators::Testing::Behavior
