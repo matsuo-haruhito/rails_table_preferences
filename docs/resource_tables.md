@@ -153,6 +153,22 @@ If the metadata uses a different Rails Fields Kit field type, map that type to t
 
 This split keeps the table gem independent from a specific form helper library while still giving the host app a copyable end-to-end path.
 
+## Management screens with a create form on the same page
+
+A common admin pattern is one page with:
+
+- a create form near the top
+- the table preference editor for the list
+- the list table itself below
+
+This is still a good fit for resource tables as long as the responsibilities stay separate:
+
+- the form saves business records
+- the editor saves display preferences
+- the list query still belongs to the host app
+
+For a copyable page shape and controller recovery path, see [Management page pattern: create form + editor + table](form_and_table_page_pattern.md).
+
 ## TreeView integration
 
 When the `tree_view` gem is installed, a tree table can use the same inferred column set:
