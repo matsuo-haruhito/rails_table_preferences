@@ -124,7 +124,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("filterPanelId(columnKey)")
     expect(source).to include('button.setAttribute("aria-controls", panel.id)')
     expect(source).to include('button.setAttribute("aria-expanded", "true")')
-    expect(source).to include('this.filterPanelButton.removeAttribute("aria-controls")')
+    expect(source).to include('button.removeAttribute("aria-controls")')
   end
 
   it "supports common filter types and operators" do
