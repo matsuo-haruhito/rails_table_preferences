@@ -62,14 +62,17 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, and action buttons.
 - [ ] Confirm those controls re-enable after success.
-- [ ] Trigger at least one API failure and confirm the generic failure status appears and the controls recover.
+- [ ] Trigger a load failure and confirm the status region says that loading failed.
+- [ ] Trigger a save or save-as-new failure and confirm the status region says which save path failed.
+- [ ] Trigger a delete failure and confirm the status region says that deletion failed.
+- [ ] Confirm the controls recover after each failure path.
 
 ## 6. Scoped preset behavior
 
 - [ ] Create or seed a shared preset and confirm it appears in the preset selector.
 - [ ] Create or seed a role preset and confirm it appears only for matching role context.
 - [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
-- [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
+- [ ] Confirm preset options show enough localized scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] Confirm shared presets are selectable by normal users.
@@ -187,6 +190,7 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm resize handles expose a useful accessible label.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
+- [ ] Confirm non-owner preset options expose readable scope labels.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
 - [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs.
 - [ ] Confirm custom host app colors meet the application's contrast requirements.
