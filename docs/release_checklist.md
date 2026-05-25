@@ -36,7 +36,8 @@ Confirm:
 
 Confirm GitHub Actions passes for the release commit:
 
-- [ ] Ruby test job passes.
+- [ ] Ruby 3.3 full CI job passes.
+- [ ] Ruby 3.1 representative CI job passes on pull requests.
 - [ ] JavaScript syntax check passes.
 - [ ] Gem build step passes.
 - [ ] Package verification step passes.
