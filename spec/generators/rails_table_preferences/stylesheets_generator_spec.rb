@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "generators/rails_table_preferences/stylesheets/stylesheets_generator"
-require "rails/generators/testing/behavior"
+require "rails/generators/test_case"
 
 RSpec.describe RailsTablePreferences::Generators::StylesheetsGenerator, type: :generator do
   include Rails::Generators::Testing::Behavior
