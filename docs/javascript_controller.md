@@ -10,6 +10,7 @@ The default controller currently handles:
 
 - editor row rendering
 - preset loading, saving, creating, deleting, and resetting
+- a bundled dirty-state indicator for unsaved editor changes
 - column visibility
 - column order from editor row drag-and-drop
 - direct table header column reordering
@@ -100,6 +101,17 @@ Current column definitions from the host application should remain authoritative
 
 Saved settings should only override user-owned state such as visibility, order, width, truncation, filters, and sorts.
 
+## Dirty-state indicator boundary
+
+The bundled dirty-state indicator compares the current editor form state plus filter/sort state against the last loaded or saved preset payload.
+
+This baseline intentionally stays lightweight:
+
+- it shows only whether there are unsaved changes
+- it does not render a detailed diff
+- it clears when a preset is loaded, saved, created, or deleted through the bundled async flow
+- host applications can replace it with richer inline feedback in copied views or a custom controller
+
 ## Filter and sort behavior
 
 Filters and sorts update the in-memory `settingsValue` payload. Display-only settings can be applied to the current table immediately. Filter and sort execution usually requires the host application to run its own search query, reload, or submit a form.
@@ -121,6 +133,7 @@ Important invariants include:
 
 - Japanese default UI labels remain available
 - table cell effects are table-scoped
+- dirty-state messaging is available without changing preset persistence behavior
 - filters and sorts are preserved by editor actions
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
