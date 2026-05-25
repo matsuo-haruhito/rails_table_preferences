@@ -51,6 +51,62 @@ Host applications can override:
 }
 ```
 
+## Minimal horizontal scroll container
+
+Pinned columns work best when the host app puts the table inside a dedicated horizontal scroll wrapper instead of relying on page-level overflow.
+
+A small baseline looks like this:
+
+```erb
+<div class="orders-table-scroll">
+  <%= table_preferences_table_tag(
+    table_key: :orders,
+    columns: columns,
+    class: "orders-table"
+  ) do %>
+    <thead>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th data-rails-table-preferences-column-key="amount">金額</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
+          <td data-rails-table-preferences-column-key="amount"><%= number_to_currency(order.amount) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</div>
+```
+
+Baseline CSS:
+
+```css
+.orders-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.orders-table {
+  min-width: 100%;
+  width: max-content;
+  border-collapse: separate;
+}
+
+.orders-table [data-rails-table-preferences-pinned="true"] {
+  background: white;
+}
+```
+
+This keeps one horizontal scroll owner, gives sticky cells a stable viewport to pin against, and avoids transparent pinned cells blending into scrolled content behind them.
+
+If the host app already uses a card, panel, or split layout, keep that structure and only make sure one wrapper near the table owns `overflow-x: auto`.
+
 ## Multiple pinned columns
 
 For multiple pinned columns, the host application may set explicit left offsets if the default automatic behavior is not enough for the table layout:
@@ -61,6 +117,12 @@ For multiple pinned columns, the host application may set explicit left offsets 
 ```
 
 The JavaScript controller keeps width, visibility, truncation, and order settings synchronized. Complex sticky offset policies remain host-app customizable because table layout, border spacing, horizontal scroll containers, and design systems differ widely.
+
+A practical starting rule is:
+
+- let the wrapper own horizontal scrolling
+- let Rails Table Preferences keep width and visibility state in sync
+- set explicit `--rails-table-preferences-pinned-left` values only when multiple pinned columns or custom borders make the default overlap visually
 
 ## Column groups
 
