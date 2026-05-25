@@ -32,6 +32,8 @@ export default class extends Controller {
     sortDescLabel: { type: String, default: "降順" },
     sortClearLabel: { type: String, default: "並び替え解除" },
     deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" },
+    deleteConfirmNamedLabel: { type: String, default: "保存済み設定「%{preset_name}」を削除します。よろしいですか？" },
+    deleteConfirmScopedLabel: { type: String, default: "[%{scope_label}] の保存済み設定「%{preset_name}」を削除します。よろしいですか？" },
     loadingStatusLabel: { type: String, default: "設定を読み込み中です..." },
     loadedStatusLabel: { type: String, default: "設定を読み込みました。" },
     savingStatusLabel: { type: String, default: "設定を保存中です..." },
@@ -207,6 +209,7 @@ export default class extends Controller {
     option.dataset.editable = preset.editable === false ? "false" : "true"
     option.dataset.scopeType = preset.scope_type || "owner"
     option.dataset.scopeKey = preset.scope_key || ""
+    option.dataset.scopeLabel = scopeLabel || "owner"
     return option
   }
 
@@ -937,10 +940,30 @@ export default class extends Controller {
   }
 
   confirmDeletePreset() {
-    const message = this.deleteConfirmLabelValue?.trim()
+    const message = this.deletePresetConfirmationMessage()
     if (!message) return true
     if (typeof window === "undefined" || typeof window.confirm !== "function") return true
     return window.confirm(message)
+  }
+
+  deletePresetConfirmationMessage() {
+    const fallbackMessage = this.deleteConfirmLabelValue?.trim()
+    const presetName = this.currentPresetName
+    if (!presetName) return fallbackMessage
+    const scopeLabel = this.currentPresetScopeLabel
+    if (scopeLabel && scopeLabel !== "owner") {
+      return this.interpolateLabel(this.deleteConfirmScopedLabelValue, {
+        preset_name: presetName,
+        scope_label: scopeLabel
+      })
+    }
+    return this.interpolateLabel(this.deleteConfirmNamedLabelValue, { preset_name: presetName })
+  }
+
+  interpolateLabel(template, replacements = {}) {
+    const text = template?.trim()
+    if (!text) return ""
+    return text.replace(/%\{(\w+)\}/g, (_match, key) => replacements[key] || "")
   }
 
   setPresetNameInput(name) {
@@ -990,6 +1013,11 @@ export default class extends Controller {
   get normalizedReorderSensitivity() { const value = Number(this.reorderSensitivityValue); return Number.isFinite(value) && value > 0 ? value : 1 }
   get reorderActivationRatio() { return Math.max(0.25, Math.min(0.5, 0.5 / this.normalizedReorderSensitivity)) }
   get currentPresetName() { return this.hasPresetNameTarget ? (this.presetNameTarget.value.trim() || "default") : (this.nameValue || "default") }
+  get currentPresetScopeLabel() {
+    if (!this.hasPresetSelectTarget) return "owner"
+    const selectedOption = this.presetSelectTarget.selectedOptions?.[0]
+    return selectedOption?.dataset.scopeLabel || selectedOption?.dataset.scopeType || "owner"
+  }
   get defaultPresetChecked() { return this.hasDefaultPresetTarget ? this.defaultPresetTarget.checked : false }
   get editorRows() { return this.hasEditorRowsTarget ? Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]")) : [] }
   get tableElement() { return this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table") }
