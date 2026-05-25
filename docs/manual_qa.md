@@ -67,7 +67,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 ## 6. Scoped preset behavior
 
 - [ ] Create or seed a shared preset and confirm it appears in the preset selector.
-- [ ] Create or seed a role preset and confirm it appears only for matching role context.
+- [ ] Configure `scope_context_method` and confirm a role preset appears only for matching role context.
 - [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
@@ -75,6 +75,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm shared presets are selectable by normal users.
 - [ ] Confirm shared/role/organization presets are not deleted from the normal user-facing editor.
 - [ ] Confirm saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
+- [ ] If you used the generated demo, confirm `operations-default` is resolved from `{ roles: ["operations"] }` and matches the configured `scope_context_method`.
 - [ ] Confirm host app authorization protects any admin UI for shared/role/organization preset management.
 
 ## 7. API and network behavior
