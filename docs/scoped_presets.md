@@ -188,6 +188,50 @@ params.require(:preset).permit(
 
 Typical `scope_key` values are stable business identifiers such as role keys (`"admin"`) or organization IDs/slugs (`"tokyo"`). The host app remains responsible for deciding who may create or update each key.
 
+A copyable host-app controller or service can write non-owner presets directly through the generated model:
+
+```ruby
+class Admin::OrderTablePresetsController < Admin::BaseController
+  def create
+    preset = build_scoped_preset
+    preset.save!
+
+    redirect_to admin_order_table_presets_path, notice: "Preset saved"
+  end
+
+  private
+
+  def build_scoped_preset
+    attrs = preset_params.to_h.deep_symbolize_keys
+
+    preset = RailsTablePreferences::Preference.find_or_initialize_for(
+      user: nil,
+      table_key: :orders,
+      name: attrs.fetch(:name),
+      scope_type: attrs.fetch(:scope_type),
+      scope_key: attrs[:scope_key]
+    )
+
+    preset.user = nil
+    preset.default_flag = ActiveModel::Type::Boolean.new.cast(attrs[:default])
+    preset.settings = RailsTablePreferences::SettingsNormalizer.call(attrs.fetch(:settings, {}))
+    preset
+  end
+
+  def preset_params
+    params.require(:preset).permit(
+      :name,
+      :default,
+      :scope_type,
+      :scope_key,
+      settings: {}
+    )
+  end
+end
+```
+
+Use `scope_type: "shared"` with a blank `scope_key` for shared presets. Use `scope_type: "role"` or `scope_type: "organization"` with the matching stable `scope_key` for role or organization presets. Keep personal presets on the regular editor or the normal owner-facing JSON API path so the current owner assignment stays automatic.
+
 ### 3. Split the regular editor and the admin flow on purpose
 
 | Surface | Who uses it | What it should save |
@@ -207,6 +251,30 @@ That keeps three things consistent:
 - the seed/default data you create up front
 - the admin UI or service object that edits scoped presets later
 - the runtime resolver that decides which scoped presets the current owner can use
+
+For example, if the runtime context is:
+
+```ruby
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    {
+      roles: [current_membership.role_key],
+      organization: current_account.slug
+    }
+  end
+end
+```
+
+then the admin-side values should line up like this:
+
+| Preset kind | Runtime value source | `scope_key` to store |
+| --- | --- | --- |
+| Role preset | `current_membership.role_key #=> "warehouse_manager"` | `"warehouse_manager"` |
+| Organization preset | `current_account.slug #=> "tokyo"` | `"tokyo"` |
+
+If the runtime context returns numeric IDs such as `current_account.id`, store that same identifier in `scope_key`. The resolver normalizes both sides as strings before matching.
 
 ## Authorization boundary
 
