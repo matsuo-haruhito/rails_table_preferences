@@ -101,6 +101,12 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("Math.max(this.normalizedResizeAutoFitMinWidth, Math.min(this.normalizedResizeAutoFitMaxWidth, Math.ceil(measured)))")
   end
 
+  it "keeps resize-handle auto-fit outside sort toggles and table drag starts" do
+    expect(source).to include("autoFitColumnFromHandle(event) {\n    event.preventDefault()\n    event.stopPropagation()")
+    expect(source).to include("if (this.shouldIgnoreHeaderAction(event.target)) return")
+    expect(source).to include("if (this.shouldIgnoreHeaderAction(event.target)) {\n      event.preventDefault()\n      return\n    }")
+  end
+
   it "installs filter buttons for filterable columns" do
     expect(source).to include("installFilterControls()")
     expect(source).to include("column?.filter")
