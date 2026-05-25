@@ -12,12 +12,16 @@ en:
       status_region: Save status
       loading_status: Loading saved settings...
       loaded_status: Saved settings loaded.
+      loading_failed_status: Could not load saved settings.
       saving_status: Saving settings...
       saved_status: Settings saved.
+      saving_failed_status: Could not save settings.
       saving_as_new_status: Saving new settings...
       saved_as_new_status: New settings saved.
+      saving_as_new_failed_status: Could not save the new preset.
       deleting_status: Deleting saved settings...
       deleted_status: Saved settings deleted.
+      deleting_failed_status: Could not delete the saved preset.
       operation_failed_status: Could not complete the table preference action.
       dirty_status: You have unsaved changes.
       reset: Reset
