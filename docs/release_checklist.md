@@ -42,11 +42,11 @@ Confirm:
 
 ## 3. CI checks
 
-Confirm GitHub Actions passes for the release commit:
+Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
-- [ ] Default RSpec / JavaScript syntax / gem build / package verification job passes.
-- [ ] Representative PR Rails compatibility jobs for Rails 7.0 and Rails 8.0 pass.
-- [ ] Any additional release-time matrix jobs pass.
+- [ ] The release commit passes the default RSpec / JavaScript syntax / gem build / package verification job.
+- [ ] The latest release-prep pull request passes the representative Rails 7.0 and Rails 8.0 compatibility jobs.
+- [ ] Any additional release-time matrix jobs pass in the workflow where they actually run.
 
 ## 4. Gem package checks
 
