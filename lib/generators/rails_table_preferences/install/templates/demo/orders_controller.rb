@@ -46,7 +46,8 @@ module RailsTablePreferencesDemo
           sortable: true
         ),
         table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
-        table_preferences_column(:memo, label: "備考", default_width: 260, default_truncate: 24),
+        table_preferences_column(:memo, label: "備考", default_width: 220, default_truncate: 24),
+        table_preferences_column(:shipping_note, label: "配送メモ", default_width: 220, overflow: :wrap),
         table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
       ]
     end
@@ -60,7 +61,8 @@ module RailsTablePreferencesDemo
           status: "未出荷",
           amount: 12_000,
           internal_cost: 8_000,
-          memo: "長い備考テキストの表示確認用です。列幅と省略表示を確認できます。"
+          memo: "初回導入分のため、担当者立ち会いでの荷受けと、検品後の受領サインをお願いします。",
+          shipping_note: "午前指定です。段ボールを二重梱包し、納品書は外装ポケットへ入れてください。"
         },
         {
           order_no: "A002",
@@ -69,7 +71,8 @@ module RailsTablePreferencesDemo
           status: "出荷済",
           amount: 34_000,
           internal_cost: 21_000,
-          memo: "フィルター、ソート、列幅変更の確認に使うデモ行です。"
+          memo: "フィルター、ソート、列幅変更に加えて、ダブルクリック auto-fit の確認にも使うデモ行です。",
+          shipping_note: "到着後は荷捌き場ではなく受付カウンターへ連絡し、担当者の案内を待ってから搬入してください。"
         },
         {
           order_no: "A003",
@@ -78,7 +81,8 @@ module RailsTablePreferencesDemo
           status: "保留",
           amount: 56_000,
           internal_cost: 39_000,
-          memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
+          memo: "ヘッダドラッグ、表示項目の並び替え、長文セルの省略表示をまとめて確認します。",
+          shipping_note: "冷蔵品を含むため、到着時はバックヤードの冷蔵スペース確保後に順次搬入し、欠品があればその場で連絡してください。"
         }
       ]
     end
