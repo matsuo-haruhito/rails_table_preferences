@@ -15,6 +15,7 @@ The bundled editor and Stimulus controller provide:
 - `aria-pressed` for active filter buttons
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
+- contextual `title` / `aria-label` text for the delete button so the current preset target can be identified before confirmation
 - a live `role="status"` region for bundled save/load/delete feedback
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
@@ -129,6 +130,7 @@ Before releasing a screen, check:
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Read-only scoped presets disable destructive/default controls.
+- The delete button identifies the current preset target before the browser confirm dialog opens.
 - Save/load/delete actions update the status region with understandable progress or result copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - The table remains understandable when columns are hidden.
