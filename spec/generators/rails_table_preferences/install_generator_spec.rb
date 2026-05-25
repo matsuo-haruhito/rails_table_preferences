@@ -86,8 +86,12 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view).to exist
     expect(controller.read).to include("module RailsTablePreferencesDemo")
     expect(controller.read).to include("rails_table_preferences_demo_orders")
+    expect(controller.read).to include("overflow: :ellipsis")
+    expect(controller.read).to include("overflow: :wrap")
     expect(view.read).to include("Rails Table Preferences Demo")
     expect(view.read).to include("table_preferences_editor")
+    expect(view.read).to include("double-click a resize handle")
+    expect(view.read).to include("memo_wrap")
   end
 
   it "provides post-install next steps in the generator source" do
