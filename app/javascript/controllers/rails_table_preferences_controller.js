@@ -49,6 +49,8 @@ export default class extends Controller {
     this.draggedTableColumnKey = null
     this.resizingColumn = null
     this.filterPanel = null
+    this.filterPanelButton = null
+    this.filterPanelHeaderCell = null
     this.presets = []
     this.currentPreferenceEditable = true
     this.defaultSettings = this.buildDefaultSettings()
@@ -638,6 +640,7 @@ export default class extends Controller {
       button.dataset.railsTablePreferencesFilterButton = "true"
       button.dataset.railsTablePreferencesColumnKey = key
       button.setAttribute("aria-label", `${this.filterLabelValue}: ${column.label || key}`)
+      button.setAttribute("aria-expanded", "false")
       button.title = `${this.filterLabelValue}: ${column.label || key}`
       button.textContent = "▾"
       button.addEventListener("mousedown", (event) => event.stopPropagation())
@@ -652,13 +655,14 @@ export default class extends Controller {
     event.preventDefault()
     event.stopPropagation()
     if (this.filterPanel?.dataset.railsTablePreferencesColumnKey === column.key) this.closeFilterPanel()
-    else this.openFilterPanel(headerCell, column)
+    else this.openFilterPanel(headerCell, column, event.currentTarget)
   }
 
-  openFilterPanel(headerCell, column) {
+  openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
     this.closeFilterPanel()
     const panel = document.createElement("div")
     panel.className = "rails-table-preferences-filter-panel"
+    panel.id = this.filterPanelId(column.key)
     panel.dataset.railsTablePreferencesColumnKey = column.key
     panel.innerHTML = this.filterPanelHtml(column)
     panel.querySelector("[data-action='apply-filter']")?.addEventListener("click", (event) => {
@@ -673,10 +677,24 @@ export default class extends Controller {
     document.body.appendChild(panel)
     this.positionFilterPanel(panel, headerCell)
     this.filterPanel = panel
+    this.filterPanelButton = button
+    this.filterPanelHeaderCell = headerCell
+    if (button) {
+      button.setAttribute("aria-controls", panel.id)
+      button.setAttribute("aria-expanded", "true")
+    }
     this.boundCloseFilterPanel = (event) => {
       if (!panel.contains(event.target) && !event.target.closest("[data-rails-table-preferences-filter-button]")) this.closeFilterPanel()
     }
+    this.boundCloseFilterPanelOnScroll = () => this.closeFilterPanel()
+    this.boundCloseFilterPanelOnResize = () => this.closeFilterPanel()
+    this.boundHandleFilterPanelKeydown = this.handleFilterPanelKeydown.bind(this)
     document.addEventListener("click", this.boundCloseFilterPanel)
+    document.addEventListener("scroll", this.boundCloseFilterPanelOnScroll, true)
+    window.addEventListener("resize", this.boundCloseFilterPanelOnResize)
+    panel.addEventListener("keydown", this.boundHandleFilterPanelKeydown)
+    this.focusInitialFilterPanelField(panel)
+    this.syncFilterButtonExpandedStates()
   }
 
   filterPanelHtml(column) {
@@ -723,6 +741,25 @@ export default class extends Controller {
     panel.style.zIndex = "1000"
   }
 
+  focusInitialFilterPanelField(panel) {
+    const firstField = panel.querySelector("[data-field='operator']") ||
+      panel.querySelector("[data-field='value'], [data-field='from'], [data-field='values']")
+    firstField?.focus()
+  }
+
+  handleFilterPanelKeydown(event) {
+    if (event.key !== "Escape") return
+    event.preventDefault()
+    event.stopPropagation()
+    this.closeFilterPanel({ returnFocus: true })
+  }
+
+  filterPanelId(columnKey) {
+    const tableKey = (this.tableKeyValue || "table").replace(/[^a-zA-Z0-9_-]+/g, "-")
+    const normalizedColumnKey = String(columnKey || "column").replace(/[^a-zA-Z0-9_-]+/g, "-")
+    return `rails-table-preferences-filter-panel-${tableKey}-${normalizedColumnKey}`
+  }
+
   applyFilterPanel(key, panel) {
     const operator = panel.querySelector("[data-field='operator']")?.value
     if (!operator) return
@@ -757,11 +794,22 @@ export default class extends Controller {
     this.settingsValue = { ...this.settingsValue, filters: { ...(this.settingsValue?.filters || {}), [key]: condition } }
   }
 
-  closeFilterPanel() {
+  closeFilterPanel({ returnFocus = false } = {}) {
     if (this.boundCloseFilterPanel) document.removeEventListener("click", this.boundCloseFilterPanel)
+    if (this.boundCloseFilterPanelOnScroll) document.removeEventListener("scroll", this.boundCloseFilterPanelOnScroll, true)
+    if (this.boundCloseFilterPanelOnResize) window.removeEventListener("resize", this.boundCloseFilterPanelOnResize)
+    if (this.boundHandleFilterPanelKeydown && this.filterPanel) this.filterPanel.removeEventListener("keydown", this.boundHandleFilterPanelKeydown)
     this.boundCloseFilterPanel = null
+    this.boundCloseFilterPanelOnScroll = null
+    this.boundCloseFilterPanelOnResize = null
+    this.boundHandleFilterPanelKeydown = null
+    const button = this.filterPanelButton
     if (this.filterPanel) this.filterPanel.remove()
     this.filterPanel = null
+    this.filterPanelHeaderCell = null
+    this.filterPanelButton = null
+    this.syncFilterButtonExpandedStates()
+    if (returnFocus && button) button.focus()
   }
 
   syncFilterButtonStates() {
@@ -772,6 +820,18 @@ export default class extends Controller {
       const active = this.filterConditionFor(key).operator
       button.classList.toggle("rails-table-preferences-filter-button--active", Boolean(active))
       button.setAttribute("aria-pressed", active ? "true" : "false")
+    })
+    this.syncFilterButtonExpandedStates()
+  }
+
+  syncFilterButtonExpandedStates() {
+    const openKey = this.filterPanel?.dataset.railsTablePreferencesColumnKey
+    this.headerCells.forEach((cell) => {
+      const button = cell.querySelector("[data-rails-table-preferences-filter-button]")
+      if (!button) return
+      const expanded = openKey && cell.dataset.railsTablePreferencesColumnKey === openKey
+      button.setAttribute("aria-expanded", expanded ? "true" : "false")
+      if (!expanded) button.removeAttribute("aria-controls")
     })
   }
 
