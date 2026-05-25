@@ -4,6 +4,8 @@ Rails Table Preferences can copy a lightweight demo screen into a host applicati
 
 Use this when you want to confirm the editor, table behavior, preference persistence, filters, and sortable headers before wiring the gem into a real business screen.
 
+For a quick visual reference before generating the screen locally, see [Visual overview](visual_overview.md).
+
 ## Generate demo files
 
 Run the install generator with `--with-demo`:
