@@ -12,12 +12,16 @@ ja:
       status_region: 保存状態
       loading_status: 設定を読み込み中です...
       loaded_status: 設定を読み込みました。
+      loading_failed_status: 設定を読み込めませんでした。
       saving_status: 設定を保存中です...
       saved_status: 設定を保存しました。
+      saving_failed_status: 設定を保存できませんでした。
       saving_as_new_status: 新しい設定を保存中です...
       saved_as_new_status: 新しい設定を保存しました。
+      saving_as_new_failed_status: 新しい設定を保存できませんでした。
       deleting_status: 設定を削除中です...
       deleted_status: 設定を削除しました。
+      deleting_failed_status: 設定を削除できませんでした。
       operation_failed_status: 設定の操作を完了できませんでした。
       dirty_status: 未保存の変更があります。
       reset: リセット
