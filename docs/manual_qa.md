@@ -57,6 +57,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Update the named preset and confirm changes persist.
 - [ ] Mark a preset as default.
 - [ ] Reload without an explicit name and confirm the default preset loads.
+- [ ] Hover or focus the delete button and confirm it identifies the current preset target before opening the browser confirm dialog.
 - [ ] Delete a non-default preset and confirm the dialog names the target preset.
 - [ ] Try deleting a scoped preset and confirm the dialog also shows scope context when available.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
