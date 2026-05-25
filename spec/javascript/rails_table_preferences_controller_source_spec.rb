@@ -15,6 +15,8 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('dragLabel: { type: String, default: "ドラッグして並び替え" }')
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
+    expect(source).to include('deleteConfirmNamedLabel: { type: String, default: "保存済み設定「%{preset_name}」を削除します。よろしいですか？" }')
+    expect(source).to include('deleteConfirmScopedLabel: { type: String, default: "[%{scope_label}] の保存済み設定「%{preset_name}」を削除します。よろしいですか？" }')
     expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
     expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
   end
@@ -152,7 +154,11 @@ RSpec.describe "rails_table_preferences_controller.js" do
   it "confirms editable preset deletion before issuing DELETE" do
     expect(source).to include("if (!this.confirmDeletePreset()) return")
     expect(source).to include("confirmDeletePreset()")
-    expect(source).to include("const message = this.deleteConfirmLabelValue?.trim()")
+    expect(source).to include("deletePresetConfirmationMessage()")
+    expect(source).to include("const presetName = this.currentPresetName")
+    expect(source).to include("const scopeLabel = this.currentPresetScopeLabel")
+    expect(source).to include("return this.interpolateLabel(this.deleteConfirmScopedLabelValue,")
+    expect(source).to include('return selectedOption?.dataset.scopeLabel || selectedOption?.dataset.scopeType || "owner"')
     expect(source).to include("return window.confirm(message)")
   end
 
@@ -169,6 +175,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("buildPresetOption(preset)")
     expect(source).to include("preset.scope_label || preset.scope_type || \"owner\"")
     expect(source).to include('option.dataset.scopeType = preset.scope_type || "owner"')
+    expect(source).to include('option.dataset.scopeLabel = scopeLabel || "owner"')
     expect(source).to include('option.dataset.editable = preset.editable === false ? "false" : "true"')
   end
 end
