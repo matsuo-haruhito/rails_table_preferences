@@ -80,6 +80,8 @@ The generated demo screen includes:
 - column order
 - table-header drag ordering
 - column width resizing
+- auto-fit by double-clicking a resize handle
+- overflow metadata comparison through `ellipsis` and `wrap` example columns
 - truncation metadata
 - preset save/load/delete UI
 - bundled status feedback for async preset actions
@@ -102,6 +104,8 @@ On the demo screen, confirm:
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
+- [ ] Double-clicking a resize handle auto-fits the current visible values in the column.
+- [ ] The `備考（省略）` and `備考（折返し）` columns show different overflow behavior when narrowed.
 - [ ] Filter panel opens.
 - [ ] Header click cycles sort state.
 - [ ] Save persists settings.
@@ -140,3 +144,4 @@ Good first automated checks are:
 - save and reload restore settings
 - filter panel opens
 - sortable header changes sort state
+- double-click auto-fit updates a column width
