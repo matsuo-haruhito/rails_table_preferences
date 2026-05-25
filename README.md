@@ -4,6 +4,15 @@ Rails Table Preferences is a Rails engine/gem for saving and restoring table dis
 
 It is designed for business applications with many index tables, where users need to customize visible columns, column order, column width, text truncation, filter UI state, sort UI state, presets, fixed columns, and export column order per table.
 
+## Visual overview
+
+The bundled editor and demo screen are intentionally lightweight, but they still cover the main moments users need to evaluate before wiring the gem into a real business screen.
+
+![Representative demo screen showing the preset editor above an orders table with pinned columns and active filters.](docs/images/visual-overview-editor-and-table.svg)
+
+- [Visual overview](docs/visual_overview.md): representative screen illustrations for the editor, preset flow, filter/sort state, and pinned-column table layout.
+- [Demo screen generator](docs/demo.md): generate the lightweight verification screen shown in the screenshots.
+
 ## Documentation
 
 Focused documentation is available under [`docs/`](docs/index.md):
