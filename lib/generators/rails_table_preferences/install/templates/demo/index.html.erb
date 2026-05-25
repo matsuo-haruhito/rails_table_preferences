@@ -20,6 +20,11 @@
   point <code>config.scope_context_method</code> at an application method that returns the same role key.
 </p>
 
+<p>
+  The sample rows intentionally mix status, delivery date, amount range, and memo length
+  so filter, sort, width, and preset changes are easier to spot without adding a full sample app.
+</p>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
@@ -28,7 +33,7 @@
 ) %>
 
 <%= form_with url: request.path, method: :get do %>
-  <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
+  <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名で絞り込み" %>
 
   <%= table_preferences_hidden_fields(
     settings: @table_preference_settings,
