@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: RSpec, JavaScript syntax, gem build, and package verification
+    name: Ruby 3.3 full CI
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,30 @@ jobs:
 
       - name: Check JavaScript syntax
         run: node --check app/javascript/controllers/rails_table_preferences_controller.js
+
+      - name: Build gem package
+        run: bundle exec rake build
+
+      - name: Verify gem package contents
+        run: bundle exec rake package:verify
+
+  ruby_floor:
+    name: Ruby 3.1 representative CI
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Run RSpec
+        run: bundle exec rspec
 
       - name: Build gem package
         run: bundle exec rake build
