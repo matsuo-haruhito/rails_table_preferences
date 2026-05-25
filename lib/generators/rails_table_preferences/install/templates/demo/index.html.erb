@@ -5,6 +5,21 @@
   <code>table_preferences</code> table for preference persistence.
 </p>
 
+<p>
+  It also seeds three preset types for the demo table:
+  <code>owner-compact</code> (owner),
+  <code>shared-baseline</code> (shared),
+  and <code>operations-default</code> (role).
+  The initial screen is resolved with
+  <code>{ roles: [&quot;<%= @demo_scope_context[:roles].first %>&quot;] }</code>
+  so you can inspect role-default behavior alongside personal and shared examples.
+</p>
+
+<p>
+  To make the bundled preset API show the same role-scoped preset in the selector,
+  point <code>config.scope_context_method</code> at an application method that returns the same role key.
+</p>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
