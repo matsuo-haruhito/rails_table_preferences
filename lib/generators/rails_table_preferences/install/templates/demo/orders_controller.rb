@@ -6,13 +6,23 @@ module RailsTablePreferencesDemo
     include RailsTablePreferences::Controller
     include RailsTablePreferences::TablePreferencesHelper
 
+    DEMO_TABLE_KEY = :rails_table_preferences_demo_orders
+    DEMO_ROLE_KEY = "operations"
+
     def index
+      ensure_demo_presets!
+
       @table_columns = table_columns
-      @table_preference_settings = rails_table_preference_settings(table_key: :rails_table_preferences_demo_orders)
+      @demo_scope_context = demo_scope_context
+      @table_preference_settings = rails_table_preference_settings(
+        table_key: DEMO_TABLE_KEY,
+        scope_context: @demo_scope_context
+      )
 
       preference_params = rails_table_preference_params(
-        table_key: :rails_table_preferences_demo_orders,
-        columns: @table_columns
+        table_key: DEMO_TABLE_KEY,
+        columns: @table_columns,
+        scope_context: @demo_scope_context
       )
 
       @orders = apply_demo_params(demo_orders, params.to_unsafe_h.merge(preference_params))
@@ -81,6 +91,88 @@ module RailsTablePreferencesDemo
           memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
         }
       ]
+    end
+
+    def ensure_demo_presets!
+      owner = rails_table_preferences_current_owner
+      return unless owner
+
+      ensure_owner_demo_preset!(owner)
+      ensure_shared_demo_preset!
+      ensure_role_demo_preset!
+    end
+
+    def ensure_owner_demo_preset!(owner)
+      preset = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: owner,
+        table_key: DEMO_TABLE_KEY,
+        name: "owner-compact"
+      )
+      return unless preset.new_record?
+
+      preset.settings = {
+        columns: [
+          { key: "order_no", visible: true, order: 10, width: 120 },
+          { key: "customer_name", visible: true, order: 20, width: 200, truncate: 20 },
+          { key: "status", visible: true, order: 30, width: 110 },
+          { key: "amount", visible: true, order: 40, width: 120 },
+          { key: "delivery_date", visible: false, order: 50, width: 140 },
+          { key: "memo", visible: false, order: 60, width: 260, truncate: 24 }
+        ]
+      }
+      preset.default_flag = false
+      preset.save!
+    end
+
+    def ensure_shared_demo_preset!
+      preset = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: nil,
+        table_key: DEMO_TABLE_KEY,
+        name: "shared-baseline",
+        scope_type: RailsTablePreferences::Preference::SHARED_SCOPE_TYPE
+      )
+      return unless preset.new_record?
+
+      preset.settings = {
+        columns: [
+          { key: "order_no", visible: true, order: 10, width: 120 },
+          { key: "customer_name", visible: true, order: 20, width: 240, truncate: 24 },
+          { key: "delivery_date", visible: true, order: 30, width: 140 },
+          { key: "status", visible: true, order: 40, width: 120 },
+          { key: "amount", visible: true, order: 50, width: 120 },
+          { key: "memo", visible: false, order: 60, width: 260, truncate: 24 }
+        ]
+      }
+      preset.default_flag = false
+      preset.save!
+    end
+
+    def ensure_role_demo_preset!
+      preset = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: nil,
+        table_key: DEMO_TABLE_KEY,
+        name: "operations-default",
+        scope_type: RailsTablePreferences::Preference::ROLE_SCOPE_TYPE,
+        scope_key: DEMO_ROLE_KEY
+      )
+      return unless preset.new_record?
+
+      preset.settings = {
+        columns: [
+          { key: "order_no", visible: true, order: 10, width: 120 },
+          { key: "customer_name", visible: true, order: 20, width: 240, truncate: 24 },
+          { key: "status", visible: true, order: 30, width: 120 },
+          { key: "delivery_date", visible: true, order: 40, width: 140 },
+          { key: "memo", visible: true, order: 50, width: 260, truncate: 24 },
+          { key: "amount", visible: false, order: 60, width: 120 }
+        ]
+      }
+      preset.default_flag = true
+      preset.save!
+    end
+
+    def demo_scope_context
+      { roles: [DEMO_ROLE_KEY] }
     end
 
     def apply_demo_params(orders, merged_params)
