@@ -6,7 +6,7 @@ require "spec_helper"
 require "tmpdir"
 
 RSpec.describe "rails_table_preferences JavaScript entrypoints" do
-  let(:repo_root) { File.expand_path("..", __dir__) }
+  let(:repo_root) { File.expand_path("../..", __dir__) }
 
   def build_entrypoint_sandbox
     Dir.mktmpdir("rails-table-preferences-entrypoints") do |tmpdir|
