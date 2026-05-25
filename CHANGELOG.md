@@ -26,7 +26,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Optional `--with-demo` install generator mode for local browser verification.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
-- Documentation for quick start, decision guide, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, demo, sandbox verification, troubleshooting, manual QA, and release checklist.
+- Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, and JavaScript entrypoints/controller notes.
 - Minimal GitHub Actions CI for Ruby specs and JavaScript syntax checks.
 
 ### Changed
