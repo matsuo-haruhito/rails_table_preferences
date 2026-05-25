@@ -89,7 +89,7 @@ The bundled editor now includes a lightweight status region for the main async p
 - saving the current settings
 - saving as a new preset
 - deleting the current preset
-- reporting a generic failure when one of those actions cannot complete
+- reporting which bundled preset action failed when one of those actions cannot complete
 
 The default markup uses a native live region:
 
@@ -132,7 +132,7 @@ Before releasing a screen, check:
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Read-only scoped presets disable destructive/default controls.
-- Save/load/delete actions update the status region with understandable progress or result copy.
+- Save/load/delete actions update the status region with understandable progress, result copy, and action-specific failure copy.
 - The dirty-state helper text appears after user-owned changes and clears after loading or saving a preset.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - The table remains understandable when columns are hidden.
