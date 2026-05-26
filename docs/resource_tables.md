@@ -12,7 +12,7 @@ They infer user-facing columns from an Active Record model, then reuse the exist
 
 `resource_table_for` infers the model from `records.klass` when possible. It builds column definitions from `model.attribute_names`, passes each column through `RailsTablePreferences::ColumnDefinition`, and hides columns whose labels cannot be resolved when `unresolved_label_behavior = :hide`.
 
-If the same management page also includes a create form or other host-app actions, keep those as separate form submissions around the table. See [Practical examples](examples.md) for a copyable page-composition example with a create form, editor, and list table on one screen.
+If the same management page also includes a search form, pagination, a create form, or other host-app actions, keep those as separate responsibilities around the table. See [Practical examples](examples.md) for copyable page-composition examples, including a convention-first list screen with small profile overrides and a create-form-plus-list screen.
 
 ## Optional filtering of inferred columns
 
