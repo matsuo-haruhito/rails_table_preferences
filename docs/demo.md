@@ -28,6 +28,8 @@ The generated screen also seeds one shared preset named `共有ビュー`. This 
 
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, and memo lengths so sort, filter, width, and preset checks are easier to judge at a glance.
 
+The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
+
 ## Add routes
 
 Mount the engine if it is not already mounted:
@@ -96,6 +98,7 @@ The generated demo screen includes:
 - sortable header metadata
 - ignored column metadata
 - existing search form hidden fields
+- export payload preview for ordered `headers` and `column_keys`
 
 For the accessibility-side contract behind these checks, see [Accessibility baseline](accessibility.md).
 
@@ -125,6 +128,8 @@ On the demo screen, confirm:
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
 - [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
+- [ ] The export payload preview excludes hidden columns by default.
+- [ ] After saving a new visible-column order, the export payload preview shows the same header order and column key order.
 
 ## Reproduce one async failure quickly
 
