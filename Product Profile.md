@@ -1,0 +1,91 @@
+# Product Profile
+
+## Summary
+
+Rails Table Preferences is a Rails engine/gem for business-style Rails applications with dense index tables. It lets a host application save and restore table display preferences such as visible columns, column order, column width, overflow behavior, fixed columns, column groups, filter UI state, sort UI state, and named presets.
+
+The gem is intentionally integration-friendly rather than all-encompassing. It helps a host application carry display preferences through existing tables, search forms, controller params, and export flows without taking over the application's business queries or administrative workflows.
+
+## Intended users
+
+Primary users are maintainers of Rails applications who need configurable table UX for operators, back-office teams, or other users working with large list screens.
+
+Typical adopters need:
+
+- owner-specific display preferences
+- optional shared, role, or organization scoped presets
+- compatibility with existing search and sort flows
+- copyable customization paths for ERB, CSS, JavaScript, and locales
+
+## Core capabilities
+
+Current repository scope includes:
+
+- table column definitions with labels, visibility, order, width, overflow/truncation, fixed/pinned metadata, groups, filters, sorts, and ignored columns
+- editor and table helpers for rendering a configurable table-preference UI
+- owner/shared/role/organization preset persistence and default resolution
+- controller helpers for merging saved filter/sort state into host-app params
+- export payload helpers for CSV/Excel/report code implemented by the host app
+- a bundled Stimulus controller and lightweight JSON API
+- install/demo/customization generators and focused operational documentation
+
+## Responsibility boundary
+
+Rails Table Preferences owns:
+
+- table display preference persistence and editing
+- saved filter/sort UI state as UI metadata
+- column/preset metadata and helper/controller integration
+- baseline accessibility hooks and lightweight demo/sandbox guidance
+
+Host applications own:
+
+- actual search/query execution
+- authorization and tenant/business rules
+- grouped header markup and advanced scroll/sticky layout polish
+- CSV, Excel, or report file generation
+- full administrative management UI for non-owner presets
+- final application design and workflow-specific UX
+
+## Integration posture
+
+The project favors practical Rails integration over framework lock-in.
+
+Maintainers should expect to combine the gem with:
+
+- existing `search(params)` / `order_by(params[:sort])` flows
+- Ransack or other search adapters when needed
+- host-app export code driven by `rails_table_preference_export_payload`
+- host-app customization via copied ERB, CSS, JavaScript, and locale files
+
+## Release posture
+
+The README currently positions the gem as active initial development targeting an initial `0.1.x` release line.
+
+Repository-level release confidence is expected to come from:
+
+- `bundle exec rspec`
+- `node --check app/javascript/controllers/rails_table_preferences_controller.js`
+- `bundle exec rake build`
+- sandbox/demo verification
+- manual QA and package verification docs
+
+## Non-goals
+
+The project does not aim to become:
+
+- a generic Active Record query builder
+- a replacement for Ransack, Datagrid, or Filterrific
+- an authorization framework
+- a CSV/Excel/report generator
+- a complete admin UI framework for shared/role/organization preset management
+- a React/Vue component library
+
+## Maintainer references
+
+Start with these files when orienting yourself:
+
+- `README.md`
+- `docs/index.md`
+- `AGENTS.md`
+- `CHANGELOG.md`

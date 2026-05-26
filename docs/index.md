@@ -26,6 +26,11 @@ This directory contains focused documentation for Rails Table Preferences.
 - [JavaScript entrypoints](javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, and custom JS bundlers.
 - [JavaScript controller notes](javascript_controller.md): responsibilities, event boundaries, and safety invariants for the bundled Stimulus controller.
 
+## Maintainer entry
+
+- [Product Profile](../Product%20Profile.md): concise maintainer-facing overview of the product surface, responsibility boundary, and release posture.
+- [AGENTS.md](../AGENTS.md): repository guardrails, source-of-truth order, and change boundaries for assisted maintenance work.
+
 ## Recommended integration order
 
 1. Install the gem and run the generated migration.

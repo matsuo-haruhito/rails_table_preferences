@@ -24,6 +24,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - [Fixed columns and column groups](docs/fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
 - [Export integration](docs/export_integration.md): reuse saved column visibility, order, labels, and metadata for CSV, Excel, or report exports.
 - [Accessibility baseline](docs/accessibility.md): accessibility hooks provided by the bundled editor/controller and host app responsibilities.
+- [Non-goals and deferred directions](docs/non_goals.md): intentionally deferred areas such as query builder behavior, export generation, full admin UI, heavy browser tests, and complex sticky layouts.
 - [Demo screen generator](docs/demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](docs/sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Manual QA checklist](docs/manual_qa.md): browser and host application checks to run before asking real users to try the feature.
@@ -36,6 +37,11 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
 - [JavaScript entrypoints](docs/javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, and custom JS bundlers.
 - [JavaScript controller notes](docs/javascript_controller.md): bundled Stimulus controller responsibilities and safety boundaries.
+
+## Maintainer docs
+
+- [Product Profile](Product%20Profile.md): concise maintainer-facing overview of the product surface, responsibility boundary, and release posture.
+- [AGENTS.md](AGENTS.md): repository guardrails, source-of-truth order, and change boundaries for assisted maintenance work.
 
 ## Goals
 
