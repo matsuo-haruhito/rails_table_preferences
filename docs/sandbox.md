@@ -11,7 +11,7 @@ Verify that the gem works end-to-end in a minimal Rails app:
 - install generator
 - migration
 - engine mount
-- copied JavaScript and CSS
+- copied or package-entrypoint JavaScript and CSS
 - editor rendering
 - table display changes
 - preset save/load/delete
@@ -135,6 +135,24 @@ db/migrate/*_create_table_preferences.rb
 app/javascript/controllers/rails_table_preferences_controller.js
 app/assets/stylesheets/rails_table_preferences.css
 ```
+
+### If the sandbox app uses Vite / `app/frontend`
+
+The generator still copies `app/javascript/controllers/rails_table_preferences_controller.js` for the default `stimulus-rails` path. If the sandbox app registers Stimulus from `app/frontend/entrypoints/application.js` instead, keep that existing Stimulus application and register the packaged controller from the gem entrypoint:
+
+```js
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+application.register("rails-table-preferences", RailsTablePreferencesController)
+```
+
+Also confirm the bundler can resolve `rails_table_preferences` and `rails_table_preferences/controller` to the gem's packaged `app/javascript/rails_table_preferences/*` files. Use the detailed resolver example in [JavaScript entrypoints](javascript_entrypoints.md) when the sandbox app does not already provide that alias.
+
+Use one path per sandbox app:
+
+- default `stimulus-rails`: rely on the copied controller under `app/javascript/controllers`
+- Vite / `app/frontend`: register the packaged controller from the gem entrypoint
+
+Do not start a second Stimulus application just for Rails Table Preferences. For the broader install flow, see [Quick start](quick_start.md) and [JavaScript entrypoints](javascript_entrypoints.md).
 
 Mount the engine in `config/routes.rb`:
 
