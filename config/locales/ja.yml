@@ -21,7 +21,8 @@ ja:
       deleting_status: 設定を削除中です...
       deleted_status: 設定を削除しました。
       operation_failed_status: 設定の操作を完了できませんでした。
-      reset: リセット
+      reset: 初期状態に戻す
+      reset_hint: 保存前の表示設定の変更を破棄して、初期状態に戻します。
       order: 表示順
       width: 列幅
       truncate: 省略文字数
