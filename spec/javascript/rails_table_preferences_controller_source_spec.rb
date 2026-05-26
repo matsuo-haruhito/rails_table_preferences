@@ -16,7 +16,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('resizeLabel: { type: String, default: "列幅を変更" }')
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
     expect(source).to include('readOnlyPresetHintLabel: { type: String, default: "この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。" }')
-    expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です...")')
+    expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
     expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
   end
 
