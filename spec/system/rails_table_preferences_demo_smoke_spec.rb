@@ -308,6 +308,9 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
   it "renders the demo surface and hides a column through apply" do
     visit "/rails_table_preferences_system_smoke/orders"
 
+    expect(page).to have_css("h1", text: "Rails Table Preferences Demo Smoke")
+    expect(page).to have_css(".rails-table-preferences-editor")
+
     page.execute_script(RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
 
     expect(page.evaluate_script("document.body.dataset.rtpSmokeError || ''")).to eq("")
