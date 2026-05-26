@@ -100,33 +100,15 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-## Save returns 422 or CSRF errors
-
-Symptoms:
-
-- Save fails with `422 Unprocessable Entity`.
-- Logs mention CSRF verification.
-
-The bundled controller sends the CSRF token from:
-
-```html
-<meta name="csrf-token" content="...">
-```
-
-Check that the application layout includes the Rails CSRF meta tags:
-
-```erb
-<%= csrf_meta_tags %>
-```
-
 ## current_user is nil
 
 Symptoms:
 
 - Preference API requests fail.
 - Logs indicate a missing owner/user.
+- The copied demo screen opens, but save/load/delete fails because no owner record is available.
 
-By default, the gem calls `current_user`. If the host application uses another owner concept, configure it:
+By default, the gem calls `current_user`. If the host application uses another owner concept, configure both the owner model and the current-owner method:
 
 ```ruby
 RailsTablePreferences.configure do |config|
@@ -136,6 +118,22 @@ end
 ```
 
 The method must return an instance of the configured owner model.
+
+For quick sandbox or demo verification, make sure that method returns a persisted record:
+
+```ruby
+class ApplicationController < ActionController::Base
+  helper_method :current_customer
+
+  private
+
+  def current_customer
+    Customer.first_or_create!(name: "Sandbox Customer")
+  end
+end
+```
+
+The copied demo screen uses the same configured current-owner method as the normal editor flow. `--with-demo` does not seed `User`, `Customer`, or another owner model automatically.
 
 ## Migration references the wrong owner model
 
