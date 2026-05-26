@@ -639,9 +639,10 @@ export default class extends Controller {
       button.className = "rails-table-preferences-filter-button"
       button.dataset.railsTablePreferencesFilterButton = "true"
       button.dataset.railsTablePreferencesColumnKey = key
-      button.setAttribute("aria-label", `${this.filterLabelValue}: ${column.label || key}`)
+      const buttonLabel = this.filterButtonLabel(column, this.filterConditionFor(key))
+      button.setAttribute("aria-label", buttonLabel)
       button.setAttribute("aria-expanded", "false")
-      button.title = `${this.filterLabelValue}: ${column.label || key}`
+      button.title = buttonLabel
       button.textContent = "▾"
       button.addEventListener("mousedown", (event) => event.stopPropagation())
       button.addEventListener("dragstart", (event) => event.preventDefault())
@@ -817,9 +818,13 @@ export default class extends Controller {
       const key = cell.dataset.railsTablePreferencesColumnKey
       const button = cell.querySelector("[data-rails-table-preferences-filter-button]")
       if (!button) return
-      const active = this.filterConditionFor(key).operator
+      const condition = this.filterConditionFor(key)
+      const active = condition.operator
       button.classList.toggle("rails-table-preferences-filter-button--active", Boolean(active))
       button.setAttribute("aria-pressed", active ? "true" : "false")
+      const label = this.filterButtonLabel(this.columnDefinitionByKey(key) || { key }, condition)
+      button.setAttribute("aria-label", label)
+      button.title = label
     })
     this.syncFilterButtonExpandedStates()
   }
@@ -833,6 +838,43 @@ export default class extends Controller {
       button.setAttribute("aria-expanded", expanded ? "true" : "false")
       if (!expanded) button.removeAttribute("aria-controls")
     })
+  }
+
+  filterButtonLabel(column, condition = {}) {
+    const columnLabel = column?.label || column?.key || this.filterLabelValue
+    const baseLabel = `${this.filterLabelValue}: ${columnLabel}`
+    const summary = this.filterConditionSummary(condition)
+    return summary ? `${baseLabel} (${summary})` : baseLabel
+  }
+
+  filterConditionSummary(condition = {}) {
+    const operator = String(condition?.operator || "").trim()
+    if (!operator) return ""
+    const operatorText = this.filterOperatorText(operator)
+    if (operator === "between") {
+      const from = this.filterSummaryText(condition.from)
+      const to = this.filterSummaryText(condition.to)
+      if (from && to) return `${operatorText}: ${from} - ${to}`
+      if (from) return `${operatorText}: ${this.filterFromLabelValue} ${from}`
+      if (to) return `${operatorText}: ${this.filterToLabelValue} ${to}`
+      return operatorText
+    }
+    if (["blank", "present", "true", "false"].includes(operator)) return operatorText
+    const values = Array.isArray(condition.values) ? condition.values.map((value) => this.filterSummaryText(value)).filter(Boolean) : []
+    if (values.length > 0) return `${operatorText}: ${this.filterSummaryValues(values)}`
+    const value = this.filterSummaryText(condition.value)
+    return value ? `${operatorText}: ${value}` : operatorText
+  }
+
+  filterSummaryValues(values) {
+    if (values.length <= 2) return values.join(", ")
+    return `${values.slice(0, 2).join(", ")} +${values.length - 2}`
+  }
+
+  filterSummaryText(value) {
+    const text = String(value ?? "").trim()
+    if (!text) return ""
+    return text.length > 24 ? `${text.slice(0, 21)}...` : text
   }
 
   filterConditionFor(key) {
