@@ -94,6 +94,9 @@ Use browser devtools while saving/loading presets.
 
 - [ ] Add a text filter column and confirm the filter button appears.
 - [ ] Open the filter panel.
+- [ ] Change the operator while leaving the panel open and confirm the value field shape updates immediately.
+- [ ] Switch a date or number filter to `between` and confirm `from/to` inputs appear without reopening the panel.
+- [ ] Switch to `blank`, `present`, `true`, or `false` and confirm unnecessary value inputs disappear.
 - [ ] Apply a `contains` condition.
 - [ ] Apply an `equals` condition.
 - [ ] Apply a blank/present condition.
