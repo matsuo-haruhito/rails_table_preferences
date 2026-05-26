@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
+require "erb"
 require "fileutils"
 require "pathname"
+require_relative "test_application"
 require "capybara"
 require "capybara/dsl"
 require "rspec/rails"
 require "selenium-webdriver"
-require_relative "test_application"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
