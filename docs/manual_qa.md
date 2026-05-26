@@ -46,6 +46,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm the resize hit area is easy enough to grab.
 - [ ] Change a width value in the editor and apply it.
 - [ ] Change a truncation value and confirm long text is truncated.
+- [ ] Confirm the reset button and helper copy explain that current editor changes will be discarded and the default display settings restored.
 - [ ] Reset settings and confirm the table returns to default display settings.
 
 ## 5. Preset behavior
@@ -201,6 +202,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm bundled filter panel focus returns to the triggering button when closed with `Escape`.
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose a useful accessible label.
+- [ ] Confirm the bundled reset action exposes copy that explains it discards current editor changes and restores the default display settings.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
