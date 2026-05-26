@@ -34,12 +34,16 @@ export default class extends Controller {
     deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" },
     loadingStatusLabel: { type: String, default: "設定を読み込み中です..." },
     loadedStatusLabel: { type: String, default: "設定を読み込みました。" },
+    loadingFailedStatusLabel: { type: String, default: "設定を読み込めませんでした。" },
     savingStatusLabel: { type: String, default: "設定を保存中です..." },
     savedStatusLabel: { type: String, default: "設定を保存しました。" },
+    savingFailedStatusLabel: { type: String, default: "設定を保存できませんでした。" },
     savingAsNewStatusLabel: { type: String, default: "新しい設定を保存中です..." },
     savedAsNewStatusLabel: { type: String, default: "新しい設定を保存しました。" },
+    savingAsNewFailedStatusLabel: { type: String, default: "新しい設定を保存できませんでした。" },
     deletingStatusLabel: { type: String, default: "設定を削除中です..." },
     deletedStatusLabel: { type: String, default: "設定を削除しました。" },
+    deletingFailedStatusLabel: { type: String, default: "設定を削除できませんでした。" },
     operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" },
     dirtyStatusLabel: { type: String, default: "未保存の変更があります。" }
   }
@@ -112,7 +116,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.savingAsNewStatusLabelValue,
-      successLabel: this.savedAsNewStatusLabelValue
+      successLabel: this.savedAsNewStatusLabelValue,
+      errorLabel: this.savingAsNewFailedStatusLabelValue
     })
   }
 
@@ -141,7 +146,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.deletingStatusLabelValue,
-      successLabel: this.deletedStatusLabelValue
+      successLabel: this.deletedStatusLabelValue,
+      errorLabel: this.deletingFailedStatusLabelValue
     })
   }
 
@@ -160,7 +166,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.savingStatusLabelValue,
-      successLabel: this.savedStatusLabelValue
+      successLabel: this.savedStatusLabelValue,
+      errorLabel: this.savingFailedStatusLabelValue
     })
   }
 
@@ -191,7 +198,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.loadingStatusLabelValue,
-      successLabel: this.loadedStatusLabelValue
+      successLabel: this.loadedStatusLabelValue,
+      errorLabel: this.loadingFailedStatusLabelValue
     })
   }
 
@@ -228,7 +236,8 @@ export default class extends Controller {
       this.applyPreferencePayload(await response.json())
     }, {
       busyLabel: this.loadingStatusLabelValue,
-      successLabel: this.loadedStatusLabelValue
+      successLabel: this.loadedStatusLabelValue,
+      errorLabel: this.loadingFailedStatusLabelValue
     })
   }
 

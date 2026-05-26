@@ -62,7 +62,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, and action buttons.
 - [ ] Confirm those controls re-enable after success.
-- [ ] Trigger at least one API failure and confirm the generic failure status appears and the controls recover.
+- [ ] Trigger at least one load failure and confirm the status region says loading failed and the controls recover.
+- [ ] Trigger at least one save, save-as-new, or delete failure and confirm the status region names the failed action and the controls recover.
 
 ## 6. Scoped preset behavior
 
