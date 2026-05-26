@@ -178,6 +178,7 @@ A minimal strong-parameters shape looks like this:
 
 ```ruby
 params.require(:preset).permit(
+  :table_key,
   :name,
   :default,
   :scope_type,
@@ -187,6 +188,82 @@ params.require(:preset).permit(
 ```
 
 Typical `scope_key` values are stable business identifiers such as role keys (`"admin"`) or organization IDs/slugs (`"tokyo"`). The host app remains responsible for deciding who may create or update each key.
+
+A copyable host-app controller/service split can stay close to the repository's current controller and model contract:
+
+```ruby
+class Admin::TablePreferencePresetsController < ApplicationController
+  def create
+    preset = ScopedPresetUpserter.call(preset_params)
+
+    redirect_to admin_table_preference_presets_path,
+                notice: "Preset saved: #{preset.name}"
+  end
+
+  def update
+    preset = ScopedPresetUpserter.call(preset_params)
+
+    redirect_to admin_table_preference_presets_path,
+                notice: "Preset updated: #{preset.name}"
+  end
+
+  private
+
+  def preset_params
+    params.require(:preset).permit(
+      :table_key,
+      :name,
+      :default,
+      :scope_type,
+      :scope_key,
+      settings: {}
+    )
+  end
+end
+```
+
+```ruby
+class ScopedPresetUpserter
+  def self.call(attrs)
+    scope_type = attrs.fetch(:scope_type)
+    scope_key = attrs[:scope_key].presence
+
+    preference = RailsTablePreferences::Preference.find_or_initialize_for(
+      user: nil,
+      table_key: attrs.fetch(:table_key),
+      name: attrs[:name].presence || "default",
+      scope_type: scope_type,
+      scope_key: scope_key
+    )
+
+    preference.user = nil
+    preference.scope_type = scope_type
+    preference.scope_key = scope_key
+    preference.settings = RailsTablePreferences::SettingsNormalizer.call(attrs[:settings] || {})
+    preference.default_flag = ActiveModel::Type::Boolean.new.cast(attrs[:default])
+
+    if preference.default_flag?
+      RailsTablePreferences::Preference.for_scope(preference.scope_type, preference.scope_key)
+                                     .where(RailsTablePreferences.configuration.user_foreign_key => nil)
+                                     .for_table(preference.table_key)
+                                     .where.not(id: preference.id)
+                                     .update_all(default_flag: false)
+    end
+
+    preference.save!
+    preference
+  end
+end
+```
+
+Why this shape works:
+
+- `user: nil` matches the current model/controller contract for shared, role, and organization presets.
+- `scope_type` and `scope_key` stay explicit instead of relying on hidden controller state.
+- `RailsTablePreferences::SettingsNormalizer.call(...)` keeps admin-created payloads aligned with the same normalized `columns` / `filters` / `sorts` shape used by the bundled JSON API.
+- `default_flag` clearing stays per table + scope so only one default wins inside the same scope bucket.
+
+If your host app prefers to manage presets through the mounted JSON API instead of direct model writes, use the same parameter shape shown above. The important part is to keep the stored `scope_type`, `scope_key`, and normalized `settings` consistent.
 
 ### 3. Split the regular editor and the admin flow on purpose
 
@@ -200,13 +277,36 @@ A practical rule of thumb is: let users read every available preset, but only le
 
 ### 4. Keep `scope_context_method` and admin inputs aligned
 
-The `scope_context_method` decides which non-owner presets are available for the current request. If the method returns role keys and an organization ID, the admin flow should store those same kinds of values in `scope_key`.
+The `scope_context_method` decides which non-owner presets are available for the current request. If the method returns role keys and an organization identifier, the admin flow should store those same kinds of values in `scope_key`.
+
+A concrete alignment example looks like this:
+
+```ruby
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    {
+      roles: current_user.roles.pluck(:key),
+      organization: current_organization.slug
+    }
+  end
+end
+```
+
+| Use case | `scope_type` | `scope_key` stored by admin flow | Resolver input that makes it available |
+| --- | --- | --- | --- |
+| Shared baseline for everyone | `shared` | blank | none |
+| Operations role preset | `role` | `operations` | `roles: ["operations", ...]` |
+| Tokyo organization preset | `organization` | `tokyo-hq` | `organization: "tokyo-hq"` |
 
 That keeps three things consistent:
 
 - the seed/default data you create up front
 - the admin UI or service object that edits scoped presets later
 - the runtime resolver that decides which scoped presets the current owner can use
+
+If your runtime context returns numeric IDs, UUIDs, or tenant slugs, store that same stable value in `scope_key`. Avoid saving human-facing labels such as `Operations Team` unless the resolver also returns that exact label.
 
 ## Authorization boundary
 
