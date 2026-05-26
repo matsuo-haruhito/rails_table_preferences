@@ -1,82 +1,94 @@
 <svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">Rails Table Preferences filter and pinned column overview</title>
-  <desc id="desc">A representative documentation image showing active filters, sorting, and pinned column context.</desc>
+  <title id="title">Rails Table Preferences grouped header and fixed column overview</title>
+  <desc id="desc">A representative documentation image showing grouped headers, a fixed leading column, and active filter and sort context.</desc>
   <rect width="1400" height="920" fill="#F5F7FB"/>
   <rect x="72" y="56" width="1256" height="88" rx="22" fill="#FFFFFF" stroke="#D6DEEB"/>
-  <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Filter, sort, and pinned-column context</text>
-  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A representative state that shows the kind of context the demo screen exposes for reviewers.</text>
+  <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Grouped headers and fixed-column context</text>
+  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The host app owns the final table markup, while the gem still preserves the metadata and working-state context.</text>
+
   <rect x="72" y="176" width="364" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
-  <text x="108" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Active state summary</text>
-  <text x="108" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">Compact callouts make it easier to see which behaviors the gem controls.</text>
-  <rect x="108" y="292" width="292" height="88" rx="18" fill="#EFF6FF" stroke="#C8DAFF"/>
-  <text x="132" y="326" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Active filters</text>
-  <text x="132" y="353" fill="#35517A" font-family="Arial, sans-serif" font-size="16">status: waiting, packed</text>
-  <text x="132" y="374" fill="#35517A" font-family="Arial, sans-serif" font-size="16">region: Kanto</text>
-  <rect x="108" y="398" width="292" height="88" rx="18" fill="#EEF2FF" stroke="#D7D9FF"/>
-  <text x="132" y="432" fill="#4338CA" font-family="Arial, sans-serif" font-size="17" font-weight="700">Active sort</text>
-  <text x="132" y="459" fill="#4E4AA8" font-family="Arial, sans-serif" font-size="16">updated_at desc</text>
-  <text x="132" y="480" fill="#4E4AA8" font-family="Arial, sans-serif" font-size="16">secondary: status asc</text>
-  <rect x="108" y="504" width="292" height="88" rx="18" fill="#ECFDF3" stroke="#B7E6CA"/>
-  <text x="132" y="538" fill="#166534" font-family="Arial, sans-serif" font-size="17" font-weight="700">Pinned columns</text>
-  <text x="132" y="565" fill="#246B46" font-family="Arial, sans-serif" font-size="16">left: order no.</text>
-  <text x="132" y="586" fill="#246B46" font-family="Arial, sans-serif" font-size="16">right: updated at</text>
+  <text x="108" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">What the view conveys</text>
+  <text x="108" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The overview stays at documentation level and leaves detailed policy in the focused guides.</text>
+
+  <rect x="108" y="292" width="292" height="88" rx="18" fill="#EEF2FF" stroke="#D7D9FF"/>
+  <text x="132" y="326" fill="#4338CA" font-family="Arial, sans-serif" font-size="17" font-weight="700">Grouped headers</text>
+  <text x="132" y="353" fill="#4E4AA8" font-family="Arial, sans-serif" font-size="16">Customer</text>
+  <text x="132" y="374" fill="#4E4AA8" font-family="Arial, sans-serif" font-size="16">Delivery</text>
+
+  <rect x="108" y="398" width="292" height="88" rx="18" fill="#ECFDF3" stroke="#B7E6CA"/>
+  <text x="132" y="432" fill="#166534" font-family="Arial, sans-serif" font-size="17" font-weight="700">Fixed column</text>
+  <text x="132" y="459" fill="#246B46" font-family="Arial, sans-serif" font-size="16">Order number stays pinned</text>
+  <text x="132" y="480" fill="#246B46" font-family="Arial, sans-serif" font-size="16">while the rest scrolls</text>
+
+  <rect x="108" y="504" width="292" height="88" rx="18" fill="#EFF6FF" stroke="#C8DAFF"/>
+  <text x="132" y="538" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="17" font-weight="700">Active state</text>
+  <text x="132" y="565" fill="#35517A" font-family="Arial, sans-serif" font-size="16">Filter: Kanto</text>
+  <text x="132" y="586" fill="#35517A" font-family="Arial, sans-serif" font-size="16">Sort: updated desc</text>
+
   <rect x="108" y="610" width="292" height="176" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
-  <text x="132" y="644" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">What this verifies</text>
-  <text x="132" y="680" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">• Preset selection preserves multiple dimensions of table state.</text>
-  <text x="132" y="712" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">• Sticky columns still read correctly when horizontal space gets tight.</text>
-  <text x="132" y="744" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">• Reviewers can compare labels and messages without running the app first.</text>
+  <text x="132" y="644" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Reading notes</text>
+  <text x="132" y="680" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- Group labels come from host-app header markup.</text>
+  <text x="132" y="712" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- The pinned first column preserves orientation.</text>
+  <text x="132" y="744" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- Filter and sort state still read as one coherent list screen.</text>
+
   <rect x="472" y="176" width="856" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
-  <text x="508" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Demo table state</text>
-  <text x="508" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The pinned first and last columns frame the filtered rows and preserve orientation while scanning.</text>
+  <text x="508" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Representative table state</text>
+  <text x="508" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">Grouped customer and delivery headers sit above the same column metadata the bundled editor stores.</text>
+
   <rect x="508" y="290" width="170" height="38" rx="19" fill="#EFF6FF"/>
   <text x="540" y="315" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Filter: Kanto</text>
-  <rect x="694" y="290" width="178" height="38" rx="19" fill="#EFF6FF"/>
-  <text x="724" y="315" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="15" font-weight="700">Status: waiting, packed</text>
-  <rect x="888" y="290" width="174" height="38" rx="19" fill="#EEF2FF"/>
-  <text x="920" y="315" fill="#4338CA" font-family="Arial, sans-serif" font-size="15" font-weight="700">Sort: updated desc</text>
-  <rect x="508" y="356" width="120" height="56" rx="12" fill="#E0E7FF"/>
-  <rect x="628" y="356" width="194" height="56" rx="12" fill="#EDF2F7"/>
-  <rect x="822" y="356" width="148" height="56" rx="12" fill="#EDF2F7"/>
-  <rect x="970" y="356" width="174" height="56" rx="12" fill="#EDF2F7"/>
-  <rect x="1144" y="356" width="148" height="56" rx="12" fill="#E0F2FE"/>
-  <text x="534" y="391" fill="#312E81" font-family="Arial, sans-serif" font-size="16" font-weight="700">Order</text>
-  <text x="666" y="391" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Customer</text>
-  <text x="858" y="391" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Status</text>
-  <text x="1006" y="391" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Assignee</text>
-  <text x="1170" y="391" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Updated</text>
-  <rect x="508" y="426" width="784" height="62" rx="12" fill="#FFFFFF"/>
-  <rect x="508" y="494" width="784" height="62" rx="12" fill="#F9FBFD"/>
-  <rect x="508" y="562" width="784" height="62" rx="12" fill="#FFFFFF"/>
-  <rect x="508" y="630" width="784" height="62" rx="12" fill="#F9FBFD"/>
-  <rect x="508" y="426" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <rect x="1144" y="426" width="148" height="62" rx="12" fill="#E0F2FE"/>
-  <rect x="508" y="494" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <rect x="1144" y="494" width="148" height="62" rx="12" fill="#E0F2FE"/>
-  <rect x="508" y="562" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <rect x="1144" y="562" width="148" height="62" rx="12" fill="#E0F2FE"/>
-  <rect x="508" y="630" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <rect x="1144" y="630" width="148" height="62" rx="12" fill="#E0F2FE"/>
-  <text x="534" y="464" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2048</text>
-  <text x="666" y="464" fill="#283548" font-family="Arial, sans-serif" font-size="15">Acme Supply</text>
-  <text x="858" y="464" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
-  <text x="1006" y="464" fill="#283548" font-family="Arial, sans-serif" font-size="15">M. Sato</text>
-  <text x="1170" y="464" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-20 09:14</text>
-  <text x="534" y="532" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2041</text>
-  <text x="666" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="15">Northwind Labs</text>
-  <text x="858" y="532" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Waiting</text>
-  <text x="1006" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="15">H. Matsuo</text>
-  <text x="1170" y="532" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-19 17:42</text>
-  <text x="534" y="600" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2033</text>
-  <text x="666" y="600" fill="#283548" font-family="Arial, sans-serif" font-size="15">Kanto Medical</text>
-  <text x="858" y="600" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
-  <text x="1006" y="600" fill="#283548" font-family="Arial, sans-serif" font-size="15">A. Kume</text>
-  <text x="1170" y="600" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-18 15:27</text>
-  <text x="534" y="668" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2029</text>
-  <text x="666" y="668" fill="#283548" font-family="Arial, sans-serif" font-size="15">Harbor Foods</text>
-  <text x="858" y="668" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Waiting</text>
-  <text x="1006" y="668" fill="#283548" font-family="Arial, sans-serif" font-size="15">K. Iwata</text>
-  <text x="1170" y="668" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-18 08:11</text>
-  <rect x="508" y="730" width="784" height="78" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
-  <text x="536" y="764" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Reading notes</text>
-  <text x="536" y="791" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">Pinned columns stay visually distinct, while the central columns continue to show the filtered working set.</text>
+  <rect x="694" y="290" width="174" height="38" rx="19" fill="#EEF2FF"/>
+  <text x="726" y="315" fill="#4338CA" font-family="Arial, sans-serif" font-size="15" font-weight="700">Sort: updated desc</text>
+  <rect x="884" y="290" width="192" height="38" rx="19" fill="#ECFDF3"/>
+  <text x="914" y="315" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Fixed column: Order</text>
+
+  <rect x="508" y="356" width="120" height="44" rx="12" fill="#E0E7FF"/>
+  <rect x="628" y="356" width="340" height="44" rx="12" fill="#F8FAFC" stroke="#D9E2F0"/>
+  <rect x="968" y="356" width="324" height="44" rx="12" fill="#F8FAFC" stroke="#D9E2F0"/>
+  <text x="536" y="384" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">Fixed</text>
+  <text x="760" y="384" fill="#283548" font-family="Arial, sans-serif" font-size="15" font-weight="700">Customer group</text>
+  <text x="1088" y="384" fill="#283548" font-family="Arial, sans-serif" font-size="15" font-weight="700">Delivery group</text>
+
+  <rect x="508" y="412" width="120" height="56" rx="12" fill="#E0E7FF"/>
+  <rect x="628" y="412" width="170" height="56" rx="12" fill="#EDF2F7"/>
+  <rect x="798" y="412" width="170" height="56" rx="12" fill="#EDF2F7"/>
+  <rect x="968" y="412" width="164" height="56" rx="12" fill="#EDF2F7"/>
+  <rect x="1132" y="412" width="160" height="56" rx="12" fill="#E0F2FE"/>
+  <text x="534" y="447" fill="#312E81" font-family="Arial, sans-serif" font-size="16" font-weight="700">Order</text>
+  <text x="666" y="447" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Customer code</text>
+  <text x="842" y="447" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Customer name</text>
+  <text x="1012" y="447" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Delivery date</text>
+  <text x="1180" y="447" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="16" font-weight="700">Updated</text>
+
+  <rect x="508" y="482" width="784" height="62" rx="12" fill="#FFFFFF"/>
+  <rect x="508" y="550" width="784" height="62" rx="12" fill="#F9FBFD"/>
+  <rect x="508" y="618" width="784" height="62" rx="12" fill="#FFFFFF"/>
+  <rect x="508" y="686" width="784" height="62" rx="12" fill="#F9FBFD"/>
+  <rect x="508" y="482" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="508" y="550" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="508" y="618" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="508" y="686" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <text x="534" y="520" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2048</text>
+  <text x="666" y="520" fill="#283548" font-family="Arial, sans-serif" font-size="15">A-332</text>
+  <text x="842" y="520" fill="#283548" font-family="Arial, sans-serif" font-size="15">Acme Supply</text>
+  <text x="1012" y="520" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-22</text>
+  <text x="1180" y="520" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-20 09:14</text>
+  <text x="534" y="588" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2041</text>
+  <text x="666" y="588" fill="#283548" font-family="Arial, sans-serif" font-size="15">N-118</text>
+  <text x="842" y="588" fill="#283548" font-family="Arial, sans-serif" font-size="15">Northwind Labs</text>
+  <text x="1012" y="588" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-21</text>
+  <text x="1180" y="588" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-19 17:42</text>
+  <text x="534" y="656" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2033</text>
+  <text x="666" y="656" fill="#283548" font-family="Arial, sans-serif" font-size="15">K-447</text>
+  <text x="842" y="656" fill="#283548" font-family="Arial, sans-serif" font-size="15">Kanto Medical</text>
+  <text x="1012" y="656" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-20</text>
+  <text x="1180" y="656" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-18 15:27</text>
+  <text x="534" y="724" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2029</text>
+  <text x="666" y="724" fill="#283548" font-family="Arial, sans-serif" font-size="15">H-291</text>
+  <text x="842" y="724" fill="#283548" font-family="Arial, sans-serif" font-size="15">Harbor Foods</text>
+  <text x="1012" y="724" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-19</text>
+  <text x="1180" y="724" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">05-18 08:11</text>
+
+  <rect x="508" y="780" width="784" height="28" rx="14" fill="#E8F0FF"/>
+  <text x="532" y="799" fill="#35517A" font-family="Arial, sans-serif" font-size="14">Grouped headers and a fixed lead column can appear in the overview without changing the host application's ownership of final table markup.</text>
 </svg>
