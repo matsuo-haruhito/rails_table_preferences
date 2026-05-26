@@ -813,7 +813,7 @@ USER_ID=1 bin/rails rails_table_preferences:legacy:import_column_adjustments
 The importer reads `setting_name`, `table_name`, and `value`, accepts legacy column keys such as `column_name`, `display_flag`, and `display_order`, and stores normalized settings in `table_preferences`.
 
 ## Development
-n
+
 Install dependencies:
 
 ```bash
