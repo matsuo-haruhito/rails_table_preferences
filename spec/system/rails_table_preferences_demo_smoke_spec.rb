@@ -18,6 +18,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   BROWSER_SMOKE_SCRIPT = <<~JS
     (() => {
       const controllerSource = #{CONTROLLER_SOURCE.dump};
+      const STORAGE_KEY = "rails-table-preferences-system-smoke-preset";
 
       class Controller {}
 
@@ -93,21 +94,91 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         })
       }
 
-      function installFetchStub() {
-        window.fetch = async function(_url, options = {}) {
+      function readStoredPreference(fallbackSettings) {
+        try {
+          const raw = window.sessionStorage.getItem(STORAGE_KEY)
+          if (raw) {
+            const parsed = JSON.parse(raw)
+            if (parsed && typeof parsed === "object") return parsed
+          }
+        } catch (_error) {
+        }
+
+        return {
+          name: "default",
+          default: false,
+          editable: true,
+          settings: deepCopy(fallbackSettings || {})
+        }
+      }
+
+      function writeStoredPreference(preference) {
+        try {
+          window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(preference))
+        } catch (_error) {
+        }
+        return preference
+      }
+
+      function collectionPayload(preference) {
+        return {
+          preferences: [{
+            name: preference.name || "default",
+            default: preference.default === true,
+            editable: preference.editable !== false
+          }]
+        }
+      }
+
+      function preferencePayload(preference) {
+        return {
+          name: preference.name || "default",
+          default: preference.default === true,
+          editable: preference.editable !== false,
+          settings: deepCopy(preference.settings || {})
+        }
+      }
+
+      function installFetchStub(initialSettings) {
+        window.fetch = async function(url, options = {}) {
           const method = String(options.method || "GET").toUpperCase()
+          const path = new URL(url, window.location.origin).pathname
+          const storedPreference = readStoredPreference(initialSettings)
+
           if (method === "GET") {
+            const payload = /\/preferences\/[^/]+\/[^/]+$/.test(path) ? preferencePayload(storedPreference) : collectionPayload(storedPreference)
             return {
               ok: true,
               status: 200,
-              json: async () => ({ preferences: [{ name: "default", default: false, editable: true }] })
+              json: async () => payload
             }
           }
+
+          if (method === "DELETE") {
+            const resetPreference = writeStoredPreference({
+              name: "default",
+              default: false,
+              editable: true,
+              settings: deepCopy(initialSettings || {})
+            })
+            return {
+              ok: true,
+              status: 200,
+              json: async () => preferencePayload(resetPreference)
+            }
+          }
+
+          const persistedPreference = writeStoredPreference({
+            name: window.__rtpController.currentPresetName,
+            default: window.__rtpController.defaultPresetChecked,
+            editable: true,
+            settings: deepCopy(window.__rtpController.settingsValue)
+          })
 
           return {
             ok: true,
             status: 200,
-            json: async () => ({ name: "default", default: false, editable: true, settings: deepCopy(window.__rtpController.settingsValue) })
+            json: async () => preferencePayload(persistedPreference)
           }
         }
       }
@@ -116,7 +187,10 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         const root = document.querySelector('[data-controller~="rails-table-preferences"]')
         if (!root) return
 
-        installFetchStub()
+        const initialSettings = JSON.parse(root.getAttribute("data-rails-table-preferences-settings-value") || "{}")
+        const storedPreference = readStoredPreference(initialSettings)
+
+        installFetchStub(initialSettings)
 
         const factory = new Function(`${controllerSource}; return RailsTablePreferencesController;`)
         const RailsTablePreferencesController = factory()
@@ -127,6 +201,9 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
 
         installTargetAccessors(controller, RailsTablePreferencesController)
         installValueAccessors(controller, RailsTablePreferencesController)
+        controller.__stimulusValues.settings = deepCopy(storedPreference.settings || initialSettings)
+        controller.__stimulusValues.name = storedPreference.name || controller.__stimulusValues.name
+        controller.__stimulusValues.url = `${controller.collectionUrlValue}/${encodeURIComponent(controller.__stimulusValues.name || "default")}`
         bindActions(controller)
 
         const originalApplyFromEditor = controller.applyFromEditor.bind(controller)
@@ -273,11 +350,22 @@ end
 Rails.application.reload_routes!
 
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
-  it "renders the demo surface and hides a column through apply" do
+  def visit_demo_smoke
     visit "/rails_table_preferences_system_smoke/orders"
 
     expect(page.has_selector?("body[data-rtp-smoke-ready='true']")).to eq(true)
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
+  end
+
+  def table_column_hidden?(key)
+    page.evaluate_script(<<~JS)
+      Array.from(document.querySelectorAll('table [data-rails-table-preferences-column-key="#{key}"]')).every((cell) => cell.hidden)
+    JS
+  end
+
+  it "renders the demo surface and hides a column through apply" do
+    visit_demo_smoke
+
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
     expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
     expect(page.has_css?(".rails-table-preferences-editor__row", text: "得意先名")).to eq(true)
@@ -287,8 +375,48 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     find("[data-action~='rails-table-preferences#applyFromEditor']", match: :first).click
 
     expect(page.has_selector?("body[data-rtp-last-action='apply']")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
+    expect(table_column_hidden?("customer_name")).to eq(true)
+    expect(table_column_hidden?("order_no")).to eq(false)
+  end
+
+  it "saves a visibility change and restores it after reload" do
+    visit_demo_smoke
+
+    row = find(".rails-table-preferences-editor__row", text: "得意先名")
+    row.find("input[data-field='visible']", visible: :all).uncheck
+    find("[data-action~='rails-table-preferences#saveFromEditor']", match: :first).click
+
+    expect(page.has_text?("設定を保存しました。")).to eq(true)
+    expect(table_column_hidden?("customer_name")).to eq(true)
+
+    visit_demo_smoke
+
+    expect(table_column_hidden?("customer_name")).to eq(true)
+    row = find(".rails-table-preferences-editor__row", text: "得意先名")
+    expect(row.find("input[data-field='visible']", visible: :all).checked?).to eq(false)
+  end
+
+  it "opens the bundled filter panel from the header button" do
+    visit_demo_smoke
+
+    button = find("th[data-rails-table-preferences-column-key='customer_name'] [data-rails-table-preferences-filter-button]")
+    expect(button["aria-expanded"]).to eq("false")
+
+    button.click
+
+    expect(button["aria-expanded"]).to eq("true")
+    expect(page.has_css?(".rails-table-preferences-filter-panel[data-rails-table-preferences-column-key='customer_name'] [data-field='operator']")).to eq(true)
+  end
+
+  it "changes aria-sort when a sortable header is clicked" do
+    visit_demo_smoke
+
+    header = find("th[data-rails-table-preferences-column-key='delivery_date']")
+    expect(header["aria-sort"]).to eq("none")
+
+    header.click
+
+    expect(header["aria-sort"]).to eq("ascending")
+    expect(page.evaluate_script("document.querySelector('th[data-rails-table-preferences-column-key=\"delivery_date\"] [data-rails-table-preferences-sort-indicator]').textContent")).to eq("▲")
   end
 end
