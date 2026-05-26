@@ -6,6 +6,8 @@ require "pathname"
 require "active_record"
 require "action_controller/railtie"
 require "rspec/rails"
+require "capybara/rspec"
+require "selenium-webdriver"
 require "rails_table_preferences"
 
 class ApplicationController < ActionController::Base
@@ -30,6 +32,17 @@ class TestApplication < Rails::Application
 end
 
 Rails.application.initialize! unless Rails.application.initialized?
+
+Capybara.server = :puma, { Silent: true }
+Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  %w[headless disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
+    options.add_argument(argument)
+  end
+
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+end
+Capybara.javascript_driver = :rails_table_preferences_headless_chrome
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
@@ -77,6 +90,10 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
   config.infer_spec_type_from_file_location!
 
+  config.before(type: :system) do
+    Capybara.current_driver = RSpec.current_example.metadata[:js] ? Capybara.javascript_driver : Capybara.default_driver
+  end
+
   config.before do
     RailsTablePreferences.configuration = RailsTablePreferences::Configuration.new
     RailsTablePreferences.configuration.scope_context_method = :table_preference_scope_context
@@ -90,5 +107,9 @@ RSpec.configure do |config|
   config.after do
     Thread.current[:rails_table_preferences_current_user] = nil
     Thread.current[:rails_table_preferences_scope_context] = nil
+  end
+
+  config.after(type: :system) do
+    Capybara.use_default_driver
   end
 end
