@@ -102,6 +102,9 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm focus moves into the filter panel when it opens.
 - [ ] Press `Escape` and confirm the panel closes and focus returns to the triggering filter button.
 - [ ] Re-open the panel and apply a `contains` condition.
+- [ ] Confirm switching the operator while the panel stays open updates the visible input controls immediately.
+- [ ] Confirm choosing `between` replaces the single value input with `from` / `to` inputs.
+- [ ] Confirm choosing `blank` / `present` or boolean operators removes unnecessary value inputs.
 - [ ] Confirm the active filter button exposes a short operator/value summary through hover title or accessible name.
 - [ ] Apply an `equals` condition.
 - [ ] Apply a blank/present condition.
