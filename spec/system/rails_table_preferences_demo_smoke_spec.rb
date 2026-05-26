@@ -276,17 +276,17 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
   it "renders the demo surface and hides a column through apply" do
     visit "/rails_table_preferences_system_smoke/orders"
 
-    expect(page).to have_selector("body[data-rtp-smoke-ready='true']")
-    expect(page).to have_text("Rails Table Preferences Demo Smoke")
-    expect(page).to have_css("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")
-    expect(page).to have_no_css("th[data-rails-table-preferences-column-key='internal_cost']")
-    expect(page).to have_css(".rails-table-preferences-editor__row", text: "得意先名")
+    expect(page.has_selector?("body[data-rtp-smoke-ready='true']")).to eq(true)
+    expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
+    expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
+    expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
+    expect(page.has_css?(".rails-table-preferences-editor__row", text: "得意先名")).to eq(true)
 
     row = find(".rails-table-preferences-editor__row", text: "得意先名")
     row.find("input[data-field='visible']", visible: :all).uncheck
     find("[data-action~='rails-table-preferences#applyFromEditor']", match: :first).click
 
-    expect(page).to have_selector("body[data-rtp-last-action='apply']")
+    expect(page.has_selector?("body[data-rtp-last-action='apply']")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
