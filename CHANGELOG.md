@@ -28,7 +28,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Legacy `ColumnAdjustment` import rake task.
 - Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, and JavaScript controller notes.
 - Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
-- Minimal GitHub Actions CI for Ruby specs and JavaScript syntax checks.
+- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, 8.0, and 8.1.
 
 ### Changed
 
