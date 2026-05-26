@@ -115,6 +115,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       function smokeRoot() {
         return document.getElementById("rtp-smoke-root") ||
           document.querySelector("[data-rtp-smoke-root]") ||
+          document.querySelector('[data-controller~="rails-table-preferences"]') ||
           Array.from(document.querySelectorAll('[data-controller~="rails-table-preferences"]')).find((element) => element.querySelector("table")) ||
           null
       }
