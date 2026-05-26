@@ -12,15 +12,7 @@ require "selenium-webdriver"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
-Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
-  options = Selenium::WebDriver::Chrome::Options.new
-  %w[headless disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
-    options.add_argument(argument)
-  end
-
-  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
-end
-Capybara.javascript_driver = :rails_table_preferences_headless_chrome
+Capybara.javascript_driver = :selenium_chrome_headless
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
