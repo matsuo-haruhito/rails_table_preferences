@@ -4,6 +4,8 @@ Rails Table Preferences does not generate CSV, Excel, or report files by itself.
 
 Instead, it provides a small export payload helper so host applications can reuse saved table display preferences when building exports.
 
+If you generated the optional demo screen with `--with-demo`, the demo now includes a lightweight preview of the current `headers` and `column_keys` output so you can compare helper results before wiring a real export action. See [Demo screen generator](demo.md).
+
 ## Controller helper
 
 Use `rails_table_preference_export_payload` from a controller that includes `RailsTablePreferences::Controller`:
