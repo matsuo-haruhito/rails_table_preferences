@@ -4,6 +4,62 @@ This document shows practical integration patterns for Rails applications that a
 
 The examples intentionally keep database search execution in the host application. Rails Table Preferences only provides display preferences, saved filter/sort UI state, and adapter params.
 
+## Example: convention-first order list with `resource_table_for`
+
+Use this pattern when the screen already has its own search form, pagination, and controller query code, but you want the table surface itself to follow Active Record inference instead of a hand-written column array.
+
+Profile:
+
+```ruby
+class OrdersIndexTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  exclude :internal_memo, :deleted_at
+  order :order_no, :customer_id, :status, :delivery_date, :total_amount
+  label :customer_id, "Customer"
+
+  display :customer_id do |order, view|
+    view.link_to order.customer.name, view.customer_path(order.customer)
+  end
+end
+```
+
+Controller:
+
+```ruby
+class OrdersController < ApplicationController
+  def index
+    @orders = Order
+      .includes(:customer)
+      .search(params)
+      .order_by(params[:sort])
+      .page(params[:page])
+  end
+end
+```
+
+View composition:
+
+```erb
+<%= form_with url: orders_path, method: :get do %>
+  <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名で検索" %>
+  <%= select_tag :status,
+                 options_for_select([["すべて", ""], ["受付", "pending"], ["出荷済", "shipped"]], params[:status]) %>
+  <%= submit_tag "検索" %>
+<% end %>
+
+<%= resource_table_for @orders, profile: OrdersIndexTableProfile %>
+
+<%= paginate @orders %>
+```
+
+Why this pattern works:
+
+- the host app keeps its existing query, authorization, and pagination flow
+- `resource_table_for` owns only the convention-first table surface and saved display preferences
+- the profile stays a delta layer for small ordering, exclusion, and display overrides instead of replacing the whole table definition
+- if the screen later needs saved filter/sort params to round-trip through the existing form, add the controller/view wiring from [Controller integration](controller_integration.md) without replacing `resource_table_for`
+
 ## Example: warehouse stock list
 
 Controller:
