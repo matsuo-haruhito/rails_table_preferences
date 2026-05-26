@@ -217,3 +217,12 @@ Before publishing, summarize:
 - [ ] Migration or generator changes.
 - [ ] JavaScript/CSS integration changes.
 - [ ] Known limitations.
+- [ ] Upgrade notes for existing users.
+
+## 12. Publish or tag
+
+When everything is ready:
+
+- [ ] Ensure the working tree is clean.
+- [ ] Tag the release.
+- [ ] Push the tag.
