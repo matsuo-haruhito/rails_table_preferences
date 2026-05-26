@@ -51,6 +51,80 @@ Host applications can override:
 }
 ```
 
+## Minimal horizontal scroll container
+
+When a pinned table can be wider than the viewport, give it a dedicated horizontal scroll wrapper. This keeps sticky cells anchored inside the table scroller instead of the whole page.
+
+Minimal ERB example with the bundled helper:
+
+```erb
+<div class="orders-table-scroll">
+  <%= table_preferences_table_tag(
+    table_key: :orders,
+    columns: columns,
+    class: "orders-table"
+  ) do %>
+    <thead>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th data-rails-table-preferences-column-key="amount">金額</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
+          <td data-rails-table-preferences-column-key="amount"><%= order.amount %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</div>
+```
+
+If the host app already owns the `<table>` markup, keep the same idea:
+
+```erb
+<div class="orders-table-scroll">
+  <table class="orders-table">
+    ...
+  </table>
+</div>
+```
+
+Minimal CSS baseline:
+
+```css
+.orders-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.orders-table {
+  min-width: 960px;
+  border-collapse: separate;
+}
+
+.orders-table th,
+.orders-table td {
+  background: white;
+}
+
+.orders-table [data-rails-table-preferences-pinned="true"] {
+  z-index: 3;
+  background: white;
+}
+```
+
+This example is intentionally small:
+
+- the wrapper owns horizontal scrolling
+- the table keeps a stable minimum width
+- pinned cells get an opaque background so scrolled content does not bleed through
+- final shadows, borders, and responsive polish stay in the host app
+
 ## Multiple pinned columns
 
 For multiple pinned columns, the host application may set explicit left offsets if the default automatic behavior is not enough for the table layout:
@@ -61,6 +135,12 @@ For multiple pinned columns, the host application may set explicit left offsets 
 ```
 
 The JavaScript controller keeps width, visibility, truncation, and order settings synchronized. Complex sticky offset policies remain host-app customizable because table layout, border spacing, horizontal scroll containers, and design systems differ widely.
+
+A practical rule of thumb is:
+
+- start with one pinned column and the simple scroll wrapper above
+- add explicit `--rails-table-preferences-pinned-left` offsets only when more than one pinned column must stay visible
+- keep offset math near the table markup or host-app CSS, not inside a gem-level abstraction
 
 ## Column groups
 
