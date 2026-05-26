@@ -87,10 +87,13 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(controller.read).to include("module RailsTablePreferencesDemo")
     expect(controller.read).to include("rails_table_preferences_demo_orders")
     expect(controller.read).to include("operations-default")
+    expect(controller.read).to include("中央メディカル")
+    expect(controller.read).to include("東西パーツ")
     expect(controller.read).to include("demo_scope_context")
     expect(view.read).to include("Rails Table Preferences Demo")
     expect(view.read).to include("table_preferences_editor")
     expect(view.read).to include("config.scope_context_method")
+    expect(view.read).to include("status, delivery date, amount range, and memo length")
   end
 
   it "provides post-install next steps in the generator source" do

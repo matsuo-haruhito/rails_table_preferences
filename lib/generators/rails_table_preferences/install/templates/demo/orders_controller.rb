@@ -70,7 +70,7 @@ module RailsTablePreferencesDemo
           status: "未出荷",
           amount: 12_000,
           internal_cost: 8_000,
-          memo: "長い備考テキストの表示確認用です。列幅と省略表示を確認できます。"
+          memo: "午前指定。月末締めの定番受注として、owner preset の絞り込み確認に使えます。"
         },
         {
           order_no: "A002",
@@ -79,7 +79,7 @@ module RailsTablePreferencesDemo
           status: "出荷済",
           amount: 34_000,
           internal_cost: 21_000,
-          memo: "フィルター、ソート、列幅変更の確認に使うデモ行です。"
+          memo: "午後便で出荷済み。短めの備考として、省略表示との見比べに使えます。"
         },
         {
           order_no: "A003",
@@ -88,7 +88,34 @@ module RailsTablePreferencesDemo
           status: "保留",
           amount: 56_000,
           internal_cost: 39_000,
-          memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
+          memo: "原料確認待ち。保留行として status filter と preset 切り替えの差分確認に使います。"
+        },
+        {
+          order_no: "A004",
+          customer_name: "鈴木物産",
+          delivery_date: Date.current + 3.days,
+          status: "未出荷",
+          amount: 98_500,
+          internal_cost: 71_400,
+          memo: "冷蔵便予定。金額が大きめなので amount sort と列幅 auto-fit の確認に向いています。"
+        },
+        {
+          order_no: "A005",
+          customer_name: "中央メディカル",
+          delivery_date: Date.current - 1.day,
+          status: "出荷済",
+          amount: 7_800,
+          internal_cost: 4_600,
+          memo: "追加伝票なし。少額かつ最短納期の例として、date sort と amount sort の差分が見えます。"
+        },
+        {
+          order_no: "A006",
+          customer_name: "東西パーツ",
+          delivery_date: Date.current + 5.days,
+          status: "保留",
+          amount: 142_000,
+          internal_cost: 101_000,
+          memo: "工程再確認中。長めの備考なので truncate と wrap の使い分けを見比べやすくしています。"
         }
       ]
     end
