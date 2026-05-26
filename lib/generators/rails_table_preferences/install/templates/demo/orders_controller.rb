@@ -8,6 +8,7 @@ module RailsTablePreferencesDemo
 
     DEMO_TABLE_KEY = :rails_table_preferences_demo_orders
     DEMO_ROLE_KEY = "operations"
+    DEMO_ORGANIZATION_KEY = "tokyo"
 
     def index
       ensure_demo_presets!
@@ -127,6 +128,7 @@ module RailsTablePreferencesDemo
       ensure_owner_demo_preset!(owner)
       ensure_shared_demo_preset!
       ensure_role_demo_preset!
+      ensure_organization_demo_preset!
     end
 
     def ensure_owner_demo_preset!(owner)
@@ -198,8 +200,35 @@ module RailsTablePreferencesDemo
       preset.save!
     end
 
+    def ensure_organization_demo_preset!
+      preset = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: nil,
+        table_key: DEMO_TABLE_KEY,
+        name: "tokyo-default",
+        scope_type: RailsTablePreferences::Preference::ORGANIZATION_SCOPE_TYPE,
+        scope_key: DEMO_ORGANIZATION_KEY
+      )
+      return unless preset.new_record?
+
+      preset.settings = {
+        columns: [
+          { key: "order_no", visible: true, order: 10, width: 120 },
+          { key: "customer_name", visible: true, order: 20, width: 240, truncate: 24 },
+          { key: "delivery_date", visible: true, order: 30, width: 140 },
+          { key: "amount", visible: true, order: 40, width: 120 },
+          { key: "status", visible: false, order: 50, width: 120 },
+          { key: "memo", visible: false, order: 60, width: 260, truncate: 24 }
+        ]
+      }
+      preset.default_flag = true
+      preset.save!
+    end
+
     def demo_scope_context
-      { roles: [DEMO_ROLE_KEY] }
+      {
+        roles: [DEMO_ROLE_KEY],
+        organization: DEMO_ORGANIZATION_KEY
+      }
     end
 
     def apply_demo_params(orders, merged_params)
