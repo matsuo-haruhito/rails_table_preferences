@@ -43,9 +43,11 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Reorder columns by dragging editor rows.
 - [ ] Reorder columns by dragging table headers directly.
 - [ ] Resize a column using the header resize handle.
+- [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] Confirm the resize hit area is easy enough to grab.
 - [ ] Change a width value in the editor and apply it.
 - [ ] Change a truncation value and confirm long text is truncated.
+- [ ] Add representative `wrap`, `nowrap`, and `ellipsis` columns and confirm each overflow mode stays visually distinct.
 - [ ] Reset settings and confirm the table returns to default display settings.
 
 ## 5. Preset behavior
