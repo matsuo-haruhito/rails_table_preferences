@@ -6,6 +6,7 @@
 <% preset_name_id = "#{editor_id_prefix}-preset-name" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
+<% read_only_preset_hint = t("rails_table_preferences.editor.read_only_preset_hint", default: "この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。") %>
 <% status_region_label = t("rails_table_preferences.editor.status_region", default: "保存状態") %>
 
 <div data-controller="rails-table-preferences"
@@ -31,6 +32,11 @@
      data-rails-table-preferences-sort-desc-label-value="<%= t("rails_table_preferences.editor.sort_desc", default: "降順") %>"
      data-rails-table-preferences-sort-clear-label-value="<%= t("rails_table_preferences.editor.sort_clear", default: "並び替え解除") %>"
      data-rails-table-preferences-delete-confirm-label-value="<%= delete_confirm_label %>"
+     data-rails-table-preferences-read-only-preset-hint-label-value="<%= read_only_preset_hint %>"
+     data-rails-table-preferences-scope-owner-label-value="<%= t("rails_table_preferences.editor.scope_owner", default: "個人") %>"
+     data-rails-table-preferences-scope-shared-label-value="<%= t("rails_table_preferences.editor.scope_shared", default: "共有") %>"
+     data-rails-table-preferences-scope-role-label-value="<%= t("rails_table_preferences.editor.scope_role", default: "ロール") %>"
+     data-rails-table-preferences-scope-organization-label-value="<%= t("rails_table_preferences.editor.scope_organization", default: "組織") %>"
      data-rails-table-preferences-loading-status-label-value="<%= t("rails_table_preferences.editor.loading_status", default: "設定を読み込み中です...") %>"
      data-rails-table-preferences-loaded-status-label-value="<%= t("rails_table_preferences.editor.loaded_status", default: "設定を読み込みました。") %>"
      data-rails-table-preferences-saving-status-label-value="<%= t("rails_table_preferences.editor.saving_status", default: "設定を保存中です...") %>"
@@ -63,6 +69,10 @@
       <%= t("rails_table_preferences.editor.default_preset", default: "標準設定にする") %>
     </label>
   </div>
+
+  <p class="rails-table-preferences-editor__hint"
+     data-rails-table-preferences-target="readOnlyHint"
+     hidden><%= read_only_preset_hint %></p>
 
   <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
   <div class="rails-table-preferences-editor__status"

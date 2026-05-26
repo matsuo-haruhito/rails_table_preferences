@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Applies and edits saved table display preferences for a server-rendered table.
 export default class extends Controller {
-  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status"]
+  static targets = ["editorRows", "presetName", "presetSelect", "defaultPreset", "status", "readOnlyHint"]
 
   static values = {
     tableKey: String,
@@ -32,6 +32,11 @@ export default class extends Controller {
     sortDescLabel: { type: String, default: "降順" },
     sortClearLabel: { type: String, default: "並び替え解除" },
     deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" },
+    readOnlyPresetHintLabel: { type: String, default: "この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。" },
+    scopeOwnerLabel: { type: String, default: "個人" },
+    scopeSharedLabel: { type: String, default: "共有" },
+    scopeRoleLabel: { type: String, default: "ロール" },
+    scopeOrganizationLabel: { type: String, default: "組織" },
     loadingStatusLabel: { type: String, default: "設定を読み込み中です..." },
     loadedStatusLabel: { type: String, default: "設定を読み込みました。" },
     savingStatusLabel: { type: String, default: "設定を保存中です..." },
@@ -198,16 +203,27 @@ export default class extends Controller {
   buildPresetOption(preset) {
     const option = document.createElement("option")
     const name = preset.name || "default"
-    const scopeLabel = preset.scope_label || preset.scope_type || "owner"
+    const scopeType = preset.scope_type || "owner"
+    const scopeLabel = preset.scope_label || this.scopeFallbackLabel(scopeType)
     const defaultMark = preset.default === true ? " *" : ""
-    const scopeMark = scopeLabel && scopeLabel !== "owner" ? ` [${scopeLabel}]` : ""
+    const scopeMark = scopeType !== "owner" && scopeLabel ? ` [${scopeLabel}]` : ""
     option.value = name
     option.textContent = `${name}${scopeMark}${defaultMark}`
     option.dataset.default = preset.default === true ? "true" : "false"
     option.dataset.editable = preset.editable === false ? "false" : "true"
-    option.dataset.scopeType = preset.scope_type || "owner"
+    option.dataset.scopeType = scopeType
     option.dataset.scopeKey = preset.scope_key || ""
     return option
+  }
+
+  scopeFallbackLabel(scopeType) {
+    switch (scopeType) {
+      case "shared": return this.scopeSharedLabelValue
+      case "role": return this.scopeRoleLabelValue
+      case "organization": return this.scopeOrganizationLabelValue
+      case "owner": return this.scopeOwnerLabelValue
+      default: return scopeType
+    }
   }
 
   async selectPreset(event) {
@@ -240,6 +256,11 @@ export default class extends Controller {
   syncPresetEditingState() {
     const editable = this.currentPreferenceEditable !== false
     if (this.hasDefaultPresetTarget) this.defaultPresetTarget.disabled = !editable
+    if (this.hasReadOnlyHintTarget) {
+      const showReadOnlyHint = !editable
+      this.readOnlyHintTarget.hidden = !showReadOnlyHint
+      this.readOnlyHintTarget.textContent = showReadOnlyHint ? this.readOnlyPresetHintLabelValue : ""
+    }
     this.element.querySelectorAll("[data-action~='rails-table-preferences#saveFromEditor']").forEach((button) => {
       button.disabled = false
       button.dataset.railsTablePreferencesNonEditableFallback = editable ? "false" : "true"
