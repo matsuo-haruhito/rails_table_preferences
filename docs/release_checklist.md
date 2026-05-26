@@ -28,6 +28,7 @@ Representative Rails compatibility checks are also useful before a release:
 
 ```bash
 BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile bundle exec rspec
+BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rspec
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rspec
 BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile bundle exec rspec
 ```
@@ -38,7 +39,7 @@ Confirm:
 - [ ] JavaScript syntax check passes.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
-- [ ] Representative Rails 7.0 / 8.0 / 8.1 RSpec checks pass.
+- [ ] Representative Rails 7.0 / 7.2 / 8.0 / 8.1 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
 ## 3. CI checks
@@ -46,7 +47,8 @@ Confirm:
 Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
 - [ ] The release commit passes the default RSpec / JavaScript syntax / gem build / package verification job.
-- [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 8.0, and Rails 8.1 compatibility jobs.
+- [ ] The latest release-prep pull request passes the Ruby 3.1 representative job.
+- [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.2, Rails 8.0, and Rails 8.1 compatibility jobs.
 - [ ] Any additional release-time matrix jobs pass in the workflow where they actually run.
 
 ## 4. Gem package checks
@@ -224,18 +226,3 @@ When everything is ready:
 - [ ] Ensure the working tree is clean.
 - [ ] Tag the release.
 - [ ] Push the tag.
-- [ ] Publish the gem if releasing to RubyGems.
-- [ ] Create GitHub release notes.
-
-## Current lightweight release gate
-
-For the current early release stage, the minimum gate is:
-
-```bash
-bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
-bundle exec rake build
-bundle exec rake package:verify
-```
-
-Plus one successful sandbox/demo verification before asking real application users to try the release.
