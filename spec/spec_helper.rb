@@ -3,11 +3,11 @@
 require "bundler/setup"
 require "fileutils"
 require "pathname"
+require "capybara"
+require "capybara/dsl"
 require "active_record"
 require "action_controller/railtie"
 require "rspec/rails"
-require "capybara"
-require "capybara/dsl"
 require "selenium-webdriver"
 require "rails_table_preferences"
 
