@@ -75,7 +75,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm shared presets are selectable by normal users.
 - [ ] Confirm shared/role/organization presets are not deleted from the normal user-facing editor.
 - [ ] Confirm saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
-- [ ] If you used the generated demo, confirm `operations-default` is resolved from `{ roles: ["operations"] }` and matches the configured `scope_context_method`.
+- [ ] If you used the generated demo, confirm `operations-default` and `tokyo-default` are both available from `{ roles: ["operations"], organization: "tokyo" }`.
+- [ ] If you used the generated demo, confirm the first render still prefers the role default over the organization default before you pick another preset.
 - [ ] Confirm host app authorization protects any admin UI for shared/role/organization preset management.
 
 ## 7. API and network behavior
