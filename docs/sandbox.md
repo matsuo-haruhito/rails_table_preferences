@@ -80,11 +80,52 @@ end
 
 This is only for sandbox verification. Real applications should use their normal authentication method.
 
+### If the host app does not use `User` / `current_user`
+
+Keep the same overall sandbox flow and only swap the owner model and current-owner method.
+
+For example, if the host app uses `Customer` and `current_customer`:
+
+```bash
+bin/rails generate model Customer name:string
+```
+
+```ruby
+class ApplicationController < ActionController::Base
+  helper_method :current_customer
+
+  private
+
+  def current_customer
+    Customer.first_or_create!(name: "Sandbox Customer")
+  end
+end
+```
+
+When you reach the install step, use the matching owner model and initializer settings:
+
+```bash
+bin/rails generate rails_table_preferences:install --owner-model customers
+```
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.owner_model = :customers
+  config.current_user_method = :current_customer
+end
+```
+
+After that, the rest of this guide stays the same. The bundled editor, copied demo screen, and mounted JSON API all use the same configured current-owner method, so make sure it returns a persisted owner record before opening the sandbox screen. For more detail, see [Quick start](quick_start.md) and [Demo screen generator](demo.md).
+
 ## 4. Install Rails Table Preferences
+
+For the default `User` owner model:
 
 ```bash
 bin/rails generate rails_table_preferences:install
 ```
+
+If you are following the non-`User` path above, use the matching `--owner-model` option instead and keep the initializer aligned with the same owner method.
 
 Confirm these files were generated:
 
