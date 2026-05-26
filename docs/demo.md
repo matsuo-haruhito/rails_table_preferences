@@ -26,7 +26,7 @@ The demo controller uses in-memory order rows for display. It does not create an
 
 The generated screen also seeds one shared preset named `共有ビュー`. This gives you a minimal way to confirm that a normal owner can load a shared preset, cannot delete it from the normal editor, and saves changes back into an owner preset instead of overwriting the shared preset.
 
-The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, and memo lengths so sort, filter, width, and preset checks are easier to judge at a glance.
+The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, long shipping codes, long shipping notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
 ## Add routes
 
@@ -82,11 +82,13 @@ end
 The generated demo screen includes:
 
 - Japanese column labels
-- sample rows with repeated customer prefixes and varied status/date/memo values for practical sort and filter checks
+- sample rows with repeated customer prefixes, varied status/date values, and long delivery notes for practical sort and filter checks
 - column visibility
 - column order
 - table-header drag ordering
 - column width resizing
+- double-click auto-fit on header resize handles
+- wrap / nowrap / ellipsis overflow examples on the same screen
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
@@ -110,6 +112,8 @@ On the demo screen, confirm:
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
+- [ ] Double-clicking the resize handle on `配送メモ` or `配送コード` expands the column to fit its content more closely.
+- [ ] `配送メモ` wraps, `配送コード` stays on one line, and `備考` uses ellipsis so the overflow mode differences are visible.
 - [ ] Filter panel opens.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
@@ -167,6 +171,7 @@ Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
+- double-click auto-fit and overflow-mode surface on representative demo columns
 
 Good next automated checks are:
 
