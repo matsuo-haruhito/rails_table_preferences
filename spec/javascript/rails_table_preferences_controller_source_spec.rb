@@ -215,7 +215,28 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("setBusyState(busy)")
     expect(source).to include("setStatus(message)")
     expect(source).to include('this.element.querySelectorAll(".rails-table-preferences-editor__actions button")')
+    expect(source).to include('this.element.setAttribute("aria-busy", this.busy ? "true" : "false")')
     expect(source).to include("console.error(error)")
+  end
+
+  it "guards generated editor inputs and bundled table controls while busy" do
+    expect(source).to include("setEditorRowsBusyState(busy)")
+    expect(source).to include('this.editorRowsTarget.querySelectorAll("input, button, select, textarea")')
+    expect(source).to include("setTableInteractionBusyState(busy)")
+    expect(source).to include('table.querySelectorAll("[data-rails-table-preferences-filter-button], [data-rails-table-preferences-resize-handle]")')
+    expect(source).to include('if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") cell.draggable = !busy')
+    expect(source).to include('if (this.busy) this.closeFilterPanel()')
+  end
+
+  it "ignores bundled drag, filter, sort, and resize interactions while busy" do
+    expect(source).to include("dragEditorRowStart(event) {\n    if (this.busy) {\n      event.preventDefault()\n      return\n    }")
+    expect(source).to include("startTableColumnDrag(event) {\n    if (this.busy) {\n      event.preventDefault()\n      return\n    }")
+    expect(source).to include("startColumnResize(event) {\n    event.preventDefault()\n    event.stopPropagation()\n    if (this.busy) return")
+    expect(source).to include("if (this.busy || !this.resizingColumn) return")
+    expect(source).to include("toggleFilterPanel(event, headerCell, column) {\n    if (this.busy) return")
+    expect(source).to include("applyFilterPanel(key, panel) {\n    if (this.busy) return")
+    expect(source).to include("clearFilter(key) {\n    if (this.busy) return")
+    expect(source).to include("toggleSortFromHeader(event, cell, column) {\n    if (this.busy) return")
   end
 
   it "labels preset options with localized scope fallbacks and scope metadata" do
