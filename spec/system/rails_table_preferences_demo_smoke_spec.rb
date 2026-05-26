@@ -163,12 +163,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       }
 
       window.__rtpMountController = mountController
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", mountController, { once: true })
-      } else {
-        mountController()
-      }
+      mountController()
     })();
   JS
 
@@ -222,8 +217,6 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         </tbody>
       <% end %>
     <% end %>
-
-    <script><%= raw self.class::BROWSER_SMOKE_SCRIPT %></script>
   ERB
 
   def index
@@ -306,7 +299,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
   it "renders the demo surface and hides a column through apply" do
     visit "/rails_table_preferences_system_smoke/orders"
 
-    page.execute_script("window.__rtpMountController && window.__rtpMountController()")
+    page.execute_script(RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
 
     expect(page.evaluate_script("document.body.dataset.rtpSmokeError || ''")).to eq("")
     expect(page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")).to eq("ready")
