@@ -304,7 +304,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
 
     expect(page.evaluate_script("document.body.dataset.rtpSmokeError || ''")).to eq("")
     expect(page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")).to eq("ready")
-    expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
+    expect(page.evaluate_script("document.querySelector('h1')?.textContent || ''")).to include("Rails Table Preferences Demo Smoke")
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
     expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
     expect(page.has_css?(".rails-table-preferences-editor__row", text: "得意先名")).to eq(true)
