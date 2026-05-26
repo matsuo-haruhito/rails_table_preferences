@@ -63,6 +63,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, and action buttons.
 - [ ] Confirm those controls re-enable after success.
 - [ ] Trigger at least one API failure and confirm the generic failure status appears and the controls recover.
+- [ ] Prefer a lightweight browser-devtools failure such as request blocking, then unblock it and confirm the same action succeeds normally.
 
 ## 6. Scoped preset behavior
 
@@ -80,6 +81,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 ## 7. API and network behavior
 
 Use browser devtools while saving/loading presets.
+
+For a quick failure-path check, temporarily block one preference API URL in browser devtools, confirm the failed request surfaces the generic failure state, then remove the block and retry once.
 
 - [ ] Confirm `GET /rails_table_preferences/preferences/:table_key` returns the preset collection.
 - [ ] Confirm `POST /rails_table_preferences/preferences/:table_key` creates a preset.

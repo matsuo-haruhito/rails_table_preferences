@@ -121,6 +121,22 @@ On the demo screen, confirm:
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
 - [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
 
+## Reproduce one async failure quickly
+
+Use browser devtools to block one preference API request once, instead of changing application code just for QA.
+
+1. Open the demo screen and browser devtools.
+2. In Network request blocking or an equivalent tool, block the mounted preference API path for the current table, such as `/rails_table_preferences/preferences/orders` or `/rails_table_preferences/preferences/orders/default`.
+3. Trigger one async preset action:
+   - Save or Save as new for `POST`/`PATCH`
+   - Switch presets for `GET`
+   - Delete for `DELETE`
+4. Confirm the bundled status region moves from the in-progress copy to the generic failure copy.
+5. Confirm the preset select, preset name, default checkbox, and action buttons become usable again after the failed request.
+6. Remove the request block and retry once to confirm the same action succeeds normally.
+
+If the host app mounts the engine at a custom path, block that configured `mount_path` instead of `/rails_table_preferences`.
+
 ## Production note
 
 The demo files are intended for development and verification only.
