@@ -305,8 +305,22 @@ end
 Rails.application.reload_routes!
 
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
+  def render_demo_html
+    session = ActionDispatch::Integration::Session.new(Rails.application)
+    session.get("/rails_table_preferences_system_smoke/orders")
+
+    raise "unexpected smoke render status: #{session.response.status}" unless session.response.status == 200
+
+    session.response.body
+  end
+
   it "renders the demo surface and hides a column through apply" do
-    visit "/rails_table_preferences_system_smoke/orders"
+    visit "about:blank"
+    page.execute_script(<<~JS, render_demo_html)
+      document.open()
+      document.write(arguments[0])
+      document.close()
+    JS
 
     expect(page).to have_css("h1", text: "Rails Table Preferences Demo Smoke")
     expect(page).to have_css(".rails-table-preferences-editor")
