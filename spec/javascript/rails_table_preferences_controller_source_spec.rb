@@ -96,8 +96,13 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("toggleFilterPanel(event, cell, column)")
   end
 
-  it "builds filter panels and stores neutral filter conditions" do
+  it "builds filter panels, re-renders operator-specific value inputs, and stores neutral filter conditions" do
     expect(source).to include("filterPanelHtml(column)")
+    expect(source).to include('data-field="value-fields"')
+    expect(source).to include("refreshFilterPanelValueFields(panel, column)")
+    expect(source).to include("buildFilterConditionFromPanel(panel)")
+    expect(source).to include('panel.querySelector("[data-field=\'operator\']")?.addEventListener("change"')
+    expect(source).to include("const condition = this.buildFilterConditionFromPanel(panel)")
     expect(source).to include("filterValueHtml(filter, condition, selectedOperator)")
     expect(source).to include("applyFilterPanel(key, panel)")
     expect(source).to include("updateFilterCondition(key, condition)")
