@@ -18,6 +18,7 @@ The bundled editor and Stimulus controller provide:
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
 - a visible helper message when saving from a read-only preset will create a new owner preset instead of overwriting the shared preset
+- a visible helper message and accessible label for the bundled reset action so users know it discards in-progress editor changes and returns to the default display settings
 - a live `role="status"` region for bundled save/load/delete feedback
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
@@ -147,6 +148,7 @@ Before releasing a screen, check:
 - Scroll or viewport resize does not leave the bundled filter panel detached from its header context.
 - Read-only scoped presets disable destructive/default controls.
 - Read-only scoped presets show helper text that explains the save-as-owner fallback.
+- The bundled reset action exposes copy that explains it discards current editor changes and restores the default display settings.
 - Save/load/delete actions update the status region with understandable progress or result copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
