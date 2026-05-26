@@ -13,10 +13,12 @@ require "selenium-webdriver"
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
 Capybara.server_host = "127.0.0.1"
+Capybara.server_port = 40_173
+Capybara.app_host = "http://127.0.0.1:40173"
 Capybara.always_include_port = true
 Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
   options = Selenium::WebDriver::Chrome::Options.new
-  %w[headless disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
+  %w[headless=new disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
     options.add_argument(argument)
   end
 
