@@ -6,18 +6,19 @@
 </p>
 
 <p>
-  It also seeds three preset types for the demo table:
+  It also seeds four preset types for the demo table:
   <code>owner-compact</code> (owner),
   <code>shared-baseline</code> (shared),
-  and <code>operations-default</code> (role).
+  <code>operations-default</code> (role),
+  and <code>tokyo-default</code> (organization).
   The initial screen is resolved with
-  <code>{ roles: [&quot;<%= @demo_scope_context[:roles].first %>&quot;] }</code>
-  so you can inspect role-default behavior alongside personal and shared examples.
+  <code>{ roles: [&quot;<%= @demo_scope_context[:roles].first %>&quot;], organization: &quot;<%= @demo_scope_context[:organization] %>&quot; }</code>
+  so the role default wins before the organization default while all four scope types stay visible in the preset selector.
 </p>
 
 <p>
-  To make the bundled preset API show the same role-scoped preset in the selector,
-  point <code>config.scope_context_method</code> at an application method that returns the same role key.
+  To make the bundled preset API show the same role-scoped and organization-scoped presets in the selector,
+  point <code>config.scope_context_method</code> at an application method that returns the same role and organization keys.
 </p>
 
 <p>
