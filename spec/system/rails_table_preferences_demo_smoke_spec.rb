@@ -113,32 +113,42 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       }
 
       function mountController() {
+        document.body.dataset.rtpSmokeReady = "false"
+        document.body.dataset.rtpSmokeError = ""
+
         const root = document.querySelector('[data-rtp-smoke-root="true"]')
-        if (!root) return
-
-        installFetchStub()
-
-        const factory = new Function(`${controllerSource}; return RailsTablePreferencesController;`)
-        const RailsTablePreferencesController = factory()
-        const controller = new RailsTablePreferencesController()
-        controller.element = root
-        controller.identifier = "rails-table-preferences"
-        controller.dispatch = function() {}
-
-        installTargetAccessors(controller, RailsTablePreferencesController)
-        installValueAccessors(controller, RailsTablePreferencesController)
-        bindActions(controller)
-
-        const originalApplyFromEditor = controller.applyFromEditor.bind(controller)
-        controller.applyFromEditor = function(event) {
-          const result = originalApplyFromEditor(event)
-          document.body.dataset.rtpLastAction = "apply"
-          return result
+        if (!root) {
+          document.body.dataset.rtpSmokeError = "root-not-found"
+          return
         }
 
-        controller.connect()
-        window.__rtpController = controller
-        document.body.dataset.rtpSmokeReady = "true"
+        try {
+          installFetchStub()
+
+          const factory = new Function(`${controllerSource}; return RailsTablePreferencesController;`)
+          const RailsTablePreferencesController = factory()
+          const controller = new RailsTablePreferencesController()
+          controller.element = root
+          controller.identifier = "rails-table-preferences"
+          controller.dispatch = function() {}
+
+          installTargetAccessors(controller, RailsTablePreferencesController)
+          installValueAccessors(controller, RailsTablePreferencesController)
+          bindActions(controller)
+
+          const originalApplyFromEditor = controller.applyFromEditor.bind(controller)
+          controller.applyFromEditor = function(event) {
+            const result = originalApplyFromEditor(event)
+            document.body.dataset.rtpLastAction = "apply"
+            return result
+          }
+
+          controller.connect()
+          window.__rtpController = controller
+          document.body.dataset.rtpSmokeReady = "true"
+        } catch (error) {
+          document.body.dataset.rtpSmokeError = `${error?.name || "Error"}: ${error?.message || String(error)}`
+        }
       }
 
       if (document.readyState === "loading") {
@@ -283,6 +293,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
   it "renders the demo surface and hides a column through apply" do
     visit "/rails_table_preferences_system_smoke/orders"
 
+    expect(page.evaluate_script("document.body.dataset.rtpSmokeError || ''")).to eq("")
     expect(page.has_selector?("body[data-rtp-smoke-ready='true']")).to eq(true)
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
