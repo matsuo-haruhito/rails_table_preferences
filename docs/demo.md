@@ -26,6 +26,8 @@ The demo controller uses in-memory order rows for display. It does not create an
 
 The generated screen also seeds one shared preset named `共有ビュー`. This gives you a minimal way to confirm that a normal owner can load a shared preset, cannot delete it from the normal editor, and saves changes back into an owner preset instead of overwriting the shared preset.
 
+The same demo controller also seeds one role preset named `担当ビュー` for the role key `operations`. After you enable the example scope context shown below, the selector shows `担当ビュー [role:operations]` and default resolution prefers it over the shared preset while no owner default exists.
+
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, and memo lengths so sort, filter, width, and preset checks are easier to judge at a glance.
 
 ## Add routes
@@ -77,6 +79,28 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
+## Optional role-scoped demo context
+
+To activate the generated role preset example, configure `scope_context_method` and return the same role key that the demo seed stores in `scope_key`:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.scope_context_method = :table_preference_scope_context
+end
+```
+
+```ruby
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    { roles: ["operations"] }
+  end
+end
+```
+
+With that context in place, the preset selector includes `担当ビュー [role:operations]`. If no owner default exists yet, reloading the demo resolves that role preset before `共有ビュー [shared]`.
+
 ## What the demo covers
 
 The generated demo screen includes:
@@ -90,6 +114,7 @@ The generated demo screen includes:
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
+- one role preset example for `roles: ["operations"]`, including role-over-shared default resolution
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
 - text/date/select filter metadata
@@ -121,6 +146,8 @@ On the demo screen, confirm:
 - [ ] Selecting `共有ビュー [shared]` loads the shared preset and keeps the normal editor usable.
 - [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
+- [ ] If the host app returns `roles: ["operations"]`, `担当ビュー [role:operations]` appears in the preset selector.
+- [ ] With that role context and no owner default, reloading the demo resolves `担当ビュー [role:operations]` before `共有ビュー [shared]`.
 - [ ] Delete removes a preset.
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
