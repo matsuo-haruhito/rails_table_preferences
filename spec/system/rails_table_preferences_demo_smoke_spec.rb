@@ -113,9 +113,10 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       }
 
       function smokeRoot() {
-        return document.querySelector("[data-rtp-smoke-root]") ||
+        return document.getElementById("rtp-smoke-root") ||
+          document.querySelector("[data-rtp-smoke-root]") ||
           Array.from(document.querySelectorAll('[data-controller~="rails-table-preferences"]')).find((element) => element.querySelector("table")) ||
-          document.body
+          null
       }
 
       function markSmokeStage(stage) {
@@ -128,10 +129,15 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         markSmokeStage("mount-start")
 
         const root = smokeRoot()
+        if (!root) {
+          markSmokeStage("root-not-found")
+          document.body.dataset.rtpSmokeError = "root-not-found"
+          return
+        }
 
         try {
           installFetchStub()
-          markSmokeStage(root === document.body ? "body-root-fallback" : "build-controller")
+          markSmokeStage("build-controller")
 
           const factory = new Function("Controller", `${controllerSource}; return RailsTablePreferencesController;`)
           const RailsTablePreferencesController = factory(Controller)
@@ -176,6 +182,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
     </p>
 
     <%= content_tag :div,
+          id: "rtp-smoke-root",
           data: table_preferences_data_attributes(
             table_key: DEMO_TABLE_KEY,
             settings: @table_preference_settings,
