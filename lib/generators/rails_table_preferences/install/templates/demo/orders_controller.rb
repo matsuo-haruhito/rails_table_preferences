@@ -59,30 +59,57 @@ module RailsTablePreferencesDemo
       [
         {
           order_no: "A001",
-          customer_name: "山田商事",
+          customer_name: "山田商事 東京本店",
           delivery_date: Date.current,
           status: "未出荷",
           amount: 12_000,
           internal_cost: 8_000,
-          memo: "長い備考テキストの表示確認用です。列幅と省略表示を確認できます。"
+          memo: "午前指定。初回出荷のため伝票控えを同梱してください。"
         },
         {
           order_no: "A002",
-          customer_name: "田中物流",
+          customer_name: "田中物流 関西センター",
           delivery_date: Date.current + 1.day,
           status: "出荷済",
           amount: 34_000,
           internal_cost: 21_000,
-          memo: "フィルター、ソート、列幅変更の確認に使うデモ行です。"
+          memo: "午後着。パレット回収あり。列幅変更と省略表示の確認に使えます。"
         },
         {
           order_no: "A003",
-          customer_name: "佐藤食品",
+          customer_name: "佐藤食品 冷凍倉庫",
           delivery_date: Date.current + 2.days,
           status: "保留",
           amount: 56_000,
           internal_cost: 39_000,
-          memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
+          memo: "温度帯確認待ち。ステータス絞り込みと並び替えの確認向けです。"
+        },
+        {
+          order_no: "A004",
+          customer_name: "東京医療機器",
+          delivery_date: Date.current + 3.days,
+          status: "未出荷",
+          amount: 89_000,
+          internal_cost: 63_000,
+          memo: "東京都内向けの追加便。得意先名で「東京」を検索したときのヒット行です。"
+        },
+        {
+          order_no: "A005",
+          customer_name: "東京製菓",
+          delivery_date: Date.current + 5.days,
+          status: "出荷済",
+          amount: 21_500,
+          internal_cost: 14_000,
+          memo: "備考をやや短めにして、同じ検索語でも表示差が分かるようにしています。"
+        },
+        {
+          order_no: "A006",
+          customer_name: "北星化学",
+          delivery_date: Date.current + 7.days,
+          status: "保留",
+          amount: 104_000,
+          internal_cost: 76_000,
+          memo: "月末締め案件。shared preset と owner preset の切り替え時に列差分を見比べやすいサンプルです。"
         }
       ]
     end
