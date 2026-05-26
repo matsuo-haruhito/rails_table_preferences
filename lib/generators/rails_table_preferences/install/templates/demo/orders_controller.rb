@@ -8,9 +8,12 @@ module RailsTablePreferencesDemo
 
     DEMO_TABLE_KEY = :rails_table_preferences_demo_orders
     SHARED_PRESET_NAME = "共有ビュー"
+    ROLE_PRESET_NAME = "担当ビュー"
+    DEMO_ROLE_KEY = "operations"
 
     def index
       ensure_demo_shared_preset!
+      ensure_demo_role_preset!
       @table_columns = table_columns
       @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
 
@@ -160,6 +163,22 @@ module RailsTablePreferencesDemo
       preference.save!
     end
 
+    def ensure_demo_role_preset!
+      preference = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: nil,
+        table_key: DEMO_TABLE_KEY,
+        name: ROLE_PRESET_NAME,
+        scope_type: RailsTablePreferences::Preference::ROLE_SCOPE_TYPE,
+        scope_key: DEMO_ROLE_KEY
+      )
+      settings = role_demo_preset_settings
+      return if preference.persisted? && preference.settings == settings && preference.default_flag == true
+
+      preference.settings = settings
+      preference.default_flag = true
+      preference.save!
+    end
+
     def shared_demo_preset_settings
       {
         "columns" => [
@@ -175,6 +194,23 @@ module RailsTablePreferencesDemo
         },
         "sorts" => [
           { "key" => "delivery_date", "direction" => "asc" }
+        ]
+      }
+    end
+
+    def role_demo_preset_settings
+      {
+        "columns" => [
+          { "key" => "customer_name", "visible" => true, "order" => 10, "width" => 240, "truncate" => 24 },
+          { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
+          { "key" => "delivery_date", "visible" => true, "order" => 30, "width" => 140 },
+          { "key" => "memo", "visible" => true, "order" => 40, "width" => 320, "truncate" => 40 },
+          { "key" => "amount", "visible" => true, "order" => 50, "width" => 120 },
+          { "key" => "order_no", "visible" => false, "order" => 60, "width" => 120 }
+        ],
+        "filters" => {},
+        "sorts" => [
+          { "key" => "amount", "direction" => "desc" }
         ]
       }
     end
