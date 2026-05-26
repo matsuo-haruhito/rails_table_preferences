@@ -6,7 +6,8 @@ require "pathname"
 require "active_record"
 require "action_controller/railtie"
 require "rspec/rails"
-require "capybara/rspec"
+require "capybara"
+require "capybara/dsl"
 require "selenium-webdriver"
 require "rails_table_preferences"
 
@@ -33,6 +34,7 @@ end
 
 Rails.application.initialize! unless Rails.application.initialized?
 
+Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
 Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
   options = Selenium::WebDriver::Chrome::Options.new
@@ -78,6 +80,7 @@ end
 RSpec.configure do |config|
   config.include FileUtils, type: :generator
   config.include GeneratorSpecHelpers, type: :generator
+  config.include Capybara::DSL, type: :system
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -110,6 +113,7 @@ RSpec.configure do |config|
   end
 
   config.after(type: :system) do
+    Capybara.reset_sessions!
     Capybara.use_default_driver
   end
 end
