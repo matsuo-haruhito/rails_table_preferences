@@ -661,6 +661,9 @@ export default class extends Controller {
     panel.className = "rails-table-preferences-filter-panel"
     panel.dataset.railsTablePreferencesColumnKey = column.key
     panel.innerHTML = this.filterPanelHtml(column)
+    panel.querySelector("[data-field='operator']")?.addEventListener("change", () => {
+      this.refreshFilterPanelValueFields(panel, column)
+    })
     panel.querySelector("[data-action='apply-filter']")?.addEventListener("click", (event) => {
       event.preventDefault()
       this.applyFilterPanel(column.key, panel)
@@ -692,7 +695,9 @@ export default class extends Controller {
           ${operators.map((operator) => `<option value="${this.escapeHtml(operator)}" ${operator === selectedOperator ? "selected" : ""}>${this.escapeHtml(this.filterOperatorText(operator))}</option>`).join("")}
         </select>
       </label>
-      ${this.filterValueHtml(filter, condition, selectedOperator)}
+      <div data-field="value-fields">
+        ${this.filterValueHtml(filter, condition, selectedOperator)}
+      </div>
       <div class="rails-table-preferences-filter-panel__actions">
         <button type="button" data-action="apply-filter">${this.escapeHtml(this.filterApplyLabelValue)}</button>
         <button type="button" data-action="clear-filter">${this.escapeHtml(this.filterClearLabelValue)}</button>
@@ -715,6 +720,37 @@ export default class extends Controller {
     return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"></label>`
   }
 
+  refreshFilterPanelValueFields(panel, column) {
+    const valueFields = panel.querySelector("[data-field='value-fields']")
+    if (!valueFields) return
+    const filter = column.filter || {}
+    const condition = this.buildFilterConditionFromPanel(panel)
+    const selectedOperator = condition.operator || this.filterOperatorsFor(filter)[0] || "contains"
+    valueFields.innerHTML = this.filterValueHtml(filter, condition, selectedOperator)
+  }
+
+  buildFilterConditionFromPanel(panel) {
+    const operator = panel.querySelector("[data-field='operator']")?.value
+    if (!operator) return {}
+    const condition = { operator }
+    if (operator === "between") {
+      const from = panel.querySelector("[data-field='from']")?.value
+      const to = panel.querySelector("[data-field='to']")?.value
+      if (from) condition.from = from
+      if (to) condition.to = to
+      return condition
+    }
+    if (["blank", "present", "true", "false"].includes(operator)) return condition
+    const valuesSelect = panel.querySelector("[data-field='values']")
+    if (valuesSelect) {
+      condition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
+      return condition
+    }
+    const value = panel.querySelector("[data-field='value']")?.value
+    if (value) condition.value = value
+    return condition
+  }
+
   positionFilterPanel(panel, headerCell) {
     const rect = headerCell.getBoundingClientRect()
     panel.style.position = "absolute"
@@ -724,22 +760,8 @@ export default class extends Controller {
   }
 
   applyFilterPanel(key, panel) {
-    const operator = panel.querySelector("[data-field='operator']")?.value
-    if (!operator) return
-    const condition = { operator }
-    if (operator === "between") {
-      const from = panel.querySelector("[data-field='from']")?.value
-      const to = panel.querySelector("[data-field='to']")?.value
-      if (from) condition.from = from
-      if (to) condition.to = to
-    } else if (!["blank", "present", "true", "false"].includes(operator)) {
-      const valuesSelect = panel.querySelector("[data-field='values']")
-      if (valuesSelect) condition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
-      else {
-        const value = panel.querySelector("[data-field='value']")?.value
-        if (value) condition.value = value
-      }
-    }
+    const condition = this.buildFilterConditionFromPanel(panel)
+    if (!condition.operator) return
     this.updateFilterCondition(key, condition)
     this.closeFilterPanel()
     this.apply()
