@@ -5,34 +5,9 @@ require "fileutils"
 require "pathname"
 require "capybara"
 require "capybara/dsl"
-require "active_record"
-require "action_controller/railtie"
 require "rspec/rails"
 require "selenium-webdriver"
-require "rails_table_preferences"
-
-class ApplicationController < ActionController::Base
-  def current_user
-    Thread.current[:rails_table_preferences_current_user]
-  end
-
-  def table_preference_scope_context
-    Thread.current[:rails_table_preferences_scope_context] || {}
-  end
-end
-
-class TestApplication < Rails::Application
-  config.root = File.expand_path("..", __dir__)
-  config.eager_load = false
-  config.secret_key_base = "test-secret-key-base"
-  config.hosts.clear
-
-  routes.append do
-    mount RailsTablePreferences::Engine, at: RailsTablePreferences.configuration.mount_path
-  end
-end
-
-Rails.application.initialize! unless Rails.application.initialized?
+require_relative "test_application"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
