@@ -26,6 +26,8 @@ The demo controller uses in-memory order rows for display. It does not create an
 
 The generated screen also seeds one shared preset named `共有ビュー`. This gives you a minimal way to confirm that a normal owner can load a shared preset, cannot delete it from the normal editor, and saves changes back into an owner preset instead of overwriting the shared preset.
 
+The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, and memo lengths so sort, filter, width, and preset checks are easier to judge at a glance.
+
 ## Add routes
 
 Mount the engine if it is not already mounted:
@@ -80,6 +82,7 @@ end
 The generated demo screen includes:
 
 - Japanese column labels
+- sample rows with repeated customer prefixes and varied status/date/memo values for practical sort and filter checks
 - column visibility
 - column order
 - table-header drag ordering
@@ -108,7 +111,9 @@ On the demo screen, confirm:
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
 - [ ] Filter panel opens.
+- [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
+- [ ] Sorting by `納品日` or `金額` makes the row order visibly change.
 - [ ] Save persists settings.
 - [ ] Reload restores saved settings.
 - [ ] Save as new creates another preset.

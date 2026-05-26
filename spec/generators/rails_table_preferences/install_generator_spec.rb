@@ -84,9 +84,13 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(controller.read).to include("rails_table_preferences_demo_orders")
     expect(controller.read).to include("ensure_demo_shared_preset!")
     expect(controller.read).to include("SHARED_PRESET_NAME = \"共有ビュー\"")
+    expect(controller.read).to include("東京医療機器")
+    expect(controller.read).to include("東京製菓")
     expect(view.read).to include("Rails Table Preferences Demo")
     expect(view.read).to include("table_preferences_editor")
     expect(view.read).to include("共有ビュー")
+    expect(view.read).to include("Search for")
+    expect(view.read).to include("東京")
   end
 
   it "provides post-install next steps in the generator source" do
