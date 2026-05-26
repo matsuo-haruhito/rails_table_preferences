@@ -19,7 +19,7 @@ The bundled editor and Stimulus controller provide:
 - disabled states for controls that should not be used on read-only scoped presets
 - a visible helper message when saving from a read-only preset will create a new owner preset instead of overwriting the shared preset
 - a live `role="status"` region for bundled save/load/delete feedback
-- temporary busy-state disabling for preset controls and action buttons while bundled async preset actions are running
+- temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; host apps can pass `editor_instance_key:` when they want deterministic ids in copied/customized views
 
@@ -111,7 +111,9 @@ The default markup uses a native live region:
 </div>
 ```
 
-While those bundled async actions are in flight, the preset select, preset name, default checkbox, and action buttons are temporarily disabled to reduce duplicate submissions.
+While those bundled async actions are in flight, the preset select, preset name, default checkbox, action buttons, generated editor row inputs, and bundled header buttons are temporarily disabled.
+
+The controller also ignores bundled row drag, header drag, sort, filter, and resize interactions while the async request is still in flight. This keeps the visible table state from drifting away from the payload that is currently being loaded, saved, created, or deleted.
 
 Host applications can still replace or restyle this surface through the existing copy-based customization path when they need richer inline messaging or branded notifications.
 
@@ -147,6 +149,7 @@ Before releasing a screen, check:
 - Read-only scoped presets show helper text that explains the save-as-owner fallback.
 - Save/load/delete actions update the status region with understandable progress or result copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
+- Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
 - Custom colors still meet the host application's contrast requirements.

@@ -85,6 +85,7 @@ export default class extends Controller {
   }
 
   applyFromEditor(event) {
+    if (this.busy) return
     if (event) event.preventDefault()
     this.settingsValue = this.settingsFromEditor()
     this.apply()
@@ -165,6 +166,7 @@ export default class extends Controller {
   }
 
   resetEditor(event) {
+    if (this.busy) return
     if (event) event.preventDefault()
     this.settingsValue = this.defaultSettings
     this.closeFilterPanel()
@@ -272,14 +274,36 @@ export default class extends Controller {
     })
   }
 
+  setEditorRowsBusyState(busy) {
+    if (!this.hasEditorRowsTarget) return
+    this.editorRowsTarget.querySelectorAll("input, button, select, textarea").forEach((control) => {
+      control.disabled = busy
+    })
+  }
+
+  setTableInteractionBusyState(busy) {
+    const table = this.tableElement
+    if (!table) return
+    this.headerCells.forEach((cell) => {
+      if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") cell.draggable = !busy
+    })
+    table.querySelectorAll("[data-rails-table-preferences-filter-button], [data-rails-table-preferences-resize-handle]").forEach((control) => {
+      control.disabled = busy
+    })
+  }
+
   setBusyState(busy) {
     this.busy = busy === true
+    if (this.busy) this.closeFilterPanel()
     if (this.hasPresetSelectTarget) this.presetSelectTarget.disabled = this.busy
     if (this.hasPresetNameTarget) this.presetNameTarget.disabled = this.busy
     if (this.hasDefaultPresetTarget) this.defaultPresetTarget.disabled = this.busy
     this.element.querySelectorAll(".rails-table-preferences-editor__actions button").forEach((button) => {
       button.disabled = this.busy
     })
+    this.setEditorRowsBusyState(this.busy)
+    this.setTableInteractionBusyState(this.busy)
+    this.element.setAttribute("aria-busy", this.busy ? "true" : "false")
     if (!this.busy) this.syncPresetEditingState()
   }
 
@@ -346,6 +370,10 @@ export default class extends Controller {
   }
 
   dragEditorRowStart(event) {
+    if (this.busy) {
+      event.preventDefault()
+      return
+    }
     const row = event.currentTarget
     this.draggedEditorRow = row
     row.classList.add("rails-table-preferences-editor__row--dragging")
@@ -354,6 +382,7 @@ export default class extends Controller {
   }
 
   dragEditorRowOver(event) {
+    if (this.busy) return
     event.preventDefault()
     const targetRow = event.currentTarget
     if (!this.draggedEditorRow || targetRow === this.draggedEditorRow) return
@@ -364,6 +393,7 @@ export default class extends Controller {
   }
 
   dropEditorRow(event) {
+    if (this.busy) return
     event.preventDefault()
     this.refreshEditorOrderInputs()
   }
@@ -438,6 +468,7 @@ export default class extends Controller {
   startColumnResize(event) {
     event.preventDefault()
     event.stopPropagation()
+    if (this.busy) return
     if (event.detail > 1) return
     const headerCell = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
     if (!headerCell) return
@@ -453,7 +484,7 @@ export default class extends Controller {
   }
 
   resizeColumn(event) {
-    if (!this.resizingColumn) return
+    if (this.busy || !this.resizingColumn) return
     const width = Math.max(40, Math.round(this.resizingColumn.startWidth + event.clientX - this.resizingColumn.startX))
     this.updateColumnSetting(this.resizingColumn.key, { width })
     this.applyColumn(this.columnByKey(this.resizingColumn.key))
@@ -469,6 +500,7 @@ export default class extends Controller {
   autoFitColumnFromHandle(event) {
     event.preventDefault()
     event.stopPropagation()
+    if (this.busy) return
     const headerCell = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
     const key = headerCell?.dataset.railsTablePreferencesColumnKey
     if (!key) return
@@ -530,6 +562,10 @@ export default class extends Controller {
   }
 
   startTableColumnDrag(event) {
+    if (this.busy) {
+      event.preventDefault()
+      return
+    }
     if (this.shouldIgnoreHeaderAction(event.target)) {
       event.preventDefault()
       return
@@ -543,6 +579,7 @@ export default class extends Controller {
   }
 
   dragTableColumnOver(event) {
+    if (this.busy) return
     event.preventDefault()
     const targetKey = event.currentTarget.dataset.railsTablePreferencesColumnKey
     if (!this.draggedTableColumnKey || !targetKey || targetKey === this.draggedTableColumnKey) return
@@ -553,6 +590,7 @@ export default class extends Controller {
   }
 
   dropTableColumn(event) {
+    if (this.busy) return
     event.preventDefault()
     this.refreshEditorFromSettings()
   }
@@ -608,6 +646,7 @@ export default class extends Controller {
   }
 
   toggleSortFromHeader(event, cell, column) {
+    if (this.busy) return
     if (this.shouldIgnoreHeaderAction(event.target)) return
     if (this.draggedTableColumnKey || this.resizingColumn) return
     event.preventDefault()
@@ -674,6 +713,7 @@ export default class extends Controller {
   }
 
   toggleFilterPanel(event, headerCell, column) {
+    if (this.busy) return
     event.preventDefault()
     event.stopPropagation()
     if (this.filterPanel?.dataset.railsTablePreferencesColumnKey === column.key) this.closeFilterPanel()
@@ -681,6 +721,7 @@ export default class extends Controller {
   }
 
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
+    if (this.busy) return
     this.closeFilterPanel()
     const panel = document.createElement("div")
     panel.className = "rails-table-preferences-filter-panel"
@@ -783,6 +824,7 @@ export default class extends Controller {
   }
 
   applyFilterPanel(key, panel) {
+    if (this.busy) return
     const operator = panel.querySelector("[data-field='operator']")?.value
     if (!operator) return
     const condition = { operator }
@@ -805,6 +847,7 @@ export default class extends Controller {
   }
 
   clearFilter(key) {
+    if (this.busy) return
     const filters = { ...(this.settingsValue?.filters || {}) }
     delete filters[key]
     this.settingsValue = { ...this.settingsValue, filters }

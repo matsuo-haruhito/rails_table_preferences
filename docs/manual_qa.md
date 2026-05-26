@@ -60,7 +60,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Delete a non-default preset.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
-- [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, and action buttons.
+- [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, action buttons, and generated editor row inputs.
+- [ ] Confirm drag-reordering editor rows does not start while an async preset action is running.
 - [ ] Confirm those controls re-enable after success.
 - [ ] Trigger at least one API failure and confirm the generic failure status appears and the controls recover.
 - [ ] Prefer a lightweight browser-devtools failure such as request blocking, then unblock it and confirm the same action succeeds normally.
@@ -112,6 +113,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm filter panel layering is not clipped by the surrounding layout.
 - [ ] Confirm opening one filter panel closes or does not visually conflict with another.
 - [ ] Confirm page scroll, container scroll, or viewport resize closes the panel instead of leaving it detached from the header context.
+- [ ] Confirm filter buttons do not reopen or change state while an async preset action is running.
 
 ## 9. Sort UI behavior
 
@@ -123,6 +125,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm clicking a filter button does not toggle sort.
 - [ ] Confirm dragging/resizing a header does not accidentally toggle sort.
 - [ ] Confirm `aria-sort` changes appropriately.
+- [ ] Confirm sortable headers do not change state while an async preset action is running.
 
 ## 10. Fixed columns and column groups
 
@@ -136,6 +139,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Add `group:` metadata to columns.
 - [ ] Use `table_preferences_column_groups` in grouped header markup and confirm `colspan` values are correct.
 - [ ] Confirm leaf header cells still have `data-rails-table-preferences-column-key`.
+- [ ] Confirm pinned-column resize and header drag do not start while an async preset action is running.
 
 ## 11. Export integration
 
@@ -200,6 +204,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
+- [ ] Confirm async preset actions also keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request finishes.
 - [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs.
 - [ ] Confirm custom host app colors meet the application's contrast requirements.
 
