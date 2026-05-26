@@ -156,12 +156,15 @@ get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/or
 
 ## Relationship to automated browser tests
 
-The demo screen is intentionally stable and small, so it can later be used as a target for Playwright or Selenium smoke tests.
+The demo screen is intentionally stable and small, and the repository now keeps one equivalent demo-shaped browser smoke under automated coverage.
 
-Good first automated checks are:
+Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
+
+Good next automated checks are:
+
 - save and reload restore settings
 - filter panel opens
 - sortable header changes sort state
