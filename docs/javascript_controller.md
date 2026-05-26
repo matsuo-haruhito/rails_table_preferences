@@ -126,7 +126,7 @@ Use the Ruby helpers and adapters for that part:
 
 ## Source-level safety specs
 
-The project includes source-level specs for the Stimulus controller and package entrypoints. These are not a replacement for browser/system specs, but they guard important invariants while browser tests are not yet being run.
+The project includes source-level specs for the Stimulus controller and package entrypoints, plus one narrow browser/system smoke for a demo-shaped screen. The source-level specs are not a replacement for broader browser/system coverage, but they still guard important invariants around the controller and package entrypoints.
 
 Important invariants include:
 

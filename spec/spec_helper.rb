@@ -3,33 +3,23 @@
 require "bundler/setup"
 require "fileutils"
 require "pathname"
-require "active_record"
-require "action_controller/railtie"
+require "capybara"
+require "capybara/dsl"
 require "rspec/rails"
-require "rails_table_preferences"
+require "selenium-webdriver"
+require_relative "test_application"
 
-class ApplicationController < ActionController::Base
-  def current_user
-    Thread.current[:rails_table_preferences_current_user]
+Capybara.app = Rails.application
+Capybara.server = :puma, { Silent: true }
+Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  %w[headless disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
+    options.add_argument(argument)
   end
 
-  def table_preference_scope_context
-    Thread.current[:rails_table_preferences_scope_context] || {}
-  end
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
 end
-
-class TestApplication < Rails::Application
-  config.root = File.expand_path("..", __dir__)
-  config.eager_load = false
-  config.secret_key_base = "test-secret-key-base"
-  config.hosts.clear
-
-  routes.append do
-    mount RailsTablePreferences::Engine, at: RailsTablePreferences.configuration.mount_path
-  end
-end
-
-Rails.application.initialize! unless Rails.application.initialized?
+Capybara.javascript_driver = :rails_table_preferences_headless_chrome
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
@@ -65,6 +55,7 @@ end
 RSpec.configure do |config|
   config.include FileUtils, type: :generator
   config.include GeneratorSpecHelpers, type: :generator
+  config.include Capybara::DSL, type: :system
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -76,6 +67,10 @@ RSpec.configure do |config|
 
   config.shared_context_metadata_behavior = :apply_to_host_groups
   config.infer_spec_type_from_file_location!
+
+  config.before(type: :system) do
+    Capybara.current_driver = RSpec.current_example.metadata[:js] ? Capybara.javascript_driver : Capybara.default_driver
+  end
 
   config.before do
     RailsTablePreferences.configuration = RailsTablePreferences::Configuration.new
@@ -90,5 +85,10 @@ RSpec.configure do |config|
   config.after do
     Thread.current[:rails_table_preferences_current_user] = nil
     Thread.current[:rails_table_preferences_scope_context] = nil
+  end
+
+  config.after(type: :system) do
+    Capybara.reset_sessions!
+    Capybara.use_default_driver
   end
 end
