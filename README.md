@@ -149,7 +149,9 @@ Then add a route for the copied demo screen:
 get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"
 ```
 
-See [Demo screen generator](docs/demo.md) and [Sandbox Rails app verification](docs/sandbox.md) for the full local verification flow.
+The copied demo reuses the same configured current-owner method as the normal editor flow. If the host app does not use `User` / `current_user`, set `config.owner_model` and `config.current_user_method` first, and make sure that method returns a persisted owner record before opening the demo screen.
+
+See [Demo screen generator](docs/demo.md), [Quick start](docs/quick_start.md), and [Sandbox Rails app verification](docs/sandbox.md) for the full local verification flow.
 
 If preferences should belong to a model other than `User`, pass an owner model. The value can be singular or plural:
 
