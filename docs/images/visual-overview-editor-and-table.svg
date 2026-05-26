@@ -1,5 +1,92 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080" role="img" aria-labelledby="title desc">
-  <title>Bundled demo screen screenshot</title>
-  <desc>Static capture of the bundled demo screen for Rails Table Preferences.</desc>
-  <image width="1600" height="1080" href="data:image/png;base64,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" />
+<svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Rails Table Preferences editor and scoped preset overview</title>
+  <desc id="desc">A representative documentation image showing the bundled editor, scoped preset choices, and a compact table preview.</desc>
+  <rect width="1400" height="920" fill="#F4F7FB"/>
+  <rect x="72" y="56" width="1256" height="88" rx="22" fill="#FFFFFF" stroke="#D6DEEB"/>
+  <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Editor and scoped preset flow</text>
+  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A quick visual reference for how the bundled editor, preset scope, and working table stay connected.</text>
+
+  <rect x="72" y="176" width="456" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
+  <text x="108" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Bundled editor surface</text>
+  <text x="108" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The default editor stays small, but still exposes the main table settings users need to review.</text>
+
+  <rect x="108" y="292" width="384" height="116" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
+  <text x="132" y="326" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Preset</text>
+  <rect x="132" y="344" width="232" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="152" y="369" fill="#162033" font-family="Arial, sans-serif" font-size="16">operations-default</text>
+  <rect x="376" y="344" width="92" height="40" rx="12" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="401" y="369" fill="#4338CA" font-family="Arial, sans-serif" font-size="15" font-weight="700">Role</text>
+
+  <rect x="108" y="428" width="384" height="122" rx="18" fill="#FFFFFF" stroke="#D9E2F0"/>
+  <text x="132" y="462" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Available presets</text>
+  <rect x="132" y="482" width="168" height="34" rx="17" fill="#E8F0FF"/>
+  <text x="154" y="504" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="14" font-weight="700">Owner: My compact view</text>
+  <rect x="310" y="482" width="158" height="34" rx="17" fill="#ECFDF3"/>
+  <text x="334" y="504" fill="#166534" font-family="Arial, sans-serif" font-size="14" font-weight="700">Shared: Team default</text>
+  <rect x="132" y="524" width="176" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="156" y="546" fill="#4338CA" font-family="Arial, sans-serif" font-size="14" font-weight="700">Role: Operations default</text>
+
+  <rect x="108" y="570" width="384" height="108" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
+  <text x="132" y="604" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Visible controls</text>
+  <text x="132" y="634" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- visible column toggles</text>
+  <text x="132" y="662" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- order and width controls</text>
+  <text x="300" y="634" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- default preset checkbox</text>
+  <text x="300" y="662" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- save, save as new, delete</text>
+
+  <rect x="108" y="698" width="384" height="110" rx="18" fill="#FFF7ED" stroke="#FED7AA"/>
+  <text x="132" y="732" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Why this matters</text>
+  <text x="132" y="762" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">The overview can mention scoped presets without implying a full admin workflow.</text>
+  <text x="132" y="790" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">It stays focused on the user-facing editor and the host app remains responsible for policy.</text>
+
+  <rect x="560" y="176" width="768" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
+  <text x="596" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Representative list screen</text>
+  <text x="596" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A compact table preview keeps the chosen preset tied to a believable business screen.</text>
+
+  <rect x="596" y="292" width="696" height="176" rx="20" fill="#F8FAFC" stroke="#D9E2F0"/>
+  <text x="624" y="326" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Editor snapshot</text>
+  <rect x="624" y="344" width="168" height="34" rx="10" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="642" y="366" fill="#162033" font-family="Arial, sans-serif" font-size="14">operations-default</text>
+  <rect x="804" y="344" width="94" height="34" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="829" y="366" fill="#4338CA" font-family="Arial, sans-serif" font-size="14" font-weight="700">Role</text>
+  <rect x="918" y="344" width="126" height="34" rx="10" fill="#ECFDF3" stroke="#BBF7D0"/>
+  <text x="946" y="366" fill="#166534" font-family="Arial, sans-serif" font-size="14" font-weight="700">Default preset</text>
+  <rect x="624" y="396" width="136" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="772" y="396" width="136" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="920" y="396" width="136" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="1068" y="396" width="120" height="40" rx="12" fill="#DBEAFE"/>
+  <text x="649" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Order width</text>
+  <text x="803" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Customer visible</text>
+  <text x="958" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Status position</text>
+  <text x="1100" y="420" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="14" font-weight="700">Save</text>
+
+  <rect x="596" y="500" width="120" height="52" rx="12" fill="#E0E7FF"/>
+  <rect x="716" y="500" width="220" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="936" y="500" width="156" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="1092" y="500" width="200" height="52" rx="12" fill="#EDF2F7"/>
+  <text x="622" y="532" fill="#312E81" font-family="Arial, sans-serif" font-size="16" font-weight="700">Order</text>
+  <text x="792" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Customer</text>
+  <text x="990" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Status</text>
+  <text x="1164" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Updated</text>
+
+  <rect x="596" y="566" width="696" height="62" rx="12" fill="#FFFFFF"/>
+  <rect x="596" y="634" width="696" height="62" rx="12" fill="#F9FBFD"/>
+  <rect x="596" y="702" width="696" height="62" rx="12" fill="#FFFFFF"/>
+  <rect x="596" y="566" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="596" y="634" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="596" y="702" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <text x="622" y="604" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2048</text>
+  <text x="748" y="604" fill="#283548" font-family="Arial, sans-serif" font-size="15">Acme Supply</text>
+  <text x="990" y="604" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
+  <text x="1164" y="604" fill="#283548" font-family="Arial, sans-serif" font-size="15">05-20 09:14</text>
+  <text x="622" y="672" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2041</text>
+  <text x="748" y="672" fill="#283548" font-family="Arial, sans-serif" font-size="15">Northwind Labs</text>
+  <text x="990" y="672" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Waiting</text>
+  <text x="1164" y="672" fill="#283548" font-family="Arial, sans-serif" font-size="15">05-19 17:42</text>
+  <text x="622" y="740" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2033</text>
+  <text x="748" y="740" fill="#283548" font-family="Arial, sans-serif" font-size="15">Kanto Medical</text>
+  <text x="990" y="740" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
+  <text x="1164" y="740" fill="#283548" font-family="Arial, sans-serif" font-size="15">05-18 15:27</text>
+
+  <rect x="596" y="780" width="696" height="28" rx="14" fill="#E8F0FF"/>
+  <text x="620" y="799" fill="#35517A" font-family="Arial, sans-serif" font-size="14">Preset context stays visible while the table preview shows the same working state a real host screen would expose.</text>
 </svg>
