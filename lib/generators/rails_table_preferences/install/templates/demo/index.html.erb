@@ -5,6 +5,13 @@
   <code>table_preferences</code> table for preference persistence.
 </p>
 
+<p>
+  The generated demo also seeds one shared preset named <strong>共有ビュー</strong>.
+  Select it to confirm that a normal user can load a shared preset, cannot
+  delete it directly, and saves changes back into an owner preset instead of
+  overwriting the shared preset.
+</p>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
