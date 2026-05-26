@@ -162,6 +162,15 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("return window.confirm(message)")
   end
 
+  it "updates delete button title and accessible name from the current preset context" do
+    expect(source).to include("syncDeletePresetButtonContext()")
+    expect(source).to include('this.element.querySelectorAll("[data-action*=\'rails-table-preferences#deletePreset\']")')
+    expect(source).to include("this.updateDeletePresetButtonContext(button)")
+    expect(source).to include('const buttonLabel = button.textContent?.trim() || "削除"')
+    expect(source).to include('button.setAttribute("aria-label", message ? `${buttonLabel}: ${message}` : buttonLabel)')
+    expect(source).to include('button.title = message || buttonLabel')
+  end
+
   it "updates a live status region and temporary busy state around async preset actions" do
     expect(source).to include("this.refreshPresetOptionsOnConnect()")
     expect(source).to include("withBusyStatus(callback,")
