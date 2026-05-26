@@ -24,7 +24,8 @@ en:
       deleting_status: Deleting saved settings...
       deleted_status: Saved settings deleted.
       operation_failed_status: Could not complete the table preference action.
-      reset: Reset
+      reset: Reset to defaults
+      reset_hint: Discard unsaved display changes and return to the default settings.
       order: Order
       width: Width
       truncate: Truncate
