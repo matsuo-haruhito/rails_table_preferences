@@ -167,9 +167,6 @@ Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
-
-Good next automated checks are:
-
 - save and reload restore settings
 - filter panel opens
 - sortable header changes sort state
