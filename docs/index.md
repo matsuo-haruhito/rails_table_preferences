@@ -48,7 +48,7 @@ This directory contains focused documentation for Rails Table Preferences.
 13. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
 14. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
 15. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-16. Optionally generate the demo screen with `--with-demo` for quick local browser verification.
+16. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
 17. Verify the feature in a sandbox Rails app.
 18. Run the manual QA checklist before asking real users to try the feature.
 19. Before release, run the release checklist and package verification guide.
