@@ -40,6 +40,17 @@ The controller keeps these separate through `shouldIgnoreHeaderAction(target)`. 
 
 The sort handler also ignores active drag and resize operations.
 
+## Bundled filter panel contract
+
+The default filter panel stays intentionally lightweight.
+
+- The triggering filter button owns `aria-expanded` and `aria-controls` while its panel is open.
+- Opening the panel moves focus into the first bundled filter field.
+- Pressing `Escape` closes the panel and returns focus to the triggering filter button.
+- Clicking outside still closes the panel.
+- Scroll and viewport resize also close the panel so the body-mounted panel does not drift away from its header context.
+- The bundled controller does not add a full popover library, focus trap, or modal dialog abstraction.
+
 ## Table-only application rule
 
 Column display effects must be applied only to cells inside the target table. This prevents editor rows from being affected when they use the same `data-rails-table-preferences-column-key` values as table cells.

@@ -94,15 +94,21 @@ Use browser devtools while saving/loading presets.
 
 - [ ] Add a text filter column and confirm the filter button appears.
 - [ ] Open the filter panel.
-- [ ] Apply a `contains` condition.
+- [ ] Confirm only the open filter button exposes `aria-expanded="true"`.
+- [ ] Confirm focus moves into the filter panel when it opens.
+- [ ] Press `Escape` and confirm the panel closes and focus returns to the triggering filter button.
+- [ ] Re-open the panel and apply a `contains` condition.
+- [ ] Confirm the active filter button exposes a short operator/value summary through hover title or accessible name.
 - [ ] Apply an `equals` condition.
 - [ ] Apply a blank/present condition.
 - [ ] Clear the filter.
 - [ ] Add a select filter column and choose one or more values.
 - [ ] Add a date filter column and set from/to values.
 - [ ] Add a number filter column and set from/to values.
+- [ ] Confirm multiple active filters still leave header controls usable while exposing summary context per column.
 - [ ] Confirm filter panel layering is not clipped by the surrounding layout.
 - [ ] Confirm opening one filter panel closes or does not visually conflict with another.
+- [ ] Confirm page scroll, container scroll, or viewport resize closes the panel instead of leaving it detached from the header context.
 
 ## 9. Sort UI behavior
 
@@ -183,6 +189,9 @@ Use browser devtools while saving/loading presets.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
 - [ ] Confirm filter buttons expose a useful accessible label.
 - [ ] Confirm active filter buttons update `aria-pressed`.
+- [ ] Confirm active filter buttons expose a short operator/value summary in `title` or `aria-label`.
+- [ ] Confirm the open filter button updates `aria-expanded` and `aria-controls`.
+- [ ] Confirm bundled filter panel focus returns to the triggering button when closed with `Escape`.
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose a useful accessible label.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.

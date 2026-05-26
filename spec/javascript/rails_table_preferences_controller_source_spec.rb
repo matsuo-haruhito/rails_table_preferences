@@ -94,7 +94,18 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("installFilterControls()")
     expect(source).to include("column?.filter")
     expect(source).to include('button.dataset.railsTablePreferencesFilterButton = "true"')
+    expect(source).to include('button.setAttribute("aria-expanded", "false")')
     expect(source).to include("toggleFilterPanel(event, cell, column)")
+  end
+
+  it "summarizes active filter conditions for filter button labels" do
+    expect(source).to include("filterButtonLabel(column, condition = {})")
+    expect(source).to include("filterConditionSummary(condition = {})")
+    expect(source).to include('return summary ? `${baseLabel} (${summary})` : baseLabel')
+    expect(source).to include('button.setAttribute("aria-label", label)')
+    expect(source).to include("button.title = label")
+    expect(source).to include('if (operator === "between")')
+    expect(source).to include('return `${values.slice(0, 2).join(", ")} +${values.length - 2}`')
   end
 
   it "builds filter panels and stores neutral filter conditions" do
@@ -103,6 +114,28 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("applyFilterPanel(key, panel)")
     expect(source).to include("updateFilterCondition(key, condition)")
     expect(source).to include("filters: this.settingsValue?.filters || {}")
+  end
+
+  it "moves focus into the filter panel and supports escape dismissal" do
+    expect(source).to include("focusInitialFilterPanelField(panel)")
+    expect(source).to include("handleFilterPanelKeydown(event)")
+    expect(source).to include('if (event.key !== "Escape") return')
+    expect(source).to include("this.closeFilterPanel({ returnFocus: true })")
+  end
+
+  it "closes a body-mounted filter panel on outside click, scroll, and resize" do
+    expect(source).to include("document.addEventListener(\"click\", this.boundCloseFilterPanel)")
+    expect(source).to include("document.addEventListener(\"scroll\", this.boundCloseFilterPanelOnScroll, true)")
+    expect(source).to include("window.addEventListener(\"resize\", this.boundCloseFilterPanelOnResize)")
+    expect(source).to include("document.removeEventListener(\"scroll\", this.boundCloseFilterPanelOnScroll, true)")
+    expect(source).to include("window.removeEventListener(\"resize\", this.boundCloseFilterPanelOnResize)")
+  end
+
+  it "keeps expanded state and controls wiring in sync with the open filter panel" do
+    expect(source).to include("filterPanelId(columnKey)")
+    expect(source).to include('button.setAttribute("aria-controls", panel.id)')
+    expect(source).to include('button.setAttribute("aria-expanded", "true")')
+    expect(source).to include('button.removeAttribute("aria-controls")')
   end
 
   it "supports common filter types and operators" do
