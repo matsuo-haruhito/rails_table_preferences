@@ -112,6 +112,12 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         }
       }
 
+      function smokeRoot() {
+        return document.querySelector("[data-rtp-smoke-root]") ||
+          Array.from(document.querySelectorAll('[data-controller~="rails-table-preferences"]')).find((element) => element.querySelector("table")) ||
+          null
+      }
+
       function markSmokeStage(stage) {
         document.body.dataset.rtpSmokeStage = stage
       }
@@ -121,7 +127,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         document.body.dataset.rtpSmokeError = ""
         markSmokeStage("mount-start")
 
-        const root = document.querySelector('[data-rtp-smoke-root="true"]')
+        const root = smokeRoot()
         if (!root) {
           markSmokeStage("root-not-found")
           document.body.dataset.rtpSmokeError = "root-not-found"
