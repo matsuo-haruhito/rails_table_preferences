@@ -12,10 +12,6 @@ require "selenium-webdriver"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
-Capybara.server_host = "127.0.0.1"
-Capybara.server_port = 40_173
-Capybara.app_host = "http://127.0.0.1:40173"
-Capybara.always_include_port = true
 Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
   options = Selenium::WebDriver::Chrome::Options.new
   %w[headless=new disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
@@ -24,7 +20,6 @@ Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
 
   Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
 end
-Capybara.javascript_driver = :rails_table_preferences_headless_chrome
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
@@ -74,7 +69,11 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
 
   config.before(type: :system) do
-    Capybara.current_driver = RSpec.current_example.metadata[:js] ? Capybara.javascript_driver : Capybara.default_driver
+    driven_by :rack_test
+  end
+
+  config.before(type: :system, js: true) do
+    driven_by :rails_table_preferences_headless_chrome
   end
 
   config.before do
