@@ -1120,7 +1120,7 @@ export default class extends Controller {
   cellsFor(key) {
     const table = this.tableElement
     if (!table) return []
-    return table.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)
+    return table.querySelectorAll(`[data-rails-table-preferences-column-key="${this.escapeSelectorValue(key)}"]`)
   }
 
   columnByKey(key) {
@@ -1145,6 +1145,11 @@ export default class extends Controller {
     const span = document.createElement("span")
     span.textContent = value
     return span.innerHTML
+  }
+
+  escapeSelectorValue(value) {
+    if (typeof CSS !== "undefined" && typeof CSS.escape === "function") return CSS.escape(String(value))
+    return String(value).replace(/["\\]/g, "\\$&")
   }
 
   get columnsFromSettings() { return this.settingsValue?.columns || [] }
