@@ -69,7 +69,7 @@ Rails 7.0 is expected to work, but Rails 7.1+ is recommended.
 
 Ruby 3.1+ is required.
 
-GitHub Actions keeps the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes for Rails 7.0, Rails 8.0, and Rails 8.1 so lower-bound and upper-bound regressions are easier to spot before merge.
+GitHub Actions keeps the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes for Rails 7.0, Rails 7.1, Rails 7.2, Rails 8.0, and Rails 8.1 so lower-bound and upper-bound regressions are easier to spot before merge.
 
 ## Installation
 
@@ -210,7 +210,7 @@ Included in v0.1 scope:
 - Controller helpers
 - Stimulus controller
 - Package JavaScript entrypoints for Vite and other JS bundlers
-- Install, JavaScript, stylesheet, view, and demo generators
+- Install, JavaScript, stylesheet, and view generators
 - Migration generator
 - Compatibility path for existing JSON column-adjustment values
 - Local demo and sandbox verification guidance
@@ -257,7 +257,7 @@ Included scope:
 - Rails helpers and Stimulus integration
 - JavaScript package entrypoints for Vite / `app/frontend` registration
 - JSON API for preference and preset persistence
-- Migration, install, JavaScript, stylesheet, view, and demo generators
+- Migration, install, JavaScript, stylesheet, and view generators
 - `--with-demo`, `--skip-javascript`, and `--skip-stylesheets` install options
 - Owner model and owner foreign key generator/configuration options
 - Existing `ColumnAdjustment` compatibility and import guidance
@@ -842,7 +842,7 @@ node --check app/javascript/controllers/rails_table_preferences_controller.js
 bundle exec rake build
 ```
 
-GitHub Actions runs the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes with `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile`, and `BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile`.
+GitHub Actions runs the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes with `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile`, and `BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile`.
 
 Before tagging or publishing a release, also inspect the built package with [Package verification](docs/package_verification.md) and run the broader release checks in [Release checklist](docs/release_checklist.md).
 
