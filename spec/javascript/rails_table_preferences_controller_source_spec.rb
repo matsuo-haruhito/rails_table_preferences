@@ -97,6 +97,16 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("toggleFilterPanel(event, cell, column)")
   end
 
+  it "summarizes active filter conditions for filter button labels" do
+    expect(source).to include("filterButtonLabel(column, condition = {})")
+    expect(source).to include("filterConditionSummary(condition = {})")
+    expect(source).to include('return summary ? `${baseLabel} (${summary})` : baseLabel')
+    expect(source).to include('button.setAttribute("aria-label", label)')
+    expect(source).to include("button.title = label")
+    expect(source).to include('if (operator === "between")')
+    expect(source).to include('return `${values.slice(0, 2).join(", ")} +${values.length - 2}`')
+  end
+
   it "builds filter panels and stores neutral filter conditions" do
     expect(source).to include("filterPanelHtml(column)")
     expect(source).to include("filterValueHtml(filter, condition, selectedOperator)")
