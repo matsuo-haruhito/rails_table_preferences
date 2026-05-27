@@ -39,7 +39,8 @@ RSpec.describe "rails_table_preferences_controller.js" do
   it "restricts column display effects to the table element" do
     expect(source).to include("cellsFor(key)")
     expect(source).to include("const table = this.tableElement")
-    expect(source).to include('return table.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)')
+    expect(source).to include('return table.querySelectorAll(`[data-rails-table-preferences-column-key="${this.escapeSelectorValue(key)}"]`)')
+    expect(source).to include("escapeSelectorValue(value)")
     expect(source).not_to include('return this.element.querySelectorAll(`[data-rails-table-preferences-column-key="${CSS.escape(key)}"]`)')
   end
 

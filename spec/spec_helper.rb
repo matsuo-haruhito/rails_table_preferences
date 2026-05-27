@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
+require "erb"
 require "fileutils"
 require "pathname"
+require_relative "test_application"
 require "capybara"
 require "capybara/dsl"
 require "rspec/rails"
 require "selenium-webdriver"
-require_relative "test_application"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
 Capybara.register_driver :rails_table_preferences_headless_chrome do |app|
   options = Selenium::WebDriver::Chrome::Options.new
-  %w[headless disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
+  %w[headless=new disable-gpu no-sandbox disable-dev-shm-usage window-size=1400,1200].each do |argument|
     options.add_argument(argument)
   end
 
   Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
 end
-Capybara.javascript_driver = :rails_table_preferences_headless_chrome
 
 ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
@@ -69,7 +69,11 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
 
   config.before(type: :system) do
-    Capybara.current_driver = RSpec.current_example.metadata[:js] ? Capybara.javascript_driver : Capybara.default_driver
+    driven_by :rack_test
+  end
+
+  config.before(type: :system, js: true) do
+    driven_by :rails_table_preferences_headless_chrome
   end
 
   config.before do
