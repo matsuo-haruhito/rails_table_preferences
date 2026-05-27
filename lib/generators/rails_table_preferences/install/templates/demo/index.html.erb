@@ -26,6 +26,37 @@
   <strong>納品日</strong> / <strong>金額</strong> to make the differences easier to spot.
 </p>
 
+<p>
+  The table below also keeps <strong>受注番号</strong> pinned inside a dedicated
+  horizontal scroll wrapper and shows one grouped header row
+  (<strong>受注情報</strong> / <strong>得意先情報</strong> / <strong>配送情報</strong>) so
+  fixed-column and column-group behavior can be checked without additional host-app markup first.
+</p>
+
+<style>
+  .rails-table-preferences-demo-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+
+  .rails-table-preferences-demo-table {
+    min-width: 1110px;
+    border-collapse: separate;
+  }
+
+  .rails-table-preferences-demo-table th,
+  .rails-table-preferences-demo-table td {
+    background: white;
+  }
+
+  .rails-table-preferences-demo-table__group-row th {
+    background: #f3f4f6;
+    font-size: 0.9375rem;
+    text-align: left;
+  }
+</style>
+
 <section>
   <h2>Export payload preview</h2>
 
@@ -69,32 +100,39 @@
   <%= submit_tag "検索" %>
 <% end %>
 
-<%= table_preferences_table_tag(
-  table_key: :rails_table_preferences_demo_orders,
-  settings: @table_preference_settings,
-  columns: @table_columns,
-  class: "table"
-) do %>
-  <thead>
-    <tr>
-      <th data-rails-table-preferences-column-key="order_no">受注番号</th>
-      <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
-      <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
-      <th data-rails-table-preferences-column-key="status">状態</th>
-      <th data-rails-table-preferences-column-key="amount">金額</th>
-      <th data-rails-table-preferences-column-key="memo">備考</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @orders.each do |order| %>
-      <tr>
-        <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
-        <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
-        <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
-        <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
-        <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
-        <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+<div class="rails-table-preferences-demo-scroll">
+  <%= table_preferences_table_tag(
+    table_key: :rails_table_preferences_demo_orders,
+    settings: @table_preference_settings,
+    columns: @table_columns,
+    class: "table rails-table-preferences-demo-table"
+  ) do %>
+    <thead>
+      <tr class="rails-table-preferences-demo-table__group-row">
+        <% @demo_column_groups.each do |group| %>
+          <th colspan="<%= group[:colspan] %>"><%= group[:label] %></th>
+        <% end %>
       </tr>
-    <% end %>
-  </tbody>
-<% end %>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="status">状態</th>
+        <th data-rails-table-preferences-column-key="amount">金額</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
+        <th data-rails-table-preferences-column-key="memo">備考</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
+          <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
+          <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
+          <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
+          <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</div>
