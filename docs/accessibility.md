@@ -70,9 +70,11 @@ Resize handles are generated as buttons and receive an `aria-label`:
 <button
   type="button"
   class="rails-table-preferences-resize-handle"
-  aria-label="列幅を変更: customer_name">
+  aria-label="列幅を変更: 得意先名">
 </button>
 ```
+
+The bundled controller prefers the configured column label for that accessible name, falls back to the visible header text when needed, and only uses the raw column key when neither user-facing label is available.
 
 The default behavior is pointer-oriented. Host applications that need full keyboard resizing should provide a custom controller or additional keyboard shortcuts.
 
@@ -150,6 +152,7 @@ Before releasing a screen, check:
 - Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
+- Resize handles announce the user-facing column label rather than only an internal column key.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
 - Custom colors still meet the host application's contrast requirements.

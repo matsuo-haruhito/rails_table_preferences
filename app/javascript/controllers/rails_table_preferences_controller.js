@@ -450,13 +450,33 @@ export default class extends Controller {
       handle.type = "button"
       handle.className = "rails-table-preferences-resize-handle"
       handle.dataset.railsTablePreferencesResizeHandle = "true"
-      handle.setAttribute("aria-label", `${this.resizeLabelValue}: ${cell.dataset.railsTablePreferencesColumnKey}`)
+      handle.setAttribute("aria-label", this.resizeHandleLabel(cell))
       handle.addEventListener("mousedown", this.startColumnResize.bind(this))
       handle.addEventListener("dblclick", this.autoFitColumnFromHandle.bind(this))
       handle.addEventListener("click", (event) => event.preventDefault())
       this.applyResizeHandleHitArea(cell, handle)
       cell.appendChild(handle)
     })
+  }
+
+  resizeHandleLabel(cell) {
+    const key = cell?.dataset.railsTablePreferencesColumnKey
+    const label = this.visibleColumnLabelFor(cell, key)
+    return label ? `${this.resizeLabelValue}: ${label}` : this.resizeLabelValue
+  }
+
+  visibleColumnLabelFor(cell, key) {
+    const configuredLabel = this.columnDefinitionByKey(key)?.label || this.columnByKey(key)?.label
+    if (configuredLabel) return configuredLabel
+    const headerText = this.headerCellTextLabel(cell)
+    return headerText || key || ""
+  }
+
+  headerCellTextLabel(cell) {
+    if (!cell) return ""
+    const clone = cell.cloneNode(true)
+    clone.querySelectorAll("[data-rails-table-preferences-resize-handle], [data-rails-table-preferences-filter-button], [data-rails-table-preferences-sort-indicator]").forEach((node) => node.remove())
+    return clone.textContent?.trim() || ""
   }
 
   applyResizeHandleHitArea(cell, handle) {

@@ -202,7 +202,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm the open filter button updates `aria-expanded` and `aria-controls`.
 - [ ] Confirm bundled filter panel focus returns to the triggering button when closed with `Escape`.
 - [ ] Confirm sortable headers update `aria-sort`.
-- [ ] Confirm resize handles expose a useful accessible label.
+- [ ] Confirm resize handles expose the visible column name, not only an internal column key.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.

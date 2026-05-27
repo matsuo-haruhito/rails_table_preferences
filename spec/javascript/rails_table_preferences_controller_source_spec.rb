@@ -95,6 +95,16 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("resizeColumn(event)")
   end
 
+  it "prefers user-facing column labels for resize handle accessible names" do
+    expect(source).to include('handle.setAttribute("aria-label", this.resizeHandleLabel(cell))')
+    expect(source).to include("resizeHandleLabel(cell)")
+    expect(source).to include("visibleColumnLabelFor(cell, key)")
+    expect(source).to include("headerCellTextLabel(cell)")
+    expect(source).to include('const configuredLabel = this.columnDefinitionByKey(key)?.label || this.columnByKey(key)?.label')
+    expect(source).to include('return headerText || key || ""')
+    expect(source).not_to include('handle.setAttribute("aria-label", `${this.resizeLabelValue}: ${cell.dataset.railsTablePreferencesColumnKey}`)')
+  end
+
   it "supports auto-fit from the resize handle with clamp and measurement helpers" do
     expect(source).to include("resizeAutoFitPadding: { type: Number, default: 24 }")
     expect(source).to include("resizeAutoFitMinWidth: { type: Number, default: 40 }")
