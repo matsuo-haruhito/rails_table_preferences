@@ -5,10 +5,15 @@ require "fileutils"
 require "pathname"
 require "capybara"
 require "capybara/dsl"
-require "erb"
 
-unless ERB.const_defined?(:ENCODING_FLAG)
-  ERB::ENCODING_FLAG = "#.*coding[:=]\\s*(\\S+)[ \\t]*"
+module ActionView
+  class Template
+    module Handlers
+      class ERB
+        ENCODING_FLAG = "#.*coding[:=]\\s*(\\S+)[ \\t]*" unless const_defined?(:ENCODING_FLAG)
+      end
+    end
+  end
 end
 
 require "rspec/rails"
