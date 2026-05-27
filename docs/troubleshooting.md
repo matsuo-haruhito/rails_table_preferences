@@ -403,6 +403,84 @@ Pass a preset name explicitly when the screen should use a specific preset:
 ) %>
 ```
 
+## Scoped preset exists but does not appear in the selector
+
+Symptoms:
+
+- A role or organization preset was created, but it does not appear for the expected owner.
+- The selector shows owner/shared presets only, even though a scoped preset record exists.
+- The generated demo shows `共有ビュー [shared]`, but `担当ビュー [role:operations]` or an organization preset never appears.
+
+Check:
+
+1. Confirm `scope_context_method` is configured.
+
+   ```ruby
+   RailsTablePreferences.configure do |config|
+     config.scope_context_method = :table_preference_scope_context
+   end
+   ```
+
+   If the configuration is missing, Rails Table Preferences resolves only owner/shared presets.
+
+2. Confirm the method actually runs for the current request and returns the expected shape.
+
+   ```ruby
+   def table_preference_scope_context
+     {
+       roles: current_user.roles.pluck(:key),
+       organization: current_user.organization_id
+     }
+   end
+   ```
+
+   The method may be private, but it must be reachable from the controller stack used by the mounted engine and the demo screen.
+
+3. Compare the runtime values with the saved `scope_key` exactly.
+
+   Role and organization matching is string-based. Save the same stable identifier that the runtime context returns.
+
+   Good matches:
+
+   - `roles: ["operations"]` with `scope_type: "role"` and `scope_key: "operations"`
+   - `organization: "tokyo-hq"` with `scope_type: "organization"` and `scope_key: "tokyo-hq"`
+
+   Common mismatches:
+
+   - role label like `"Operations Team"` saved in `scope_key`, while the runtime context returns `"operations"`
+   - numeric `organization_id` returned at runtime, but a slug like `"tokyo-hq"` saved in `scope_key`
+   - symbol-like values in app code that end up serialized differently from the stored string
+
+4. Confirm the preset record was saved as a non-owner scoped preset.
+
+   Shared, role, and organization presets should be stored with `user: nil` and the intended `scope_type` / `scope_key`.
+
+   Example console checks:
+
+   ```ruby
+   RailsTablePreferences::Preference.where(
+     table_key: "orders",
+     scope_type: "role",
+     scope_key: "operations",
+     user: nil
+   )
+   ```
+
+   ```ruby
+   RailsTablePreferences::Preference.where(
+     table_key: "orders",
+     scope_type: "organization",
+     scope_key: "tokyo-hq",
+     user: nil
+   )
+   ```
+
+5. If you are using the generated demo, remember that the role example appears only after you add the matching scope context.
+
+   The copied demo seeds `担当ビュー` with `scope_type: "role"` and `scope_key: "operations"`. It stays hidden until the host app returns `roles: ["operations"]` from `scope_context_method`.
+
+If the record exists and the context keys line up, but the selector still does not show the preset, compare the current host-app setup with [Scoped presets](scoped_presets.md) and inspect the request-time context values directly before changing the saved data.
+
 ## Need to customize the UI
 
 The default ERB, CSS, and JavaScript are intentionally copy-based, while Vite apps can import the packaged controller entrypoint directly.
