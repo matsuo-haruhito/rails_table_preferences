@@ -17,8 +17,9 @@ The bundled editor and Stimulus controller provide:
 - `aria-controls` from the open filter button to the current filter panel
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
-- a visible helper message when saving from a read-only preset will create a new owner preset instead of overwriting the shared preset
+- a visible helper message when saving from a read-only preset will save to the owner preset path instead of overwriting the shared preset directly
 - a live `role="status"` region for bundled save/load/delete feedback
+- explanatory `title` and `aria-label` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
@@ -88,7 +89,7 @@ For applications with stricter accessibility requirements, prefer documenting th
 
 Shared, role, and organization presets may be returned as `editable: false`.
 
-The bundled controller disables destructive/default controls for read-only presets, shows a short helper message about the save fallback, and falls back to creating an owner preset when users save edits from the normal editor path.
+The bundled controller disables destructive/default controls for read-only presets, shows a short helper message about the save fallback, and falls back to creating or updating an owner preset when users save edits from the normal editor path.
 
 This prevents the regular user-facing editor from accidentally overwriting shared presets while keeping the next action understandable.
 
@@ -140,6 +141,7 @@ Before releasing a screen, check:
 - All editor controls can receive focus.
 - Focus order is understandable.
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
+- The reset button hover text or accessible name explains that it discards unsaved editor changes and returns to the default settings.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Active filter buttons expose a short summary through `title` or `aria-label`.

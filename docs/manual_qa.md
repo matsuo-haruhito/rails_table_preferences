@@ -49,6 +49,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Change a truncation value and confirm long text is truncated.
 - [ ] Add representative `wrap`, `nowrap`, and `ellipsis` columns and confirm each overflow mode stays visually distinct.
 - [ ] Reset settings and confirm the table returns to default display settings.
+- [ ] Hover or focus the reset button and confirm the hint explains that unsaved editor changes are discarded and defaults are restored.
 
 ## 5. Preset behavior
 
@@ -200,6 +201,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm all editor controls can receive keyboard focus.
 - [ ] Confirm focus order is understandable.
 - [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
+- [ ] Confirm the reset button hover text or accessible name explains that current edits are discarded and defaults are restored.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
 - [ ] Confirm filter buttons expose a useful accessible label.
 - [ ] Confirm active filter buttons update `aria-pressed`.
