@@ -383,6 +383,10 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     %[.rails-table-preferences-filter-panel[data-rails-table-preferences-column-key='#{key}']]
   end
 
+  def editor_row_selector(key)
+    %[.rails-table-preferences-editor__row[data-rails-table-preferences-column-key='#{key}']]
+  end
+
   def filter_button_attribute(key, attribute)
     page.evaluate_script(<<~JS)
       (() => {
@@ -413,9 +417,9 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
     expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
-    expect(page.has_css?(".rails-table-preferences-editor__row", text: "得意先名")).to eq(true)
+    expect(page.has_css?(editor_row_selector("customer_name"), visible: :all)).to eq(true)
 
-    row = find(".rails-table-preferences-editor__row", text: "得意先名")
+    row = find(editor_row_selector("customer_name"), visible: :all)
     row.find("input[data-field='visible']", visible: :all).uncheck
     find("[data-action~='rails-table-preferences#applyFromEditor']", match: :first).click
 
