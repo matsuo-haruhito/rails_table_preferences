@@ -21,6 +21,15 @@
 </p>
 
 <p>
+  The demo also seeds one organization preset named <strong>本部ビュー</strong> for the
+  organization key <code>tokyo-hq</code>. If the host app returns
+  <code>{ organization: "tokyo-hq" }</code>, the selector also shows
+  <strong>本部ビュー [organization:tokyo-hq]</strong> and resolves it before the
+  shared preset while no owner or matching role default exists. If both the
+  role and organization context are present, the role preset still wins first.
+</p>
+
+<p>
   Sample rows intentionally mix statuses, delivery dates, repeated customer
   prefixes, and memo lengths. Search for <strong>東京</strong> or sort by
   <strong>納品日</strong> / <strong>金額</strong> to make the differences easier to spot.
