@@ -1,92 +1,94 @@
 <svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">Rails Table Preferences editor and scoped preset overview</title>
-  <desc id="desc">A representative documentation image showing the bundled editor, scoped preset choices, and a compact table preview.</desc>
+  <title id="title">Rails Table Preferences demo-aligned editor and shared preset overview</title>
+  <desc id="desc">A representative documentation image showing the bundled editor, the seeded shared preset, Japanese demo labels, and a compact orders table preview.</desc>
   <rect width="1400" height="920" fill="#F4F7FB"/>
   <rect x="72" y="56" width="1256" height="88" rx="22" fill="#FFFFFF" stroke="#D6DEEB"/>
-  <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Editor and scoped preset flow</text>
-  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A quick visual reference for how the bundled editor, preset scope, and working table stay connected.</text>
+  <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Editor and shared preset flow</text>
+  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A lightweight overview that follows the current generated demo: Japanese labels, a seeded shared preset, and practical list-screen cues.</text>
 
   <rect x="72" y="176" width="456" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
   <text x="108" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Bundled editor surface</text>
   <text x="108" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The default editor stays small, but still exposes the main table settings users need to review.</text>
 
   <rect x="108" y="292" width="384" height="116" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
-  <text x="132" y="326" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Preset</text>
-  <rect x="132" y="344" width="232" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
-  <text x="152" y="369" fill="#162033" font-family="Arial, sans-serif" font-size="16">operations-default</text>
-  <rect x="376" y="344" width="92" height="40" rx="12" fill="#EEF2FF" stroke="#C7D2FE"/>
-  <text x="401" y="369" fill="#4338CA" font-family="Arial, sans-serif" font-size="15" font-weight="700">Role</text>
+  <text x="132" y="326" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">現在の設定</text>
+  <rect x="132" y="344" width="188" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="156" y="369" fill="#162033" font-family="Arial, sans-serif" font-size="16">共有ビュー</text>
+  <rect x="332" y="344" width="136" height="40" rx="12" fill="#ECFDF3" stroke="#BBF7D0"/>
+  <text x="364" y="369" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">[shared]</text>
 
-  <rect x="108" y="428" width="384" height="122" rx="18" fill="#FFFFFF" stroke="#D9E2F0"/>
-  <text x="132" y="462" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Available presets</text>
-  <rect x="132" y="482" width="168" height="34" rx="17" fill="#E8F0FF"/>
-  <text x="154" y="504" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="14" font-weight="700">Owner: My compact view</text>
-  <rect x="310" y="482" width="158" height="34" rx="17" fill="#ECFDF3"/>
-  <text x="334" y="504" fill="#166534" font-family="Arial, sans-serif" font-size="14" font-weight="700">Shared: Team default</text>
-  <rect x="132" y="524" width="176" height="34" rx="17" fill="#EEF2FF"/>
-  <text x="156" y="546" fill="#4338CA" font-family="Arial, sans-serif" font-size="14" font-weight="700">Role: Operations default</text>
+  <rect x="108" y="428" width="384" height="138" rx="18" fill="#FFFFFF" stroke="#D9E2F0"/>
+  <text x="132" y="462" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Preset context</text>
+  <rect x="132" y="482" width="152" height="34" rx="17" fill="#E8F0FF"/>
+  <text x="158" y="504" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="14" font-weight="700">個人: default</text>
+  <rect x="296" y="482" width="172" height="34" rx="17" fill="#ECFDF3"/>
+  <text x="324" y="504" fill="#166534" font-family="Arial, sans-serif" font-size="14" font-weight="700">共有: 共有ビュー</text>
+  <text x="132" y="544" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">通常の editor から shared preset を読み込み、保存時は owner preset fallback で扱えます。</text>
 
-  <rect x="108" y="570" width="384" height="108" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
-  <text x="132" y="604" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Visible controls</text>
-  <text x="132" y="634" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- visible column toggles</text>
-  <text x="132" y="662" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- order and width controls</text>
-  <text x="300" y="634" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- default preset checkbox</text>
-  <text x="300" y="662" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- save, save as new, delete</text>
+  <rect x="108" y="586" width="384" height="108" rx="18" fill="#FBFCFE" stroke="#D9E2F0"/>
+  <text x="132" y="620" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Visible controls</text>
+  <text x="132" y="650" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- 表示 / 順序 / 列幅の編集</text>
+  <text x="132" y="678" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- Save / Save as new / Delete / Reset</text>
+  <text x="300" y="650" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- status region と busy-state</text>
+  <text x="300" y="678" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- hidden search params</text>
 
-  <rect x="108" y="698" width="384" height="110" rx="18" fill="#FFF7ED" stroke="#FED7AA"/>
-  <text x="132" y="732" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Why this matters</text>
-  <text x="132" y="762" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">The overview can mention scoped presets without implying a full admin workflow.</text>
-  <text x="132" y="790" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">It stays focused on the user-facing editor and the host app remains responsible for policy.</text>
+  <rect x="108" y="714" width="384" height="94" rx="18" fill="#FFF7ED" stroke="#FED7AA"/>
+  <text x="132" y="748" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Why this matters</text>
+  <text x="132" y="778" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">The generated demo now leads with Japanese labels and one shared preset path.</text>
+  <text x="132" y="800" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">Keeping the overview close to that surface reduces docs drift.</text>
 
   <rect x="560" y="176" width="768" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
-  <text x="596" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Representative list screen</text>
-  <text x="596" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A compact table preview keeps the chosen preset tied to a believable business screen.</text>
+  <text x="596" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Generated demo-aligned list screen</text>
+  <text x="596" y="254" fill="#58637A" font-family="Arial, sans-serif" font-size="16">The preset choice, search form, and table preview stay tied to one believable business screen.</text>
 
-  <rect x="596" y="292" width="696" height="176" rx="20" fill="#F8FAFC" stroke="#D9E2F0"/>
+  <rect x="596" y="292" width="696" height="190" rx="20" fill="#F8FAFC" stroke="#D9E2F0"/>
   <text x="624" y="326" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Editor snapshot</text>
   <rect x="624" y="344" width="168" height="34" rx="10" fill="#FFFFFF" stroke="#CBD5E1"/>
-  <text x="642" y="366" fill="#162033" font-family="Arial, sans-serif" font-size="14">operations-default</text>
-  <rect x="804" y="344" width="94" height="34" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
-  <text x="829" y="366" fill="#4338CA" font-family="Arial, sans-serif" font-size="14" font-weight="700">Role</text>
-  <rect x="918" y="344" width="126" height="34" rx="10" fill="#ECFDF3" stroke="#BBF7D0"/>
-  <text x="946" y="366" fill="#166534" font-family="Arial, sans-serif" font-size="14" font-weight="700">Default preset</text>
-  <rect x="624" y="396" width="136" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
-  <rect x="772" y="396" width="136" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
-  <rect x="920" y="396" width="136" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
-  <rect x="1068" y="396" width="120" height="40" rx="12" fill="#DBEAFE"/>
-  <text x="649" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Order width</text>
-  <text x="803" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Customer visible</text>
-  <text x="958" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Status position</text>
-  <text x="1100" y="420" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="14" font-weight="700">Save</text>
+  <text x="660" y="366" fill="#162033" font-family="Arial, sans-serif" font-size="14">共有ビュー</text>
+  <rect x="804" y="344" width="120" height="34" rx="10" fill="#ECFDF3" stroke="#BBF7D0"/>
+  <text x="836" y="366" fill="#166534" font-family="Arial, sans-serif" font-size="14" font-weight="700">[shared]</text>
+  <rect x="938" y="344" width="218" height="34" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="972" y="366" fill="#4338CA" font-family="Arial, sans-serif" font-size="14" font-weight="700">設定を読み込みました。</text>
+  <rect x="624" y="396" width="244" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="648" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">search_word: 東京</text>
+  <rect x="882" y="396" width="92" height="40" rx="12" fill="#DBEAFE"/>
+  <text x="913" y="420" fill="#1D4ED8" font-family="Arial, sans-serif" font-size="14" font-weight="700">検索</text>
+  <rect x="988" y="396" width="158" height="40" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="1020" y="420" fill="#4D5B71" font-family="Arial, sans-serif" font-size="14">Delete disabled</text>
 
-  <rect x="596" y="500" width="120" height="52" rx="12" fill="#E0E7FF"/>
-  <rect x="716" y="500" width="220" height="52" rx="12" fill="#EDF2F7"/>
-  <rect x="936" y="500" width="156" height="52" rx="12" fill="#EDF2F7"/>
-  <rect x="1092" y="500" width="200" height="52" rx="12" fill="#EDF2F7"/>
-  <text x="622" y="532" fill="#312E81" font-family="Arial, sans-serif" font-size="16" font-weight="700">Order</text>
-  <text x="792" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Customer</text>
-  <text x="990" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Status</text>
-  <text x="1164" y="532" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">Updated</text>
+  <rect x="596" y="512" width="104" height="52" rx="12" fill="#E0E7FF"/>
+  <rect x="700" y="512" width="240" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="940" y="512" width="126" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="1066" y="512" width="116" height="52" rx="12" fill="#EDF2F7"/>
+  <rect x="1182" y="512" width="110" height="52" rx="12" fill="#EDF2F7"/>
+  <text x="622" y="544" fill="#312E81" font-family="Arial, sans-serif" font-size="16" font-weight="700">受注番号</text>
+  <text x="788" y="544" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">得意先名</text>
+  <text x="972" y="544" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">納品日</text>
+  <text x="1102" y="544" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">状態</text>
+  <text x="1216" y="544" fill="#283548" font-family="Arial, sans-serif" font-size="16" font-weight="700">金額</text>
 
-  <rect x="596" y="566" width="696" height="62" rx="12" fill="#FFFFFF"/>
-  <rect x="596" y="634" width="696" height="62" rx="12" fill="#F9FBFD"/>
-  <rect x="596" y="702" width="696" height="62" rx="12" fill="#FFFFFF"/>
-  <rect x="596" y="566" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <rect x="596" y="634" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <rect x="596" y="702" width="120" height="62" rx="12" fill="#EEF2FF"/>
-  <text x="622" y="604" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2048</text>
-  <text x="748" y="604" fill="#283548" font-family="Arial, sans-serif" font-size="15">Acme Supply</text>
-  <text x="990" y="604" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
-  <text x="1164" y="604" fill="#283548" font-family="Arial, sans-serif" font-size="15">05-20 09:14</text>
-  <text x="622" y="672" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2041</text>
-  <text x="748" y="672" fill="#283548" font-family="Arial, sans-serif" font-size="15">Northwind Labs</text>
-  <text x="990" y="672" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">Waiting</text>
-  <text x="1164" y="672" fill="#283548" font-family="Arial, sans-serif" font-size="15">05-19 17:42</text>
-  <text x="622" y="740" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">SO-2033</text>
-  <text x="748" y="740" fill="#283548" font-family="Arial, sans-serif" font-size="15">Kanto Medical</text>
-  <text x="990" y="740" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">Packed</text>
-  <text x="1164" y="740" fill="#283548" font-family="Arial, sans-serif" font-size="15">05-18 15:27</text>
+  <rect x="596" y="578" width="696" height="62" rx="12" fill="#FFFFFF"/>
+  <rect x="596" y="646" width="696" height="62" rx="12" fill="#F9FBFD"/>
+  <rect x="596" y="714" width="696" height="62" rx="12" fill="#FFFFFF"/>
+  <rect x="596" y="578" width="104" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="596" y="646" width="104" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="596" y="714" width="104" height="62" rx="12" fill="#EEF2FF"/>
+  <text x="630" y="616" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">A001</text>
+  <text x="724" y="616" fill="#283548" font-family="Arial, sans-serif" font-size="15">山田商事 東京本店</text>
+  <text x="972" y="616" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-27</text>
+  <text x="1108" y="616" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">未出荷</text>
+  <text x="1216" y="616" fill="#283548" font-family="Arial, sans-serif" font-size="15">12,000</text>
+  <text x="630" y="684" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">A004</text>
+  <text x="724" y="684" fill="#283548" font-family="Arial, sans-serif" font-size="15">東京医療機器</text>
+  <text x="972" y="684" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-05-30</text>
+  <text x="1108" y="684" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">未出荷</text>
+  <text x="1216" y="684" fill="#283548" font-family="Arial, sans-serif" font-size="15">89,000</text>
+  <text x="630" y="752" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">A005</text>
+  <text x="724" y="752" fill="#283548" font-family="Arial, sans-serif" font-size="15">東京製菓</text>
+  <text x="972" y="752" fill="#283548" font-family="Arial, sans-serif" font-size="15">2026-06-01</text>
+  <text x="1108" y="752" fill="#166534" font-family="Arial, sans-serif" font-size="15" font-weight="700">出荷済</text>
+  <text x="1216" y="752" fill="#283548" font-family="Arial, sans-serif" font-size="15">21,500</text>
 
-  <rect x="596" y="780" width="696" height="28" rx="14" fill="#E8F0FF"/>
-  <text x="620" y="799" fill="#35517A" font-family="Arial, sans-serif" font-size="14">Preset context stays visible while the table preview shows the same working state a real host screen would expose.</text>
+  <rect x="596" y="792" width="696" height="28" rx="14" fill="#E8F0FF"/>
+  <text x="620" y="811" fill="#35517A" font-family="Arial, sans-serif" font-size="14">The overview follows the generated demo's shared preset, Japanese labels, and practical search cue instead of a generic placeholder screen.</text>
 </svg>
