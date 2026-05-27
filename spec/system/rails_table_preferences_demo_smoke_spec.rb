@@ -315,9 +315,10 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     session = ActionDispatch::Integration::Session.new(Rails.application)
     session.get("/rails_table_preferences_system_smoke/orders")
 
-    raise "unexpected smoke render status: #{session.response.status}" unless session.response.status == 200
+    return session.response.body if session.response.status == 200
 
-    session.response.body
+    body_excerpt = session.response.body.to_s.gsub(/\s+/, " ").slice(0, 500)
+    raise "unexpected smoke render status: #{session.response.status} body=#{body_excerpt.inspect}"
   end
 
   it "renders the demo surface and hides a column through apply" do
