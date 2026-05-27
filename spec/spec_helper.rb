@@ -6,6 +6,9 @@ require "pathname"
 require "capybara"
 require "capybara/dsl"
 require "erb"
+require "active_record"
+require "action_controller/railtie"
+require "rails_table_preferences"
 
 ACTION_VIEW_ENCODING_FLAG = if ::ERB.const_defined?(:ENCODING_FLAG)
   ::ERB::ENCODING_FLAG
@@ -25,9 +28,9 @@ module ActionView
   end
 end
 
-require_relative "test_application"
 require "rspec/rails"
 require "selenium-webdriver"
+require_relative "test_application"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
