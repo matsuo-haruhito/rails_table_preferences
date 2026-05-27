@@ -58,7 +58,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 
 Rails Table Preferences targets Rails 7.0 and later.
 
-Current representative compatibility coverage is:
+Current representative CI compatibility coverage is:
 
 - Rails 7.0
 - Rails 7.1
