@@ -5,6 +5,12 @@ require "fileutils"
 require "pathname"
 require "capybara"
 require "capybara/dsl"
+require "erb"
+
+unless ERB.const_defined?(:ENCODING_FLAG)
+  ERB::ENCODING_FLAG = "#.*coding[:=]\\s*(\\S+)[ \\t]*"
+end
+
 require "rspec/rails"
 require "selenium-webdriver"
 require_relative "test_application"
