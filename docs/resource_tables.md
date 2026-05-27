@@ -50,6 +50,79 @@ Profiles are applied after Active Record column inference. They are for deltas, 
 
 Supported profile directives include `model`, `only`, `exclude`, `order`, `label`, `filter`, `editor`, `display`, and `column`.
 
+## Round-trip saved filter/sort params through an existing search form
+
+Use this pattern when the page wants `resource_table_for` for the visible table surface, but the surrounding search form should still round-trip saved filter/sort UI state.
+
+Controller:
+
+```ruby
+class OrdersController < ApplicationController
+  def index
+    @preference_columns = [
+      table_preferences_column(
+        :customer_id,
+        label: "Customer",
+        filter: { type: :text, param: :customer_id }
+      ),
+      table_preferences_column(
+        :status,
+        label: "Status",
+        filter: { type: :text, param: :status },
+        sortable: true
+      ),
+      table_preferences_column(
+        :delivery_date,
+        label: "Delivery date",
+        filter: { type: :date, from_param: :from_delivery_date, to_param: :to_delivery_date },
+        sortable: true
+      )
+    ]
+
+    preference_params = rails_table_preference_params(
+      table_key: :orders,
+      name: params[:table_preference_name],
+      columns: @preference_columns
+    )
+
+    merged_params = params.to_unsafe_h.merge(preference_params)
+
+    @orders = Order
+      .includes(:customer)
+      .search(merged_params)
+      .order_by(merged_params["sort"] || params[:sort])
+      .page(params[:page])
+  end
+end
+```
+
+View:
+
+```erb
+<%= form_with url: orders_path, method: :get do %>
+  <%= text_field_tag :customer_id, params[:customer_id], placeholder: "Customer" %>
+  <%= text_field_tag :status, params[:status], placeholder: "Status" %>
+  <%= hidden_field_tag :table_preference_name, params[:table_preference_name] if params[:table_preference_name].present? %>
+
+  <%= table_preferences_hidden_fields(
+    settings: @table_preference_settings,
+    columns: @preference_columns
+  ) %>
+
+  <%= submit_tag "Search" %>
+<% end %>
+
+<%= resource_table_for @orders, profile: OrdersTableProfile, table_key: :orders %>
+```
+
+Why this split works:
+
+- `resource_table_for` still owns inferred columns, profile overrides, and the rendered table surface
+- `rails_table_preference_params(...)` and `table_preferences_hidden_fields(...)` only describe how saved filter/sort UI state maps back into the existing controller/search form contract
+- the host app still owns query execution, pagination, and deciding which params are safe to send through the search form
+
+This keeps the resource-table path convention-first while making the params boundary explicit. When the screen later adds export actions, keep the export submit separate and pass only the query params that export should accept. See [Export integration](export_integration.md) for that adjacent pattern.
+
 ## Renderer registries
 
 Renderer registries convert filter/editor metadata into HTML without making Rails Table Preferences depend on a specific form helper library.
