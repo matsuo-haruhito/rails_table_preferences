@@ -171,3 +171,4 @@ Current automated browser/system smoke covers:
 - filter panel opens
 - sortable header changes sort state
 - shared preset read-only load and owner fallback save
+- async preset save busy-state disable and failure recovery
