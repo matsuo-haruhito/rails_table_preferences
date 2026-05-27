@@ -411,8 +411,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
 
   def apply_demo_params(orders, merged_params)
     filtered = orders
-      search_word = merged_params["search_word"].presence || merged_params[:search_word]
-      status_values = Array(merged_params["status"].presence || merged_params[:status]).filter_map(&:presence)
+    search_word = merged_params["search_word"].presence || merged_params[:search_word]
+    status_values = Array(merged_params["status"].presence || merged_params[:status]).filter_map(&:presence)
     from_delivery_date = parse_date(merged_params["from_delivery_date"].presence || merged_params[:from_delivery_date])
     to_delivery_date = parse_date(merged_params["to_delivery_date"].presence || merged_params[:to_delivery_date])
 
