@@ -19,6 +19,7 @@ The bundled editor and Stimulus controller provide:
 - disabled states for controls that should not be used on read-only scoped presets
 - a visible helper message when saving from a read-only preset will create a new owner preset instead of overwriting the shared preset
 - a live `role="status"` region for bundled save/load/delete feedback
+- explanatory `title` and `aria-label` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
@@ -140,6 +141,7 @@ Before releasing a screen, check:
 - All editor controls can receive focus.
 - Focus order is understandable.
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
+- The reset button hover text or accessible name explains that it discards unsaved editor changes and returns to the default settings.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Active filter buttons expose a short summary through `title` or `aria-label`.
