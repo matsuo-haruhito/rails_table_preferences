@@ -2,7 +2,7 @@
 
 Rails Table Preferences can copy a lightweight demo screen into a host application for local browser verification.
 
-Use this when you want to confirm the editor, table behavior, preference persistence, filters, and sortable headers before wiring the gem into a real business screen.
+Use this when you want to confirm the editor, table behavior, preference persistence, filters, sortable headers, fixed columns, and column groups before wiring the gem into a real business screen.
 
 For a quick visual reference before generating the screen locally, see [Visual overview](visual_overview.md).
 
@@ -31,6 +31,8 @@ The same demo controller also seeds one role preset named `担当ビュー` for 
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, and memo lengths so sort, filter, width, and preset checks are easier to judge at a glance.
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
+
+The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup.
 
 ## Add routes
 
@@ -113,6 +115,8 @@ The generated demo screen includes:
 - column order
 - table-header drag ordering
 - column width resizing
+- fixed/pinned column metadata inside a horizontal scroll wrapper
+- grouped header markup that mirrors column group metadata
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
@@ -138,6 +142,8 @@ On the demo screen, confirm:
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
+- [ ] Horizontally scrolling the demo wrapper keeps `受注番号` visible.
+- [ ] The grouped header row shows `受注情報`, `得意先情報`, and `配送情報` above the leaf headers.
 - [ ] Filter panel opens.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
@@ -199,6 +205,7 @@ Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
+- pinned column hooks and grouped header render on the demo-shaped table surface
 
 Good next automated checks are:
 
