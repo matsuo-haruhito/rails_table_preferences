@@ -72,10 +72,12 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Create or seed a role preset and confirm it appears only for matching role context.
 - [ ] If you use the generated demo example, set `scope_context_method` to return `roles: ["operations"]` and confirm `担当ビュー [role:operations]` appears.
 - [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
+- [ ] If you use the generated demo example, set `scope_context_method` to return `organization: "tokyo-hq"` and confirm `東京組織ビュー [organization:tokyo-hq]` appears.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, clear any owner default and confirm `担当ビュー [role:operations]` wins before `共有ビュー [shared]`.
+- [ ] In the generated demo flow, use `organization: "tokyo-hq"` without a matching role default and confirm `東京組織ビュー [organization:tokyo-hq]` wins before `共有ビュー [shared]`.
 - [ ] Confirm shared presets are selectable by normal users.
 - [ ] Confirm shared/role/organization presets are not deleted from the normal user-facing editor.
 - [ ] Confirm saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
