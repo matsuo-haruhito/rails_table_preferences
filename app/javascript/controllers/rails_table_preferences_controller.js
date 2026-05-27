@@ -851,7 +851,7 @@ export default class extends Controller {
     return {
       operator: String(condition.operator || ""),
       value: condition.value ?? "",
-      values: Array.isArray(condition.values) ? condition.values.map(String) : Array(condition.value || []).map(String),
+      values: Array.isArray(condition.values) ? condition.values.map(String) : [],
       from: condition.from ?? "",
       to: condition.to ?? ""
     }
@@ -862,16 +862,16 @@ export default class extends Controller {
     draftCondition.operator = panel.querySelector("[data-field='operator']")?.value || draftCondition.operator || ""
 
     const valueInput = panel.querySelector("[data-field='value']")
-    if (valueInput) draftCondition.value = valueInput.value
+    draftCondition.value = valueInput ? valueInput.value : ""
 
     const valuesSelect = panel.querySelector("[data-field='values']")
-    if (valuesSelect) draftCondition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
+    draftCondition.values = valuesSelect ? Array.from(valuesSelect.selectedOptions).map((option) => option.value) : []
 
     const fromInput = panel.querySelector("[data-field='from']")
-    if (fromInput) draftCondition.from = fromInput.value
+    draftCondition.from = fromInput ? fromInput.value : ""
 
     const toInput = panel.querySelector("[data-field='to']")
-    if (toInput) draftCondition.to = toInput.value
+    draftCondition.to = toInput ? toInput.value : ""
 
     panel.__railsTablePreferencesDraftCondition = draftCondition
     return draftCondition
