@@ -201,9 +201,13 @@ Current automated browser/system smoke covers:
 - hide column and apply
 - active filter button summary through `title` / `aria-label`
 - bundled filter panel close on viewport resize
+- existing search form submit with saved hidden-field filters and sort
+- export payload preview hidden-column exclusion and saved visible-column order
+- bundled filter panel close on page scroll
 
 Good next automated checks are:
 
 - save and reload restore settings
 - filter operator switch updates the in-panel fields in place
-- sortable header changes sort state
+- sortable header click changes sort state directly
+- bundled filter panel close on container scroll
