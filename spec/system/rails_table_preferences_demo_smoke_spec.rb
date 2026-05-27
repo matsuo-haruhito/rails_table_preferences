@@ -182,7 +182,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   JS
 
   TEMPLATE = <<~ERB
-    <% smoke_data_attributes = @smoke_data_attributes.merge(class: "rails-table-preferences-editor") %>
+    <% smoke_root_options = { data: @smoke_data_attributes, class: "rails-table-preferences-editor" } %>
 
     <h1>Rails Table Preferences Demo Smoke</h1>
 
@@ -192,7 +192,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
 
     <div id="rtp-smoke-root"
          data-rtp-smoke-root="true"
-         <%= tag.attributes(smoke_data_attributes) %>>
+         <%= tag.attributes(smoke_root_options) %>>
       <div class="rails-table-preferences-editor__title">デモ受注一覧の表示設定</div>
 
       <div class="rails-table-preferences-editor__preset">
