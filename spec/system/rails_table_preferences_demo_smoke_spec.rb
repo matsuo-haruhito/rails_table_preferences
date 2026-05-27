@@ -318,9 +318,7 @@ end
 Rails.application.reload_routes!
 
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
-  it "renders the demo surface and hides a column through apply" do
-    visit "/rails_table_preferences_system_smoke/orders"
-
+  def ensure_smoke_controller_mounted
     page.execute_script(<<~JS)
       if (document.body.dataset.rtpSmokeReady !== "true" && window.__rtpMountController) {
         window.__rtpMountController()
@@ -334,6 +332,43 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect}"
     expect(smoke_error).to eq("")
     expect(smoke_stage).to match(/ready/)
+  end
+
+  def filter_button_selector(key)
+    %[button[data-rails-table-preferences-filter-button][data-rails-table-preferences-column-key='#{key}']]
+  end
+
+  def filter_panel_selector(key)
+    %[.rails-table-preferences-filter-panel[data-rails-table-preferences-column-key='#{key}']]
+  end
+
+  def filter_button_attribute(key, attribute)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const button = document.querySelector(#{filter_button_selector(key).inspect})
+        return button ? button.getAttribute(#{attribute.inspect}) : null
+      })()
+    JS
+  end
+
+  def filter_button_has_attribute?(key, attribute)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const button = document.querySelector(#{filter_button_selector(key).inspect})
+        return button ? button.hasAttribute(#{attribute.inspect}) : false
+      })()
+    JS
+  end
+
+  def open_filter_panel_for(key)
+    find(filter_button_selector(key), visible: :all).click
+    expect(page.has_css?(filter_panel_selector(key))).to eq(true)
+  end
+
+  it "renders the demo surface and hides a column through apply" do
+    visit "/rails_table_preferences_system_smoke/orders"
+    ensure_smoke_controller_mounted
+
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
     expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
@@ -347,5 +382,37 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
+  end
+
+  it "summarizes the active filter button through title and aria-label" do
+    visit "/rails_table_preferences_system_smoke/orders"
+    ensure_smoke_controller_mounted
+
+    open_filter_panel_for("customer_name")
+    within(filter_panel_selector("customer_name")) do
+      find("[data-field='value']").set("東京")
+      find("[data-action='apply-filter']").click
+    end
+
+    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
+    expect(find(filter_button_selector("customer_name"), visible: :all).text).to eq("▾")
+    expect(filter_button_attribute("customer_name", "aria-pressed")).to eq("true")
+    expect(filter_button_attribute("customer_name", "aria-label")).to eq("絞り込み: 得意先名 (含む: 東京)")
+    expect(filter_button_attribute("customer_name", "title")).to eq("絞り込み: 得意先名 (含む: 東京)")
+  end
+
+  it "closes the open filter panel on viewport resize" do
+    visit "/rails_table_preferences_system_smoke/orders"
+    ensure_smoke_controller_mounted
+
+    open_filter_panel_for("customer_name")
+    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("true")
+    expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(true)
+
+    page.execute_script("window.dispatchEvent(new Event('resize'))")
+
+    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
+    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
+    expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(false)
   end
 end
