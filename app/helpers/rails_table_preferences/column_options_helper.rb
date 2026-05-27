@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module RailsTablePreferences
+  # Rails helper lookup derives this constant from the file path.
+  # The actual helper methods are reopened onto TablePreferencesHelper below.
+  module ColumnOptionsHelper
+  end
+
   module TablePreferencesHelper
     def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       ColumnDefinition.new(
