@@ -3,13 +3,30 @@
 require "bundler/setup"
 require "fileutils"
 require "pathname"
-require "active_record"
-require "action_controller/railtie"
-require "action_view/railtie"
-require "rspec/rails"
-require_relative "test_application"
 require "capybara"
 require "capybara/dsl"
+require "erb"
+
+ACTION_VIEW_ENCODING_FLAG = if ::ERB.const_defined?(:ENCODING_FLAG)
+  ::ERB::ENCODING_FLAG
+else
+  "#.*coding[:=]\\s*(\\S+)[ \\t]*"
+end
+
+module ActionView
+  class Template
+    ENCODING_FLAG = ::ACTION_VIEW_ENCODING_FLAG unless const_defined?(:ENCODING_FLAG)
+
+    module Handlers
+      class ERB
+        ENCODING_FLAG = ::ACTION_VIEW_ENCODING_FLAG unless const_defined?(:ENCODING_FLAG)
+      end
+    end
+  end
+end
+
+require_relative "test_application"
+require "rspec/rails"
 require "selenium-webdriver"
 
 Capybara.app = Rails.application
