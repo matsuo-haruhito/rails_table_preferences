@@ -222,7 +222,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       </tbody>
     <% end %>
 
-    <script><%= raw self.class::BROWSER_SMOKE_SCRIPT %></script>
+    <script><%= raw controller.class::BROWSER_SMOKE_SCRIPT %></script>
   ERB
 
   def index
