@@ -11,8 +11,8 @@ module RailsTablePreferences
     end
 
     initializer "rails_table_preferences.load_controller_extensions" do
-      require_dependency root.join("app/helpers/rails_table_preferences/column_options_helper").to_s
       require_dependency root.join("app/helpers/rails_table_preferences/table_preferences_helper").to_s
+      require_dependency root.join("app/helpers/rails_table_preferences/column_options_helper").to_s
       require_dependency root.join("app/controllers/concerns/rails_table_preferences/controller").to_s
     end
 
