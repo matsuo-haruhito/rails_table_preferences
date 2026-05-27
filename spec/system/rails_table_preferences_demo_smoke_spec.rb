@@ -313,15 +313,22 @@ Rails.application.reload_routes!
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
   it "renders the demo surface and hides a column through apply" do
     visit "/rails_table_preferences_system_smoke/orders"
-    page.execute_script(RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
+    page.execute_script(<<~JS, RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
+      document.body.dataset.rtpHarnessWrapper = "started"
+      new Function(arguments[0])()
+      document.body.dataset.rtpHarnessWrapper = "completed"
+    JS
+
+    expect(page).to have_css("body[data-rtp-harness-wrapper='completed']", visible: false)
 
     smoke_ready = page.evaluate_script("document.body.dataset.rtpSmokeReady || ''")
     smoke_error = page.evaluate_script("document.body.dataset.rtpSmokeError || ''")
     smoke_stage = page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")
     mount_present = page.evaluate_script("typeof window.__rtpMountController")
     controller_present = page.evaluate_script("typeof window.__rtpController")
+    wrapper_state = page.evaluate_script("document.body.dataset.rtpHarnessWrapper || ''")
 
-    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect} mount=#{mount_present.inspect} controller=#{controller_present.inspect}"
+    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect} mount=#{mount_present.inspect} controller=#{controller_present.inspect} wrapper=#{wrapper_state.inspect}"
     expect(smoke_error).to eq("")
     expect(smoke_stage).to match(/ready/)
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
