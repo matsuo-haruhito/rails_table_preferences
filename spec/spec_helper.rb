@@ -6,27 +6,8 @@ require "pathname"
 require "capybara"
 require "capybara/dsl"
 require "erb"
-require "active_record"
-require "action_controller/railtie"
-require "rails_table_preferences"
 
-ACTION_VIEW_ENCODING_FLAG = if ::ERB.const_defined?(:ENCODING_FLAG)
-  ::ERB::ENCODING_FLAG
-else
-  "#.*coding[:=]\\s*(\\S+)[ \\t]*"
-end
-
-module ActionView
-  class Template
-    ENCODING_FLAG = ::ACTION_VIEW_ENCODING_FLAG unless const_defined?(:ENCODING_FLAG)
-
-    module Handlers
-      class ERB
-        ENCODING_FLAG = ::ACTION_VIEW_ENCODING_FLAG unless const_defined?(:ENCODING_FLAG)
-      end
-    end
-  end
-end
+::ERB.const_set(:ENCODING_FLAG, "#.*coding[:=]\\s*(\\S+)[ \\t]*") unless ::ERB.const_defined?(:ENCODING_FLAG)
 
 require "rspec/rails"
 require "selenium-webdriver"
