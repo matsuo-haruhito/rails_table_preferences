@@ -757,7 +757,13 @@ export default class extends Controller {
     panel.className = "rails-table-preferences-filter-panel"
     panel.id = this.filterPanelId(column.key)
     panel.dataset.railsTablePreferencesColumnKey = column.key
+    panel.__railsTablePreferencesDraftCondition = this.filterDraftConditionFor(column.key)
     panel.innerHTML = this.filterPanelHtml(column)
+    panel.querySelector("[data-field='operator']")?.addEventListener("change", () => {
+      this.syncFilterPanelDraftCondition(panel)
+      this.renderFilterPanelValueFields(panel, column)
+      this.focusFilterPanelValueField(panel)
+    })
     panel.querySelector("[data-action='apply-filter']")?.addEventListener("click", (event) => {
       event.preventDefault()
       this.applyFilterPanel(column.key, panel)
@@ -766,6 +772,8 @@ export default class extends Controller {
       event.preventDefault()
       this.clearFilter(column.key)
     })
+    panel.addEventListener("input", () => this.syncFilterPanelDraftCondition(panel))
+    panel.addEventListener("change", () => this.syncFilterPanelDraftCondition(panel))
     panel.addEventListener("click", (event) => event.stopPropagation())
     document.body.appendChild(panel)
     this.positionFilterPanel(panel, headerCell)
@@ -803,7 +811,9 @@ export default class extends Controller {
           ${operators.map((operator) => `<option value="${this.escapeHtml(operator)}" ${operator === selectedOperator ? "selected" : ""}>${this.escapeHtml(this.filterOperatorText(operator))}</option>`).join("")}
         </select>
       </label>
-      ${this.filterValueHtml(filter, condition, selectedOperator)}
+      <div data-rails-table-preferences-filter-values="true">
+        ${this.filterValueHtml(filter, condition, selectedOperator)}
+      </div>
       <div class="rails-table-preferences-filter-panel__actions">
         <button type="button" data-action="apply-filter">${this.escapeHtml(this.filterApplyLabelValue)}</button>
         <button type="button" data-action="clear-filter">${this.escapeHtml(this.filterClearLabelValue)}</button>
@@ -826,6 +836,47 @@ export default class extends Controller {
     return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"></label>`
   }
 
+  renderFilterPanelValueFields(panel, column) {
+    const valuesContainer = panel.querySelector("[data-rails-table-preferences-filter-values]")
+    if (!valuesContainer) return
+    const draftCondition = panel.__railsTablePreferencesDraftCondition || this.filterDraftConditionFor(column.key)
+    const operator = panel.querySelector("[data-field='operator']")?.value || draftCondition.operator || this.filterOperatorsFor(column.filter || {})[0] || "contains"
+    draftCondition.operator = operator
+    panel.__railsTablePreferencesDraftCondition = draftCondition
+    valuesContainer.innerHTML = this.filterValueHtml(column.filter || {}, draftCondition, operator)
+  }
+
+  filterDraftConditionFor(key) {
+    const condition = this.filterConditionFor(key)
+    return {
+      operator: String(condition.operator || ""),
+      value: condition.value ?? "",
+      values: Array.isArray(condition.values) ? condition.values.map(String) : Array(condition.value || []).map(String),
+      from: condition.from ?? "",
+      to: condition.to ?? ""
+    }
+  }
+
+  syncFilterPanelDraftCondition(panel) {
+    const draftCondition = panel.__railsTablePreferencesDraftCondition || { value: "", values: [], from: "", to: "" }
+    draftCondition.operator = panel.querySelector("[data-field='operator']")?.value || draftCondition.operator || ""
+
+    const valueInput = panel.querySelector("[data-field='value']")
+    if (valueInput) draftCondition.value = valueInput.value
+
+    const valuesSelect = panel.querySelector("[data-field='values']")
+    if (valuesSelect) draftCondition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
+
+    const fromInput = panel.querySelector("[data-field='from']")
+    if (fromInput) draftCondition.from = fromInput.value
+
+    const toInput = panel.querySelector("[data-field='to']")
+    if (toInput) draftCondition.to = toInput.value
+
+    panel.__railsTablePreferencesDraftCondition = draftCondition
+    return draftCondition
+  }
+
   positionFilterPanel(panel, headerCell) {
     const rect = headerCell.getBoundingClientRect()
     panel.style.position = "absolute"
@@ -837,6 +888,12 @@ export default class extends Controller {
   focusInitialFilterPanelField(panel) {
     const firstField = panel.querySelector("[data-field='operator']") ||
       panel.querySelector("[data-field='value'], [data-field='from'], [data-field='values']")
+    firstField?.focus()
+  }
+
+  focusFilterPanelValueField(panel) {
+    const firstField = panel.querySelector("[data-field='value'], [data-field='from'], [data-field='values']") ||
+      panel.querySelector("[data-action='apply-filter']")
     firstField?.focus()
   }
 
@@ -855,21 +912,16 @@ export default class extends Controller {
 
   applyFilterPanel(key, panel) {
     if (this.busy) return
-    const operator = panel.querySelector("[data-field='operator']")?.value
+    const draftCondition = this.syncFilterPanelDraftCondition(panel)
+    const operator = draftCondition.operator
     if (!operator) return
     const condition = { operator }
     if (operator === "between") {
-      const from = panel.querySelector("[data-field='from']")?.value
-      const to = panel.querySelector("[data-field='to']")?.value
-      if (from) condition.from = from
-      if (to) condition.to = to
+      if (draftCondition.from) condition.from = draftCondition.from
+      if (draftCondition.to) condition.to = draftCondition.to
     } else if (!["blank", "present", "true", "false"].includes(operator)) {
-      const valuesSelect = panel.querySelector("[data-field='values']")
-      if (valuesSelect) condition.values = Array.from(valuesSelect.selectedOptions).map((option) => option.value)
-      else {
-        const value = panel.querySelector("[data-field='value']")?.value
-        if (value) condition.value = value
-      }
+      if (Array.isArray(draftCondition.values) && draftCondition.values.length > 0) condition.values = draftCondition.values
+      else if (draftCondition.value) condition.value = draftCondition.value
     }
     this.updateFilterCondition(key, condition)
     this.closeFilterPanel()
