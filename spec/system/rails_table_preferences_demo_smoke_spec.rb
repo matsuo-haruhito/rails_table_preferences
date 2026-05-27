@@ -311,9 +311,13 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
       }
     JS
 
-    expect(page.has_selector?("body[data-rtp-smoke-ready='true']")).to eq(true)
-    expect(page.evaluate_script("document.body.dataset.rtpSmokeError || ''")).to eq("")
-    expect(page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")).to match(/ready/)
+    smoke_ready = page.evaluate_script("document.body.dataset.rtpSmokeReady || ''")
+    smoke_error = page.evaluate_script("document.body.dataset.rtpSmokeError || ''")
+    smoke_stage = page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")
+
+    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect}"
+    expect(smoke_error).to eq("")
+    expect(smoke_stage).to match(/ready/)
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
     expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
