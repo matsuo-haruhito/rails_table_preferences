@@ -3,14 +3,14 @@
 require "bundler/setup"
 require "fileutils"
 require "pathname"
-require "capybara"
-require "capybara/dsl"
 require "active_record"
 require "action_controller/railtie"
 require "action_view/railtie"
 require "rspec/rails"
-require "selenium-webdriver"
 require_relative "test_application"
+require "capybara"
+require "capybara/dsl"
+require "selenium-webdriver"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
