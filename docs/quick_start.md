@@ -358,6 +358,22 @@ Existing search form integration example:
 ) %>
 ```
 
+If the page already has a normal GET search form, `table_preferences_hidden_fields(...)` is the shortest way to keep saved filter/sort UI state attached to that form submission without rewriting the rest of the search flow. See [Controller integration](controller_integration.md) for full controller-side examples, nested-param variants, and Ransack wiring.
+
+### If the same screen also offers exports
+
+When a CSV, Excel, or report action should follow the same saved visible columns and order, resolve an export payload in the export action and keep file generation in the host app:
+
+```ruby
+export_payload = rails_table_preference_export_payload(
+  table_key: :orders,
+  columns: @table_columns,
+  name: params[:table_preference_name]
+)
+```
+
+Use `export_payload["column_keys"]` for a lightweight ordered column list, or `export_payload["headers"]` and `export_payload["columns"]` when labels and metadata need to follow the selected preset. See [Export integration](export_integration.md) for the minimal list-to-export wiring.
+
 ## 8. Hide columns from the preference UI
 
 Use `ignored: true` for columns that should not appear in the user-facing editor:
@@ -383,5 +399,6 @@ Ignored columns are removed from Rails Table Preferences settings, but the host 
 ## Next steps
 
 - See [Practical examples](examples.md) for more realistic list-screen integrations.
-- See [Controller integration](controller_integration.md) for saved filter/sort params.
+- See [Controller integration](controller_integration.md) for saved filter/sort params and existing search form wiring.
+- See [Export integration](export_integration.md) when export actions should follow the saved visible columns and order.
 - See [Troubleshooting](troubleshooting.md) if the editor, API, CSS, or JavaScript does not behave as expected.
