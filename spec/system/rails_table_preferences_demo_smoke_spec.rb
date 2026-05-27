@@ -313,6 +313,7 @@ Rails.application.reload_routes!
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
   def visit_demo_smoke
     visit "/rails_table_preferences_system_smoke/orders"
+    expect(page.has_css?("#rtp-smoke-root")).to eq(true)
     page.execute_script(RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
   end
 
