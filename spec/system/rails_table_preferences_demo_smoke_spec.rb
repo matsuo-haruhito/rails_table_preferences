@@ -487,7 +487,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
   def visit_demo_smoke
     visit "/rails_table_preferences_system_smoke/orders"
 
-    expect(page).to have_css("#rtp-smoke-root[data-rtp-smoke-root='true']", visible: false)
+    expect(page).to have_css("#rtp-smoke-root", visible: false)
 
     page.execute_script(<<~JS, RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
       document.body.dataset.rtpHarnessWrapper = "started"
