@@ -189,6 +189,116 @@ View:
 <% end %>
 ```
 
+## Example: keep the search form and export action separate
+
+Use this pattern when one list screen needs all of these at once:
+
+- a normal GET search form for the visible table
+- saved filter/sort UI state from Rails Table Preferences
+- a separate CSV or Excel export action that should follow the same effective query and selected preset
+
+Controller:
+
+```ruby
+class WarehouseStocksController < ApplicationController
+  def index
+    @table_columns = warehouse_stock_table_columns
+
+    preference_params = rails_table_preference_params(
+      table_key: :warehouse_stocks,
+      name: params[:table_preference_name],
+      columns: @table_columns
+    )
+
+    merged_params = params.to_unsafe_h.merge(preference_params)
+
+    @warehouse_stocks = WarehouseStock
+      .search(merged_params)
+      .order_by(merged_params["sort"] || params[:sort])
+      .page(params[:page])
+  end
+
+  def export
+    @table_columns = warehouse_stock_table_columns
+
+    export_payload = rails_table_preference_export_payload(
+      table_key: :warehouse_stocks,
+      name: params[:table_preference_name],
+      columns: @table_columns
+    )
+
+    scoped_stocks = WarehouseStock
+      .search(export_query_params)
+      .order_by(export_query_params["sort"])
+
+    csv_string = CSV.generate do |csv|
+      csv << export_payload["headers"]
+
+      scoped_stocks.find_each do |stock|
+        csv << export_payload["columns"].map do |column|
+          stock.public_send(column["export_key"] || column["key"])
+        end
+      end
+    end
+
+    send_data csv_string, filename: "warehouse_stocks.csv"
+  end
+
+  private
+
+  def export_query_params
+    params.to_unsafe_h.slice(
+      "search_word",
+      "warehouse_name",
+      "item_code",
+      "from_stock_quantity",
+      "to_stock_quantity",
+      "from_arrival_date",
+      "to_arrival_date",
+      "sort"
+    )
+  end
+end
+```
+
+View composition:
+
+```erb
+<%= form_with url: warehouse_stocks_path, method: :get, local: true do %>
+  <%= text_field_tag :search_word, params[:search_word], placeholder: "商品名" %>
+  <%= text_field_tag :warehouse_name, params[:warehouse_name], placeholder: "倉庫名" %>
+  <%= hidden_field_tag :table_preference_name, params[:table_preference_name] if params[:table_preference_name].present? %>
+
+  <%= table_preferences_hidden_fields(
+    settings: @table_preference_settings,
+    columns: @table_columns
+  ) %>
+
+  <%= submit_tag "検索" %>
+<% end %>
+
+<%= form_with url: export_warehouse_stocks_path, method: :get, local: true do %>
+  <%= hidden_field_tag :table_preference_name, params[:table_preference_name] if params[:table_preference_name].present? %>
+  <%= hidden_field_tag :search_word, params[:search_word] if params[:search_word].present? %>
+  <%= hidden_field_tag :warehouse_name, params[:warehouse_name] if params[:warehouse_name].present? %>
+  <%= hidden_field_tag :item_code, params[:item_code] if params[:item_code].present? %>
+  <%= hidden_field_tag :from_stock_quantity, params[:from_stock_quantity] if params[:from_stock_quantity].present? %>
+  <%= hidden_field_tag :to_stock_quantity, params[:to_stock_quantity] if params[:to_stock_quantity].present? %>
+  <%= hidden_field_tag :from_arrival_date, params[:from_arrival_date] if params[:from_arrival_date].present? %>
+  <%= hidden_field_tag :to_arrival_date, params[:to_arrival_date] if params[:to_arrival_date].present? %>
+  <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+
+  <%= submit_tag "CSV出力" %>
+<% end %>
+```
+
+Why this split works:
+
+- the search form owns user-entered query params plus `table_preferences_hidden_fields(...)`, so saved filter/sort UI state can round-trip through the normal index request
+- the export form owns only the params that the export action actually accepts, which keeps export authorization and query scope explicit in the host app
+- `table_preference_name` still selects the same saved column order, visibility, and labels when `rails_table_preference_export_payload(...)` builds export metadata
+- query execution and file generation remain host app responsibilities even when the export follows the same visible table state
+
 ## Example: customer shipment list with Ransack
 
 Controller:
