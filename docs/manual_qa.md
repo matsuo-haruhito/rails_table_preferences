@@ -134,12 +134,14 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Add `fixed: true` or `pinned: true` to a column.
 - [ ] Confirm pinned cells receive pinned/fixed class and data hooks.
 - [ ] Confirm the pinned column remains visible while horizontally scrolling the table container.
+- [ ] If you use the generated demo example, confirm the scroll wrapper keeps `受注番号` visible while the rest of the table moves.
 - [ ] Confirm multiple pinned columns do not overlap in the tested layout.
 - [ ] Resize a pinned column and confirm pinned offsets are still correct.
 - [ ] Reorder columns and confirm pinned offsets are recalculated.
 - [ ] Hide a pinned column and confirm later pinned columns shift correctly.
 - [ ] Add `group:` metadata to columns.
 - [ ] Use `table_preferences_column_groups` in grouped header markup and confirm `colspan` values are correct.
+- [ ] If you use the generated demo example, confirm the grouped header row shows `受注情報`, `得意先情報`, and `配送情報` above the matching leaf headers.
 - [ ] Confirm leaf header cells still have `data-rails-table-preferences-column-key`.
 - [ ] Confirm pinned-column resize and header drag do not start while an async preset action is running.
 
