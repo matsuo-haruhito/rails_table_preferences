@@ -188,49 +188,41 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       This screen mirrors the lightweight demo surface closely enough to keep one browser smoke flow under automated coverage.
     </p>
 
-    <%= content_tag :div,
-          id: "rtp-smoke-root",
-          data: table_preferences_data_attributes(
-            table_key: DEMO_TABLE_KEY,
-            settings: @table_preference_settings,
-            columns: @table_columns
-          ).merge(rtp_smoke_root: true) do %>
-      <%= table_preferences_editor(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        title: "デモ受注一覧の表示設定"
-      ) %>
+    <%= table_preferences_editor(
+      table_key: DEMO_TABLE_KEY,
+      settings: @table_preference_settings,
+      columns: @table_columns,
+      title: "デモ受注一覧の表示設定"
+    ) %>
 
-      <%= table_preferences_table_tag(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        class: "table"
-      ) do %>
-        <thead>
+    <%= table_preferences_table_tag(
+      table_key: DEMO_TABLE_KEY,
+      settings: @table_preference_settings,
+      columns: @table_columns,
+      class: "table"
+    ) do %>
+      <thead>
+        <tr>
+          <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+          <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+          <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
+          <th data-rails-table-preferences-column-key="status">状態</th>
+          <th data-rails-table-preferences-column-key="amount">金額</th>
+          <th data-rails-table-preferences-column-key="memo">備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @orders.each do |order| %>
           <tr>
-            <th data-rails-table-preferences-column-key="order_no">受注番号</th>
-            <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
-            <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
-            <th data-rails-table-preferences-column-key="status">状態</th>
-            <th data-rails-table-preferences-column-key="amount">金額</th>
-            <th data-rails-table-preferences-column-key="memo">備考</th>
+            <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
+            <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
+            <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
+            <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
+            <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+            <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
           </tr>
-        </thead>
-        <tbody>
-          <% @orders.each do |order| %>
-            <tr>
-              <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
-              <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
-              <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
-              <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
-              <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
-              <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      <% end %>
+        <% end %>
+      </tbody>
     <% end %>
   ERB
 
@@ -314,8 +306,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
   it "renders the demo surface and hides a column through apply" do
     visit "/rails_table_preferences_system_smoke/orders"
 
-    expect(page).to have_css("#rtp-smoke-root[data-rtp-smoke-root='true']", visible: false)
-    expect(page).to have_css("#rtp-smoke-root [data-controller~='rails-table-preferences']", visible: false)
+    expect(page).to have_css("[data-controller~='rails-table-preferences']", visible: false)
 
     page.execute_script(<<~JS, RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
       document.body.dataset.rtpHarnessWrapper = "started"
