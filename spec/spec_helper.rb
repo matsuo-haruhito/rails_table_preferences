@@ -5,21 +5,7 @@ require "fileutils"
 require "pathname"
 require "capybara"
 require "capybara/dsl"
-require "action_view/template/handlers"
-
-module ActionView
-  class Template
-    module Handlers
-      remove_const(:ERB) if autoload?(:ERB)
-
-      class ERB
-        ENCODING_FLAG = "#.*coding[:=]\\s*(\\S+)[ \\t]*"
-      end
-    end
-  end
-end
-
-require "action_view/template/handlers/erb"
+require "erb"
 require "rspec/rails"
 require "selenium-webdriver"
 require_relative "test_application"
