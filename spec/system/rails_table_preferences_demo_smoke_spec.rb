@@ -112,14 +112,6 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         }
       }
 
-      function smokeRoot() {
-        return document.getElementById("rtp-smoke-root") ||
-          document.querySelector("[data-rtp-smoke-root]") ||
-          document.querySelector('[data-controller~="rails-table-preferences"]') ||
-          Array.from(document.querySelectorAll('[data-controller~="rails-table-preferences"]')).find((element) => element.querySelector("table")) ||
-          null
-      }
-
       function markSmokeStage(stage) {
         document.body.dataset.rtpSmokeStage = stage
       }
@@ -135,10 +127,10 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         document.body.dataset.rtpSmokeError = ""
         markSmokeStage("mount-start")
 
-        const root = smokeRoot()
+        const root = document.querySelector('[data-controller~="rails-table-preferences"]')
         if (!root) {
-          markSmokeStage("root-not-found")
           document.body.dataset.rtpSmokeError = "root-not-found"
+          markSmokeStage("root-not-found")
           return
         }
 
@@ -171,13 +163,18 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
           document.body.dataset.rtpSmokeReady = "true"
           markSmokeStage("ready")
         } catch (error) {
-          markSmokeStage("error")
           document.body.dataset.rtpSmokeError = `${error?.name || "Error"}: ${error?.message || String(error)}`
+          markSmokeStage("error")
         }
       }
 
       window.__rtpMountController = mountController
-      mountController()
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", mountController, { once: true })
+      } else {
+        mountController()
+      }
     })();
   JS
 
@@ -188,50 +185,44 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       This screen mirrors the lightweight demo surface closely enough to keep one browser smoke flow under automated coverage.
     </p>
 
-    <%= content_tag :div,
-          id: "rtp-smoke-root",
-          data: table_preferences_data_attributes(
-            table_key: DEMO_TABLE_KEY,
-            settings: @table_preference_settings,
-            columns: @table_columns
-          ).merge(rtp_smoke_root: true) do %>
-      <%= table_preferences_editor(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        title: "デモ受注一覧の表示設定"
-      ) %>
+    <%= table_preferences_editor(
+      table_key: DEMO_TABLE_KEY,
+      settings: @table_preference_settings,
+      columns: @table_columns,
+      title: "デモ受注一覧の表示設定"
+    ) %>
 
-      <%= table_preferences_table_tag(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        class: "table"
-      ) do %>
-        <thead>
+    <%= table_preferences_table_tag(
+      table_key: DEMO_TABLE_KEY,
+      settings: @table_preference_settings,
+      columns: @table_columns,
+      class: "table"
+    ) do %>
+      <thead>
+        <tr>
+          <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+          <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+          <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
+          <th data-rails-table-preferences-column-key="status">状態</th>
+          <th data-rails-table-preferences-column-key="amount">金額</th>
+          <th data-rails-table-preferences-column-key="memo">備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @orders.each do |order| %>
           <tr>
-            <th data-rails-table-preferences-column-key="order_no">受注番号</th>
-            <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
-            <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
-            <th data-rails-table-preferences-column-key="status">状態</th>
-            <th data-rails-table-preferences-column-key="amount">金額</th>
-            <th data-rails-table-preferences-column-key="memo">備考</th>
+            <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
+            <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
+            <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
+            <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
+            <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+            <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
           </tr>
-        </thead>
-        <tbody>
-          <% @orders.each do |order| %>
-            <tr>
-              <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
-              <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
-              <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
-              <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
-              <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
-              <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      <% end %>
+        <% end %>
+      </tbody>
     <% end %>
+
+    <script><%= raw controller.class::BROWSER_SMOKE_SCRIPT %></script>
   ERB
 
   def index
@@ -311,42 +302,20 @@ end
 Rails.application.reload_routes!
 
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
-  def render_demo_html
-    session = ActionDispatch::Integration::Session.new(Rails.application)
-    session.get("/rails_table_preferences_system_smoke/orders")
-
-    raise "unexpected smoke render status: #{session.response.status}" unless session.response.status == 200
-
-    session.response.body
-  end
-
   it "renders the demo surface and hides a column through apply" do
-    visit "about:blank"
-    page.execute_script(<<~JS, render_demo_html)
-      document.open()
-      document.write(arguments[0])
-      document.close()
+    visit "/rails_table_preferences_system_smoke/orders"
+
+    page.execute_script(<<~JS)
+      if (document.body.dataset.rtpSmokeReady !== "true" && window.__rtpMountController) {
+        window.__rtpMountController()
+      }
     JS
-
-    expect(page).to have_css("#rtp-smoke-root[data-rtp-smoke-root='true']", visible: false)
-    expect(page).to have_css("#rtp-smoke-root [data-controller~='rails-table-preferences']", visible: false)
-
-    page.execute_script(<<~JS, RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
-      document.body.dataset.rtpHarnessWrapper = "started"
-      new Function(arguments[0])()
-      document.body.dataset.rtpHarnessWrapper = "completed"
-    JS
-
-    expect(page).to have_css("body[data-rtp-harness-wrapper='completed']", visible: false)
 
     smoke_ready = page.evaluate_script("document.body.dataset.rtpSmokeReady || ''")
     smoke_error = page.evaluate_script("document.body.dataset.rtpSmokeError || ''")
     smoke_stage = page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")
-    mount_present = page.evaluate_script("typeof window.__rtpMountController")
-    controller_present = page.evaluate_script("typeof window.__rtpController")
-    wrapper_state = page.evaluate_script("document.body.dataset.rtpHarnessWrapper || ''")
 
-    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect} mount=#{mount_present.inspect} controller=#{controller_present.inspect} wrapper=#{wrapper_state.inspect}"
+    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect}"
     expect(smoke_error).to eq("")
     expect(smoke_stage).to match(/ready/)
     expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
