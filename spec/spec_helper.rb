@@ -25,9 +25,9 @@ module ActionView
   end
 end
 
+require_relative "test_application"
 require "rspec/rails"
 require "selenium-webdriver"
-require_relative "test_application"
 
 Capybara.app = Rails.application
 Capybara.server = :puma, { Silent: true }
