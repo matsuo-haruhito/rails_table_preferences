@@ -4,8 +4,6 @@ require "set"
 
 module RailsTablePreferences
   module TablePreferencesHelper
-    include RailsTablePreferences::ColumnOptionsHelper
-
     def table_preferences_data_attributes(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [])
       normalized_columns = table_preferences_columns(columns, ignored_columns: ignored_columns)
       normalized_settings = table_preferences_settings(settings, allowed_columns: normalized_columns)
