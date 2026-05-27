@@ -18,6 +18,10 @@ RSpec.describe RailsTablePreferences::Generators::JavascriptGenerator, type: :ge
     expect(controller_path.read).to include("static targets = [\"editorRows\", \"presetName\", \"presetSelect\", \"defaultPreset\", \"status\", \"readOnlyHint\"]")
     expect(controller_path.read).to include('readOnlyPresetHintLabel: { type: String, default: "この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。" }')
     expect(controller_path.read).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
+    expect(controller_path.read).to include('loadingFailedStatusLabel: { type: String, default: "設定の読み込みを完了できませんでした。" }')
+    expect(controller_path.read).to include('savingFailedStatusLabel: { type: String, default: "設定の保存を完了できませんでした。" }')
+    expect(controller_path.read).to include('savingAsNewFailedStatusLabel: { type: String, default: "新しい設定の保存を完了できませんでした。" }')
+    expect(controller_path.read).to include('deletingFailedStatusLabel: { type: String, default: "設定の削除を完了できませんでした。" }')
   end
 
   def destination_root

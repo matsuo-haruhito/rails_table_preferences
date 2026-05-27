@@ -39,12 +39,16 @@ export default class extends Controller {
     scopeOrganizationLabel: { type: String, default: "組織" },
     loadingStatusLabel: { type: String, default: "設定を読み込み中です..." },
     loadedStatusLabel: { type: String, default: "設定を読み込みました。" },
+    loadingFailedStatusLabel: { type: String, default: "設定の読み込みを完了できませんでした。" },
     savingStatusLabel: { type: String, default: "設定を保存中です..." },
     savedStatusLabel: { type: String, default: "設定を保存しました。" },
+    savingFailedStatusLabel: { type: String, default: "設定の保存を完了できませんでした。" },
     savingAsNewStatusLabel: { type: String, default: "新しい設定を保存中です..." },
     savedAsNewStatusLabel: { type: String, default: "新しい設定を保存しました。" },
+    savingAsNewFailedStatusLabel: { type: String, default: "新しい設定の保存を完了できませんでした。" },
     deletingStatusLabel: { type: String, default: "設定を削除中です..." },
     deletedStatusLabel: { type: String, default: "設定を削除しました。" },
+    deletingFailedStatusLabel: { type: String, default: "設定の削除を完了できませんでした。" },
     operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }
   }
 
@@ -114,7 +118,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.savingAsNewStatusLabelValue,
-      successLabel: this.savedAsNewStatusLabelValue
+      successLabel: this.savedAsNewStatusLabelValue,
+      errorLabel: this.savingAsNewFailedStatusLabelValue
     })
   }
 
@@ -142,7 +147,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.deletingStatusLabelValue,
-      successLabel: this.deletedStatusLabelValue
+      successLabel: this.deletedStatusLabelValue,
+      errorLabel: this.deletingFailedStatusLabelValue
     })
   }
 
@@ -161,7 +167,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.savingStatusLabelValue,
-      successLabel: this.savedStatusLabelValue
+      successLabel: this.savedStatusLabelValue,
+      errorLabel: this.savingFailedStatusLabelValue
     })
   }
 
@@ -192,7 +199,8 @@ export default class extends Controller {
       await this.refreshPresetOptions()
     }, {
       busyLabel: this.loadingStatusLabelValue,
-      successLabel: this.loadedStatusLabelValue
+      successLabel: this.loadedStatusLabelValue,
+      errorLabel: this.loadingFailedStatusLabelValue
     })
   }
 
@@ -240,7 +248,8 @@ export default class extends Controller {
       this.applyPreferencePayload(await response.json())
     }, {
       busyLabel: this.loadingStatusLabelValue,
-      successLabel: this.loadedStatusLabelValue
+      successLabel: this.loadedStatusLabelValue,
+      errorLabel: this.loadingFailedStatusLabelValue
     })
   }
 
@@ -570,19 +579,19 @@ export default class extends Controller {
       event.preventDefault()
       return
     }
-    const key = event.currentTarget.dataset.railsTablePreferencesColumnKey
-    if (!key) return
-    this.draggedTableColumnKey = key
-    event.currentTarget.classList.add("rails-table-preferences-table-column--dragging")
+    const headerCell = event.currentTarget
+    this.draggedTableColumnKey = headerCell.dataset.railsTablePreferencesColumnKey
+    headerCell.classList.add("rails-table-preferences-table-column--dragging")
     event.dataTransfer.effectAllowed = "move"
-    event.dataTransfer.setData("text/plain", key)
+    event.dataTransfer.setData("text/plain", this.draggedTableColumnKey)
   }
 
   dragTableColumnOver(event) {
-    if (this.busy) return
+    if (this.busy || !this.draggedTableColumnKey) return
+    if (this.shouldIgnoreHeaderAction(event.target)) return
     event.preventDefault()
     const targetKey = event.currentTarget.dataset.railsTablePreferencesColumnKey
-    if (!this.draggedTableColumnKey || !targetKey || targetKey === this.draggedTableColumnKey) return
+    if (!targetKey || targetKey === this.draggedTableColumnKey) return
     const placement = this.tableColumnPlacement(event, event.currentTarget)
     this.moveColumnInSettings(this.draggedTableColumnKey, targetKey, placement)
     this.applyColumnOrder()
@@ -647,6 +656,7 @@ export default class extends Controller {
 
   toggleSortFromHeader(event, cell, column) {
     if (this.busy) return
+    if (column?.sortable !== true) return
     if (this.shouldIgnoreHeaderAction(event.target)) return
     if (this.draggedTableColumnKey || this.resizingColumn) return
     event.preventDefault()

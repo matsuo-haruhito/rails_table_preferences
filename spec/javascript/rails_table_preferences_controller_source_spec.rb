@@ -17,6 +17,10 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('deleteConfirmLabel: { type: String, default: "この保存済み設定を削除します。よろしいですか？" }')
     expect(source).to include('readOnlyPresetHintLabel: { type: String, default: "この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。" }')
     expect(source).to include('loadingStatusLabel: { type: String, default: "設定を読み込み中です..." }')
+    expect(source).to include('loadingFailedStatusLabel: { type: String, default: "設定の読み込みを完了できませんでした。" }')
+    expect(source).to include('savingFailedStatusLabel: { type: String, default: "設定の保存を完了できませんでした。" }')
+    expect(source).to include('savingAsNewFailedStatusLabel: { type: String, default: "新しい設定の保存を完了できませんでした。" }')
+    expect(source).to include('deletingFailedStatusLabel: { type: String, default: "設定の削除を完了できませんでした。" }')
     expect(source).to include('operationFailedStatusLabel: { type: String, default: "設定の操作を完了できませんでした。" }')
   end
 
@@ -217,6 +221,10 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include("setStatus(message)")
     expect(source).to include('this.element.querySelectorAll(".rails-table-preferences-editor__actions button")')
     expect(source).to include('this.element.setAttribute("aria-busy", this.busy ? "true" : "false")')
+    expect(source).to include("errorLabel: this.loadingFailedStatusLabelValue")
+    expect(source).to include("errorLabel: this.savingFailedStatusLabelValue")
+    expect(source).to include("errorLabel: this.savingAsNewFailedStatusLabelValue")
+    expect(source).to include("errorLabel: this.deletingFailedStatusLabelValue")
     expect(source).to include("console.error(error)")
   end
 

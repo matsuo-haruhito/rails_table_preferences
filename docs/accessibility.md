@@ -98,7 +98,7 @@ The bundled editor now includes a lightweight status region for the main async p
 - saving the current settings
 - saving as a new preset
 - deleting the current preset
-- reporting a generic failure when one of those actions cannot complete
+- reporting action-specific failure copy when load, save, save as new, or delete cannot complete
 
 The default markup uses a native live region:
 
@@ -147,7 +147,7 @@ Before releasing a screen, check:
 - Scroll or viewport resize does not leave the bundled filter panel detached from its header context.
 - Read-only scoped presets disable destructive/default controls.
 - Read-only scoped presets show helper text that explains the save-as-owner fallback.
-- Save/load/delete actions update the status region with understandable progress or result copy.
+- Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
 - The table remains understandable when columns are hidden.
