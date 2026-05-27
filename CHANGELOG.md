@@ -28,7 +28,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Legacy `ColumnAdjustment` import rake task.
 - Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, and JavaScript controller notes.
 - Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
-- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, 8.0, and 8.1.
+- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and 8.0.
 
 ### Changed
 
@@ -36,6 +36,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - README roadmap and current scope were updated to reflect the expanded v0.1 scope.
 - Generated migrations use nullable owner references and `scope_type` / `scope_key` to support owner, shared, role, and organization presets.
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
+- The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
 
 ### Fixed
 
