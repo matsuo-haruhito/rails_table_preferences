@@ -15,8 +15,10 @@ module RailsTablePreferencesDemo
       ensure_demo_shared_preset!
       ensure_demo_role_preset!
       @table_columns = table_columns
-      @demo_column_groups = demo_column_groups
       @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
+      @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
+      @demo_visible_columns = @demo_table_state.fetch("visible_columns")
+      @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
       @export_payload_preview = RailsTablePreferences::ExportPayload.call(
         settings: @table_preference_settings,
         columns: @table_columns
@@ -85,12 +87,33 @@ module RailsTablePreferencesDemo
       ]
     end
 
-    def demo_column_groups
-      [
-        { label: "受注情報", colspan: 3 },
-        { label: "得意先情報", colspan: 1 },
-        { label: "配送情報", colspan: 2 }
-      ]
+    def demo_visible_column_groups(visible_columns)
+      visible_columns
+        .chunk { |column| demo_column_group(column) }
+        .filter_map do |group, grouped_columns|
+          next if group["label"].blank?
+
+          group.merge(
+            "columns" => grouped_columns,
+            "colspan" => grouped_columns.length
+          )
+        end
+    end
+
+    def demo_column_group(column)
+      group = column["group"] || column[:group]
+      return { "key" => "", "label" => "" } if group.blank?
+
+      case group
+      when Hash
+        stringified = group.deep_stringify_keys
+        {
+          "key" => stringified.fetch("key", stringified.fetch("label", "")).to_s,
+          "label" => stringified.fetch("label", stringified.fetch("key", "")).to_s
+        }
+      else
+        { "key" => group.to_s, "label" => group.to_s }
+      end
     end
 
     def demo_orders
