@@ -6,6 +6,21 @@ require "pathname"
 require "capybara"
 require "capybara/dsl"
 require "erb"
+
+module ActionView
+  class Template
+    module Handlers
+      class ERB
+        ENCODING_FLAG = if ::ERB.const_defined?(:ENCODING_FLAG)
+          ::ERB::ENCODING_FLAG
+        else
+          "#.*coding[:=]\\s*(\\S+)[ \\t]*"
+        end
+      end
+    end
+  end
+end
+
 require "rspec/rails"
 require "selenium-webdriver"
 require_relative "test_application"
