@@ -7,15 +7,19 @@ require "capybara"
 require "capybara/dsl"
 require "erb"
 
+encoding_flag = if ::ERB.const_defined?(:ENCODING_FLAG)
+  ::ERB::ENCODING_FLAG
+else
+  "#.*coding[:=]\\s*(\\S+)[ \\t]*"
+end
+
 module ActionView
   class Template
+    ENCODING_FLAG = encoding_flag unless const_defined?(:ENCODING_FLAG)
+
     module Handlers
       class ERB
-        ENCODING_FLAG = if ::ERB.const_defined?(:ENCODING_FLAG)
-          ::ERB::ENCODING_FLAG
-        else
-          "#.*coding[:=]\\s*(\\S+)[ \\t]*"
-        end
+        ENCODING_FLAG = encoding_flag unless const_defined?(:ENCODING_FLAG)
       end
     end
   end
