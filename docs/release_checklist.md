@@ -47,7 +47,7 @@ Confirm:
 Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
 - [ ] The release commit passes the default RSpec / JavaScript syntax / gem build / package verification job.
-- [ ] The latest release-prep pull request passes the Ruby 3.1 representative job.
+- [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 compatibility jobs.
 - [ ] Any additional release-time matrix jobs pass in the workflow where they actually run.
 
