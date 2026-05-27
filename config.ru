@@ -2,4 +2,4 @@
 
 require_relative "spec/test_application"
 
-run Rails.application
+run TestApplication.instance
