@@ -9,11 +9,14 @@ module RailsTablePreferencesDemo
     DEMO_TABLE_KEY = :rails_table_preferences_demo_orders
     SHARED_PRESET_NAME = "共有ビュー"
     ROLE_PRESET_NAME = "担当ビュー"
+    ORGANIZATION_PRESET_NAME = "東京組織ビュー"
     DEMO_ROLE_KEY = "operations"
+    DEMO_ORGANIZATION_KEY = "tokyo-hq"
 
     def index
       ensure_demo_shared_preset!
       ensure_demo_role_preset!
+      ensure_demo_organization_preset!
       @table_columns = table_columns
       @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
       @export_payload_preview = RailsTablePreferences::ExportPayload.call(
@@ -183,6 +186,22 @@ module RailsTablePreferencesDemo
       preference.save!
     end
 
+    def ensure_demo_organization_preset!
+      preference = RailsTablePreferences::Preference.find_or_initialize_for(
+        user: nil,
+        table_key: DEMO_TABLE_KEY,
+        name: ORGANIZATION_PRESET_NAME,
+        scope_type: RailsTablePreferences::Preference::ORGANIZATION_SCOPE_TYPE,
+        scope_key: DEMO_ORGANIZATION_KEY
+      )
+      settings = organization_demo_preset_settings
+      return if preference.persisted? && preference.settings == settings && preference.default_flag == true
+
+      preference.settings = settings
+      preference.default_flag = true
+      preference.save!
+    end
+
     def shared_demo_preset_settings
       {
         "columns" => [
@@ -215,6 +234,23 @@ module RailsTablePreferencesDemo
         "filters" => {},
         "sorts" => [
           { "key" => "amount", "direction" => "desc" }
+        ]
+      }
+    end
+
+    def organization_demo_preset_settings
+      {
+        "columns" => [
+          { "key" => "customer_name", "visible" => true, "order" => 10, "width" => 240, "truncate" => 24 },
+          { "key" => "delivery_date", "visible" => true, "order" => 20, "width" => 140 },
+          { "key" => "order_no", "visible" => true, "order" => 30, "width" => 120 },
+          { "key" => "memo", "visible" => true, "order" => 40, "width" => 320, "truncate" => 32 },
+          { "key" => "status", "visible" => true, "order" => 50, "width" => 120 },
+          { "key" => "amount", "visible" => false, "order" => 60, "width" => 120 }
+        ],
+        "filters" => {},
+        "sorts" => [
+          { "key" => "delivery_date", "direction" => "desc" }
         ]
       }
     end
