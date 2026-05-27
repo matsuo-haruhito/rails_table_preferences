@@ -182,7 +182,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   JS
 
   TEMPLATE = <<~ERB
-    <% smoke_root_options = { data: @smoke_data_attributes, class: "rails-table-preferences-editor" } %>
+    <% smoke_root_data_attributes = @smoke_data_attributes.merge(rtp_smoke_root: true) %>
 
     <h1>Rails Table Preferences Demo Smoke</h1>
 
@@ -190,9 +190,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       This screen mirrors the lightweight demo surface closely enough to keep one browser smoke flow under automated coverage.
     </p>
 
-    <div id="rtp-smoke-root"
-         data-rtp-smoke-root="true"
-         <%= tag.attributes(smoke_root_options) %>>
+    <%= content_tag :div, id: "rtp-smoke-root", class: "rails-table-preferences-editor", data: smoke_root_data_attributes do %>
       <div class="rails-table-preferences-editor__title">デモ受注一覧の表示設定</div>
 
       <section class="rails-table-preferences-demo__export-preview">
@@ -293,7 +291,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
           <% end %>
         </tbody>
       </table>
-    </div>
+    <% end %>
 
     <div aria-hidden="true" style="height: 1600px;"></div>
   ERB
