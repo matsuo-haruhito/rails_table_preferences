@@ -205,7 +205,6 @@ Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
-- pinned column hooks and grouped header render on the demo-shaped table surface
 
 Good next automated checks are:
 
