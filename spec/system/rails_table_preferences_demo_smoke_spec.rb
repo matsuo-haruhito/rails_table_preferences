@@ -476,7 +476,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='value']")
 
     within(".rails-table-preferences-filter-panel") do
-      find("option", text: "空白").select_option
+      find("select[data-field='operator'] option[value='blank']", visible: :all).select_option
     end
 
     expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
@@ -486,7 +486,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     find("th[data-rails-table-preferences-column-key='delivery_date'] [data-rails-table-preferences-filter-button]").click
 
     within(".rails-table-preferences-filter-panel") do
-      find("option", text: "範囲").select_option
+      find("select[data-field='operator'] option[value='between']", visible: :all).select_option
     end
 
     expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='from']")
@@ -499,7 +499,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     find("th[data-rails-table-preferences-column-key='confirmed'] [data-rails-table-preferences-filter-button]").click
 
     within(".rails-table-preferences-filter-panel") do
-      find("option", text: "はい").select_option
+      find("select[data-field='operator'] option[value='true']", visible: :all).select_option
     end
 
     expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
