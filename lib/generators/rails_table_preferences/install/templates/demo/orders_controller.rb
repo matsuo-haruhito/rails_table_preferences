@@ -15,6 +15,7 @@ module RailsTablePreferencesDemo
       ensure_demo_shared_preset!
       ensure_demo_role_preset!
       @table_columns = table_columns
+      @demo_column_groups = demo_column_groups
       @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
       @export_payload_preview = RailsTablePreferences::ExportPayload.call(
         settings: @table_preference_settings,
@@ -33,32 +34,62 @@ module RailsTablePreferencesDemo
 
     def table_columns
       [
-        table_preferences_column(:order_no, label: "受注番号", default_width: 120, sortable: true),
         table_preferences_column(
-          :customer_name,
-          label: "得意先名",
-          default_width: 240,
-          default_truncate: 24,
-          filter: { type: :text, param: :search_word },
-          sortable: true
-        ),
-        table_preferences_column(
-          :delivery_date,
-          label: "納品日",
+          :order_no,
+          label: "受注番号",
           default_width: 140,
-          filter: { type: :date, from_param: :from_delivery_date, to_param: :to_delivery_date },
+          pinned: true,
+          group: { key: :order, label: "受注情報" },
           sortable: true
         ),
         table_preferences_column(
           :status,
           label: "状態",
           default_width: 120,
+          group: { key: :order, label: "受注情報" },
           filter: { type: :select, param: :status, options: ["未出荷", "出荷済", "保留"] },
           sortable: true
         ),
-        table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
-        table_preferences_column(:memo, label: "備考", default_width: 260, default_truncate: 24),
+        table_preferences_column(
+          :amount,
+          label: "金額",
+          default_width: 120,
+          group: { key: :order, label: "受注情報" },
+          sortable: true
+        ),
+        table_preferences_column(
+          :customer_name,
+          label: "得意先名",
+          default_width: 260,
+          default_truncate: 24,
+          group: { key: :customer, label: "得意先情報" },
+          filter: { type: :text, param: :search_word },
+          sortable: true
+        ),
+        table_preferences_column(
+          :delivery_date,
+          label: "納品日",
+          default_width: 150,
+          group: { key: :delivery, label: "配送情報" },
+          filter: { type: :date, from_param: :from_delivery_date, to_param: :to_delivery_date },
+          sortable: true
+        ),
+        table_preferences_column(
+          :memo,
+          label: "備考",
+          default_width: 320,
+          default_truncate: 24,
+          group: { key: :delivery, label: "配送情報" }
+        ),
         table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
+      ]
+    end
+
+    def demo_column_groups
+      [
+        { label: "受注情報", colspan: 3 },
+        { label: "得意先情報", colspan: 1 },
+        { label: "配送情報", colspan: 2 }
       ]
     end
 
@@ -186,12 +217,12 @@ module RailsTablePreferencesDemo
     def shared_demo_preset_settings
       {
         "columns" => [
-          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 120 },
+          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 140, "pinned" => true },
           { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
-          { "key" => "customer_name", "visible" => true, "order" => 30, "width" => 240, "truncate" => 24 },
-          { "key" => "delivery_date", "visible" => true, "order" => 40, "width" => 140 },
-          { "key" => "amount", "visible" => true, "order" => 50, "width" => 120 },
-          { "key" => "memo", "visible" => false, "order" => 60, "width" => 260, "truncate" => 24 }
+          { "key" => "amount", "visible" => true, "order" => 30, "width" => 120 },
+          { "key" => "customer_name", "visible" => true, "order" => 40, "width" => 260, "truncate" => 24 },
+          { "key" => "delivery_date", "visible" => true, "order" => 50, "width" => 150 },
+          { "key" => "memo", "visible" => false, "order" => 60, "width" => 320, "truncate" => 24 }
         ],
         "filters" => {
           "status" => { "operator" => "in", "values" => ["未出荷", "保留"] }
@@ -205,12 +236,12 @@ module RailsTablePreferencesDemo
     def role_demo_preset_settings
       {
         "columns" => [
-          { "key" => "customer_name", "visible" => true, "order" => 10, "width" => 240, "truncate" => 24 },
-          { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
-          { "key" => "delivery_date", "visible" => true, "order" => 30, "width" => 140 },
-          { "key" => "memo", "visible" => true, "order" => 40, "width" => 320, "truncate" => 40 },
-          { "key" => "amount", "visible" => true, "order" => 50, "width" => 120 },
-          { "key" => "order_no", "visible" => false, "order" => 60, "width" => 120 }
+          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 140, "pinned" => true },
+          { "key" => "customer_name", "visible" => true, "order" => 20, "width" => 260, "truncate" => 24 },
+          { "key" => "delivery_date", "visible" => true, "order" => 30, "width" => 150 },
+          { "key" => "status", "visible" => true, "order" => 40, "width" => 120 },
+          { "key" => "memo", "visible" => true, "order" => 50, "width" => 320, "truncate" => 40 },
+          { "key" => "amount", "visible" => true, "order" => 60, "width" => 120 }
         ],
         "filters" => {},
         "sorts" => [
