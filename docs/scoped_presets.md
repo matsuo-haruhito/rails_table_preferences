@@ -138,6 +138,36 @@ Preference responses include scope metadata:
 
 `editable` is `true` for owner presets that belong to the current owner. Shared, role, and organization presets are returned as non-editable from the normal user-facing editor path.
 
+## Scope label fallback and localization
+
+The bundled editor has two sources for the user-facing owner/shared/role/organization label:
+
+1. If a preset payload already includes `scope_label`, the selector shows that value.
+2. Otherwise the copied editor falls back to the locale-backed labels passed through `app/views/rails_table_preferences/_editor.html.erb`.
+
+The default fallback keys are:
+
+- `rails_table_preferences.editor.scope_owner`
+- `rails_table_preferences.editor.scope_shared`
+- `rails_table_preferences.editor.scope_role`
+- `rails_table_preferences.editor.scope_organization`
+
+A host app can change those fallback labels through normal Rails locale overrides:
+
+```yaml
+ja:
+  rails_table_preferences:
+    editor:
+      scope_owner: 個人設定
+      scope_shared: 全体共有
+      scope_role: ロール既定
+      scope_organization: 組織既定
+```
+
+If the host app copies the bundled editor partial, it can also replace the `data-rails-table-preferences-scope-*-label-value` attributes directly. The locale keys are the shortest path when the bundled partial is still in use.
+
+If the host app also provides its own preset endpoint, admin UI, or payload transformer that sets `scope_label`, keep that value aligned with the same wording. That prevents the preset selector from showing one label while nearby bundled fallback copy uses another.
+
 ## Recommended UI behavior
 
 For user-facing screens:
