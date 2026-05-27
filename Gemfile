@@ -2,6 +2,4 @@
 
 source "https://rubygems.org"
 
-gem "erb", "< 6.0"
-
 gemspec
