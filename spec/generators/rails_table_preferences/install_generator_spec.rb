@@ -89,6 +89,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(controller.read).to include("DEMO_ROLE_KEY = \"operations\"")
     expect(controller.read).to include("東京医療機器")
     expect(controller.read).to include("東京製菓")
+    expect(controller.read).to include("ExportPayload.call")
     expect(view.read).to include("Rails Table Preferences Demo")
     expect(view.read).to include("table_preferences_editor")
     expect(view.read).to include("共有ビュー")
@@ -96,6 +97,8 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("operations")
     expect(view.read).to include("Search for")
     expect(view.read).to include("東京")
+    expect(view.read).to include("Export payload preview")
+    expect(view.read).to include("Column keys")
   end
 
   it "provides post-install next steps in the generator source" do

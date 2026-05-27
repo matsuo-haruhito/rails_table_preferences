@@ -26,6 +26,31 @@
   <strong>納品日</strong> / <strong>金額</strong> to make the differences easier to spot.
 </p>
 
+<section>
+  <h2>Export payload preview</h2>
+
+  <p>
+    This preview shows the ordered headers and column keys that the current
+    saved table settings would pass into the export helper.
+  </p>
+
+  <p>
+    <strong>Headers:</strong>
+    <%= @export_payload_preview.fetch("headers", []).join(" / ") %>
+  </p>
+
+  <p>
+    <strong>Column keys:</strong>
+    <code><%= @export_payload_preview.fetch("column_keys", []).join(", ") %></code>
+  </p>
+
+  <p>
+    Hidden columns stay out of this preview by default. Change visibility or
+    order in the editor, save once, and reload to confirm that the export
+    payload follows the saved table settings.
+  </p>
+</section>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,

@@ -16,6 +16,10 @@ module RailsTablePreferencesDemo
       ensure_demo_role_preset!
       @table_columns = table_columns
       @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
+      @export_payload_preview = RailsTablePreferences::ExportPayload.call(
+        settings: @table_preference_settings,
+        columns: @table_columns
+      )
 
       preference_params = rails_table_preference_params(
         table_key: DEMO_TABLE_KEY,
