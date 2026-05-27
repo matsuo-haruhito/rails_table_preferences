@@ -17,7 +17,7 @@ The bundled editor and Stimulus controller provide:
 - `aria-controls` from the open filter button to the current filter panel
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
-- a visible helper message when saving from a read-only preset will create a new owner preset instead of overwriting the shared preset
+- a visible helper message when saving from a read-only preset will save to the owner preset path instead of overwriting the shared preset directly
 - a live `role="status"` region for bundled save/load/delete feedback
 - explanatory `title` and `aria-label` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
@@ -89,7 +89,7 @@ For applications with stricter accessibility requirements, prefer documenting th
 
 Shared, role, and organization presets may be returned as `editable: false`.
 
-The bundled controller disables destructive/default controls for read-only presets, shows a short helper message about the save fallback, and falls back to creating an owner preset when users save edits from the normal editor path.
+The bundled controller disables destructive/default controls for read-only presets, shows a short helper message about the save fallback, and falls back to creating or updating an owner preset when users save edits from the normal editor path.
 
 This prevents the regular user-facing editor from accidentally overwriting shared presets while keeping the next action understandable.
 
