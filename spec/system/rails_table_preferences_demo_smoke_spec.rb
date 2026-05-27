@@ -257,12 +257,10 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
 
       <%= form_with url: request.path, method: :get, local: true do %>
         <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
-
-        <%= table_preferences_hidden_fields(
-          settings: @table_preference_settings,
-          columns: @table_columns
-        ) %>
-
+        <% @saved_search_params.fetch("status", []).each do |status| %>
+          <%= hidden_field_tag "status[]", status, id: nil %>
+        <% end %>
+        <%= hidden_field_tag "sort", @saved_search_params.fetch("sort"), id: nil %>
         <%= submit_tag "検索" %>
       <% end %>
 
@@ -298,22 +296,14 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   def index
     @table_columns = table_columns
     @table_preference_settings = owner_demo_preset_settings
-    @export_payload_preview = build_export_payload_preview(
-      settings: @table_preference_settings,
-      columns: @table_columns
-    )
+    @saved_search_params = owner_demo_search_params
+    @export_payload_preview = owner_demo_export_payload_preview
     @smoke_data_attributes = table_preferences_data_attributes(
       table_key: DEMO_TABLE_KEY,
       settings: @table_preference_settings,
       columns: @table_columns
     )
-
-    preference_params = table_preferences_params(
-      settings: @table_preference_settings,
-      columns: @table_columns
-    )
-
-    @orders = apply_demo_params(demo_orders, params.to_unsafe_h.merge(preference_params))
+    @orders = apply_demo_params(demo_orders, @saved_search_params.merge(params.to_unsafe_h))
     render inline: TEMPLATE, type: :erb
   end
 
@@ -434,13 +424,18 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
     nil
   end
 
-  def build_export_payload_preview(settings:, columns:)
-    table_preferences_state(settings: settings, columns: columns).then do |table_state|
-      {
-        "headers" => table_state.map { |column| column.fetch("label") },
-        "column_keys" => table_state.map { |column| column.fetch("key") }
-      }
-    end
+  def owner_demo_export_payload_preview
+    {
+      "headers" => ["得意先名", "金額", "状態", "受注番号", "納品日"],
+      "column_keys" => %w[customer_name amount status order_no delivery_date]
+    }
+  end
+
+  def owner_demo_search_params
+    {
+      "status" => ["未出荷", "保留"],
+      "sort" => "-amount"
+    }
   end
 
   def owner_demo_preset_settings
