@@ -374,6 +374,29 @@ export_payload = rails_table_preference_export_payload(
 
 Use `export_payload["column_keys"]` for a lightweight ordered column list, or `export_payload["headers"]` and `export_payload["columns"]` when labels and metadata need to follow the selected preset. See [Export integration](export_integration.md) for the minimal list-to-export wiring.
 
+### If the same screen also needs shared, role, or organization presets
+
+Owner presets work without extra scope configuration. When the same table should also resolve shared, role, or organization presets, configure `scope_context_method` and return the same stable identifiers that the non-owner presets use as `scope_key`:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.scope_context_method = :table_preference_scope_context
+end
+
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    {
+      roles: current_user.roles.pluck(:key),
+      organization: current_user.organization_id
+    }
+  end
+end
+```
+
+Keep the regular editor path for owner presets, and let the host app or a separate admin flow create shared, role, or organization presets. See [Scoped presets](scoped_presets.md) for default resolution order, `scope_key` examples, and minimal operating patterns.
+
 ## 8. Hide columns from the preference UI
 
 Use `ignored: true` for columns that should not appear in the user-facing editor:
@@ -401,4 +424,5 @@ Ignored columns are removed from Rails Table Preferences settings, but the host 
 - See [Practical examples](examples.md) for more realistic list-screen integrations.
 - See [Controller integration](controller_integration.md) for saved filter/sort params and existing search form wiring.
 - See [Export integration](export_integration.md) when export actions should follow the saved visible columns and order.
+- See [Scoped presets](scoped_presets.md) when the same screen should resolve shared, role, or organization presets.
 - See [Troubleshooting](troubleshooting.md) if the editor, API, CSS, or JavaScript does not behave as expected.
