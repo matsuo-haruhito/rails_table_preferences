@@ -246,6 +246,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
             <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
             <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
             <th data-rails-table-preferences-column-key="status">状態</th>
+            <th data-rails-table-preferences-column-key="confirmed">確認済</th>
             <th data-rails-table-preferences-column-key="amount">金額</th>
             <th data-rails-table-preferences-column-key="memo">備考</th>
           </tr>
@@ -257,6 +258,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
               <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
               <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
               <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
+              <td data-rails-table-preferences-column-key="confirmed"><%= order[:confirmed] ? "はい" : "いいえ" %></td>
               <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
               <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
             </tr>
@@ -305,6 +307,12 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         filter: { type: :select, param: :status, options: ["未出荷", "出荷済", "保留"] },
         sortable: true
       ),
+      table_preferences_column(
+        :confirmed,
+        label: "確認済",
+        default_width: 100,
+        filter: { type: :boolean, param: :confirmed }
+      ),
       table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
       table_preferences_column(:memo, label: "備考", default_width: 260, default_truncate: 24),
       table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
@@ -318,6 +326,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         customer_name: "山田商事",
         delivery_date: Date.current,
         status: "未出荷",
+        confirmed: true,
         amount: 12_000,
         memo: "長い備考テキストの表示確認用です。列幅と省略表示を確認できます。"
       },
@@ -326,6 +335,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         customer_name: "田中物流",
         delivery_date: Date.current + 1.day,
         status: "出荷済",
+        confirmed: false,
         amount: 34_000,
         memo: "フィルター、ソート、列幅変更の確認に使うデモ行です。"
       },
@@ -334,6 +344,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         customer_name: "佐藤食品",
         delivery_date: Date.current + 2.days,
         status: "保留",
+        confirmed: true,
         amount: 56_000,
         memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
       }
@@ -459,5 +470,45 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
     expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
     expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(false)
+  end
+
+  it "switches filter panel inputs when the operator changes" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    find("th[data-rails-table-preferences-column-key='customer_name'] [data-rails-table-preferences-filter-button]").click
+    expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='value']")
+
+    within(".rails-table-preferences-filter-panel") do
+      find("select[data-field='operator'] option[value='blank']", visible: :all).select_option
+    end
+
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='from']")
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='to']")
+
+    find("th[data-rails-table-preferences-column-key='delivery_date'] [data-rails-table-preferences-filter-button]").click
+
+    within(".rails-table-preferences-filter-panel") do
+      find("select[data-field='operator'] option[value='between']", visible: :all).select_option
+    end
+
+    expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='from']")
+    expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='to']")
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
+
+    find("th[data-rails-table-preferences-column-key='status'] [data-rails-table-preferences-filter-button]").click
+    expect(page).to have_css(".rails-table-preferences-filter-panel select[data-field='values'][multiple]")
+
+    find("th[data-rails-table-preferences-column-key='confirmed'] [data-rails-table-preferences-filter-button]").click
+
+    within(".rails-table-preferences-filter-panel") do
+      find("select[data-field='operator'] option[value='true']", visible: :all).select_option
+    end
+
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='from']")
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='to']")
+    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='values']")
   end
 end
