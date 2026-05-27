@@ -28,7 +28,7 @@ The generated screen also seeds one shared preset named `共有ビュー`. This 
 
 The same demo controller also seeds one role preset named `担当ビュー` for the role key `operations`. After you enable the example scope context shown below, the selector shows `担当ビュー [role:operations]` and default resolution prefers it over the shared preset while no owner default exists.
 
-The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, and memo lengths so sort, filter, width, and preset checks are easier to judge at a glance.
+The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
 
@@ -108,11 +108,13 @@ With that context in place, the preset selector includes `担当ビュー [role:
 The generated demo screen includes:
 
 - Japanese column labels
-- sample rows with repeated customer prefixes and varied status/date/memo values for practical sort and filter checks
+- sample rows with repeated customer prefixes, varied status/date values, and long delivery notes for practical sort and filter checks
 - column visibility
 - column order
 - table-header drag ordering
 - column width resizing
+- double-click auto-fit on header resize handles
+- wrap / nowrap / ellipsis overflow examples on the same screen
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
@@ -138,6 +140,8 @@ On the demo screen, confirm:
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
 - [ ] Header resize changes column width.
+- [ ] Double-clicking the resize handle on `配送メモ` or `配送コード` expands the column to fit its content more closely.
+- [ ] `配送メモ` wraps, `配送コード` stays on one line, and `備考` uses ellipsis so the overflow mode differences are visible.
 - [ ] Filter panel opens.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
@@ -201,6 +205,7 @@ Current automated browser/system smoke covers:
 - hide column and apply
 - active filter button summary through `title` / `aria-label`
 - bundled filter panel close on viewport resize
+- double-click auto-fit and overflow-mode surface on representative demo columns
 
 Good next automated checks are:
 

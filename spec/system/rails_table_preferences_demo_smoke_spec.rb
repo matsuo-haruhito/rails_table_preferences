@@ -248,6 +248,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
             <th data-rails-table-preferences-column-key="status">状態</th>
             <th data-rails-table-preferences-column-key="confirmed">確認済</th>
             <th data-rails-table-preferences-column-key="amount">金額</th>
+            <th data-rails-table-preferences-column-key="shipping_code">配送コード</th>
+            <th data-rails-table-preferences-column-key="shipping_notes">配送メモ</th>
             <th data-rails-table-preferences-column-key="memo">備考</th>
           </tr>
         </thead>
@@ -260,6 +262,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
               <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
               <td data-rails-table-preferences-column-key="confirmed"><%= order[:confirmed] ? "はい" : "いいえ" %></td>
               <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+              <td data-rails-table-preferences-column-key="shipping_code"><%= order[:shipping_code] %></td>
+              <td data-rails-table-preferences-column-key="shipping_notes"><%= order[:shipping_notes] %></td>
               <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
             </tr>
           <% end %>
@@ -314,7 +318,9 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         filter: { type: :boolean, param: :confirmed }
       ),
       table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
-      table_preferences_column(:memo, label: "備考", default_width: 260, default_truncate: 24),
+      table_preferences_column(:shipping_code, label: "配送コード", default_width: 140, overflow: "nowrap"),
+      table_preferences_column(:shipping_notes, label: "配送メモ", default_width: 160, overflow: "wrap"),
+      table_preferences_column(:memo, label: "備考", default_width: 180, default_truncate: 24),
       table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
     ]
   end
@@ -323,30 +329,36 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
     [
       {
         order_no: "A001",
-        customer_name: "山田商事",
+        customer_name: "山田商事 東京本店",
         delivery_date: Date.current,
         status: "未出荷",
         confirmed: true,
         amount: 12_000,
-        memo: "長い備考テキストの表示確認用です。列幅と省略表示を確認できます。"
+        shipping_code: "TOKYO-AM-PRIMARY-001",
+        shipping_notes: "午前指定のため、到着後すぐに検品できるよう納品書を最上段へ入れてください。",
+        memo: "初回出荷のため伝票控えを同梱してください。"
       },
       {
         order_no: "A002",
-        customer_name: "田中物流",
+        customer_name: "田中物流 関西センター",
         delivery_date: Date.current + 1.day,
         status: "出荷済",
         confirmed: false,
         amount: 34_000,
-        memo: "フィルター、ソート、列幅変更の確認に使うデモ行です。"
+        shipping_code: "KANSAI-PALLET-RETURN-220",
+        shipping_notes: "午後着。パレット回収あり。荷下ろし口の案内を事前連絡すると現場が止まりにくい案件です。",
+        memo: "列幅変更と省略表示の確認に使えます。"
       },
       {
         order_no: "A003",
-        customer_name: "佐藤食品",
+        customer_name: "佐藤食品 冷凍倉庫",
         delivery_date: Date.current + 2.days,
         status: "保留",
         confirmed: true,
         amount: 56_000,
-        memo: "ヘッダドラッグと表示項目の並び替えを確認します。"
+        shipping_code: "FREEZER-CHECK-WAITING-305",
+        shipping_notes: "温度帯確認待ち。確認が取れしだい、冷凍便と常温便のどちらで出すかを切り替える予定です。",
+        memo: "ステータス絞り込みと並び替えの確認向けです。"
       }
     ]
   end
@@ -510,5 +522,39 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='from']")
     expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='to']")
     expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='values']")
+  end
+
+  it "auto-fits the representative demo column and keeps overflow modes distinct" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    initial_width = page.evaluate_script(<<~JS)
+      (() => {
+        const cell = document.querySelector('th[data-rails-table-preferences-column-key="shipping_notes"]')
+        return Math.round(cell.getBoundingClientRect().width)
+      })()
+    JS
+
+    page.execute_script(<<~JS)
+      (() => {
+        const handle = document.querySelector('th[data-rails-table-preferences-column-key="shipping_notes"] [data-rails-table-preferences-resize-handle]')
+        handle.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+      })()
+    JS
+
+    auto_fit_width = page.evaluate_script(<<~JS)
+      (() => {
+        const cell = document.querySelector('th[data-rails-table-preferences-column-key="shipping_notes"]')
+        return Math.round(cell.getBoundingClientRect().width)
+      })()
+    JS
+
+    expect(auto_fit_width).to be > initial_width
+    expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_notes\"]').dataset.railsTablePreferencesOverflow")).to eq("wrap")
+    expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_notes\"]')).whiteSpace")).to eq("normal")
+    expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_code\"]').dataset.railsTablePreferencesOverflow")).to eq("nowrap")
+    expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_code\"]')).whiteSpace")).to eq("nowrap")
+    expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"memo\"]').dataset.railsTablePreferencesOverflow")).to eq("ellipsis")
+    expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"memo\"]')).textOverflow")).to eq("ellipsis")
   end
 end

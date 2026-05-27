@@ -22,8 +22,16 @@
 
 <p>
   Sample rows intentionally mix statuses, delivery dates, repeated customer
-  prefixes, and memo lengths. Search for <strong>東京</strong> or sort by
-  <strong>納品日</strong> / <strong>金額</strong> to make the differences easier to spot.
+  prefixes, long shipping codes, long delivery notes, and memo lengths.
+  Search for <strong>東京</strong> or sort by <strong>納品日</strong> /
+  <strong>金額</strong> to make the differences easier to spot.
+</p>
+
+<p>
+  Double-click the resize handle on <strong>配送メモ</strong> or <strong>配送コード</strong>
+  to confirm auto-fit, then compare <strong>配送メモ</strong> (wrap),
+  <strong>配送コード</strong> (nowrap), and <strong>備考</strong> (ellipsis)
+  to see the overflow modes side by side.
 </p>
 
 <section>
@@ -82,6 +90,8 @@
       <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
       <th data-rails-table-preferences-column-key="status">状態</th>
       <th data-rails-table-preferences-column-key="amount">金額</th>
+      <th data-rails-table-preferences-column-key="shipping_code">配送コード</th>
+      <th data-rails-table-preferences-column-key="shipping_notes">配送メモ</th>
       <th data-rails-table-preferences-column-key="memo">備考</th>
     </tr>
   </thead>
@@ -93,6 +103,8 @@
         <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
         <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
         <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
+        <td data-rails-table-preferences-column-key="shipping_code"><%= order[:shipping_code] %></td>
+        <td data-rails-table-preferences-column-key="shipping_notes"><%= order[:shipping_notes] %></td>
         <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
       </tr>
     <% end %>
