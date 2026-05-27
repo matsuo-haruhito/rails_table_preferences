@@ -4,7 +4,6 @@ require "spec_helper"
 
 class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   helper RailsTablePreferences::TablePreferencesHelper
-  include RailsTablePreferences::Controller
   include RailsTablePreferences::TablePreferencesHelper
 
   DEMO_TABLE_KEY = :rails_table_preferences_system_smoke_orders
@@ -297,13 +296,10 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   ERB
 
   def index
-    Thread.current[:rails_table_preferences_current_user] = demo_owner
-    ensure_demo_owner_preset!
-
     @table_columns = table_columns
-    @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
-    @export_payload_preview = rails_table_preference_export_payload(
-      table_key: DEMO_TABLE_KEY,
+    @table_preference_settings = owner_demo_preset_settings
+    @export_payload_preview = build_export_payload_preview(
+      settings: @table_preference_settings,
       columns: @table_columns
     )
     @smoke_data_attributes = table_preferences_data_attributes(
@@ -312,8 +308,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       columns: @table_columns
     )
 
-    preference_params = rails_table_preference_params(
-      table_key: DEMO_TABLE_KEY,
+    preference_params = table_preferences_params(
+      settings: @table_preference_settings,
       columns: @table_columns
     )
 
@@ -438,21 +434,13 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
     nil
   end
 
-  def demo_owner
-    User.find_or_create_by!(name: "System Smoke User")
-  end
-
-  def ensure_demo_owner_preset!
-    preference = RailsTablePreferences::Preference.find_or_initialize_for(
-      user: demo_owner,
-      table_key: DEMO_TABLE_KEY
-    )
-    settings = owner_demo_preset_settings
-    return if preference.persisted? && preference.settings == settings && preference.default_flag == true
-
-    preference.settings = settings
-    preference.default_flag = true
-    preference.save!
+  def build_export_payload_preview(settings:, columns:)
+    table_preferences_state(settings: settings, columns: columns).then do |table_state|
+      {
+        "headers" => table_state.map { |column| column.fetch("label") },
+        "column_keys" => table_state.map { |column| column.fetch("key") }
+      }
+    end
   end
 
   def owner_demo_preset_settings
