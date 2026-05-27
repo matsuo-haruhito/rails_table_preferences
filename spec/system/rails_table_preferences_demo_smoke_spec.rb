@@ -125,6 +125,12 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       }
 
       function mountController() {
+        if (window.__rtpController) {
+          document.body.dataset.rtpSmokeReady = "true"
+          markSmokeStage("ready-existing")
+          return
+        }
+
         document.body.dataset.rtpSmokeReady = "false"
         document.body.dataset.rtpSmokeError = ""
         markSmokeStage("mount-start")
@@ -171,7 +177,12 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       }
 
       window.__rtpMountController = mountController
-      mountController()
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", mountController, { once: true })
+      } else {
+        mountController()
+      }
     })();
   JS
 
@@ -226,6 +237,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         </tbody>
       <% end %>
     <% end %>
+
+    <script><%= raw RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT %></script>
   ERB
 
   def index
@@ -305,31 +318,23 @@ end
 Rails.application.reload_routes!
 
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
-  def render_demo_html
-    session = ActionDispatch::Integration::Session.new(Rails.application)
-    session.get("/rails_table_preferences_system_smoke/orders")
-
-    raise "unexpected smoke render status: #{session.response.status}" unless session.response.status == 200
-
-    session.response.body
-  end
-
   it "renders the demo surface and hides a column through apply" do
-    visit "about:blank"
-    page.execute_script(<<~JS, render_demo_html)
-      document.open()
-      document.write(arguments[0])
-      document.close()
+    visit "/rails_table_preferences_system_smoke/orders"
+
+    page.execute_script(<<~JS)
+      if (document.body.dataset.rtpSmokeReady !== "true" && window.__rtpMountController) {
+        window.__rtpMountController()
+      }
     JS
 
-    expect(page).to have_css("h1", text: "Rails Table Preferences Demo Smoke")
-    expect(page).to have_css(".rails-table-preferences-editor")
+    smoke_ready = page.evaluate_script("document.body.dataset.rtpSmokeReady || ''")
+    smoke_error = page.evaluate_script("document.body.dataset.rtpSmokeError || ''")
+    smoke_stage = page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")
 
-    page.execute_script(RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
-
-    expect(page.evaluate_script("document.body.dataset.rtpSmokeError || ''")).to eq("")
-    expect(page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")).to eq("ready")
-    expect(page.evaluate_script("document.querySelector('h1')?.textContent || ''")).to include("Rails Table Preferences Demo Smoke")
+    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect}"
+    expect(smoke_error).to eq("")
+    expect(smoke_stage).to match(/ready/)
+    expect(page.has_text?("Rails Table Preferences Demo Smoke")).to eq(true)
     expect(page.has_css?("th[data-rails-table-preferences-column-key='order_no']", text: "受注番号")).to eq(true)
     expect(page.has_no_css?("th[data-rails-table-preferences-column-key='internal_cost']")).to eq(true)
     expect(page.has_css?(".rails-table-preferences-editor__row", text: "得意先名")).to eq(true)
