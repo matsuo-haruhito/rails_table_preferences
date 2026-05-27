@@ -87,6 +87,9 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(controller.read).to include("SHARED_PRESET_NAME = \"共有ビュー\"")
     expect(controller.read).to include("ROLE_PRESET_NAME = \"担当ビュー\"")
     expect(controller.read).to include("DEMO_ROLE_KEY = \"operations\"")
+    expect(controller.read).to include("pinned: true")
+    expect(controller.read).to include("受注情報")
+    expect(controller.read).to include("配送情報")
     expect(controller.read).to include("東京医療機器")
     expect(controller.read).to include("東京製菓")
     expect(controller.read).to include("ExportPayload.call")
@@ -99,6 +102,10 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("東京")
     expect(view.read).to include("Export payload preview")
     expect(view.read).to include("Column keys")
+    expect(view.read).to include("rails-table-preferences-demo-scroll")
+    expect(view.read).to include("受注情報")
+    expect(view.read).to include("得意先情報")
+    expect(view.read).to include("配送情報")
   end
 
   it "provides post-install next steps in the generator source" do
