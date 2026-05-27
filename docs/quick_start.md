@@ -113,6 +113,18 @@ end
 
 ## 4. Define columns
 
+If you want a convention-first path instead of hand-writing every column, start with `resource_table_for` or `tree_resource_table_for` and then continue with [Resource table adapters](resource_tables.md) for inferred columns, profile overrides, and existing search-form round-trip wiring.
+
+```erb
+<%= resource_table_for @orders %>
+```
+
+```erb
+<%= tree_resource_table_for @projects, parent_id_method: :parent_project_id %>
+```
+
+Use manual `table_preferences_column(...)` definitions for screens that need explicit labels, custom display blocks, or column-by-column metadata from the start. The rest of this quick start follows that manual path.
+
 Define the table columns in the controller, helper, or another view-friendly place.
 
 ```ruby
