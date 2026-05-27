@@ -199,9 +199,11 @@ Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
+- active filter button summary through `title` / `aria-label`
+- bundled filter panel close on viewport resize
 
 Good next automated checks are:
 
 - save and reload restore settings
-- filter panel opens
+- filter operator switch updates the in-panel fields in place
 - sortable header changes sort state
