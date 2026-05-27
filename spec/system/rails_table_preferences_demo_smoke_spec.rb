@@ -137,8 +137,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
 
         const root = smokeRoot()
         if (!root) {
-          markSmokeStage("root-not-found")
           document.body.dataset.rtpSmokeError = "root-not-found"
+          markSmokeStage("root-not-found")
           return
         }
 
@@ -182,32 +182,64 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   JS
 
   TEMPLATE = <<~ERB
+    <% smoke_root_options = { data: @smoke_data_attributes, class: "rails-table-preferences-editor" } %>
+
     <h1>Rails Table Preferences Demo Smoke</h1>
 
     <p>
       This screen mirrors the lightweight demo surface closely enough to keep one browser smoke flow under automated coverage.
     </p>
 
-    <%= content_tag :div,
-          id: "rtp-smoke-root",
-          data: table_preferences_data_attributes(
-            table_key: DEMO_TABLE_KEY,
-            settings: @table_preference_settings,
-            columns: @table_columns
-          ).merge(rtp_smoke_root: true) do %>
-      <%= table_preferences_editor(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        title: "デモ受注一覧の表示設定"
-      ) %>
+    <div id="rtp-smoke-root"
+         data-rtp-smoke-root="true"
+         <%= tag.attributes(smoke_root_options) %>>
+      <div class="rails-table-preferences-editor__title">デモ受注一覧の表示設定</div>
 
-      <%= table_preferences_table_tag(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        class: "table"
-      ) do %>
+      <div class="rails-table-preferences-editor__preset">
+        <label for="rtp-smoke-preset-select">保存済み設定</label>
+        <select id="rtp-smoke-preset-select"
+                data-rails-table-preferences-target="presetSelect"
+                data-action="rails-table-preferences#selectPreset">
+          <option value="default">default</option>
+        </select>
+
+        <label for="rtp-smoke-preset-name">設定名</label>
+        <input type="text"
+               id="rtp-smoke-preset-name"
+               value="default"
+               data-rails-table-preferences-target="presetName">
+
+        <label class="rails-table-preferences-editor__default-preset">
+          <input type="checkbox"
+                 data-rails-table-preferences-target="defaultPreset">
+          標準設定にする
+        </label>
+      </div>
+
+      <p class="rails-table-preferences-editor__hint"
+         data-rails-table-preferences-target="readOnlyHint"
+         hidden></p>
+
+      <div data-rails-table-preferences-target="editorRows" class="rails-table-preferences-editor__rows"></div>
+      <div class="rails-table-preferences-editor__status"
+           data-rails-table-preferences-target="status"
+           role="status"
+           aria-live="polite"
+           aria-atomic="true"
+           aria-label="保存状態"></div>
+
+      <div class="rails-table-preferences-editor__actions">
+        <button type="button" data-action="rails-table-preferences#applyFromEditor">適用</button>
+        <button type="button" data-action="rails-table-preferences#saveFromEditor">保存</button>
+        <button type="button" data-action="rails-table-preferences#createPresetFromEditor">別名で保存</button>
+        <button type="button"
+                data-action="rails-table-preferences#deletePreset"
+                title="この保存済み設定を削除します。よろしいですか？"
+                aria-label="削除: この保存済み設定を削除します。よろしいですか？">削除</button>
+        <button type="button" data-action="rails-table-preferences#resetEditor">リセット</button>
+      </div>
+
+      <table class="table">
         <thead>
           <tr>
             <th data-rails-table-preferences-column-key="order_no">受注番号</th>
@@ -230,13 +262,18 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
             </tr>
           <% end %>
         </tbody>
-      <% end %>
-    <% end %>
+      </table>
+    </div>
   ERB
 
   def index
     @table_columns = table_columns
     @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
+    @smoke_data_attributes = table_preferences_data_attributes(
+      table_key: DEMO_TABLE_KEY,
+      settings: @table_preference_settings,
+      columns: @table_columns
+    )
     @orders = demo_orders
     render inline: TEMPLATE, type: :erb
   end
@@ -313,8 +350,16 @@ Rails.application.reload_routes!
 RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: true do
   def visit_demo_smoke
     visit "/rails_table_preferences_system_smoke/orders"
-    expect(page.has_css?("#rtp-smoke-root")).to eq(true)
-    page.execute_script(RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
+
+    expect(page).to have_css("#rtp-smoke-root[data-rtp-smoke-root='true']", visible: false)
+
+    page.execute_script(<<~JS, RailsTablePreferencesSystemSmokeOrdersController::BROWSER_SMOKE_SCRIPT)
+      document.body.dataset.rtpHarnessWrapper = "started"
+      new Function(arguments[0])()
+      document.body.dataset.rtpHarnessWrapper = "completed"
+    JS
+
+    expect(page).to have_css("body[data-rtp-harness-wrapper='completed']", visible: false)
   end
 
   def ensure_smoke_controller_mounted
@@ -323,8 +368,9 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     smoke_stage = page.evaluate_script("document.body.dataset.rtpSmokeStage || ''")
     mount_present = page.evaluate_script("typeof window.__rtpMountController")
     controller_present = page.evaluate_script("typeof window.__rtpController")
+    wrapper_state = page.evaluate_script("document.body.dataset.rtpHarnessWrapper || ''")
 
-    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect} mount=#{mount_present.inspect} controller=#{controller_present.inspect}"
+    expect(smoke_ready).to eq("true"), "smoke mount failed at stage=#{smoke_stage.inspect} error=#{smoke_error.inspect} mount=#{mount_present.inspect} controller=#{controller_present.inspect} wrapper=#{wrapper_state.inspect}"
     expect(smoke_error).to eq("")
     expect(smoke_stage).to match(/ready/)
   end
