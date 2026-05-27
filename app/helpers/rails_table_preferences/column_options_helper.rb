@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module RailsTablePreferences
-  module ColumnOptionsHelper
+  module TablePreferencesHelper
     def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       ColumnDefinition.new(
         key: key,
@@ -61,4 +61,6 @@ module RailsTablePreferences
       end
     end
   end
+
+  ColumnOptionsHelper = TablePreferencesHelper unless const_defined?(:ColumnOptionsHelper, false)
 end
