@@ -19,6 +19,7 @@ module RailsTablePreferences
     initializer "rails_table_preferences.helpers" do
       ActiveSupport.on_load(:action_controller_base) do
         helper RailsTablePreferences::TablePreferencesHelper if respond_to?(:helper)
+        helper RailsTablePreferences::ColumnOptionsHelper if respond_to?(:helper)
         include RailsTablePreferences::Controller
       end
     end
