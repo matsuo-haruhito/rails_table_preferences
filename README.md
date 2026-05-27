@@ -58,18 +58,18 @@ Focused documentation is available under [`docs/`](docs/index.md):
 
 Rails Table Preferences targets Rails 7.0 and later.
 
-Primary support is planned for:
+Current representative compatibility coverage is:
 
+- Rails 7.0
 - Rails 7.1
 - Rails 7.2
 - Rails 8.0
-- Rails 8.1
 
-Rails 7.0 is expected to work, but Rails 7.1+ is recommended.
+The development Gemfile currently tracks Rails 8.0.x.
 
 Ruby 3.1+ is required.
 
-GitHub Actions keeps the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes for Rails 7.0, Rails 7.1, Rails 7.2, Rails 8.0, and Rails 8.1 so lower-bound and upper-bound regressions are easier to spot before merge.
+GitHub Actions keeps the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes for Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 so lower-bound and current-baseline regressions are easier to spot before merge.
 
 ## Installation
 
@@ -842,7 +842,7 @@ node --check app/javascript/controllers/rails_table_preferences_controller.js
 bundle exec rake build
 ```
 
-GitHub Actions runs the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes with `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile`, and `BUNDLE_GEMFILE=gemfiles/rails_8_1.gemfile`.
+GitHub Actions runs the default RSpec / JavaScript syntax / gem build / package verification job on both pushes and pull requests. Pull requests also run representative Rails compatibility lanes with `BUNDLE_GEMFILE=gemfiles/rails_7_0.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_7_1.gemfile`, `BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile`, and `BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile`.
 
 Before tagging or publishing a release, also inspect the built package with [Package verification](docs/package_verification.md) and run the broader release checks in [Release checklist](docs/release_checklist.md).
 
