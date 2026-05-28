@@ -144,6 +144,64 @@ Those keys feed different bundled accessibility surfaces:
 - `*_status`: the live `role="status"` region used for async preset feedback
 - `reset_hint`: the bundled reset button `title` and `aria-label`
 
+## Choosing the copy override path
+
+Use the lightest override that matches the wording change you need.
+
+### 1. Locale keys for bundled helper and status copy
+
+Use locale entries when the text is already rendered in the bundled ERB partial and the existing markup is still acceptable.
+
+Typical locale-driven surfaces include:
+
+- preset selector and preset name helper text
+- action hint copy for `適用`, `保存`, and `別名で保存`
+- read-only preset helper text
+- reset and delete confirmation wording
+- async status-region progress, success, and failure copy
+
+This is the best default when the same wording should stay consistent across every screen that uses the bundled editor.
+
+### 2. Stimulus values for per-root filter, sort, or scope wording
+
+Use controller-root values when the copy belongs to the bundled controller surface itself or when one table needs wording that differs from another.
+
+Representative attributes include:
+
+- `data-rails-table-preferences-filter-label-value`
+- `data-rails-table-preferences-filter-apply-label-value`
+- `data-rails-table-preferences-filter-clear-label-value`
+- `data-rails-table-preferences-filter-operator-label-value`
+- `data-rails-table-preferences-filter-value-label-value`
+- `data-rails-table-preferences-filter-from-label-value`
+- `data-rails-table-preferences-filter-to-label-value`
+- `data-rails-table-preferences-sort-asc-label-value`
+- `data-rails-table-preferences-sort-desc-label-value`
+- `data-rails-table-preferences-sort-clear-label-value`
+- `data-rails-table-preferences-scope-owner-label-value`
+- `data-rails-table-preferences-scope-shared-label-value`
+- `data-rails-table-preferences-scope-role-label-value`
+- `data-rails-table-preferences-scope-organization-label-value`
+
+These values affect controller-owned text such as filter button `aria-label` / `title`, bundled filter panel field labels, sort announcements, and scope fallback labels for preset options. The bundled helper output already passes default values from I18n, but host apps can override a single controller root when a specific screen needs different wording. For the controller-side contract, see [JavaScript controller notes](javascript_controller.md).
+
+### 3. Copied ERB or copied JavaScript for markup or logic changes
+
+Copy the bundled ERB partial when the host app needs different markup or helper-text placement, such as:
+
+- a custom status surface instead of the bundled `role="status"` block
+- extra screen-specific helper copy around preset controls
+- different button layout or additional descriptive markup
+
+Copy or replace the bundled JavaScript when the host app needs controller logic or vocabulary that is not exposed through root values, such as:
+
+- different filter operator option text or summary wording from `filterOperatorText(...)`
+- different busy-state or status-update behavior
+- custom filter panel interaction rules
+- extra confirmation flow beyond the bundled delete confirm
+
+In other words, changing `絞り込み`, `条件`, `開始`, `終了`, or scope fallback labels can stay in locale entries and root values, but changing operator vocabulary such as `含む`, `一致`, or `範囲` still requires copied JavaScript today.
+
 Minimal host-app override example:
 
 ```yaml
