@@ -17,6 +17,8 @@ The bundled editor and Stimulus controller provide:
 - `aria-controls` from the open filter button to the current filter panel
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
+- a visible helper message that explains the difference between the bundled preset selector and the preset name field
+- per-field `title` text and shared helper copy on the bundled preset selector and preset name field so users can tell whether they are choosing a saved preset to load or naming the preset they are about to save
 - a visible helper message that explains the difference between the bundled `適用`, `保存`, and `別名で保存` actions
 - per-button `title` and `aria-label` text on the bundled `適用`, `保存`, and `別名で保存` buttons so users can tell whether they are applying the current editor state, saving to the current preset name, or creating a separately named preset
 - a visible helper message when saving from a read-only preset will create or update the owner preset path instead of overwriting the shared preset directly
@@ -144,6 +146,7 @@ Before releasing a screen, check:
 - All editor controls can receive focus.
 - Focus order is understandable.
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
+- The preset field helper text or accessible descriptions explain the difference between the preset selector and the preset name input.
 - The bundled action hint or accessible names explain the difference between apply, save, and save as new.
 - The default checkbox helper text or accessible description explains that it only takes effect when the user saves or saves as new.
 - The reset button hover text or accessible name explains that it discards unsaved editor changes and returns to the default settings.
