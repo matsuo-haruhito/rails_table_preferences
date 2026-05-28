@@ -145,24 +145,27 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         const fetchOverrides = []
 
         function wait(delay) {
-          return new Promise((resolve) => window.setTimeout(resolve, delay))
+          return new Promise(function(resolve) { window.setTimeout(resolve, delay) })
         }
 
-        function buildResponse(payload, ok = true, status = 200) {
+        function buildResponse(payload, ok, status) {
           return {
-            ok,
-            status,
-            json: async () => deepCopy(payload)
+            ok: ok,
+            status: status,
+            json: async function() { return deepCopy(payload) }
           }
         }
 
         function collectionPayload() {
           return {
-            preferences: Object.values(preferencePayloads).map((payload) => ({
-              name: payload.name,
-              default: payload.default === true,
-              editable: payload.editable !== false
-            }))
+            preferences: Object.keys(preferencePayloads).map(function(key) {
+              const payload = preferencePayloads[key]
+              return {
+                name: payload.name,
+                default: payload.default === true,
+                editable: payload.editable !== false
+              }
+            })
           }
         }
 
@@ -171,42 +174,66 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         }
 
         function consumeFetchOverride(method, kind, name) {
-          const index = fetchOverrides.findIndex((override) => {
-            return override.method === method &&
-              (!override.kind || override.kind === kind) &&
-              (!override.name || override.name === name)
-          })
-          if (index < 0) return null
-          return fetchOverrides.splice(index, 1)[0]
+          for (let index = 0; index < fetchOverrides.length; index += 1) {
+            const override = fetchOverrides[index]
+            if (override.method !== method) continue
+            if (override.kind && override.kind !== kind) continue
+            if (override.name && override.name !== name) continue
+            fetchOverrides.splice(index, 1)
+            return override
+          }
+          return null
+        }
+
+        function overrideValue(override, key, fallback) {
+          return override && Object.prototype.hasOwnProperty.call(override, key) ? override[key] : fallback
         }
 
         window.__rtpTestApi = {
-          queueFetchOverride(override) {
-            fetchOverrides.push({ ...override })
+          queueFetchOverride: function(override) {
+            fetchOverrides.push({
+              method: override.method,
+              kind: override.kind,
+              name: override.name,
+              ok: override.ok,
+              status: override.status,
+              delay: override.delay,
+              error: override.error
+            })
           }
         }
 
         window.fetch = async function(url, options = {}) {
           const method = String(options.method || "GET").toUpperCase()
           const normalizedUrl = String(url)
-          const isPreferenceGet = method === "GET" && /\/(?:default|compact)$/.test(normalizedUrl)
+          const pathTail = decodeURIComponent(normalizedUrl.split("/").pop() || "")
+          const isPreferenceGet = method === "GET" && (pathTail === "default" || pathTail === "compact")
           const kind = isPreferenceGet ? "preference" : (method === "GET" ? "collection" : "mutation")
-          const name = isPreferenceGet ? decodeURIComponent(normalizedUrl.split("/").pop() || "default") : null
+          const name = isPreferenceGet ? pathTail : null
           const override = consumeFetchOverride(method, kind, name)
-          if (override?.delay) await wait(override.delay)
-          if (override?.error) throw new Error(override.error)
+
+          if (override && override.delay) await wait(override.delay)
+          if (override && override.error) throw new Error(override.error)
 
           if (method === "GET") {
             if (isPreferenceGet) {
-              return buildResponse(preferencePayload(name), override?.ok ?? true, override?.status ?? 200)
+              return buildResponse(
+                preferencePayload(name),
+                overrideValue(override, "ok", true),
+                overrideValue(override, "status", 200)
+              )
             }
-            return buildResponse(collectionPayload(), override?.ok ?? true, override?.status ?? 200)
+            return buildResponse(
+              collectionPayload(),
+              overrideValue(override, "ok", true),
+              overrideValue(override, "status", 200)
+            )
           }
 
           return buildResponse(
             { name: "default", default: false, editable: true, settings: deepCopy(window.__rtpController.settingsValue) },
-            override?.ok ?? true,
-            override?.status ?? 200
+            overrideValue(override, "ok", true),
+            overrideValue(override, "status", 200)
           )
         }
       }
