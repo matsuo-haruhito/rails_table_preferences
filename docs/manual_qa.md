@@ -76,7 +76,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Create or seed a role preset and confirm it appears only for matching role context.
 - [ ] If you use the generated demo example, set `scope_context_method` to return `roles: ["operations"]` and confirm `担当ビュー [role:operations]` appears.
 - [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
-- [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets, including owner presets.
+- [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, clear any owner default and confirm `担当ビュー [role:operations]` wins before `共有ビュー [shared]`.
@@ -204,7 +204,6 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm all editor controls can receive keyboard focus.
 - [ ] Confirm focus order is understandable.
 - [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
-- [ ] Confirm the preset selector exposes enough owner/shared/role/organization context to distinguish the current scope.
 - [ ] Confirm the action row helper text or accessible names explain the difference between apply, save, and save as new.
 - [ ] Confirm the reset button hover text or accessible name explains that current edits are discarded and defaults are restored.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
