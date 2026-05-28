@@ -9,6 +9,7 @@ Symptoms:
 - The editor appears, but Apply/Save buttons do nothing.
 - Dragging columns does nothing.
 - Resize handles or filter buttons do not appear.
+- Vite or another bundler reports `module not found` / `Failed to resolve import "rails_table_preferences/controller"`.
 
 Check:
 
@@ -31,6 +32,8 @@ Check:
    const application = Application.start()
    application.register("rails-table-preferences", RailsTablePreferencesController)
    ```
+
+   If that import fails with a `module not found` or `Failed to resolve import` error, the bundler still cannot see the gem's packaged `app/javascript/rails_table_preferences/*` files. Add an alias or equivalent resolver for `rails_table_preferences` and `rails_table_preferences/controller`, then compare it with the minimal `vite.config.ts` example in [JavaScript entrypoints](javascript_entrypoints.md).
 
    With jsbundling or another custom Stimulus setup that uses the copied file, register it manually:
 
