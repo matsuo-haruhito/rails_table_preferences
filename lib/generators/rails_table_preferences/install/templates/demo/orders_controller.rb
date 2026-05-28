@@ -26,6 +26,7 @@ module RailsTablePreferencesDemo
         settings: @table_preference_settings,
         columns: @table_columns
       )
+      @demo_owner_summary = demo_owner_summary
 
       preference_params = rails_table_preference_params(
         table_key: DEMO_TABLE_KEY,
@@ -36,6 +37,63 @@ module RailsTablePreferencesDemo
     end
 
     private
+
+    def demo_owner_summary
+      owner = demo_current_owner
+
+      {
+        "model_name" => demo_owner_model_name(owner),
+        "display_name" => demo_owner_display_name(owner),
+        "identifier" => demo_owner_identifier(owner)
+      }
+    end
+
+    def demo_current_owner
+      method_name = RailsTablePreferences.configuration.current_user_method
+      return if method_name.blank? || !respond_to?(method_name, true)
+
+      public_send(method_name)
+    rescue NoMethodError
+      nil
+    end
+
+    def demo_owner_model_name(owner)
+      return "Not available" if owner.blank?
+
+      if owner.class.respond_to?(:model_name)
+        owner.class.model_name.human
+      else
+        owner.class.name
+      end
+    end
+
+    def demo_owner_display_name(owner)
+      return "Not available" if owner.blank?
+
+      %i[display_name name title email].each do |method_name|
+        next unless owner.respond_to?(method_name)
+
+        value = owner.public_send(method_name)
+        return value.to_s if value.present?
+      end
+
+      value = owner.to_s
+      return value if value.present? && !value.start_with?("#<")
+
+      "#{demo_owner_model_name(owner)} record"
+    end
+
+    def demo_owner_identifier(owner)
+      return "Not available" if owner.blank?
+
+      if owner.respond_to?(:id) && owner.id.present?
+        "id: #{owner.id}"
+      elsif owner.respond_to?(:to_param) && owner.to_param.present?
+        owner.to_param.to_s
+      else
+        "Not available"
+      end
+    end
 
     def table_columns
       [
