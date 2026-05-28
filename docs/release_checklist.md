@@ -126,6 +126,7 @@ Confirm:
 - [ ] The demo page renders.
 - [ ] The host app has a working current owner method, usually `current_user`.
 - [ ] Private `current_user` methods work.
+- [ ] The `Current owner` summary matches the owner record that save/reload will persist into.
 - [ ] Japanese demo labels render.
 - [ ] Ignored demo columns do not appear in the editor.
 - [ ] Column visibility works.
@@ -137,7 +138,18 @@ Confirm:
 - [ ] Filter panel opens.
 - [ ] Sortable header click cycles sort state.
 - [ ] Fixed/pinned column hooks are present when configured.
+- [ ] The grouped header row still matches the visible leaf headers after changing visibility or order, saving, and reloading.
 - [ ] Read-only scoped presets do not expose destructive normal-user controls.
+- [ ] The `Current scope context` summary matches the scope context returned by the host app.
+- [ ] Shared preset examples appear in the preset selector.
+- [ ] Matching role context shows the role preset example in the preset selector.
+- [ ] Matching organization context shows the organization preset example in the preset selector.
+- [ ] With no owner default, role default resolution still wins before organization and shared defaults.
+- [ ] With no owner or matching role default, organization default resolution still wins before shared defaults.
+- [ ] The export payload preview excludes hidden columns by default.
+- [ ] The export payload preview follows the saved visible-column order.
+- [ ] Async preset actions update the bundled status region with understandable progress and result copy.
+- [ ] Async preset actions temporarily disable controls and recover after success or failure.
 
 See also:
 
@@ -194,6 +206,7 @@ Check the main user paths:
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
 - [ ] Demo docs clearly say the demo route must be added manually.
+- [ ] `docs/demo.md`, `docs/manual_qa.md`, and `docs/release_checklist.md` stay aligned on the current demo verification surface, including owner/scope summaries, scoped preset precedence, export payload preview, grouped-header consistency, and async preset recovery.
 - [ ] Troubleshooting covers Stimulus, Vite entrypoints, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
 - [ ] Responsibility boundary is clear: host app owns database search, authorization, complex sticky layout polish, export file generation, and shared preset admin UI.
 
