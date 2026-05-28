@@ -5,11 +5,15 @@ ja:
       preset: 設定名
       default_preset: 標準設定にする
       apply: 適用
+      apply_context: 現在の表示に反映
       save: 保存
+      save_context: 現在の設定名に保存
       save_as_new: 別名で保存
+      save_as_new_context: 新しい設定名として保存
+      action_hint: 適用は現在の表示に反映し、保存は現在の設定名に保存、別名で保存は新しい設定名として保存します。
       delete: 削除
       delete_confirm: この保存済み設定を削除します。よろしいですか？
-      read_only_preset_hint: この設定は直接上書きできません。保存すると個人用の新しい設定として保存されます。
+      read_only_preset_hint: この設定は直接上書きできません。保存すると個人用設定として作成または更新されます。
       scope_owner: 個人
       scope_shared: 共有
       scope_role: ロール

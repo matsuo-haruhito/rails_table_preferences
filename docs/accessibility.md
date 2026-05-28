@@ -17,7 +17,9 @@ The bundled editor and Stimulus controller provide:
 - `aria-controls` from the open filter button to the current filter panel
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
-- a visible helper message when saving from a read-only preset will save to the owner preset path instead of overwriting the shared preset directly
+- a visible helper message that explains the difference between the bundled `適用`, `保存`, and `別名で保存` actions
+- per-button `title` and `aria-label` text on the bundled `適用`, `保存`, and `別名で保存` buttons so users can tell whether they are applying the current editor state, saving to the current preset name, or creating a separately named preset
+- a visible helper message when saving from a read-only preset will create or update the owner preset path instead of overwriting the shared preset directly
 - a visible helper message and `aria-describedby` context for the bundled default preset checkbox so users can tell it only takes effect when they save or save as new
 - a live `role="status"` region for bundled save/load/delete feedback
 - explanatory `title` and `aria-label` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings
@@ -142,6 +144,7 @@ Before releasing a screen, check:
 - All editor controls can receive focus.
 - Focus order is understandable.
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
+- The bundled action hint or accessible names explain the difference between apply, save, and save as new.
 - The default checkbox helper text or accessible description explains that it only takes effect when the user saves or saves as new.
 - The reset button hover text or accessible name explains that it discards unsaved editor changes and returns to the default settings.
 - Sortable headers expose the current sort state.
@@ -152,7 +155,7 @@ Before releasing a screen, check:
 - `Escape` closes the bundled filter panel and returns focus to the triggering filter button.
 - Scroll or viewport resize does not leave the bundled filter panel detached from its header context.
 - Read-only scoped presets disable destructive/default controls.
-- Read-only scoped presets show helper text that explains the save-as-owner fallback.
+- Read-only scoped presets show helper text that explains the save fallback goes to the owner preset path without implying it always creates a brand-new preset.
 - Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
