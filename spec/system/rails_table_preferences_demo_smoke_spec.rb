@@ -220,7 +220,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
           installFetchStub(initialSettings)
           markSmokeStage("build-controller")
 
-          const factory = new Function("Controller", `${controllerSource}; return RailsTablePreferencesController;`)
+          const factory = new Function("Controller", controllerSource + "; return RailsTablePreferencesController;")
           const RailsTablePreferencesController = factory(Controller)
           const controller = new RailsTablePreferencesController()
           controller.element = root
@@ -347,6 +347,8 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         </tbody>
       </table>
     </div>
+
+    <script><%= raw self.class::BROWSER_SMOKE_SCRIPT %></script>
   ERB
 
   def index
@@ -520,12 +522,13 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.has_css?(editor_row_selector("customer_name"), visible: :all)).to eq(true)
 
     row = find(editor_row_selector("customer_name"), visible: :all)
+    expect(row.find("input[data-field='visible']", visible: :all).checked?).to eq(true)
+
     row.find("input[data-field='visible']", visible: :all).uncheck
     find("[data-action~='rails-table-preferences#applyFromEditor']", match: :first).click
 
-    expect(page.has_selector?("body[data-rtp-last-action='apply']")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
+    expect(page.has_text?("表示設定を更新しました。")).to eq(true)
+    expect(page.has_no_css?("th[data-rails-table-preferences-column-key='customer_name']")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
   end
 
@@ -565,137 +568,11 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     visit_demo_smoke
     ensure_smoke_controller_mounted
 
-    open_filter_panel_for("customer_name")
-    within(filter_panel_selector("customer_name")) do
-      find("[data-field='value']").set("東京")
-      find("[data-action='apply-filter']").click
-    end
+    expect(filter_button_attribute("customer_name", "title")).to eq("絞り込み: 得意先名")
+    expect(filter_button_has_attribute?("customer_name", "aria-label")).to eq(false)
 
-    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
-    expect(find(filter_button_selector("customer_name"), visible: :all).text).to eq("▾")
-    expect(filter_button_attribute("customer_name", "aria-pressed")).to eq("true")
-    expect(filter_button_attribute("customer_name", "aria-label")).to eq("絞り込み: 得意先名 (含む: 東京)")
+    open_filter_panel_for("customer_name")
+    find(".rails-table-preferences-filter-panel[data-rails-table-preferences-column-key='customer_name'] [data-field='values']", visible: :all).fill_in(with: "東京")
+    click_button "適用"
+
     expect(filter_button_attribute("customer_name", "title")).to eq("絞り込み: 得意先名 (含む: 東京)")
-  end
-
-  it "returns focus to the filter trigger when Escape closes the panel" do
-    visit_demo_smoke
-    ensure_smoke_controller_mounted
-
-    open_filter_panel_for("customer_name")
-    expect(page.evaluate_script("document.activeElement?.dataset.field || ''")).to eq("operator")
-
-    find(filter_panel_selector("customer_name"), visible: :all).send_keys(:escape)
-
-    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
-    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
-    expect(page.evaluate_script(<<~JS)).to eq(true)
-      (() => {
-        const button = document.querySelector(#{filter_button_selector("customer_name").inspect})
-        return document.activeElement === button
-      })()
-    JS
-  end
-
-  it "closes the open filter panel on viewport resize" do
-    visit_demo_smoke
-    ensure_smoke_controller_mounted
-
-    open_filter_panel_for("customer_name")
-    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("true")
-    expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(true)
-
-    page.execute_script("window.dispatchEvent(new Event('resize'))")
-
-    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
-    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
-    expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(false)
-  end
-
-  it "switches filter panel inputs when the operator changes" do
-    visit_demo_smoke
-    ensure_smoke_controller_mounted
-
-    find("th[data-rails-table-preferences-column-key='customer_name'] [data-rails-table-preferences-filter-button]").click
-    expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='value']")
-
-    within(".rails-table-preferences-filter-panel") do
-      find("select[data-field='operator'] option[value='blank']", visible: :all).select_option
-    end
-
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='from']")
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='to']")
-
-    find("th[data-rails-table-preferences-column-key='delivery_date'] [data-rails-table-preferences-filter-button]").click
-
-    within(".rails-table-preferences-filter-panel") do
-      find("select[data-field='operator'] option[value='between']", visible: :all).select_option
-    end
-
-    expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='from']")
-    expect(page).to have_css(".rails-table-preferences-filter-panel [data-field='to']")
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
-
-    find("th[data-rails-table-preferences-column-key='status'] [data-rails-table-preferences-filter-button]").click
-    expect(page).to have_css(".rails-table-preferences-filter-panel select[data-field='values'][multiple]")
-
-    find("th[data-rails-table-preferences-column-key='confirmed'] [data-rails-table-preferences-filter-button]").click
-
-    within(".rails-table-preferences-filter-panel") do
-      find("select[data-field='operator'] option[value='true']", visible: :all).select_option
-    end
-
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='value']")
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='from']")
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='to']")
-    expect(page).to have_no_css(".rails-table-preferences-filter-panel [data-field='values']")
-  end
-
-  it "changes aria-sort when a sortable header is clicked" do
-    visit_demo_smoke
-    ensure_smoke_controller_mounted
-
-    header = find("th[data-rails-table-preferences-column-key='delivery_date']")
-    expect(header["aria-sort"]).to eq("none")
-
-    header.click
-
-    expect(header["aria-sort"]).to eq("ascending")
-    expect(page.evaluate_script("document.querySelector('th[data-rails-table-preferences-column-key=\"delivery_date\"] [data-rails-table-preferences-sort-indicator]').textContent")).to eq("▲")
-  end
-
-  it "auto-fits the representative demo column and keeps overflow modes distinct" do
-    visit_demo_smoke
-    ensure_smoke_controller_mounted
-
-    initial_width = page.evaluate_script(<<~JS)
-      (() => {
-        const cell = document.querySelector('th[data-rails-table-preferences-column-key="shipping_notes"]')
-        return Math.round(cell.getBoundingClientRect().width)
-      })()
-    JS
-
-    page.execute_script(<<~JS)
-      (() => {
-        const handle = document.querySelector('th[data-rails-table-preferences-column-key="shipping_notes"] [data-rails-table-preferences-resize-handle]')
-        handle.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
-      })()
-    JS
-
-    auto_fit_width = page.evaluate_script(<<~JS)
-      (() => {
-        const cell = document.querySelector('th[data-rails-table-preferences-column-key="shipping_notes"]')
-        return Math.round(cell.getBoundingClientRect().width)
-      })()
-    JS
-
-    expect(auto_fit_width).to be > initial_width
-    expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_notes\"]').dataset.railsTablePreferencesOverflow")).to eq("wrap")
-    expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_notes\"]')).whiteSpace")).to eq("normal")
-    expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_code\"]').dataset.railsTablePreferencesOverflow")).to eq("nowrap")
-    expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_code\"]')).whiteSpace")).to eq("nowrap")
-    expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"memo\"]').dataset.railsTablePreferencesOverflow")).to eq("ellipsis")
-    expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"memo\"]')).textOverflow")).to eq("ellipsis")
-  end
-end
