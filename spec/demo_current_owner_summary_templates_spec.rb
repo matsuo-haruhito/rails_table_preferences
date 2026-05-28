@@ -5,14 +5,14 @@ require "spec_helper"
 RSpec.describe "demo current owner summary templates" do
   let(:demo_view_template_path) do
     File.expand_path(
-      "../../lib/generators/rails_table_preferences/install/templates/demo/index.html.erb",
+      "../lib/generators/rails_table_preferences/install/templates/demo/index.html.erb",
       __dir__
     )
   end
 
   let(:demo_controller_template_path) do
     File.expand_path(
-      "../../lib/generators/rails_table_preferences/install/templates/demo/orders_controller.rb",
+      "../lib/generators/rails_table_preferences/install/templates/demo/orders_controller.rb",
       __dir__
     )
   end
