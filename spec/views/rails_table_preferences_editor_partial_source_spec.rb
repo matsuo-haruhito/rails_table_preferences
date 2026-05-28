@@ -15,4 +15,12 @@ RSpec.describe "rails_table_preferences editor partial" do
     expect(source).to include('aria-label="<%= reset_hint %>"')
     expect(source).to include('><%= reset_label %></button>')
   end
+
+  it "makes the bundled default preset checkbox explain that it takes effect on save" do
+    expect(source).to include('default_preset_hint_id = "#{editor_id_prefix}-default-preset-hint"')
+    expect(source).to include('default_preset_hint = t("rails_table_preferences.editor.default_preset_hint", default: "保存または別名保存すると、この設定を標準設定として登録します。")')
+    expect(source).to include('data-rails-table-preferences-target="defaultPreset"')
+    expect(source).to include('aria-describedby="<%= default_preset_hint_id %>"')
+    expect(source).to include('<p id="<%= default_preset_hint_id %>" class="rails-table-preferences-editor__hint"><%= default_preset_hint %></p>')
+  end
 end
