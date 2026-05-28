@@ -110,6 +110,8 @@ end
 
 With both values in place, the preset selector includes `担当ビュー [role:operations]` and `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo still resolves the role preset before the organization preset and shared preset.
 
+If you already created an owner default while testing Save or Save as new, clear it before checking role/organization precedence. In the bundled editor, load the owner preset, uncheck `標準設定にする`, save, then reload. Deleting that temporary owner preset also works when you only created it for demo verification. The important part is to return to a state where no owner preset for this table is marked as default, because owner defaults always win before role, organization, and shared defaults.
+
 If you want to verify the organization path specifically, return only the organization key or a non-matching role list:
 
 ```ruby
