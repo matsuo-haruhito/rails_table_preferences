@@ -110,6 +110,8 @@ end
 
 With both values in place, the preset selector includes `担当ビュー [role:operations]` and `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo still resolves the role preset before the organization preset and shared preset.
 
+If you already created an owner default while testing Save or Save as new, clear it before checking role/organization precedence. In the bundled editor, load the owner preset, uncheck `標準設定にする`, save, then reload. Deleting that temporary owner preset also works when you only created it for demo verification. The important part is to return to a state where no owner preset for this table is marked as default, because owner defaults always win before role, organization, and shared defaults.
+
 If you want to verify the organization path specifically, return only the organization key or a non-matching role list:
 
 ```ruby
@@ -233,7 +235,7 @@ Current automated browser/system smoke covers:
 - hide column and apply
 - active filter button summary through `title` / `aria-label`
 - bundled filter panel close on viewport resize
-- existing search form submit with saved hidden-field filters and sort
+- existing search form submit with saved hidden-field sort state
 - export payload preview hidden-column exclusion and saved visible-column order
 - filter operator switch updates the in-panel fields in place
 - double-click auto-fit and overflow-mode surface on representative demo columns
