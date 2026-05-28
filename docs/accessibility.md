@@ -11,7 +11,8 @@ The bundled editor and Stimulus controller provide:
 - button elements for interactive controls
 - labels for generated editor inputs
 - configurable Japanese default labels
-- localized fallback scope labels for preset options when the payload does not provide `scope_label`
+- scope context in bundled preset options for owner/shared/role/organization presets, with localized fallback labels when the payload does not provide `scope_label`
+- a visible helper message and shared `aria-describedby` context that explain the difference between the bundled preset selector and preset name field
 - `aria-label` for drag handles, resize handles, and filter buttons
 - `aria-pressed` and `aria-expanded` for filter buttons
 - `aria-controls` from the open filter button to the current filter panel
@@ -144,6 +145,8 @@ Before releasing a screen, check:
 - All editor controls can receive focus.
 - Focus order is understandable.
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
+- Preset options show enough scope context to distinguish owner/shared/role/organization presets.
+- The preset helper text or accessible descriptions explain that the selector changes the loaded preset while the name field is used for save or save as new.
 - The bundled action hint or accessible names explain the difference between apply, save, and save as new.
 - The default checkbox helper text or accessible description explains that it only takes effect when the user saves or saves as new.
 - The reset button hover text or accessible name explains that it discards unsaved editor changes and returns to the default settings.
