@@ -85,6 +85,8 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
+When the generated demo loads, it also shows a small `Current owner` summary with the owner model, display name, and identifier. Use that summary as a quick check that `Save` and `Save as new` will persist back into the owner record you expect, especially after loading `共有ビュー [shared]`.
+
 ## Optional scoped demo context
 
 To activate the generated role and organization preset examples, configure `scope_context_method` and return the same stable keys that the demo seeds store in `scope_key`:
@@ -180,6 +182,7 @@ On the demo screen, confirm:
 - [ ] `共有ビュー [shared]` appears in the preset selector.
 - [ ] Selecting `共有ビュー [shared]` loads the shared preset and keeps the normal editor usable.
 - [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
+- [ ] The `Current owner` summary matches the owner record that shared-preset fallback saves back into.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
 - [ ] If the host app returns `roles: ["operations"]`, `担当ビュー [role:operations]` appears in the preset selector.
 - [ ] With that role context and no owner default, reloading the demo resolves `担当ビュー [role:operations]` before `共有ビュー [shared]`.
