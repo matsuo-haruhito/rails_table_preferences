@@ -16,6 +16,17 @@ RSpec.describe "rails_table_preferences editor partial" do
     expect(source).to include('><%= reset_label %></button>')
   end
 
+  it "derives preset field ids from the per-editor prefix and keeps labels paired to them" do
+    expect(source).to include('editor_instance_key = local_assigns[:editor_instance_key].presence || SecureRandom.hex(4)')
+    expect(source).to include('editor_id_prefix = "rails-table-preferences-#{editor_id_key}"')
+    expect(source).to include('preset_select_id = "#{editor_id_prefix}-preset-select"')
+    expect(source).to include('preset_name_id = "#{editor_id_prefix}-preset-name"')
+    expect(source).to include('<label for="<%= preset_select_id %>">')
+    expect(source).to include('id="<%= preset_select_id %>"')
+    expect(source).to include('<label for="<%= preset_name_id %>">')
+    expect(source).to include('id="<%= preset_name_id %>"')
+  end
+
   it "makes the bundled default preset checkbox explain that it takes effect on save" do
     expect(source).to include('default_preset_hint_id = "#{editor_id_prefix}-default-preset-hint"')
     expect(source).to include('default_preset_hint = t("rails_table_preferences.editor.default_preset_hint", default: "保存または別名保存すると、この設定を標準設定として登録します。")')
