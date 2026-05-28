@@ -65,6 +65,10 @@ Current representative CI compatibility coverage is:
 - Rails 7.2
 - Rails 8.0
 
+That list is the current representative CI coverage in this repository, not a blanket promise that every newer host-app Rails release is continuously exercised here.
+
+If you are evaluating the gem in a newer host app release such as Rails 8.1, treat it as additional host-app verification work for now: run the sandbox/demo flow and the manual QA checklist before assuming parity with the CI-covered matrix.
+
 The development Gemfile currently tracks Rails 8.0.x.
 
 Ruby 3.1+ is required.
