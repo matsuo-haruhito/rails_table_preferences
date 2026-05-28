@@ -51,6 +51,8 @@ table_preferences_column(:internal_note, label: "内部メモ", filter: false, o
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
 
+If the host app only needs to change bundled filter/sort wording such as `絞り込み`, `条件`, `開始`, `終了`, or sort labels, treat that as a copy-override concern rather than metadata design. See [Accessibility baseline](accessibility.md) and [JavaScript controller notes](javascript_controller.md).
+
 Supported overflow values are:
 
 - `:ellipsis` or `:truncate`: single-line hidden overflow with `...`

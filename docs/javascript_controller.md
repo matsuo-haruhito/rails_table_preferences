@@ -145,13 +145,31 @@ Representative keys include:
 - `deleting_failed_status`
 - `reset_hint`
 
+Representative controller-root label values include:
+
+- `data-rails-table-preferences-filter-label-value`
+- `data-rails-table-preferences-filter-apply-label-value`
+- `data-rails-table-preferences-filter-clear-label-value`
+- `data-rails-table-preferences-filter-operator-label-value`
+- `data-rails-table-preferences-filter-value-label-value`
+- `data-rails-table-preferences-filter-from-label-value`
+- `data-rails-table-preferences-filter-to-label-value`
+- `data-rails-table-preferences-sort-asc-label-value`
+- `data-rails-table-preferences-sort-desc-label-value`
+- `data-rails-table-preferences-sort-clear-label-value`
+- `data-rails-table-preferences-scope-owner-label-value`
+- `data-rails-table-preferences-scope-shared-label-value`
+- `data-rails-table-preferences-scope-role-label-value`
+- `data-rails-table-preferences-scope-organization-label-value`
+
 In practice that means:
 
-- filter/sort button labels can be overridden per controller root through `data-rails-table-preferences-*-label-value`
+- filter/sort labels and scope fallback labels can be overridden per controller root through `data-rails-table-preferences-*-label-value`
 - bundled helper/status/reset wording is usually better changed through host-app locale entries
-- copied ERB or a replacement controller is only needed when the host app wants different markup, per-screen copy rules, or a custom status surface
+- copied ERB is only needed when the host app wants different markup, helper-text placement, or a custom status surface
+- copied or replacement JavaScript is needed when the host app wants controller vocabulary or behavior that is not exposed as a root value, such as custom filter operator wording or different busy-state logic
 
-For a concrete locale example and the accessibility surfaces those keys feed, see [Accessibility baseline](accessibility.md).
+For a route-by-route decision guide and locale example, see [Accessibility baseline](accessibility.md).
 
 ## Stable table_key guideline
 
