@@ -258,7 +258,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         </p>
       </section>
 
-      <%= form_with url: request.path, method: :get do %>
+      <%= form_with url: request.path, method: :get, local: true do %>
         <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
 
         <%= table_preferences_hidden_fields(
