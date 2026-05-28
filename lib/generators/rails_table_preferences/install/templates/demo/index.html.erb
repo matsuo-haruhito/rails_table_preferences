@@ -34,6 +34,38 @@
   to see the overflow modes side by side.
 </p>
 
+<p>
+  The table below also keeps <strong>受注番号</strong> pinned inside a dedicated
+  horizontal scroll wrapper and shows one grouped header row
+  (<strong>受注情報</strong> / <strong>得意先情報</strong> / <strong>配送情報</strong>) that follows the
+  current saved visible-column order after reload, so fixed-column and column-group
+  behavior can be checked without additional host-app markup first.
+</p>
+
+<style>
+  .rails-table-preferences-demo-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+
+  .rails-table-preferences-demo-table {
+    min-width: 1280px;
+    border-collapse: separate;
+  }
+
+  .rails-table-preferences-demo-table th,
+  .rails-table-preferences-demo-table td {
+    background: white;
+  }
+
+  .rails-table-preferences-demo-table__group-row th {
+    background: #f3f4f6;
+    font-size: 0.9375rem;
+    text-align: left;
+  }
+</style>
+
 <section>
   <h2>Export payload preview</h2>
 
@@ -77,36 +109,45 @@
   <%= submit_tag "検索" %>
 <% end %>
 
-<%= table_preferences_table_tag(
-  table_key: :rails_table_preferences_demo_orders,
-  settings: @table_preference_settings,
-  columns: @table_columns,
-  class: "table"
-) do %>
-  <thead>
-    <tr>
-      <th data-rails-table-preferences-column-key="order_no">受注番号</th>
-      <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
-      <th data-rails-table-preferences-column-key="delivery_date">納品日</th>
-      <th data-rails-table-preferences-column-key="status">状態</th>
-      <th data-rails-table-preferences-column-key="amount">金額</th>
-      <th data-rails-table-preferences-column-key="shipping_code">配送コード</th>
-      <th data-rails-table-preferences-column-key="shipping_notes">配送メモ</th>
-      <th data-rails-table-preferences-column-key="memo">備考</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @orders.each do |order| %>
+<div class="rails-table-preferences-demo-scroll">
+  <%= table_preferences_table_tag(
+    table_key: :rails_table_preferences_demo_orders,
+    settings: @table_preference_settings,
+    columns: @table_columns,
+    class: "table rails-table-preferences-demo-table"
+  ) do %>
+    <thead>
+      <% if @demo_visible_column_groups.any? %>
+        <tr class="rails-table-preferences-demo-table__group-row">
+          <% @demo_visible_column_groups.each do |group| %>
+            <th colspan="<%= group["colspan"] %>"><%= group["label"] %></th>
+          <% end %>
+        </tr>
+      <% end %>
       <tr>
-        <td data-rails-table-preferences-column-key="order_no"><%= order[:order_no] %></td>
-        <td data-rails-table-preferences-column-key="customer_name"><%= order[:customer_name] %></td>
-        <td data-rails-table-preferences-column-key="delivery_date"><%= l(order[:delivery_date]) %></td>
-        <td data-rails-table-preferences-column-key="status"><%= order[:status] %></td>
-        <td data-rails-table-preferences-column-key="amount"><%= number_with_delimiter(order[:amount]) %></td>
-        <td data-rails-table-preferences-column-key="shipping_code"><%= order[:shipping_code] %></td>
-        <td data-rails-table-preferences-column-key="shipping_notes"><%= order[:shipping_notes] %></td>
-        <td data-rails-table-preferences-column-key="memo"><%= order[:memo] %></td>
+        <% @demo_visible_columns.each do |column| %>
+          <th data-rails-table-preferences-column-key="<%= column["key"] %>"><%= column["label"] %></th>
+        <% end %>
       </tr>
-    <% end %>
-  </tbody>
-<% end %>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <% @demo_visible_columns.each do |column| %>
+            <% key = column["key"] %>
+            <td data-rails-table-preferences-column-key="<%= key %>">
+              <% case key %>
+              <% when "delivery_date" %>
+                <%= l(order[:delivery_date]) %>
+              <% when "amount" %>
+                <%= number_with_delimiter(order[:amount]) %>
+              <% else %>
+                <%= order[key.to_sym] %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</div>
