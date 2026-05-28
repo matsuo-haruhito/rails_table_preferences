@@ -123,6 +123,42 @@ The controller also ignores bundled row drag, header drag, sort, filter, and res
 
 Host applications can still replace or restyle this surface through the existing copy-based customization path when they need richer inline messaging or branded notifications.
 
+## Locale overrides for bundled copy
+
+The current bundled helper and status copy is I18n-driven, so host applications can change wording without copying ERB or JavaScript when the existing structure is still acceptable.
+
+Representative locale keys include:
+
+- `rails_table_preferences.editor.action_hint`
+- `rails_table_preferences.editor.read_only_preset_hint`
+- `rails_table_preferences.editor.loading_status`
+- `rails_table_preferences.editor.saved_status`
+- `rails_table_preferences.editor.deleting_failed_status`
+- `rails_table_preferences.editor.reset_hint`
+
+Those keys feed different bundled accessibility surfaces:
+
+- `action_hint`: the visible helper text and `aria-describedby` context for `適用`, `保存`, and `別名で保存`
+- `read_only_preset_hint`: the helper text shown when a shared, role, or organization preset is read-only
+- `*_status`: the live `role="status"` region used for async preset feedback
+- `reset_hint`: the bundled reset button `title` and `aria-label`
+
+Minimal host-app override example:
+
+```yaml
+ja:
+  rails_table_preferences:
+    editor:
+      action_hint: 適用は現在の表示だけを更新し、保存は現在の設定名へ反映、別名で保存は新しい設定として残します。
+      read_only_preset_hint: この設定は直接更新できません。保存すると個人用設定として保存されます。
+      loading_status: 設定を読み込み中です...
+      saved_status: 設定を保存しました。
+      deleting_failed_status: 設定の削除を完了できませんでした。
+      reset_hint: 保存前の変更を破棄して初期表示へ戻します。
+```
+
+If the host app also needs per-screen wording, different markup, or a custom status surface, keep using the existing copy-based path by copying the bundled ERB partial or controller.
+
 ## Host application responsibilities
 
 The host application owns:
@@ -163,6 +199,7 @@ Before releasing a screen, check:
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
 - Custom colors still meet the host application's contrast requirements.
+- If the host app overrides bundled helper or status copy, the locale entries still match the intended action and accessibility context.
 
 ## Customization path
 
