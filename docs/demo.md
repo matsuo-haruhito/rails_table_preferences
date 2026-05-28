@@ -110,6 +110,8 @@ class ApplicationController < ActionController::Base
 end
 ```
 
+The generated screen shows a lightweight `Current scope context` summary near the top. Use it to confirm whether the current request is still `owner-only` or already includes representative `roles` / `organization` keys before reading the preset selector.
+
 With both values in place, the preset selector includes `担当ビュー [role:operations]` and `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo still resolves the role preset before the organization preset and shared preset.
 
 If you already created an owner default while testing Save or Save as new, clear it before checking role/organization precedence. In the bundled editor, load the owner preset, uncheck `標準設定にする`, save, then reload. Deleting that temporary owner preset also works when you only created it for demo verification. The important part is to return to a state where no owner preset for this table is marked as default, because owner defaults always win before role, organization, and shared defaults.
@@ -184,6 +186,7 @@ On the demo screen, confirm:
 - [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
 - [ ] The `Current owner` summary matches the owner record that shared-preset fallback saves back into.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
+- [ ] The `Current scope context` summary matches the scope context returned by the host app.
 - [ ] If the host app returns `roles: ["operations"]`, `担当ビュー [role:operations]` appears in the preset selector.
 - [ ] With that role context and no owner default, reloading the demo resolves `担当ビュー [role:operations]` before `共有ビュー [shared]`.
 - [ ] If the host app returns `organization: "tokyo-hq"`, `東京組織ビュー [organization:tokyo-hq]` appears in the preset selector.

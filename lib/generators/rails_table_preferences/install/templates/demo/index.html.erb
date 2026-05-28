@@ -28,6 +28,32 @@
   no matching role default, reloading the demo resolves it before the shared preset.
 </p>
 
+<section>
+  <h2>Current scope context</h2>
+
+  <p>
+    <strong>Current context:</strong>
+    <% if @demo_scope_context_summary["owner_only"] %>
+      owner-only
+    <% else %>
+      <% summary_parts = [] %>
+      <% if @demo_scope_context_summary.fetch("roles", []).any? %>
+        <% summary_parts << "roles: [#{@demo_scope_context_summary.fetch("roles").join(", ")}]" %>
+      <% end %>
+      <% if @demo_scope_context_summary["organization"].present? %>
+        <% summary_parts << "organization: #{@demo_scope_context_summary["organization"]}" %>
+      <% end %>
+      <code><%= summary_parts.join(" / ") %></code>
+    <% end %>
+  </p>
+
+  <p>
+    Use this summary to confirm which scope the preset selector and default
+    resolution below should reflect before comparing owner, role, and
+    organization behavior.
+  </p>
+</section>
+
 <p>
   Sample rows intentionally mix statuses, delivery dates, repeated customer
   prefixes, long shipping codes, long delivery notes, and memo lengths.
