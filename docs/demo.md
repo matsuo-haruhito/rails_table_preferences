@@ -240,7 +240,9 @@ Current automated browser/system smoke covers:
 - editor and table render
 - hide column and apply
 - active filter button summary through `title` / `aria-label`
+- bundled filter panel `Escape` close with focus return to the trigger button
 - bundled filter panel close on viewport resize
+- preset-load failure busy-state disable and recovery on the bundled controls
 - existing search form submit with saved hidden-field filter and sort state
 - export payload preview hidden-column exclusion and saved visible-column order
 - filter operator switch updates the in-panel fields in place
@@ -249,6 +251,7 @@ Current automated browser/system smoke covers:
 
 Good next automated checks are:
 
+- shared preset read-only load and owner-fallback save
 - save and reload restore settings
 - sortable header click changes sort state directly
 - bundled filter panel close on container scroll
