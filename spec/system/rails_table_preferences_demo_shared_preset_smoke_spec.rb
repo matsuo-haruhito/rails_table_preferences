@@ -197,8 +197,8 @@ class RailsTablePreferencesSharedPresetSystemSmokeOrdersController < Application
         const storedPreference = readStoredPreference(initialSettings)
         installFetchStub(initialSettings)
 
-        const factory = new Function(`${controllerSource}; return RailsTablePreferencesController;`)
-        const RailsTablePreferencesController = factory()
+        const factory = new Function("Controller", controllerSource + "; return RailsTablePreferencesController;")
+        const RailsTablePreferencesController = factory(Controller)
         const controller = new RailsTablePreferencesController()
         controller.element = root
         controller.identifier = "rails-table-preferences"
