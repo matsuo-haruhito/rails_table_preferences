@@ -62,11 +62,15 @@ Maintainers should expect to combine the gem with:
 
 The README currently positions the gem as active initial development targeting an initial `0.1.x` release line.
 
+Current representative pull-request compatibility coverage is Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0, while the development Gemfile tracks Rails 8.0.x. Host applications evaluating newer Rails releases should treat that as additional verification space until the representative compatibility matrix expands.
+
 Repository-level release confidence is expected to come from:
 
 - `bundle exec rspec`
 - `node --check app/javascript/controllers/rails_table_preferences_controller.js`
 - `bundle exec rake build`
+- `bundle exec rake package:verify`
+- representative pull-request compatibility lanes for Rails 7.0 / 7.1 / 7.2 / 8.0
 - sandbox/demo verification
 - manual QA and package verification docs
 
