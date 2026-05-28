@@ -28,6 +28,8 @@ The generated screen also seeds one shared preset named `共有ビュー`. This 
 
 The same demo controller also seeds one role preset named `担当ビュー` for the role key `operations`. After you enable the example scope context shown below, the selector shows `担当ビュー [role:operations]` and default resolution prefers it over the shared preset while no owner default exists.
 
+The same demo controller also seeds one organization preset named `東京組織ビュー` for the organization key `tokyo-hq`. If you return that organization without a matching owner or role default, the selector shows `東京組織ビュー [organization:tokyo-hq]` and default resolution prefers it over the shared preset.
+
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
@@ -83,9 +85,9 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-## Optional role-scoped demo context
+## Optional scoped demo context
 
-To activate the generated role preset example, configure `scope_context_method` and return the same role key that the demo seed stores in `scope_key`:
+To activate the generated role and organization preset examples, configure `scope_context_method` and return the same stable keys that the demo seeds store in `scope_key`:
 
 ```ruby
 RailsTablePreferences.configure do |config|
@@ -98,12 +100,29 @@ class ApplicationController < ActionController::Base
   private
 
   def table_preference_scope_context
-    { roles: ["operations"] }
+    {
+      roles: ["operations"],
+      organization: "tokyo-hq"
+    }
   end
 end
 ```
 
-With that context in place, the preset selector includes `担当ビュー [role:operations]`. If no owner default exists yet, reloading the demo resolves that role preset before `共有ビュー [shared]`.
+With both values in place, the preset selector includes `担当ビュー [role:operations]` and `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo still resolves the role preset before the organization preset and shared preset.
+
+If you want to verify the organization path specifically, return only the organization key or a non-matching role list:
+
+```ruby
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    { organization: "tokyo-hq" }
+  end
+end
+```
+
+Then the preset selector includes `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo resolves that organization preset before `共有ビュー [shared]`.
 
 ## What the demo covers
 
@@ -123,6 +142,7 @@ The generated demo screen includes:
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
 - one role preset example for `roles: ["operations"]`, including role-over-shared default resolution
+- one organization preset example for `organization: "tokyo-hq"`, including organization-over-shared default resolution when no owner or matching role default exists
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
 - text/date/select filter metadata
@@ -161,6 +181,8 @@ On the demo screen, confirm:
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
 - [ ] If the host app returns `roles: ["operations"]`, `担当ビュー [role:operations]` appears in the preset selector.
 - [ ] With that role context and no owner default, reloading the demo resolves `担当ビュー [role:operations]` before `共有ビュー [shared]`.
+- [ ] If the host app returns `organization: "tokyo-hq"`, `東京組織ビュー [organization:tokyo-hq]` appears in the preset selector.
+- [ ] With that organization context and no owner or matching role default, reloading the demo resolves `東京組織ビュー [organization:tokyo-hq]` before `共有ビュー [shared]`.
 - [ ] Delete removes a preset.
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
