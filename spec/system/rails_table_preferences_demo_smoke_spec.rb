@@ -239,6 +239,36 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         <button type="button" data-action="rails-table-preferences#resetEditor">リセット</button>
       </div>
 
+      <section class="rails-table-preferences-demo__export-preview">
+        <h2>Export payload preview</h2>
+
+        <p>
+          This preview shows the ordered headers and column keys that the current
+          saved table settings would pass into the export helper.
+        </p>
+
+        <p id="rtp-export-headers">
+          <strong>Headers:</strong>
+          <%= @export_payload_preview.fetch("headers", []).join(" / ") %>
+        </p>
+
+        <p id="rtp-export-column-keys">
+          <strong>Column keys:</strong>
+          <code><%= @export_payload_preview.fetch("column_keys", []).join(", ") %></code>
+        </p>
+      </section>
+
+      <%= form_with url: request.path, method: :get do %>
+        <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
+
+        <%= table_preferences_hidden_fields(
+          settings: @table_preference_settings,
+          columns: @table_columns
+        ) %>
+
+        <%= submit_tag "検索" %>
+      <% end %>
+
       <table class="table">
         <thead>
           <tr>
@@ -270,18 +300,32 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         </tbody>
       </table>
     </div>
+
+    <div aria-hidden="true" style="height: 1600px;"></div>
   ERB
 
   def index
     @table_columns = table_columns
     @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
+    @export_payload_preview = rails_table_preference_export_payload(table_key: DEMO_TABLE_KEY, columns: @table_columns)
     @smoke_data_attributes = table_preferences_data_attributes(
       table_key: DEMO_TABLE_KEY,
       settings: @table_preference_settings,
       columns: @table_columns
     )
-    @orders = demo_orders
+    preference_params = rails_table_preference_params(table_key: DEMO_TABLE_KEY, columns: @table_columns)
+    @orders = apply_demo_params(demo_orders, params.to_unsafe_h.merge(preference_params))
     render inline: TEMPLATE, type: :erb
+  end
+
+  def rails_table_preference_settings(table_key:, name: nil, owner: nil, scope_context: nil, fallback: {})
+    super(
+      table_key: table_key,
+      name: name,
+      owner: owner,
+      scope_context: scope_context,
+      fallback: fallback.presence || owner_demo_preset_settings
+    )
   end
 
   private
@@ -359,8 +403,94 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         shipping_code: "FREEZER-CHECK-WAITING-305",
         shipping_notes: "温度帯確認待ち。確認が取れしだい、冷凍便と常温便のどちらで出すかを切り替える予定です。",
         memo: "ステータス絞り込みと並び替えの確認向けです。"
+      },
+      {
+        order_no: "A004",
+        customer_name: "東京医療機器",
+        delivery_date: Date.current + 3.days,
+        status: "未出荷",
+        confirmed: true,
+        amount: 89_000,
+        shipping_code: "TOKYO-MEDICAL-RUSH-410",
+        shipping_notes: "東京都内向けの追加便です。午後の短い時間帯しか受け取りできないため、到着前の電話連絡が必要です。",
+        memo: "得意先名で「東京」を検索したときのヒット行です。"
+      },
+      {
+        order_no: "A005",
+        customer_name: "東京製菓",
+        delivery_date: Date.current + 5.days,
+        status: "出荷済",
+        confirmed: false,
+        amount: 21_500,
+        shipping_code: "TOKYO-SWEETS-WEEKLY-088",
+        shipping_notes: "定期便。納品口は狭いですが荷受け自体は短時間で終わるため、積み下ろし手順のメモが折り返して表示される列です。",
+        memo: "備考をやや短めにして、同じ検索語でも表示差が分かるようにしています。"
+      },
+      {
+        order_no: "A006",
+        customer_name: "北星化学",
+        delivery_date: Date.current + 7.days,
+        status: "保留",
+        confirmed: true,
+        amount: 104_000,
+        shipping_code: "HOKUSEI-MONTH-END-HOLD-512",
+        shipping_notes: "月末締め案件。saved sort と hidden fields round-trip の確認に使うサンプルです。",
+        memo: "shared preset と owner preset の切り替え時に列差分を見比べやすいサンプルです。"
       }
     ]
+  end
+
+  def apply_demo_params(orders, merged_params)
+    filtered = orders
+    search_word = merged_params["search_word"].presence || merged_params[:search_word]
+    status_values = Array(merged_params["status"].presence || merged_params[:status]).filter_map(&:presence)
+    from_delivery_date = parse_date(merged_params["from_delivery_date"].presence || merged_params[:from_delivery_date])
+    to_delivery_date = parse_date(merged_params["to_delivery_date"].presence || merged_params[:to_delivery_date])
+
+    filtered = filtered.select { |order| order[:customer_name].include?(search_word) } if search_word.present?
+    filtered = filtered.select { |order| status_values.include?(order[:status]) } if status_values.any?
+    filtered = filtered.select { |order| order[:delivery_date] >= from_delivery_date } if from_delivery_date
+    filtered = filtered.select { |order| order[:delivery_date] <= to_delivery_date } if to_delivery_date
+
+    sort_orders(filtered, merged_params["sort"].presence || merged_params[:sort])
+  end
+
+  def sort_orders(orders, sort)
+    key = sort.to_s.delete_prefix("-").presence
+    return orders unless key
+
+    sorted = orders.sort_by { |order| order[key.to_sym] || "" }
+    sort.to_s.start_with?("-") ? sorted.reverse : sorted
+  end
+
+  def parse_date(value)
+    return if value.blank?
+
+    Date.parse(value.to_s)
+  rescue ArgumentError
+    nil
+  end
+
+  def owner_demo_preset_settings
+    {
+      "columns" => [
+        { "key" => "customer_name", "visible" => true, "order" => 10, "width" => 240, "truncate" => 24 },
+        { "key" => "amount", "visible" => true, "order" => 20, "width" => 120 },
+        { "key" => "status", "visible" => true, "order" => 30, "width" => 120 },
+        { "key" => "order_no", "visible" => true, "order" => 40, "width" => 120 },
+        { "key" => "delivery_date", "visible" => true, "order" => 50, "width" => 140 },
+        { "key" => "confirmed", "visible" => true, "order" => 60, "width" => 100 },
+        { "key" => "shipping_code", "visible" => true, "order" => 70, "width" => 140, "overflow" => "nowrap" },
+        { "key" => "shipping_notes", "visible" => true, "order" => 80, "width" => 160, "overflow" => "wrap" },
+        { "key" => "memo", "visible" => false, "order" => 90, "width" => 180, "truncate" => 24 }
+      ],
+      "filters" => {
+        "status" => { "operator" => "in", "values" => ["未出荷", "保留"] }
+      },
+      "sorts" => [
+        { "key" => "amount", "direction" => "desc" }
+      ]
+    }
   end
 end
 
@@ -433,6 +563,23 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.has_css?(filter_panel_selector(key))).to eq(true)
   end
 
+  def current_query_state
+    page.evaluate_script(<<~JS)
+      (() => {
+        const params = new URLSearchParams(window.location.search)
+        return {
+          searchWord: params.get("search_word"),
+          sort: params.get("sort"),
+          statuses: params.getAll("status[]")
+        }
+      })()
+    JS
+  end
+
+  def visible_order_numbers
+    page.all("tbody tr td[data-rails-table-preferences-column-key='order_no']").map(&:text)
+  end
+
   it "renders the demo surface and hides a column through apply" do
     visit_demo_smoke
     ensure_smoke_controller_mounted
@@ -450,6 +597,32 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
+  end
+
+  it "shows export payload preview without hidden columns and in saved order" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    expect(page).to have_css("#rtp-export-headers", text: "Headers: 得意先名 / 金額 / 状態 / 受注番号 / 納品日 / 確認済 / 配送コード / 配送メモ")
+    expect(page).to have_css("#rtp-export-column-keys", text: "Column keys: customer_name, amount, status, order_no, delivery_date, confirmed, shipping_code, shipping_notes")
+    expect(find("#rtp-export-column-keys").text).not_to include("memo")
+  end
+
+  it "round-trips saved hidden field filters and sort through the search form" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    fill_in "search_word", with: "東京"
+    click_button "検索"
+
+    query_state = current_query_state
+
+    expect(query_state["searchWord"]).to eq("東京")
+    expect(query_state["sort"]).to eq("-amount")
+    expect(query_state["statuses"]).to eq(["未出荷", "保留"])
+    expect(visible_order_numbers).to eq(%w[A004 A001])
+    expect(page).to have_text("東京医療機器")
+    expect(page).to have_no_text("東京製菓")
   end
 
   it "summarizes the active filter button through title and aria-label" do
@@ -556,5 +729,20 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"shipping_code\"]')).whiteSpace")).to eq("nowrap")
     expect(page.evaluate_script("document.querySelector('td[data-rails-table-preferences-column-key=\"memo\"]').dataset.railsTablePreferencesOverflow")).to eq("ellipsis")
     expect(page.evaluate_script("getComputedStyle(document.querySelector('td[data-rails-table-preferences-column-key=\"memo\"]')).textOverflow")).to eq("ellipsis")
+  end
+
+  it "closes the open filter panel on page scroll" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    open_filter_panel_for("customer_name")
+    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("true")
+    expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(true)
+
+    page.execute_script("window.scrollTo(0, document.body.scrollHeight); document.dispatchEvent(new Event('scroll', { bubbles: true }))")
+
+    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
+    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
+    expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(false)
   end
 end
