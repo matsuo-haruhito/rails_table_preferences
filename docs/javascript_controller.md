@@ -132,6 +132,27 @@ Notes:
 - The URL values above assume the default mount path. If the host app mounts the engine elsewhere, change both URLs to the mounted path that serves `/preferences/:table_key`.
 - The example intentionally reuses `@table_preference_settings` from `rails_table_preference_settings(...)` and the same column definitions the host app passes to `table_preferences_editor(...)`.
 
+## Bundled editor copy override path
+
+The bundled editor resolves most visible helper copy before the controller runs, in the ERB partial, through locale keys under `rails_table_preferences.editor`.
+
+Representative keys include:
+
+- `action_hint`
+- `read_only_preset_hint`
+- `loading_status`
+- `saved_status`
+- `deleting_failed_status`
+- `reset_hint`
+
+In practice that means:
+
+- filter/sort button labels can be overridden per controller root through `data-rails-table-preferences-*-label-value`
+- bundled helper/status/reset wording is usually better changed through host-app locale entries
+- copied ERB or a replacement controller is only needed when the host app wants different markup, per-screen copy rules, or a custom status surface
+
+For a concrete locale example and the accessibility surfaces those keys feed, see [Accessibility baseline](accessibility.md).
+
 ## Stable table_key guideline
 
 Use a `table_key` that identifies the logical screen or template, not a transient record id, request param, or DOM-generated UUID.
