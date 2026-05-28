@@ -8,9 +8,9 @@ It is designed for business applications with many index tables, where users nee
 
 The bundled editor and demo screen are intentionally lightweight, but they still cover the main moments users need to evaluate before wiring the gem into a real business screen.
 
-![Representative demo screen showing the preset editor above an orders table with pinned columns and active filters.](docs/images/visual-overview-editor-and-table.svg)
+![Representative demo screen showing the preset editor, scoped preset cues, and a pinned-column orders table.](docs/images/visual-overview-editor-and-table.svg)
 
-- [Visual overview](docs/visual_overview.md): representative screen illustrations for the editor, preset flow, filter/sort state, and pinned-column table layout.
+- [Visual overview](docs/visual_overview.md): representative screen illustrations for the editor, shared/scoped preset orientation, export-preview-related cues, filter/sort state, and pinned-column table layout.
 - [Demo screen generator](docs/demo.md): generate the lightweight verification screen shown in the screenshots.
 
 ## Documentation
@@ -68,7 +68,13 @@ Current representative CI compatibility coverage is:
 
 That list is the current representative CI coverage in this repository, not a blanket promise that every newer host-app Rails release is continuously exercised here.
 
-If you are evaluating the gem in a newer host app release such as Rails 8.1, treat it as additional host-app verification work for now: run the sandbox/demo flow and the manual QA checklist before assuming parity with the CI-covered matrix.
+If you are evaluating the gem in a newer host app release such as Rails 8.1, treat it as additional host-app verification work for now before assuming parity with the CI-covered matrix.
+
+A compact verification path for those newer host-app Rails releases is:
+
+- [Demo screen generator](docs/demo.md): check the bundled editor surface, scoped preset examples, current scope context summary, and export payload preview in a lightweight browser-facing screen.
+- [Sandbox Rails app verification](docs/sandbox.md): confirm install, engine mount, copied/package JavaScript and CSS, and end-to-end preference wiring in a minimal Rails app.
+- [Manual QA checklist](docs/manual_qa.md): finish in the real host app to verify authentication, authorization, layout, accessibility, and existing search/export integration.
 
 The development Gemfile currently tracks Rails 8.0.x.
 

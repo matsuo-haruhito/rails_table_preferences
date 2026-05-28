@@ -1,10 +1,10 @@
 <svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">Rails Table Preferences demo-aligned editor and shared preset overview</title>
-  <desc id="desc">A representative documentation image showing the bundled editor, the seeded shared preset, Japanese demo labels, and a compact orders table preview.</desc>
+  <title id="title">Rails Table Preferences demo-aligned editor, scoped preset, and export preview overview</title>
+  <desc id="desc">A representative documentation image showing the bundled editor, the seeded shared preset path, scoped preset orientation, and the list-screen cues that lead into export payload preview verification.</desc>
   <rect width="1400" height="920" fill="#F4F7FB"/>
   <rect x="72" y="56" width="1256" height="88" rx="22" fill="#FFFFFF" stroke="#D6DEEB"/>
   <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Editor and shared preset flow</text>
-  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A lightweight overview that follows the current generated demo: Japanese labels, a seeded shared preset, and practical list-screen cues.</text>
+  <text x="108" y="126" fill="#58637A" font-family="Arial, sans-serif" font-size="16">A lightweight overview that follows the current generated demo: Japanese labels, a seeded shared preset, scoped preset cues, and practical list-screen guidance.</text>
 
   <rect x="72" y="176" width="456" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
   <text x="108" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Bundled editor surface</text>
@@ -34,8 +34,8 @@
 
   <rect x="108" y="714" width="384" height="94" rx="18" fill="#FFF7ED" stroke="#FED7AA"/>
   <text x="132" y="748" fill="#9A3412" font-family="Arial, sans-serif" font-size="17" font-weight="700">Why this matters</text>
-  <text x="132" y="778" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">The generated demo now leads with Japanese labels and one shared preset path.</text>
-  <text x="132" y="800" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">Keeping the overview close to that surface reduces docs drift.</text>
+  <text x="132" y="778" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">The generated demo now leads with shared/scoped preset orientation and practical list-screen cues.</text>
+  <text x="132" y="800" fill="#7C3A16" font-family="Arial, sans-serif" font-size="15">Keeping the overview close to that surface makes the later export-preview checks easier to place.</text>
 
   <rect x="560" y="176" width="768" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
   <text x="596" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Generated demo-aligned list screen</text>
@@ -90,5 +90,5 @@
   <text x="1216" y="752" fill="#283548" font-family="Arial, sans-serif" font-size="15">21,500</text>
 
   <rect x="596" y="792" width="696" height="28" rx="14" fill="#E8F0FF"/>
-  <text x="620" y="811" fill="#35517A" font-family="Arial, sans-serif" font-size="14">The overview follows the generated demo's shared preset, Japanese labels, and practical search cue instead of a generic placeholder screen.</text>
+  <text x="620" y="811" fill="#35517A" font-family="Arial, sans-serif" font-size="14">The overview follows the generated demo's shared preset, scoped preset, and practical search cues before the fuller export-preview checks in the demo guide.</text>
 </svg>
