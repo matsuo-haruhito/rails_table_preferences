@@ -16,6 +16,9 @@ module RailsTablePreferencesDemo
       ensure_demo_role_preset!
       @table_columns = table_columns
       @table_preference_settings = rails_table_preference_settings(table_key: DEMO_TABLE_KEY)
+      @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
+      @demo_visible_columns = @demo_table_state.fetch("visible_columns")
+      @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
       @export_payload_preview = RailsTablePreferences::ExportPayload.call(
         settings: @table_preference_settings,
         columns: @table_columns
@@ -33,12 +36,20 @@ module RailsTablePreferencesDemo
 
     def table_columns
       [
-        table_preferences_column(:order_no, label: "受注番号", default_width: 120, sortable: true),
+        table_preferences_column(
+          :order_no,
+          label: "受注番号",
+          default_width: 140,
+          pinned: true,
+          group: { key: :order, label: "受注情報" },
+          sortable: true
+        ),
         table_preferences_column(
           :customer_name,
           label: "得意先名",
           default_width: 240,
           default_truncate: 24,
+          group: { key: :customer, label: "得意先情報" },
           filter: { type: :text, param: :search_word },
           sortable: true
         ),
@@ -46,6 +57,7 @@ module RailsTablePreferencesDemo
           :delivery_date,
           label: "納品日",
           default_width: 140,
+          group: { key: :delivery, label: "配送情報" },
           filter: { type: :date, from_param: :from_delivery_date, to_param: :to_delivery_date },
           sortable: true
         ),
@@ -53,15 +65,69 @@ module RailsTablePreferencesDemo
           :status,
           label: "状態",
           default_width: 120,
+          group: { key: :order, label: "受注情報" },
           filter: { type: :select, param: :status, options: ["未出荷", "出荷済", "保留"] },
           sortable: true
         ),
-        table_preferences_column(:amount, label: "金額", default_width: 120, sortable: true),
-        table_preferences_column(:shipping_code, label: "配送コード", default_width: 140, overflow: "nowrap"),
-        table_preferences_column(:shipping_notes, label: "配送メモ", default_width: 160, overflow: "wrap"),
-        table_preferences_column(:memo, label: "備考", default_width: 180, default_truncate: 24),
+        table_preferences_column(
+          :amount,
+          label: "金額",
+          default_width: 120,
+          group: { key: :order, label: "受注情報" },
+          sortable: true
+        ),
+        table_preferences_column(
+          :shipping_code,
+          label: "配送コード",
+          default_width: 140,
+          group: { key: :delivery, label: "配送情報" },
+          overflow: "nowrap"
+        ),
+        table_preferences_column(
+          :shipping_notes,
+          label: "配送メモ",
+          default_width: 160,
+          group: { key: :delivery, label: "配送情報" },
+          overflow: "wrap"
+        ),
+        table_preferences_column(
+          :memo,
+          label: "備考",
+          default_width: 180,
+          default_truncate: 24,
+          group: { key: :delivery, label: "配送情報" }
+        ),
         table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
       ]
+    end
+
+    def demo_visible_column_groups(visible_columns)
+      visible_columns
+        .chunk { |column| demo_column_group(column) }
+        .filter_map do |group, grouped_columns|
+          next if group["label"].blank?
+
+          group.merge(
+            "columns" => grouped_columns,
+            "colspan" => grouped_columns.length
+          )
+        end
+    end
+
+    def demo_column_group(column)
+      group = column["group"] || column[:group]
+      return { "key" => "", "label" => "" } if group.blank?
+
+      case group
+      when Hash
+        stringified = group.deep_stringify_keys
+        {
+          "key" => stringified.fetch("key", stringified.fetch("label", "")).to_s,
+          "label" => stringified.fetch("label", stringified.fetch("key", "")).to_s
+        }
+      else
+        { "key" => group.to_s, "label" => group.to_s }
+      end
     end
 
     def demo_orders
@@ -200,11 +266,11 @@ module RailsTablePreferencesDemo
     def shared_demo_preset_settings
       {
         "columns" => [
-          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 120 },
+          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 140, "pinned" => true },
           { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
-          { "key" => "customer_name", "visible" => true, "order" => 30, "width" => 240, "truncate" => 24 },
-          { "key" => "delivery_date", "visible" => true, "order" => 40, "width" => 140 },
-          { "key" => "amount", "visible" => true, "order" => 50, "width" => 120 },
+          { "key" => "amount", "visible" => true, "order" => 30, "width" => 120 },
+          { "key" => "customer_name", "visible" => true, "order" => 40, "width" => 240, "truncate" => 24 },
+          { "key" => "delivery_date", "visible" => true, "order" => 50, "width" => 140 },
           { "key" => "shipping_code", "visible" => true, "order" => 60, "width" => 140, "overflow" => "nowrap" },
           { "key" => "shipping_notes", "visible" => true, "order" => 70, "width" => 160, "overflow" => "wrap" },
           { "key" => "memo", "visible" => false, "order" => 80, "width" => 180, "truncate" => 24 }
@@ -221,14 +287,14 @@ module RailsTablePreferencesDemo
     def role_demo_preset_settings
       {
         "columns" => [
-          { "key" => "customer_name", "visible" => true, "order" => 10, "width" => 240, "truncate" => 24 },
-          { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
+          { "key" => "order_no", "visible" => true, "order" => 10, "width" => 140, "pinned" => true },
+          { "key" => "customer_name", "visible" => true, "order" => 20, "width" => 240, "truncate" => 24 },
           { "key" => "delivery_date", "visible" => true, "order" => 30, "width" => 140 },
-          { "key" => "memo", "visible" => true, "order" => 40, "width" => 320, "truncate" => 40 },
+          { "key" => "status", "visible" => true, "order" => 40, "width" => 120 },
           { "key" => "shipping_notes", "visible" => true, "order" => 50, "width" => 240, "overflow" => "wrap" },
           { "key" => "shipping_code", "visible" => true, "order" => 60, "width" => 140, "overflow" => "nowrap" },
-          { "key" => "amount", "visible" => true, "order" => 70, "width" => 120 },
-          { "key" => "order_no", "visible" => false, "order" => 80, "width" => 120 }
+          { "key" => "memo", "visible" => true, "order" => 70, "width" => 320, "truncate" => 40 },
+          { "key" => "amount", "visible" => true, "order" => 80, "width" => 120 }
         ],
         "filters" => {},
         "sorts" => [
