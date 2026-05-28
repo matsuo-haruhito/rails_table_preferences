@@ -42,6 +42,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Product Profile](Product%20Profile.md): concise maintainer-facing overview of the product surface, responsibility boundary, and release posture.
 - [AGENTS.md](AGENTS.md): repository guardrails, source-of-truth order, and change boundaries for assisted maintenance work.
+- [CHANGELOG.md](CHANGELOG.md): current unreleased scope and release narrative.
 
 ## Goals
 
