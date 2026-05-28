@@ -62,6 +62,7 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Reload without an explicit name and confirm the default preset loads.
 - [ ] Delete a non-default preset.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
+- [ ] Confirm the bundled action hint explains the difference between apply, save, and save as new.
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, action buttons, and generated editor row inputs.
 - [ ] Confirm drag-reordering editor rows does not start while an async preset action is running.
@@ -75,13 +76,13 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Create or seed a role preset and confirm it appears only for matching role context.
 - [ ] If you use the generated demo example, set `scope_context_method` to return `roles: ["operations"]` and confirm `担当ビュー [role:operations]` appears.
 - [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
-- [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
+- [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets, including owner presets.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, clear any owner default and confirm `担当ビュー [role:operations]` wins before `共有ビュー [shared]`.
 - [ ] Confirm shared presets are selectable by normal users.
 - [ ] Confirm shared/role/organization presets are not deleted from the normal user-facing editor.
-- [ ] Confirm saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
+- [ ] Confirm the read-only hint explains that saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
 - [ ] Confirm host app authorization protects any admin UI for shared/role/organization preset management.
 
 ## 7. API and network behavior
@@ -203,6 +204,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm all editor controls can receive keyboard focus.
 - [ ] Confirm focus order is understandable.
 - [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
+- [ ] Confirm the preset selector exposes enough owner/shared/role/organization context to distinguish the current scope.
+- [ ] Confirm the action row helper text or accessible names explain the difference between apply, save, and save as new.
 - [ ] Confirm the reset button hover text or accessible name explains that current edits are discarded and defaults are restored.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
 - [ ] Confirm filter buttons expose a useful accessible label.
@@ -214,6 +217,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
+- [ ] Confirm read-only scoped presets explain that saves fall back to the owner preset path without implying they only create a brand-new preset.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
 - [ ] Confirm async preset actions also keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request finishes.
 - [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs.
