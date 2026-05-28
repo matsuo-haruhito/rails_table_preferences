@@ -72,7 +72,57 @@
     font-size: 0.9375rem;
     text-align: left;
   }
+
+  .rails-table-preferences-demo-summary {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: #f9fafb;
+  }
+
+  .rails-table-preferences-demo-summary dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .rails-table-preferences-demo-summary dt {
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .rails-table-preferences-demo-summary dd {
+    margin: 0.25rem 0 0;
+  }
 </style>
+
+<section class="rails-table-preferences-demo-summary">
+  <h2>Current owner</h2>
+
+  <p>
+    Shared presets save back into this owner context when you use
+    <strong>Save</strong> or <strong>Save as new</strong>.
+  </p>
+
+  <dl>
+    <div>
+      <dt>Model</dt>
+      <dd><%= @demo_owner_summary.fetch("model_name") %></dd>
+    </div>
+
+    <div>
+      <dt>Display</dt>
+      <dd><%= @demo_owner_summary.fetch("display_name") %></dd>
+    </div>
+
+    <div>
+      <dt>Identifier</dt>
+      <dd><%= @demo_owner_summary.fetch("identifier") %></dd>
+    </div>
+  </dl>
+</section>
 
 <section>
   <h2>Export payload preview</h2>
