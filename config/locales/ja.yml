@@ -2,7 +2,10 @@ ja:
   rails_table_preferences:
     editor:
       preset_select: 保存済み設定
+      preset_target_context: 読み込む保存済み設定を選択
       preset: 設定名
+      preset_name_context: 保存または別名保存で使う設定名を入力
+      preset_relationship_hint: 保存済み設定は読み込む対象、設定名は保存または別名保存で使う名前です。
       default_preset: 標準設定にする
       apply: 適用
       apply_context: 現在の表示に反映
