@@ -4,12 +4,16 @@
 <% editor_id_prefix = "rails-table-preferences-#{editor_id_key}" %>
 <% preset_select_id = "#{editor_id_prefix}-preset-select" %>
 <% preset_name_id = "#{editor_id_prefix}-preset-name" %>
+<% preset_select_hint_id = "#{editor_id_prefix}-preset-select-hint" %>
+<% preset_name_hint_id = "#{editor_id_prefix}-preset-name-hint" %>
 <% default_preset_hint_id = "#{editor_id_prefix}-default-preset-hint" %>
 <% action_hint_id = "#{editor_id_prefix}-action-hint" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
 <% reset_label = t("rails_table_preferences.editor.reset", default: "初期状態に戻す") %>
 <% reset_hint = t("rails_table_preferences.editor.reset_hint", default: "保存前の表示設定の変更を破棄して、初期状態に戻します。") %>
+<% preset_select_hint = t("rails_table_preferences.editor.preset_select_hint", default: "読み込む保存済み設定を選びます。") %>
+<% preset_name_hint = t("rails_table_preferences.editor.preset_name_hint", default: "保存または別名保存で使う設定名を入力します。") %>
 <% default_preset_hint = t("rails_table_preferences.editor.default_preset_hint", default: "保存または別名保存すると、この設定を標準設定として登録します。") %>
 <% read_only_preset_hint = t("rails_table_preferences.editor.read_only_preset_hint", default: "この設定は直接上書きできません。保存すると個人用設定として作成または更新されます。") %>
 <% action_hint = t("rails_table_preferences.editor.action_hint", default: "適用は現在の表示に反映し、保存は現在の設定名に保存、別名で保存は新しい設定名として保存します。") %>
@@ -65,6 +69,7 @@
   <div class="rails-table-preferences-editor__preset">
     <label for="<%= preset_select_id %>"><%= t("rails_table_preferences.editor.preset_select", default: "保存済み設定") %></label>
     <select id="<%= preset_select_id %>"
+            aria-describedby="<%= preset_select_hint_id %>"
             data-rails-table-preferences-target="presetSelect"
             data-action="rails-table-preferences#selectPreset">
       <option value="<%= name %>"><%= name %></option>
@@ -74,6 +79,7 @@
     <input type="text"
            id="<%= preset_name_id %>"
            value="<%= name %>"
+           aria-describedby="<%= preset_name_hint_id %>"
            data-rails-table-preferences-target="presetName">
 
     <label class="rails-table-preferences-editor__default-preset">
@@ -84,6 +90,8 @@
     </label>
   </div>
 
+  <p id="<%= preset_select_hint_id %>" class="rails-table-preferences-editor__hint"><%= preset_select_hint %></p>
+  <p id="<%= preset_name_hint_id %>" class="rails-table-preferences-editor__hint"><%= preset_name_hint %></p>
   <p id="<%= default_preset_hint_id %>" class="rails-table-preferences-editor__hint"><%= default_preset_hint %></p>
 
   <p class="rails-table-preferences-editor__hint"
