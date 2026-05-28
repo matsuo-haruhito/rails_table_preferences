@@ -207,6 +207,47 @@ The key must match the `table_preferences_column` key:
 table_preferences_column(:customer_name, label: "得意先名")
 ```
 
+## Preset labels or helper text point to another editor instance
+
+Symptoms:
+
+- Clicking the preset select label in one editor focuses the select in another editor.
+- Clicking the preset name label in one editor focuses the text input in another editor.
+- The default preset checkbox reads helper text from another editor instance.
+- A copied/customized partial works with one editor, but breaks after rendering two editors on the same page.
+
+Check:
+
+1. Confirm whether the host app still uses the bundled partial unchanged.
+
+   The current bundled partial already generates per-render ids for the preset select, preset name, and default preset hint. If the host app did not copy/customize the partial, compare the rendered markup with the current `_editor.html.erb` output before assuming the helper/runtime contract is wrong.
+
+2. Inspect each rendered editor and verify that these pairings stay local to the same instance:
+
+   - preset select label `for` -> select `id`
+   - preset name label `for` -> text input `id`
+   - default preset checkbox `aria-describedby` -> helper text `id`
+
+   The bundled partial currently generates ids with these suffixes:
+
+   - `-preset-select`
+   - `-preset-name`
+   - `-default-preset-hint`
+
+   If two editors render the same exact ids, the copied/customized partial likely replaced the bundled per-render prefix with a static value.
+
+3. If the host app copied/customized the partial, look for hard-coded ids such as `preset-select`, `preset-name`, or `default-preset-hint`.
+
+   The safe pattern is the same one documented in [Quick start](quick_start.md): preserve the label/input and helper-text relationships, but keep ids unique per rendered instance.
+
+4. Do not try to fix this by inventing a new helper keyword first.
+
+   The current helper contract does not expose an `editor_instance_key:` keyword for host apps. When the page renders multiple editors, keep `table_key` stable for the logical table and restore unique per-render ids in the partial markup instead.
+
+5. Re-run the narrow manual checks after adjusting the markup.
+
+   Use the same checks already called out in [Accessibility baseline](accessibility.md) and [Manual QA checklist](manual_qa.md): render two editors, click each preset label, confirm focus stays inside the matching editor, and confirm each default preset checkbox describes only its local helper text.
+
 ## Double-click auto-fit does not change the expected width
 
 Symptoms:
