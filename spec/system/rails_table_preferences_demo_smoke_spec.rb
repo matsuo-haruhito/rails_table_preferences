@@ -956,6 +956,6 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(control_disabled?("#rtp-smoke-preset-name")).to eq(false)
     expect(control_disabled?("[data-rails-table-preferences-target='defaultPreset']")).to eq(false)
     expect(control_disabled?("[data-action~='rails-table-preferences#saveFromEditor']")).to eq(false)
-    expect(find("#rtp-smoke-preset-select", visible: :all).value).to eq("default")
+    expect(find("#rtp-smoke-preset-select", visible: :all).value).to eq("compact")
   end
 end
