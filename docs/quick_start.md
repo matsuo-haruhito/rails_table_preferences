@@ -92,6 +92,10 @@ The `rails_table_preferences` package also exports the controller as a named exp
 import { RailsTablePreferencesController } from "rails_table_preferences"
 ```
 
+Before those imports work, make sure the host bundler can resolve the gem's packaged `app/javascript/rails_table_preferences/*` files. Vite does not discover Ruby gem `app/javascript` paths automatically, so add an alias or equivalent resolver for `rails_table_preferences` and `rails_table_preferences/controller`.
+
+Keep the detailed `vite.config.ts` example in [JavaScript entrypoints](javascript_entrypoints.md) as the source of truth and mirror only the minimum resolver wiring needed by your bundler.
+
 The generator still copies `app/javascript/controllers/rails_table_preferences_controller.js` for Rails apps that rely on `stimulus-rails` default manifests. Vite apps can use the package entrypoint above to avoid depending on that copied path from `app/frontend`.
 
 ## 3. Mount the engine
