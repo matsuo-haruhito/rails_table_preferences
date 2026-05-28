@@ -297,7 +297,117 @@ Minimal table markup example:
 
 In this example, `order_no` and `customer_name` remain under Rails Table Preferences control, while `備考` stays a normal host-app column.
 
-If you bypass the bundled table helper entirely, the controller root must still receive the same core values as the normal helper output: `tableKey`, `collectionUrl`, `url`, `columns`, and `settings`. See [JavaScript controller notes](javascript_controller.md) for the exact data attributes and controller-side rules.
+If you bypass the bundled table helper entirely, the controller root must still receive the same core values as the normal helper output: `tableKey`, `collectionUrl`, `url`, `columns`, and `settings`. In practice it is also useful to pass the current preset `name` so the manual root stays aligned with the editor and preset select.
+
+The example below mirrors the current bundled editor/controller contract closely enough to copy into a host app and then rename labels, URLs, and query wiring as needed.
+
+Controller setup:
+
+```ruby
+class LegacyOrdersController < ApplicationController
+  def index
+    @table_key = :legacy_orders
+    @table_preference_name = params[:table_preference_name].presence || "default"
+    @table_columns = legacy_order_table_columns
+    @table_preference_settings = rails_table_preference_settings(
+      table_key: @table_key,
+      name: @table_preference_name,
+      fallback: {}
+    )
+
+    preference_params = rails_table_preference_params(
+      table_key: @table_key,
+      name: @table_preference_name,
+      columns: @table_columns
+    )
+    merged_params = params.to_unsafe_h.merge(preference_params)
+
+    @orders = Order
+      .search(merged_params)
+      .order_by(merged_params["sort"] || params[:sort])
+      .page(params[:page])
+
+    @table_preference_collection_url = "/rails_table_preferences/preferences/#{@table_key}"
+    @table_preference_url = "#{@table_preference_collection_url}/#{ERB::Util.url_encode(@table_preference_name)}"
+  end
+
+  private
+
+  def legacy_order_table_columns
+    [
+      table_preferences_column(
+        :order_no,
+        label: "受注番号",
+        sortable: true,
+        default_width: 140
+      ),
+      table_preferences_column(
+        :customer_name,
+        label: "得意先名",
+        filter: { type: :text, param: :search_word },
+        sortable: true,
+        default_width: 240,
+        overflow: :ellipsis
+      )
+    ]
+  end
+end
+```
+
+View wiring:
+
+```erb
+<%= table_preferences_editor(
+  table_key: @table_key,
+  name: @table_preference_name,
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  title: "受注一覧の表示設定"
+) %>
+
+<div
+  data-controller="rails-table-preferences"
+  data-rails-table-preferences-table-key-value="<%= @table_key %>"
+  data-rails-table-preferences-name-value="<%= @table_preference_name %>"
+  data-rails-table-preferences-collection-url-value="<%= @table_preference_collection_url %>"
+  data-rails-table-preferences-url-value="<%= @table_preference_url %>"
+  data-rails-table-preferences-columns-value="<%= @table_columns.to_json %>"
+  data-rails-table-preferences-settings-value="<%= @table_preference_settings.to_json %>">
+  <table class="table">
+    <thead>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th>備考</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
+          <td><%= truncate(order.note, length: 40) %></td>
+          <td><%= link_to "詳細", order_path(order) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+```
+
+Use this pattern when:
+
+- the host app already has a shared `<table>` partial or builder that you do not want to replace
+- some columns should stay fully host-app-owned, such as notes, badges, or action links
+- the page still needs saved filter/sort state through `rails_table_preference_params(...)` or `table_preferences_hidden_fields(...)`
+
+Keep these boundaries in mind:
+
+- the gem owns the managed-column keys, saved settings payload, preset API calls, and the UI behavior attached to those managed cells
+- the host app still owns the query, authorization, export action, unmanaged columns, and any URL changes when `config.mount_path` is not `/rails_table_preferences`
+
+For the exact manual-root attribute list and controller-side rules, see [JavaScript controller notes](javascript_controller.md). For a longer practical screen example, see [Practical examples](examples.md).
 
 Users can drag resize handles to change widths. Double-clicking a resize handle auto-fits the column to the currently rendered cells, similar to spreadsheet applications. The resulting width is stored as the normal column `width` setting when the preference is saved.
 
