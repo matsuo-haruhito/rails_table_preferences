@@ -189,6 +189,114 @@ View:
 <% end %>
 ```
 
+## Example: keep an existing HTML table partial and mount the controller root manually
+
+Use this pattern when the host app already owns the `<table>` markup through a shared partial, HTML rewrite, or another table builder, and you want to add saved display preferences without rewriting that table into `table_preferences_table_tag(...)`.
+
+Controller:
+
+```ruby
+class LegacyOrdersController < ApplicationController
+  def index
+    @table_key = :legacy_orders
+    @table_preference_name = params[:table_preference_name].presence || "default"
+    @table_columns = legacy_order_table_columns
+    @table_preference_settings = rails_table_preference_settings(
+      table_key: @table_key,
+      name: @table_preference_name,
+      fallback: {}
+    )
+
+    preference_params = rails_table_preference_params(
+      table_key: @table_key,
+      name: @table_preference_name,
+      columns: @table_columns
+    )
+    merged_params = params.to_unsafe_h.merge(preference_params)
+
+    @orders = Order
+      .search(merged_params)
+      .order_by(merged_params["sort"] || params[:sort])
+      .page(params[:page])
+
+    @table_preference_collection_url = "/rails_table_preferences/preferences/#{@table_key}"
+    @table_preference_url = "#{@table_preference_collection_url}/#{ERB::Util.url_encode(@table_preference_name)}"
+  end
+
+  private
+
+  def legacy_order_table_columns
+    [
+      table_preferences_column(
+        :order_no,
+        label: "受注番号",
+        sortable: true,
+        default_width: 140
+      ),
+      table_preferences_column(
+        :customer_name,
+        label: "得意先名",
+        filter: { type: :text, param: :search_word },
+        sortable: true,
+        default_width: 240,
+        overflow: :ellipsis
+      )
+    ]
+  end
+end
+```
+
+View composition:
+
+```erb
+<%= table_preferences_editor(
+  table_key: @table_key,
+  name: @table_preference_name,
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  title: "受注一覧の表示設定"
+) %>
+
+<div
+  data-controller="rails-table-preferences"
+  data-rails-table-preferences-table-key-value="<%= @table_key %>"
+  data-rails-table-preferences-name-value="<%= @table_preference_name %>"
+  data-rails-table-preferences-collection-url-value="<%= @table_preference_collection_url %>"
+  data-rails-table-preferences-url-value="<%= @table_preference_url %>"
+  data-rails-table-preferences-columns-value="<%= @table_columns.to_json %>"
+  data-rails-table-preferences-settings-value="<%= @table_preference_settings.to_json %>">
+  <table class="table">
+    <thead>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th>備考</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
+          <td><%= truncate(order.note, length: 40) %></td>
+          <td><%= link_to "詳細", order_path(order) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+```
+
+Why this pattern works:
+
+- the host app keeps the existing table partial and can leave note/action columns fully outside Rails Table Preferences control
+- the gem still owns visibility, order, width, filters, sorts, and preset API calls for the managed columns because both `th` and `td` cells expose matching `data-rails-table-preferences-column-key` values
+- the same `@table_columns` and `@table_preference_settings` can feed both `table_preferences_editor(...)` and the helper-free controller root, so the editor and table stay aligned
+- query execution, authorization, export actions, and any `config.mount_path` override still belong to the host app
+
+For the exact attribute list and table-target rules, see [JavaScript controller notes](javascript_controller.md). For the lighter introductory version of this pattern, see [Quick start](quick_start.md).
+
 ## Example: keep the search form and export action separate
 
 Use this pattern when one list screen needs all of these at once:

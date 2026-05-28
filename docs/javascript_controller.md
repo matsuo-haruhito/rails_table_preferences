@@ -89,6 +89,49 @@ If the host app mounts the controller root manually instead of using the bundled
 
 Optional UI labels such as `data-rails-table-preferences-filter-label-value` and `data-rails-table-preferences-sort-asc-label-value` can also be overridden when the host app needs localized copy different from the defaults.
 
+When the page also renders the bundled editor or preset select, pass `data-rails-table-preferences-name-value` too so the helper-free table root stays aligned with the current preset name.
+
+Example manual root wiring:
+
+```erb
+<div
+  data-controller="rails-table-preferences"
+  data-rails-table-preferences-table-key-value="<%= @table_key %>"
+  data-rails-table-preferences-name-value="<%= @table_preference_name %>"
+  data-rails-table-preferences-collection-url-value="<%= @table_preference_collection_url %>"
+  data-rails-table-preferences-url-value="<%= @table_preference_url %>"
+  data-rails-table-preferences-columns-value="<%= @table_columns.to_json %>"
+  data-rails-table-preferences-settings-value="<%= @table_preference_settings.to_json %>">
+  <table class="table">
+    <thead>
+      <tr>
+        <th data-rails-table-preferences-column-key="order_no">受注番号</th>
+        <th data-rails-table-preferences-column-key="customer_name">得意先名</th>
+        <th>備考</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <td data-rails-table-preferences-column-key="order_no"><%= order.order_no %></td>
+          <td data-rails-table-preferences-column-key="customer_name"><%= order.customer_name %></td>
+          <td><%= truncate(order.note, length: 40) %></td>
+          <td><%= link_to "詳細", order_path(order) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+```
+
+Notes:
+
+- `order_no` and `customer_name` are managed by Rails Table Preferences because both header and body cells expose matching column keys.
+- `備考` and `操作` stay fully host-app-owned because they do not expose `data-rails-table-preferences-column-key`.
+- The URL values above assume the default mount path. If the host app mounts the engine elsewhere, change both URLs to the mounted path that serves `/preferences/:table_key`.
+- The example intentionally reuses `@table_preference_settings` from `rails_table_preference_settings(...)` and the same column definitions the host app passes to `table_preferences_editor(...)`.
+
 ## Stable table_key guideline
 
 Use a `table_key` that identifies the logical screen or template, not a transient record id, request param, or DOM-generated UUID.
