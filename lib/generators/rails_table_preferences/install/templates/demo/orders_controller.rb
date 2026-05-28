@@ -22,6 +22,7 @@ module RailsTablePreferencesDemo
       @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
       @demo_visible_columns = @demo_table_state.fetch("visible_columns")
       @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
+      @demo_scope_context_summary = demo_scope_context_summary
       @export_payload_preview = RailsTablePreferences::ExportPayload.call(
         settings: @table_preference_settings,
         columns: @table_columns
@@ -233,6 +234,28 @@ module RailsTablePreferencesDemo
       Date.parse(value.to_s)
     rescue ArgumentError
       nil
+    end
+
+    def demo_scope_context_summary
+      context = current_demo_scope_context
+      roles = Array(context["roles"]).filter_map { |role| role.to_s.presence }
+      organization = context["organization"].to_s.presence
+
+      {
+        "owner_only" => roles.empty? && organization.blank?,
+        "roles" => roles,
+        "organization" => organization
+      }
+    end
+
+    def current_demo_scope_context
+      method_name = RailsTablePreferences.configuration.scope_context_method
+      return {} if method_name.blank? || !respond_to?(method_name, true)
+
+      context = send(method_name)
+      return {} unless context.is_a?(Hash)
+
+      context.deep_stringify_keys
     end
 
     def ensure_demo_shared_preset!
