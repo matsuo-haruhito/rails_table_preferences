@@ -94,21 +94,120 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       }
 
       function installFetchStub() {
-        window.fetch = async function(_url, options = {}) {
-          const method = String(options.method || "GET").toUpperCase()
-          if (method === "GET") {
-            return {
-              ok: true,
-              status: 200,
-              json: async () => ({ preferences: [{ name: "default", default: false, editable: true }] })
+        const preferencePayloads = {
+          default: {
+            name: "default",
+            default: false,
+            editable: true,
+            settings: {
+              columns: [
+                { key: "customer_name", visible: true, order: 10, width: 240, truncate: 24 },
+                { key: "amount", visible: true, order: 20, width: 120 },
+                { key: "status", visible: true, order: 30, width: 120 },
+                { key: "order_no", visible: true, order: 40, width: 120 },
+                { key: "delivery_date", visible: true, order: 50, width: 140 },
+                { key: "confirmed", visible: true, order: 60, width: 100 },
+                { key: "shipping_code", visible: true, order: 70, width: 140, overflow: "nowrap" },
+                { key: "shipping_notes", visible: true, order: 80, width: 160, overflow: "wrap" },
+                { key: "memo", visible: false, order: 90, width: 180, truncate: 24 }
+              ],
+              filters: {
+                status: { operator: "eq", value: "未出荷" }
+              },
+              sorts: [
+                { key: "amount", direction: "desc" }
+              ]
+            }
+          },
+          compact: {
+            name: "compact",
+            default: false,
+            editable: true,
+            settings: {
+              columns: [
+                { key: "order_no", visible: true, order: 10, width: 120 },
+                { key: "customer_name", visible: true, order: 20, width: 220, truncate: 18 },
+                { key: "status", visible: true, order: 30, width: 110 },
+                { key: "amount", visible: true, order: 40, width: 120 },
+                { key: "delivery_date", visible: true, order: 50, width: 140 },
+                { key: "confirmed", visible: false, order: 60, width: 100 },
+                { key: "shipping_code", visible: false, order: 70, width: 140, overflow: "nowrap" },
+                { key: "shipping_notes", visible: false, order: 80, width: 160, overflow: "wrap" },
+                { key: "memo", visible: false, order: 90, width: 180, truncate: 24 }
+              ],
+              filters: {},
+              sorts: [
+                { key: "order_no", direction: "asc" }
+              ]
             }
           }
+        }
+        const fetchOverrides = []
 
+        function wait(delay) {
+          return new Promise((resolve) => window.setTimeout(resolve, delay))
+        }
+
+        function buildResponse(payload, ok = true, status = 200) {
           return {
-            ok: true,
-            status: 200,
-            json: async () => ({ name: "default", default: false, editable: true, settings: deepCopy(window.__rtpController.settingsValue) })
+            ok,
+            status,
+            json: async () => deepCopy(payload)
           }
+        }
+
+        function collectionPayload() {
+          return {
+            preferences: Object.values(preferencePayloads).map((payload) => ({
+              name: payload.name,
+              default: payload.default === true,
+              editable: payload.editable !== false
+            }))
+          }
+        }
+
+        function preferencePayload(name) {
+          return deepCopy(preferencePayloads[name] || preferencePayloads.default)
+        }
+
+        function consumeFetchOverride(method, kind, name) {
+          const index = fetchOverrides.findIndex((override) => {
+            return override.method === method &&
+              (!override.kind || override.kind === kind) &&
+              (!override.name || override.name === name)
+          })
+          if (index < 0) return null
+          return fetchOverrides.splice(index, 1)[0]
+        }
+
+        window.__rtpTestApi = {
+          queueFetchOverride(override) {
+            fetchOverrides.push({ ...override })
+          }
+        }
+
+        window.fetch = async function(url, options = {}) {
+          const method = String(options.method || "GET").toUpperCase()
+          const normalizedUrl = String(url)
+          const isPreferenceGet = method === "GET" && /\/(?:default|compact)$/.test(normalizedUrl)
+          const kind = isPreferenceGet ? "preference" : (method === "GET" ? "collection" : "mutation")
+          const name = isPreferenceGet ? decodeURIComponent(normalizedUrl.split("/").pop() || "default") : null
+          const override = consumeFetchOverride(method, kind, name)
+          if (override?.delay) await wait(override.delay)
+          if (override?.error) throw new Error(override.error)
+
+          if (method === "GET") {
+            if (isPreferenceGet) {
+              return buildResponse(preferencePayload(name), override?.ok ?? true, override?.status ?? 200)
+            }
+            return buildResponse(collectionPayload(), override?.ok ?? true, override?.status ?? 200)
+          }
+
+          return buildResponse(
+            { name: "default", default: false, editable: true, settings: deepCopy(window.__rtpController.settingsValue) },
+            override?.ok ?? true,
+            override?.status ?? 200
+          )
         }
       }
 
@@ -588,6 +687,24 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     page.all("tbody tr td[data-rails-table-preferences-column-key='order_no']").map(&:text)
   end
 
+  def control_disabled?(selector)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const control = document.querySelector(#{selector.inspect})
+        return control ? control.disabled === true : null
+      })()
+    JS
+  end
+
+  def active_element_matches?(selector)
+    page.evaluate_script(<<~JS)
+      (() => {
+        const element = document.querySelector(#{selector.inspect})
+        return Boolean(element && document.activeElement === element)
+      })()
+    JS
+  end
+
   it "renders the demo surface and hides a column through apply" do
     visit_demo_smoke
     ensure_smoke_controller_mounted
@@ -762,5 +879,56 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
     expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
     expect(filter_button_has_attribute?("customer_name", "aria-controls")).to eq(false)
+  end
+
+  it "closes the filter panel with Escape and returns focus to the trigger button" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    open_filter_panel_for("customer_name")
+
+    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("true")
+    expect(page.evaluate_script("document.activeElement?.dataset.field || ''")).to eq("operator")
+
+    find("#{filter_panel_selector("customer_name")} [data-field='operator']", visible: :all).send_keys(:escape)
+
+    expect(page.has_no_css?(filter_panel_selector("customer_name"))).to eq(true)
+    expect(filter_button_attribute("customer_name", "aria-expanded")).to eq("false")
+    expect(active_element_matches?(filter_button_selector("customer_name"))).to eq(true)
+  end
+
+  it "recovers disabled controls and status text after a preset load failure" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    expect(page).to have_css("#rtp-smoke-preset-select option[value='compact']", visible: :all)
+
+    page.execute_script(<<~JS)
+      window.__rtpTestApi.queueFetchOverride({
+        method: "GET",
+        kind: "preference",
+        name: "compact",
+        ok: false,
+        status: 500,
+        delay: 200
+      })
+    JS
+
+    find("#rtp-smoke-preset-select option[value='compact']", visible: :all).select_option
+
+    expect(page).to have_css("#rtp-smoke-root[aria-busy='true']", visible: false)
+    expect(page).to have_css(".rails-table-preferences-editor__status", text: "設定を読み込み中です...")
+    expect(control_disabled?("#rtp-smoke-preset-select")).to eq(true)
+    expect(control_disabled?("#rtp-smoke-preset-name")).to eq(true)
+    expect(control_disabled?("[data-rails-table-preferences-target='defaultPreset']")).to eq(true)
+    expect(control_disabled?("[data-action~='rails-table-preferences#saveFromEditor']")).to eq(true)
+
+    expect(page).to have_css(".rails-table-preferences-editor__status", text: "設定の読み込みを完了できませんでした。")
+    expect(page).to have_css("#rtp-smoke-root[aria-busy='false']", visible: false)
+    expect(control_disabled?("#rtp-smoke-preset-select")).to eq(false)
+    expect(control_disabled?("#rtp-smoke-preset-name")).to eq(false)
+    expect(control_disabled?("[data-rails-table-preferences-target='defaultPreset']")).to eq(false)
+    expect(control_disabled?("[data-action~='rails-table-preferences#saveFromEditor']")).to eq(false)
+    expect(find("#rtp-smoke-preset-select", visible: :all).value).to eq("default")
   end
 end
