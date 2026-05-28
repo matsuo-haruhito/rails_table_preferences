@@ -443,12 +443,12 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
   def apply_demo_params(orders, merged_params)
     filtered = orders
     search_word = merged_params["search_word"].presence || merged_params[:search_word]
-    status_values = Array(merged_params["status"].presence || merged_params[:status]).filter_map(&:presence)
+    status = merged_params["status"].presence || merged_params[:status]
     from_delivery_date = parse_date(merged_params["from_delivery_date"].presence || merged_params[:from_delivery_date])
     to_delivery_date = parse_date(merged_params["to_delivery_date"].presence || merged_params[:to_delivery_date])
 
     filtered = filtered.select { |order| order[:customer_name].include?(search_word) } if search_word.present?
-    filtered = filtered.select { |order| status_values.include?(order[:status]) } if status_values.any?
+    filtered = filtered.select { |order| order[:status] == status } if status.present?
     filtered = filtered.select { |order| order[:delivery_date] >= from_delivery_date } if from_delivery_date
     filtered = filtered.select { |order| order[:delivery_date] <= to_delivery_date } if to_delivery_date
 
@@ -485,7 +485,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         { "key" => "memo", "visible" => false, "order" => 90, "width" => 180, "truncate" => 24 }
       ],
       "filters" => {
-        "status" => { "operator" => "in", "values" => ["未出荷", "保留"] }
+        "status" => { "operator" => "eq", "value" => "未出荷" }
       },
       "sorts" => [
         { "key" => "amount", "direction" => "desc" }
@@ -570,7 +570,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
         return {
           searchWord: params.get("search_word"),
           sort: params.get("sort"),
-          statuses: params.getAll("status[]")
+          status: params.get("status")
         }
       })()
     JS
@@ -594,9 +594,9 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     find("[data-action~='rails-table-preferences#applyFromEditor']", match: :first).click
 
     expect(page.has_selector?("body[data-rtp-last-action='apply']")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
-    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
+    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\\\"customer_name\\\"]')).every((cell) => cell.hidden)")).to eq(true)
+    expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\\\"customer_name\\\"]')).every((cell) => cell.hidden)")).to eq(true)
+    expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\\\"order_no\\\"]')).every((cell) => !cell.hidden)")).to eq(true)
   end
 
   it "shows export payload preview without hidden columns and in saved order" do
@@ -619,7 +619,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
 
     expect(query_state["searchWord"]).to eq("東京")
     expect(query_state["sort"]).to eq("-amount")
-    expect(query_state["statuses"]).to eq(["未出荷", "保留"])
+    expect(query_state["status"]).to eq("未出荷")
     expect(visible_order_numbers).to eq(%w[A004 A001])
     expect(page).to have_text("東京医療機器")
     expect(page).to have_no_text("東京製菓")
