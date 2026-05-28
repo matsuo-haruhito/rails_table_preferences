@@ -235,7 +235,7 @@ Current automated browser/system smoke covers:
 - hide column and apply
 - active filter button summary through `title` / `aria-label`
 - bundled filter panel close on viewport resize
-- existing search form submit with saved hidden-field sort state
+- existing search form submit with saved hidden-field filter and sort state
 - export payload preview hidden-column exclusion and saved visible-column order
 - filter operator switch updates the in-panel fields in place
 - double-click auto-fit and overflow-mode surface on representative demo columns
