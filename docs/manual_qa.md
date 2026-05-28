@@ -62,6 +62,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Reload without an explicit name and confirm the default preset loads.
 - [ ] Delete a non-default preset.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
+- [ ] Confirm owner presets also show scope context in the selector, so owner/shared/role/organization options are readable with the same pattern.
+- [ ] Confirm the preset helper text explains that the selector changes the loaded preset while the name field is used for save or save as new.
 - [ ] Confirm the bundled action hint explains the difference between apply, save, and save as new.
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, action buttons, and generated editor row inputs.
@@ -204,6 +206,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm all editor controls can receive keyboard focus.
 - [ ] Confirm focus order is understandable.
 - [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
+- [ ] Confirm owner presets also expose scope context, not just shared/role/organization presets.
+- [ ] Confirm the preset helper text or accessible descriptions explain that the selector changes the loaded preset while the name field is used for save or save as new.
 - [ ] Confirm the action row helper text or accessible names explain the difference between apply, save, and save as new.
 - [ ] Confirm the reset button hover text or accessible name explains that current edits are discarded and defaults are restored.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
