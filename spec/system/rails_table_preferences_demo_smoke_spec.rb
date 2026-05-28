@@ -198,6 +198,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
       <div class="rails-table-preferences-editor__preset">
         <label for="rtp-smoke-preset-select">保存済み設定</label>
         <select id="rtp-smoke-preset-select"
+                aria-describedby="rtp-smoke-preset-select-hint"
                 data-rails-table-preferences-target="presetSelect"
                 data-action="rails-table-preferences#selectPreset">
           <option value="default">default</option>
@@ -207,6 +208,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         <input type="text"
                id="rtp-smoke-preset-name"
                value="default"
+               aria-describedby="rtp-smoke-preset-name-hint"
                data-rails-table-preferences-target="presetName">
 
         <label class="rails-table-preferences-editor__default-preset">
@@ -215,6 +217,9 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
           標準設定にする
         </label>
       </div>
+
+      <p id="rtp-smoke-preset-select-hint" class="rails-table-preferences-editor__hint">読み込む保存済み設定を選びます。</p>
+      <p id="rtp-smoke-preset-name-hint" class="rails-table-preferences-editor__hint">保存または別名保存で使う設定名を入力します。</p>
 
       <p class="rails-table-preferences-editor__hint"
          data-rails-table-preferences-target="readOnlyHint"
@@ -450,6 +455,16 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('td[data-rails-table-preferences-column-key=\"customer_name\"]')).every((cell) => cell.hidden)")).to eq(true)
     expect(page.evaluate_script("Array.from(document.querySelectorAll('th[data-rails-table-preferences-column-key=\"order_no\"]')).every((cell) => !cell.hidden)")).to eq(true)
+  end
+
+  it "explains the roles of the preset selector and preset name field" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    expect(find("#rtp-smoke-preset-select", visible: :all)["aria-describedby"]).to eq("rtp-smoke-preset-select-hint")
+    expect(find("#rtp-smoke-preset-name", visible: :all)["aria-describedby"]).to eq("rtp-smoke-preset-name-hint")
+    expect(page).to have_css("#rtp-smoke-preset-select-hint", text: "読み込む保存済み設定を選びます。")
+    expect(page).to have_css("#rtp-smoke-preset-name-hint", text: "保存または別名保存で使う設定名を入力します。")
   end
 
   it "summarizes the active filter button through title and aria-label" do

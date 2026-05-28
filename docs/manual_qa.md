@@ -63,6 +63,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Delete a non-default preset.
 - [ ] Try deleting a preset and confirm the UI remains usable afterwards.
 - [ ] Confirm the bundled action hint explains the difference between apply, save, and save as new.
+- [ ] Confirm the preset selector helper copy explains that it chooses which saved settings to load or switch to.
+- [ ] Confirm the preset name helper copy explains that save and save as new use that field as the edited preset name.
 - [ ] Confirm save/load/delete actions update the bundled status region with understandable progress and result copy.
 - [ ] Confirm async preset actions temporarily disable the preset select, preset name, default checkbox, action buttons, and generated editor row inputs.
 - [ ] Confirm drag-reordering editor rows does not start while an async preset action is running.
@@ -207,6 +209,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm focus order is understandable.
 - [ ] Confirm preset select, preset name, default checkbox, and action buttons have labels.
 - [ ] Confirm the action row helper text or accessible names explain the difference between apply, save, and save as new.
+- [ ] Confirm the preset selector helper copy or accessible description explains that it loads or switches the saved preset.
+- [ ] Confirm the preset name helper copy or accessible description explains that save and save as new use that field as the edited preset name.
 - [ ] Confirm the reset button hover text or accessible name explains that current edits are discarded and defaults are restored.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
 - [ ] Confirm filter buttons expose a useful accessible label.
