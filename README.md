@@ -214,6 +214,9 @@ Included in v0.1 scope:
 - Sort metadata and sortable header click UI
 - Controller params and Ransack adapters
 - Controller/view helpers for existing search forms
+- Convention-first resource table helpers for Active Record-backed tables
+- Active Record column inference with `TableProfile` overrides for small per-screen deltas
+- Renderer registries for filter/editor metadata integrations such as Rails Fields Kit
 - Export payload helper for CSV, Excel, and report generation in the host app
 - Baseline accessibility hooks for generated controls
 - Rails engine structure
@@ -264,6 +267,9 @@ Included scope:
 - Plain controller params adapter
 - Ransack adapter
 - Hidden fields helper for existing search forms
+- Convention-first `resource_table_for` and `tree_resource_table_for` helpers with Active Record column inference
+- `RailsTablePreferences::TableProfile` overrides for labels, filters, editors, display values, and column order
+- Renderer registries for host-app filter/editor controls such as Rails Fields Kit
 - Export payload helper for host app CSV/Excel/report code
 - Rails helpers and Stimulus integration
 - JavaScript package entrypoints for Vite / `app/frontend` registration
