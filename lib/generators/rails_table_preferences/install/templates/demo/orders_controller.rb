@@ -35,6 +35,19 @@ module RailsTablePreferencesDemo
         "context" => { "organization" => DEMO_ORGANIZATION_KEY }
       }
     }.freeze
+    DEMO_OWNER_PARAM = "demo_owner"
+    DEMO_OWNER_SWITCH_LABELS = ["Demo owner A", "Demo owner B"].freeze
+
+    owner_method_name = RailsTablePreferences.configuration.current_user_method.to_s.presence || "current_user"
+    define_method(owner_method_name) do
+      override = demo_owner_override
+      return override if override
+
+      super_method = method(owner_method_name).super_method
+      return super_method.call if super_method
+
+      nil
+    end
 
     def index
       ensure_demo_shared_preset!
@@ -45,6 +58,8 @@ module RailsTablePreferencesDemo
       @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
       @demo_visible_columns = @demo_table_state.fetch("visible_columns")
       @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
+      @demo_owner_switches = demo_owner_switches
+      @demo_owner_switch_ready = @demo_owner_switches.length > 1
       @demo_scope_context_switches = demo_scope_context_switches
       @demo_scope_context_toggle_ready = demo_scope_context_toggle_ready?
       @demo_scope_context_summary = demo_scope_context_summary
@@ -84,11 +99,21 @@ module RailsTablePreferencesDemo
     end
 
     def demo_current_owner
-      method_name = RailsTablePreferences.configuration.current_user_method
-      return if method_name.blank? || !respond_to?(method_name, true)
+      method_name = RailsTablePreferences.configuration.current_user_method.to_s.presence || "current_user"
+      return unless respond_to?(method_name, true)
 
-      public_send(method_name)
+      send(method_name)
     rescue NoMethodError
+      nil
+    end
+
+    def demo_host_app_owner
+      method_name = RailsTablePreferences.configuration.current_user_method.to_s.presence || "current_user"
+      super_method = method(method_name).super_method
+      return super_method.call if super_method
+
+      nil
+    rescue NameError, NoMethodError
       nil
     end
 
@@ -128,6 +153,131 @@ module RailsTablePreferencesDemo
       else
         "Not available"
       end
+    end
+
+    def demo_owner_switches
+      demo_available_owner_records.each_with_index.map do |owner, index|
+        {
+          "active" => demo_current_owner_switch_key == demo_owner_switch_key(owner),
+          "description" => demo_owner_switch_description(owner, index),
+          "label" => demo_owner_switch_label(index),
+          "path" => demo_owner_switch_path(owner, index)
+        }
+      end
+    end
+
+    def demo_current_owner_switch_key
+      demo_owner_switch_key(demo_current_owner)
+    end
+
+    def demo_owner_switch_key(owner)
+      return "" if owner.blank?
+
+      if owner.respond_to?(:id) && owner.id.present?
+        owner.id.to_s
+      else
+        owner.object_id.to_s
+      end
+    end
+
+    def demo_owner_override
+      selected_key = params[DEMO_OWNER_PARAM].to_s.presence
+      return if selected_key.blank?
+
+      demo_available_owner_records.find { |owner| demo_owner_switch_key(owner) == selected_key }
+    end
+
+    def demo_available_owner_records
+      @demo_available_owner_records ||= begin
+        host_owner = demo_host_app_owner
+        if host_owner.blank?
+          []
+        else
+          owners = [host_owner]
+          owners.concat(demo_existing_owner_candidates(host_owner))
+          DEMO_OWNER_SWITCH_LABELS.each_index do |index|
+            break if owners.length >= 3
+
+            demo_owner = demo_find_or_create_owner_record(host_owner.class, index)
+            owners << demo_owner if demo_owner.present?
+          end
+          owners.compact.uniq { |owner| demo_owner_switch_key(owner) }
+        end
+      end
+    end
+
+    def demo_existing_owner_candidates(host_owner)
+      model = host_owner.class
+      return [] unless defined?(ActiveRecord::Base) && model < ActiveRecord::Base
+
+      scope = model.all
+      scope = scope.where.not(id: host_owner.id) if host_owner.respond_to?(:id) && host_owner.id.present?
+      scope.limit(2).to_a
+    rescue StandardError
+      []
+    end
+
+    def demo_find_or_create_owner_record(model, index)
+      return unless defined?(ActiveRecord::Base) && model < ActiveRecord::Base
+
+      attributes = demo_owner_seed_attributes(model, index)
+      record = demo_owner_lookup_record(model, attributes) || model.new
+
+      attributes.each do |attribute, value|
+        setter = "#{attribute}="
+        next unless record.respond_to?(setter)
+        next if record.public_send(attribute).present?
+
+        record.public_send(setter, value)
+      end
+
+      record.save! if record.new_record? || record.changed?
+      record
+    rescue StandardError
+      nil
+    end
+
+    def demo_owner_lookup_record(model, attributes)
+      lookup_attribute = %w[email slug code name].find do |attribute|
+        attributes[attribute].present? && model.column_names.include?(attribute)
+      end
+      return unless lookup_attribute
+
+      model.find_or_initialize_by(lookup_attribute => attributes.fetch(lookup_attribute))
+    end
+
+    def demo_owner_seed_attributes(model, index)
+      label = DEMO_OWNER_SWITCH_LABELS.fetch(index)
+      slug = label.downcase.tr(" ", "-")
+      columns = model.column_names
+      attributes = {}
+
+      attributes["name"] = label if columns.include?("name")
+      attributes["email"] = "#{slug}@example.test" if columns.include?("email")
+      attributes["title"] = label if columns.include?("title")
+      attributes["slug"] = slug if columns.include?("slug")
+      attributes["code"] = slug if columns.include?("code")
+      attributes
+    end
+
+    def demo_owner_switch_label(index)
+      return "Host app owner" if index.zero?
+
+      DEMO_OWNER_SWITCH_LABELS.fetch(index - 1)
+    end
+
+    def demo_owner_switch_description(owner, index)
+      return "Use the owner returned by the host app's configured current-user method." if index.zero?
+
+      "Switch to #{demo_owner_display_name(owner)} and confirm presets stay isolated from the other owners."
+    end
+
+    def demo_owner_switch_path(owner, index)
+      query_params = request.query_parameters.except(DEMO_OWNER_PARAM)
+      query_params = query_params.merge(DEMO_OWNER_PARAM => demo_owner_switch_key(owner)) unless index.zero?
+      return request.path if query_params.empty?
+
+      "#{request.path}?#{query_params.to_query}"
     end
 
     def table_columns
