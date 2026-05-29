@@ -87,6 +87,14 @@ end
 
 When the generated demo loads, it also shows a small `Current owner` summary with the owner model, display name, and identifier. Use that summary as a quick check that `Save` and `Save as new` will persist back into the owner record you expect, especially after loading `共有ビュー [shared]`.
 
+The generated screen also adds demo-only owner links near the top of the page:
+
+- `Host app owner`
+- `Demo owner A`
+- `Demo owner B`
+
+Use those links to save once as one owner, switch to another owner, and confirm presets do not leak between owner records without editing authentication code between requests.
+
 ## Optional scoped demo context
 
 To activate the generated role and organization preset examples, configure `scope_context_method` once and point it at the generated demo controller method:
@@ -183,6 +191,9 @@ On the demo screen, confirm:
 - [ ] Selecting `共有ビュー [shared]` loads the shared preset and keeps the normal editor usable.
 - [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
 - [ ] The `Current owner` summary matches the owner record that shared-preset fallback saves back into.
+- [ ] `Host app owner`, `Demo owner A`, and `Demo owner B` switch the owner context without editing application code.
+- [ ] After switching owners, the `Current owner` summary follows the active owner link.
+- [ ] Saving under `Demo owner A`, then switching to `Demo owner B`, makes it easy to confirm those presets do not leak across owners.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
 - [ ] After enabling `scope_context_method = :table_preference_scope_context`, the `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` links switch the current scope without editing application code.
 - [ ] The `Current scope context` summary matches whichever scope link is active.
