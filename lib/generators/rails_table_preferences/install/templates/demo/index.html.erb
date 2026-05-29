@@ -28,7 +28,7 @@
   no matching role default, reloading the demo resolves it before the shared preset.
 </p>
 
-<section>
+<section class="rails-table-preferences-demo-summary">
   <h2>Current scope context</h2>
 
   <p>
@@ -52,6 +52,37 @@
     resolution below should reflect before comparing owner, role, and
     organization behavior.
   </p>
+</section>
+
+<section class="rails-table-preferences-demo-summary">
+  <h2>Scope switch</h2>
+
+  <p>
+    Use these demo-only links to compare owner, role, and organization preset
+    resolution without editing controller code between requests.
+  </p>
+
+  <% unless @demo_scope_context_toggle_ready %>
+    <p class="rails-table-preferences-demo-scope-note">
+      Set <code>scope_context_method</code> to <code>table_preference_scope_context</code>
+      once to make the owner / role / organization links below drive the demo.
+    </p>
+  <% end %>
+
+  <ul class="rails-table-preferences-demo-scope-switches">
+    <% @demo_scope_context_switches.each do |switch| %>
+      <li>
+        <%= link_to switch.fetch("label"),
+                    switch.fetch("path"),
+                    class: [
+                      "rails-table-preferences-demo-scope-switch",
+                      ("rails-table-preferences-demo-scope-switch--active" if switch["active"])
+                    ].compact.join(" "),
+                    "aria-current": ("page" if switch["active"]) %>
+        <span><%= switch.fetch("description") %></span>
+      </li>
+    <% end %>
+  </ul>
 </section>
 
 <p>
@@ -107,48 +138,41 @@
     background: #f9fafb;
   }
 
-  .rails-table-preferences-demo-summary dl {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.75rem;
+  .rails-table-preferences-demo-scope-note {
+    margin-bottom: 0.75rem;
+  }
+
+  .rails-table-preferences-demo-scope-switches {
+    list-style: none;
+    padding: 0;
     margin: 0;
+    display: grid;
+    gap: 0.75rem;
   }
 
-  .rails-table-preferences-demo-summary dt {
+  .rails-table-preferences-demo-scope-switches li {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .rails-table-preferences-demo-scope-switch {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #9ca3af;
+    border-radius: 999px;
+    background: white;
+    color: #111827;
+    text-decoration: none;
     font-weight: 600;
-    color: #374151;
   }
 
-  .rails-table-preferences-demo-summary dd {
-    margin: 0.25rem 0 0;
+  .rails-table-preferences-demo-scope-switch--active {
+    border-color: #1d4ed8;
+    background: #dbeafe;
+    color: #1e3a8a;
   }
 </style>
-
-<section class="rails-table-preferences-demo-summary">
-  <h2>Current owner</h2>
-
-  <p>
-    Shared presets save back into this owner context when you use
-    <strong>Save</strong> or <strong>Save as new</strong>.
-  </p>
-
-  <dl>
-    <div>
-      <dt>Model</dt>
-      <dd><%= @demo_owner_summary.fetch("model_name") %></dd>
-    </div>
-
-    <div>
-      <dt>Display</dt>
-      <dd><%= @demo_owner_summary.fetch("display_name") %></dd>
-    </div>
-
-    <div>
-      <dt>Identifier</dt>
-      <dd><%= @demo_owner_summary.fetch("identifier") %></dd>
-    </div>
-  </dl>
-</section>
 
 <section>
   <h2>Export payload preview</h2>

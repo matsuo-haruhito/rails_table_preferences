@@ -85,11 +85,9 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-When the generated demo loads, it also shows a small `Current owner` summary with the owner model, display name, and identifier. Use that summary as a quick check that `Save` and `Save as new` will persist back into the owner record you expect, especially after loading `共有ビュー [shared]`.
-
 ## Optional scoped demo context
 
-To activate the generated role and organization preset examples, configure `scope_context_method` and return the same stable keys that the demo seeds store in `scope_key`:
+To activate the generated role and organization preset examples, configure `scope_context_method` once and point it at the generated demo controller method:
 
 ```ruby
 RailsTablePreferences.configure do |config|
@@ -97,38 +95,36 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-```ruby
-class ApplicationController < ActionController::Base
-  private
+After that one-time setup, the generated demo gives you four small links near the top of the page:
 
-  def table_preference_scope_context
-    {
-      roles: ["operations"],
-      organization: "tokyo-hq"
-    }
-  end
-end
+- `Host app context`
+- `Owner-only baseline`
+- `Role preset lane`
+- `Organization preset lane`
+
+Use those links to move between the shared baseline, the representative role scope, and the representative organization scope without editing `ApplicationController` between requests.
+
+The generated screen also shows a lightweight `Current scope context` summary near the top. Use it to confirm whether the current request is still `owner-only` or already includes representative `roles` / `organization` keys before reading the preset selector.
+
+The role link forces this representative scope:
+
+```ruby
+{ roles: ["operations"] }
 ```
 
-The generated screen shows a lightweight `Current scope context` summary near the top. Use it to confirm whether the current request is still `owner-only` or already includes representative `roles` / `organization` keys before reading the preset selector.
+The organization link forces this representative scope:
 
-With both values in place, the preset selector includes `担当ビュー [role:operations]` and `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo still resolves the role preset before the organization preset and shared preset.
+```ruby
+{ organization: "tokyo-hq" }
+```
+
+With both demo presets seeded, those links make it easier to compare the selector and default resolution paths in one browser session:
+
+- `Owner-only baseline` returns to the shared baseline with no scoped keys.
+- `Role preset lane` makes the selector include `担当ビュー [role:operations]` and, with no owner default, reloading still resolves it before the shared preset.
+- `Organization preset lane` makes the selector include `東京組織ビュー [organization:tokyo-hq]` and, with no owner or matching role default, reloading still resolves it before the shared preset.
 
 If you already created an owner default while testing Save or Save as new, clear it before checking role/organization precedence. In the bundled editor, load the owner preset, uncheck `標準設定にする`, save, then reload. Deleting that temporary owner preset also works when you only created it for demo verification. The important part is to return to a state where no owner preset for this table is marked as default, because owner defaults always win before role, organization, and shared defaults.
-
-If you want to verify the organization path specifically, return only the organization key or a non-matching role list:
-
-```ruby
-class ApplicationController < ActionController::Base
-  private
-
-  def table_preference_scope_context
-    { organization: "tokyo-hq" }
-  end
-end
-```
-
-Then the preset selector includes `東京組織ビュー [organization:tokyo-hq]`. If no owner default exists yet, reloading the demo resolves that organization preset before `共有ビュー [shared]`.
 
 ## What the demo covers
 
@@ -184,12 +180,13 @@ On the demo screen, confirm:
 - [ ] `共有ビュー [shared]` appears in the preset selector.
 - [ ] Selecting `共有ビュー [shared]` loads the shared preset and keeps the normal editor usable.
 - [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
-- [ ] The `Current owner` summary matches the owner record that shared-preset fallback saves back into.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
-- [ ] The `Current scope context` summary matches the scope context returned by the host app.
-- [ ] If the host app returns `roles: ["operations"]`, `担当ビュー [role:operations]` appears in the preset selector.
+- [ ] After enabling `scope_context_method = :table_preference_scope_context`, the `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` links switch the current scope without editing application code.
+- [ ] The `Current scope context` summary matches whichever scope link is active.
+- [ ] `Owner-only baseline` returns the summary to `owner-only` and makes it easy to compare the shared baseline again.
+- [ ] `Role preset lane` makes `担当ビュー [role:operations]` appear in the selector.
 - [ ] With that role context and no owner default, reloading the demo resolves `担当ビュー [role:operations]` before `共有ビュー [shared]`.
-- [ ] If the host app returns `organization: "tokyo-hq"`, `東京組織ビュー [organization:tokyo-hq]` appears in the preset selector.
+- [ ] `Organization preset lane` makes `東京組織ビュー [organization:tokyo-hq]` appear in the selector.
 - [ ] With that organization context and no owner or matching role default, reloading the demo resolves `東京組織ビュー [organization:tokyo-hq]` before `共有ビュー [shared]`.
 - [ ] Delete removes a preset.
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
@@ -240,9 +237,7 @@ Current automated browser/system smoke covers:
 - editor and table render
 - hide column and apply
 - active filter button summary through `title` / `aria-label`
-- bundled filter panel `Escape` close with focus return to the trigger button
 - bundled filter panel close on viewport resize
-- preset-load failure busy-state disable and recovery on the bundled controls
 - existing search form submit with saved hidden-field filter and sort state
 - export payload preview hidden-column exclusion and saved visible-column order
 - filter operator switch updates the in-panel fields in place
@@ -251,7 +246,6 @@ Current automated browser/system smoke covers:
 
 Good next automated checks are:
 
-- shared preset read-only load and owner-fallback save
 - save and reload restore settings
 - sortable header click changes sort state directly
 - bundled filter panel close on container scroll
