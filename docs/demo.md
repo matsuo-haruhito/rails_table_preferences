@@ -36,6 +36,8 @@ The same screen now includes a lightweight export payload preview. It shows the 
 
 The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup, and the grouped header follows the current visible columns after save/reload.
 
+The generated screen also includes an `Async failure check` button. Use it when you want the next preset save, load, or delete request to fail exactly once, then retry the same action to confirm the bundled status region and controls recover without browser request blocking.
+
 ## Add routes
 
 Mount the engine if it is not already mounted:
@@ -157,6 +159,7 @@ The generated demo screen includes:
 - one organization preset example for `organization: "tokyo-hq"`, including organization-over-shared default resolution when no owner or matching role default exists
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
+- one-shot async failure trigger for demo-only preset save/load/delete recovery checks
 - text/date/select filter metadata
 - sortable header metadata
 - ignored column metadata
@@ -205,25 +208,27 @@ On the demo screen, confirm:
 - [ ] Delete removes a preset.
 - [ ] Save, reload, save as new, and delete update the bundled status region with understandable progress and result copy.
 - [ ] While save/load/delete actions run, the preset select, preset name, default checkbox, and action buttons are temporarily disabled and then re-enabled.
+- [ ] The `Async failure check` button makes the next preset save, load, or delete request fail exactly once.
 - [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
+- [ ] Retrying the same preset action after the one-shot failure succeeds normally.
 - [ ] The export payload preview excludes hidden columns by default.
 - [ ] After saving a new visible-column order, the export payload preview shows the same header order and column key order.
 
 ## Reproduce one async failure quickly
 
-Use browser devtools to block one preference API request once, instead of changing application code just for QA.
+Use the generated `Async failure check` section to fail one preset API request once, without changing application code or opening browser request-blocking tools.
 
-1. Open the demo screen and browser devtools.
-2. In Network request blocking or an equivalent tool, block the mounted preference API path for the current table, such as `/rails_table_preferences/preferences/orders` or `/rails_table_preferences/preferences/orders/default`.
+1. Open the demo screen.
+2. Click `Fail next preset request once`.
 3. Trigger one async preset action:
    - Save or Save as new for `POST`/`PATCH`
    - Switch presets for `GET`
    - Delete for `DELETE`
 4. Confirm the bundled status region moves from the in-progress copy to the generic failure copy.
 5. Confirm the preset select, preset name, default checkbox, and action buttons become usable again after the failed request.
-6. Remove the request block and retry once to confirm the same action succeeds normally.
+6. Retry the same action once to confirm it succeeds normally; the demo trigger is one-shot and does not keep blocking requests.
 
-If the host app mounts the engine at a custom path, block that configured `mount_path` instead of `/rails_table_preferences`.
+If you need to test a custom host-app wrapper outside the generated demo, browser devtools request blocking is still a useful fallback. Block the configured `mount_path` for one request, then unblock it before retrying.
 
 ## Production note
 
@@ -266,3 +271,4 @@ Good next automated checks are:
 - save and reload restore settings
 - sortable header click changes sort state directly
 - bundled filter panel close on container scroll
+- one-shot async failure trigger from the generated demo surface

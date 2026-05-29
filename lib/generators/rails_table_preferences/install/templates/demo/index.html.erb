@@ -206,7 +206,8 @@
   }
 
   .rails-table-preferences-demo-owner-switch,
-  .rails-table-preferences-demo-scope-switch {
+  .rails-table-preferences-demo-scope-switch,
+  .rails-table-preferences-demo-failure-trigger {
     display: inline-flex;
     width: fit-content;
     padding: 0.45rem 0.75rem;
@@ -223,6 +224,11 @@
     border-color: #1d4ed8;
     background: #dbeafe;
     color: #1e3a8a;
+  }
+
+  .rails-table-preferences-demo-failure-status {
+    margin-bottom: 0;
+    font-weight: 600;
   }
 </style>
 
@@ -277,12 +283,81 @@
   </p>
 </section>
 
+<section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-failure>
+  <h2>Async failure check</h2>
+
+  <p>
+    Use this demo-only button to make the next preset save, load, or delete
+    request fail once. The following retry uses the normal mounted engine API.
+  </p>
+
+  <button type="button"
+          class="rails-table-preferences-demo-failure-trigger"
+          data-rails-table-preferences-demo-failure-trigger>
+    Fail next preset request once
+  </button>
+
+  <p class="rails-table-preferences-demo-failure-status"
+     role="status"
+     aria-live="polite"
+     data-rails-table-preferences-demo-failure-status></p>
+</section>
+
 <%= table_preferences_editor(
   table_key: :rails_table_preferences_demo_orders,
   settings: @table_preference_settings,
   columns: @table_columns,
   title: "デモ受注一覧の表示設定"
 ) %>
+
+<script>
+  (() => {
+    if (window.__railsTablePreferencesDemoFailureInstalled) return
+    window.__railsTablePreferencesDemoFailureInstalled = true
+
+    const nativeFetch = window.fetch.bind(window)
+    let failNextPresetRequest = false
+
+    const statusElements = () => document.querySelectorAll("[data-rails-table-preferences-demo-failure-status]")
+    const setDemoFailureStatus = (message) => {
+      statusElements().forEach((element) => { element.textContent = message })
+    }
+    const preferenceUrls = () => Array.from(document.querySelectorAll("[data-controller~='rails-table-preferences']")).flatMap((element) => [
+      element.dataset.railsTablePreferencesCollectionUrlValue,
+      element.dataset.railsTablePreferencesUrlValue
+    ].filter(Boolean))
+    const requestUrl = (input) => typeof input === "string" ? input : input?.url || ""
+    const matchesPreferenceRequest = (input) => {
+      const url = requestUrl(input)
+      return preferenceUrls().some((preferenceUrl) => (
+        url === preferenceUrl ||
+        url.startsWith(`${preferenceUrl}/`) ||
+        url.startsWith(`${preferenceUrl}?`)
+      ))
+    }
+
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-rails-table-preferences-demo-failure-trigger]")
+      if (!trigger) return
+
+      failNextPresetRequest = true
+      setDemoFailureStatus("The next preset request will fail once.")
+    })
+
+    window.fetch = (...args) => {
+      if (failNextPresetRequest && matchesPreferenceRequest(args[0])) {
+        failNextPresetRequest = false
+        setDemoFailureStatus("One preset request failed as planned. Retry the same action to confirm recovery.")
+        return Promise.resolve(new Response(JSON.stringify({ error: "Demo failure" }), {
+          status: 503,
+          headers: { "Content-Type": "application/json" }
+        }))
+      }
+
+      return nativeFetch(...args)
+    }
+  })()
+</script>
 
 <%= form_with url: request.path, method: :get do %>
   <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
