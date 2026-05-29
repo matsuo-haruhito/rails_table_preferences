@@ -99,23 +99,61 @@ Supported operator mapping:
 | `true` | `true` |
 | `false` | `false` |
 
-## Datagrid and Filterrific direction
+## Datagrid and Filterrific host adapters
 
-Datagrid and Filterrific should be handled as adapter targets later, but Rails Table Preferences should avoid deeply controlling their internals.
+Datagrid and Filterrific are not current built-in adapter classes. Treat them as host-application adapter examples unless a future feature explicitly adds gem-owned helpers.
 
-Preferred direction:
+That means Rails Table Preferences can still supply the neutral `filters` and `sorts` payload, but the host application should translate that payload into the Datagrid or Filterrific API it already trusts.
+
+A small host-owned adapter can live near the controller, query object, or table profile:
 
 ```ruby
-datagrid_params = RailsTablePreferences::Adapters::Datagrid.to_params(filters: filters, sorts: sorts)
-filterrific_params = RailsTablePreferences::Adapters::Filterrific.to_params(filters: filters, sorts: sorts)
+class OrderDatagridParams
+  def self.call(filters:, sorts: [])
+    {
+      customer_name: filters.dig("customer_name", "value"),
+      statuses: filters.dig("status", "values"),
+      order: sorts.map { |sort| "#{sort["key"]} #{sort["direction"]}" }
+    }.compact
+  end
+end
+
+settings = rails_table_preference_settings(table_key: :orders)
+filters = settings.fetch("filters", {})
+sorts = settings.fetch("sorts", [])
+
+grid = OrdersGrid.new(OrderDatagridParams.call(filters: filters, sorts: sorts))
 ```
 
-The host application should still decide:
+For Filterrific, keep the same boundary: map only the neutral UI state into existing allowed params or scopes, then let the host app apply its normal authorization and query rules.
 
-- which Datagrid class or Filterrific configuration to use
-- which scopes or joins are allowed
-- which fields are searchable by the current user
-- how business-specific conditions are applied
+```ruby
+class OrderFilterrificParams
+  def self.call(filters:, sorts: [])
+    first_sort = sorts.first
+
+    {
+      search_query: filters.dig("customer_name", "value"),
+      with_status: filters.dig("status", "values"),
+      sorted_by: first_sort && "#{first_sort["key"]}_#{first_sort["direction"]}"
+    }.compact
+  end
+end
+
+filterrific = initialize_filterrific(
+  Order,
+  OrderFilterrificParams.call(filters: filters, sorts: sorts),
+  persistence_id: false
+)
+```
+
+Keep the adapter intentionally boring:
+
+- map only fields the current screen already allows
+- reject or ignore unknown keys instead of inferring joins
+- keep authorization and business scopes in the host app
+- keep Datagrid classes, Filterrific configurations, and custom search objects owned by the host app
+- add a project-local adapter first when the mapping is application-specific
 
 ## Non-goals
 
