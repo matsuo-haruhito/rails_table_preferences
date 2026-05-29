@@ -81,14 +81,22 @@ README.md
 CHANGELOG.md
 LICENSE
 docs/index.md
+docs/visual_overview.md
+docs/images/visual-overview-editor-and-table.svg
+docs/quick_start.md
+docs/demo.md
+docs/export_integration.md
+docs/accessibility.md
+docs/troubleshooting.md
+docs/release_checklist.md
 docs/package_verification.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The documentation entries are representative package entrances from the README rather than a complete freeze of every file under `docs/`.
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, or docs usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, visual overview assets, or README-linked docs usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
