@@ -12,6 +12,29 @@ module RailsTablePreferencesDemo
     ORGANIZATION_PRESET_NAME = "東京組織ビュー"
     DEMO_ROLE_KEY = "operations"
     DEMO_ORGANIZATION_KEY = "tokyo-hq"
+    DEMO_SCOPE_CONTEXT_PARAM = "demo_scope_context"
+    DEMO_SCOPE_CONTEXT_HOST_MODE = "host"
+    DEMO_SCOPE_CONTEXT_MODE_CONFIGS = {
+      DEMO_SCOPE_CONTEXT_HOST_MODE => {
+        "label" => "Host app context",
+        "description" => "Use the host app's current scope_context_method result."
+      },
+      "owner" => {
+        "label" => "Owner-only baseline",
+        "description" => "Clear scoped keys and compare the shared baseline.",
+        "context" => {}
+      },
+      "role" => {
+        "label" => "Role preset lane",
+        "description" => "Force roles: [operations] to verify the role preset lane.",
+        "context" => { "roles" => [DEMO_ROLE_KEY] }
+      },
+      "organization" => {
+        "label" => "Organization preset lane",
+        "description" => "Force organization: tokyo-hq with no matching role default.",
+        "context" => { "organization" => DEMO_ORGANIZATION_KEY }
+      }
+    }.freeze
 
     def index
       ensure_demo_shared_preset!
@@ -22,6 +45,8 @@ module RailsTablePreferencesDemo
       @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
       @demo_visible_columns = @demo_table_state.fetch("visible_columns")
       @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
+      @demo_scope_context_switches = demo_scope_context_switches
+      @demo_scope_context_toggle_ready = demo_scope_context_toggle_ready?
       @demo_scope_context_summary = demo_scope_context_summary
       @export_payload_preview = RailsTablePreferences::ExportPayload.call(
         settings: @table_preference_settings,
@@ -38,6 +63,15 @@ module RailsTablePreferencesDemo
     end
 
     private
+
+    def table_preference_scope_context
+      override_context = demo_scope_context_override
+      return override_context if override_context
+
+      return super if defined?(super)
+
+      {}
+    end
 
     def demo_owner_summary
       owner = demo_current_owner
@@ -294,6 +328,21 @@ module RailsTablePreferencesDemo
       nil
     end
 
+    def demo_scope_context_switches
+      DEMO_SCOPE_CONTEXT_MODE_CONFIGS.map do |mode, config|
+        {
+          "active" => demo_scope_context_mode == mode,
+          "description" => config.fetch("description"),
+          "label" => config.fetch("label"),
+          "path" => demo_scope_context_switch_path(mode)
+        }
+      end
+    end
+
+    def demo_scope_context_toggle_ready?
+      RailsTablePreferences.configuration.scope_context_method.to_s == "table_preference_scope_context"
+    end
+
     def demo_scope_context_summary
       context = current_demo_scope_context
       roles = Array(context["roles"]).filter_map { |role| role.to_s.presence }
@@ -314,6 +363,28 @@ module RailsTablePreferencesDemo
       return {} unless context.is_a?(Hash)
 
       context.deep_stringify_keys
+    end
+
+    def demo_scope_context_mode
+      mode = params[DEMO_SCOPE_CONTEXT_PARAM].to_s
+      return mode if DEMO_SCOPE_CONTEXT_MODE_CONFIGS.key?(mode)
+
+      DEMO_SCOPE_CONTEXT_HOST_MODE
+    end
+
+    def demo_scope_context_override
+      mode = demo_scope_context_mode
+      return unless DEMO_SCOPE_CONTEXT_MODE_CONFIGS.fetch(mode).key?("context")
+
+      DEMO_SCOPE_CONTEXT_MODE_CONFIGS.fetch(mode).fetch("context").deep_dup
+    end
+
+    def demo_scope_context_switch_path(mode)
+      query_params = request.query_parameters.except(DEMO_SCOPE_CONTEXT_PARAM)
+      query_params = query_params.merge(DEMO_SCOPE_CONTEXT_PARAM => mode) unless mode == DEMO_SCOPE_CONTEXT_HOST_MODE
+      return request.path if query_params.empty?
+
+      "#{request.path}?#{query_params.to_query}"
     end
 
     def ensure_demo_shared_preset!
