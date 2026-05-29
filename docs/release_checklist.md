@@ -33,6 +33,8 @@ BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rspec
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rspec
 ```
 
+These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compatibility matrix. Newer host-app Rails releases, such as Rails 8.1, should be treated as additional verification work until a separate support-policy or CI-matrix decision adds them here.
+
 Confirm:
 
 - [ ] RSpec passes.
@@ -49,7 +51,7 @@ Confirm GitHub Actions passes for both the release commit and the latest release
 - [ ] The release commit passes the default RSpec / JavaScript syntax / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 compatibility jobs.
-- [ ] Any additional release-time matrix jobs pass in the workflow where they actually run.
+- [ ] Any additional release-time matrix jobs pass in the workflow where they actually run; they are not part of the required PR matrix unless `.github/workflows/ci.yml` adds them.
 
 ## 4. Gem package checks
 
