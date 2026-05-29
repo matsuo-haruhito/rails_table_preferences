@@ -111,15 +111,16 @@ A small host-owned adapter can live near the controller, query object, or table 
 class OrderDatagridParams
   def self.call(filters:, sorts: [])
     {
-      customer_name: filters.dig(:customer_name, :value),
-      statuses: filters.dig(:status, :values),
-      order: sorts.map { |sort| "#{sort[:key]} #{sort[:direction]}" }
+      customer_name: filters.dig("customer_name", "value"),
+      statuses: filters.dig("status", "values"),
+      order: sorts.map { |sort| "#{sort["key"]} #{sort["direction"]}" }
     }.compact
   end
 end
 
-filters = rails_table_preference_settings(table_key: :orders).fetch("filters", {})
-sorts = rails_table_preference_settings(table_key: :orders).fetch("sorts", [])
+settings = rails_table_preference_settings(table_key: :orders)
+filters = settings.fetch("filters", {})
+sorts = settings.fetch("sorts", [])
 
 grid = OrdersGrid.new(OrderDatagridParams.call(filters: filters, sorts: sorts))
 ```
@@ -129,10 +130,12 @@ For Filterrific, keep the same boundary: map only the neutral UI state into exis
 ```ruby
 class OrderFilterrificParams
   def self.call(filters:, sorts: [])
+    first_sort = sorts.first
+
     {
-      search_query: filters.dig(:customer_name, :value),
-      with_status: filters.dig(:status, :values),
-      sorted_by: sorts.first && "#{sorts.first[:key]}_#{sorts.first[:direction]}"
+      search_query: filters.dig("customer_name", "value"),
+      with_status: filters.dig("status", "values"),
+      sorted_by: first_sort && "#{first_sort["key"]}_#{first_sort["direction"]}"
     }.compact
   end
 end
