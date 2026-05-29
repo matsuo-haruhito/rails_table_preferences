@@ -12,6 +12,35 @@ They infer user-facing columns from an Active Record model, then reuse the exist
 
 `resource_table_for` infers the model from `records.klass` when possible. It builds column definitions from `model.attribute_names`, passes each column through `RailsTablePreferences::ColumnDefinition`, and hides columns whose labels cannot be resolved when `unresolved_label_behavior = :hide`.
 
+### Model inference and empty collections
+
+Relation-like collections are the most convenient path because `records.klass` tells the helper which Active Record model to inspect:
+
+```erb
+<%= resource_table_for Order.where(status: "open") %>
+```
+
+Plain arrays can still work when they contain at least one record, because the helper can fall back to the first record's class:
+
+```erb
+<%= resource_table_for @orders.to_a %>
+```
+
+When records do not expose `klass` and may be empty, pass the model explicitly or put the model on the profile. This is the safe path for empty arrays, manually assembled collections, and pages that intentionally render before a query has returned rows.
+
+```erb
+<%= resource_table_for [], model: Order %>
+<%= resource_table_for @orders, profile: OrdersTableProfile %>
+```
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+end
+```
+
+If neither `model:` nor profile `model` is available and the collection has no `klass` or first record, the helper raises `model: is required when records do not expose klass and are empty` instead of guessing.
+
 If the same management page also includes a search form, pagination, a create form, or other host-app actions, keep those as separate responsibilities around the table. See [Practical examples](examples.md) for copyable page-composition examples, including a convention-first list screen with small profile overrides and a create-form-plus-list screen.
 
 ## Optional filtering of inferred columns
