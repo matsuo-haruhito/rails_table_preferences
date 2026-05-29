@@ -4,7 +4,7 @@
 
 Rails Table Preferences is a Rails engine/gem for business-style Rails applications with dense index tables. It lets a host application save and restore table display preferences such as visible columns, column order, column width, overflow behavior, fixed columns, column groups, filter UI state, sort UI state, and named presets.
 
-The gem is intentionally integration-friendly rather than all-encompassing. It helps a host application carry display preferences through existing tables, search forms, controller params, and export flows without taking over the application's business queries or administrative workflows.
+The gem is intentionally integration-friendly rather than all-encompassing. It helps a host application carry display preferences through existing tables, search forms, controller params, convention-first resource table helpers, and export flows without taking over the application's business queries or administrative workflows.
 
 ## Intended users
 
@@ -15,6 +15,7 @@ Typical adopters need:
 - owner-specific display preferences
 - optional shared, role, or organization scoped presets
 - compatibility with existing search and sort flows
+- convention-first table rendering from Active Record metadata with small profile overrides
 - copyable customization paths for ERB, CSS, JavaScript, and locales
 
 ## Core capabilities
@@ -22,6 +23,8 @@ Typical adopters need:
 Current repository scope includes:
 
 - table column definitions with labels, visibility, order, width, overflow/truncation, fixed/pinned metadata, groups, filters, sorts, and ignored columns
+- resource table helpers that infer Active Record columns, apply table profile overrides, and optionally connect TreeView-style tree tables
+- renderer registries that let host apps map filter/editor metadata to helper libraries such as Rails Fields Kit without making this gem depend on those libraries
 - editor and table helpers for rendering a configurable table-preference UI
 - owner/shared/role/organization preset persistence and default resolution
 - controller helpers for merging saved filter/sort state into host-app params
@@ -36,6 +39,7 @@ Rails Table Preferences owns:
 - table display preference persistence and editing
 - saved filter/sort UI state as UI metadata
 - column/preset metadata and helper/controller integration
+- Active Record column inference, table profile override application, and renderer registry lookup for resource table helpers
 - baseline accessibility hooks and lightweight demo/sandbox guidance
 
 Host applications own:
@@ -44,6 +48,7 @@ Host applications own:
 - authorization and tenant/business rules
 - grouped header markup and advanced scroll/sticky layout polish
 - CSV, Excel, or report file generation
+- resource table partial layout, route URLs, and behavior behind rendered filter/editor controls
 - full administrative management UI for non-owner presets
 - final application design and workflow-specific UX
 
@@ -55,6 +60,8 @@ Maintainers should expect to combine the gem with:
 
 - existing `search(params)` / `order_by(params[:sort])` flows
 - Ransack or other search adapters when needed
+- `resource_table_for` / `tree_resource_table_for` when convention-first Active Record column inference is useful
+- table profiles and renderer registrations when a screen needs small column, filter, editor, or display overrides
 - host-app export code driven by `rails_table_preference_export_payload`
 - host-app customization via copied ERB, CSS, JavaScript, and locale files
 
@@ -91,5 +98,6 @@ Start with these files when orienting yourself:
 
 - `README.md`
 - `docs/index.md`
+- `docs/resource_tables.md`
 - `AGENTS.md`
 - `CHANGELOG.md`
