@@ -316,6 +316,14 @@ module RailsTablePreferencesDemo
           sortable: true
         ),
         table_preferences_column(
+          :confirmed,
+          label: "確認済",
+          default_width: 100,
+          group: { key: :order, label: "受注情報" },
+          filter: { type: :boolean, param: :confirmed },
+          sortable: true
+        ),
+        table_preferences_column(
           :amount,
           label: "金額",
           default_width: 120,
@@ -383,6 +391,7 @@ module RailsTablePreferencesDemo
           customer_name: "山田商事 東京本店",
           delivery_date: Date.current,
           status: "未出荷",
+          confirmed: true,
           amount: 12_000,
           shipping_code: "TOKYO-AM-PRIMARY-001",
           shipping_notes: "午前指定のため、到着後すぐに検品できるよう納品書を最上段へ入れてください。",
@@ -394,6 +403,7 @@ module RailsTablePreferencesDemo
           customer_name: "田中物流 関西センター",
           delivery_date: Date.current + 1.day,
           status: "出荷済",
+          confirmed: false,
           amount: 34_000,
           shipping_code: "KANSAI-PALLET-RETURN-220",
           shipping_notes: "午後着。パレット回収あり。荷下ろし口の案内を事前連絡すると現場が止まりにくい案件です。",
@@ -405,6 +415,7 @@ module RailsTablePreferencesDemo
           customer_name: "佐藤食品 冷凍倉庫",
           delivery_date: Date.current + 2.days,
           status: "保留",
+          confirmed: true,
           amount: 56_000,
           shipping_code: "FREEZER-CHECK-WAITING-305",
           shipping_notes: "温度帯確認待ち。確認が取れしだい、冷凍便と常温便のどちらで出すかを切り替える予定です。",
@@ -416,6 +427,7 @@ module RailsTablePreferencesDemo
           customer_name: "東京医療機器",
           delivery_date: Date.current + 3.days,
           status: "未出荷",
+          confirmed: true,
           amount: 89_000,
           shipping_code: "TOKYO-MEDICAL-RUSH-410",
           shipping_notes: "東京都内向けの追加便です。午後の短い時間帯しか受け取りできないため、到着前の電話連絡が必要です。",
@@ -427,6 +439,7 @@ module RailsTablePreferencesDemo
           customer_name: "東京製菓",
           delivery_date: Date.current + 5.days,
           status: "出荷済",
+          confirmed: false,
           amount: 21_500,
           shipping_code: "TOKYO-SWEETS-WEEKLY-088",
           shipping_notes: "定期便。納品口は狭いですが荷受け自体は短時間で終わるため、積み下ろし手順のメモが折り返して表示される列です。",
@@ -438,6 +451,7 @@ module RailsTablePreferencesDemo
           customer_name: "北星化学",
           delivery_date: Date.current + 7.days,
           status: "保留",
+          confirmed: false,
           amount: 104_000,
           shipping_code: "HOKUSEI-MONTH-END-HOLD-512",
           shipping_notes: "月末締め案件。shared preset と owner preset の切り替え時に列差分を見比べやすいよう、もっとも長い配送メモを入れています。",
@@ -451,15 +465,28 @@ module RailsTablePreferencesDemo
       filtered = orders
       search_word = merged_params["search_word"].presence || merged_params[:search_word]
       status = merged_params["status"].presence || merged_params[:status]
+      confirmed = merged_params["confirmed"].presence || merged_params[:confirmed]
       from_delivery_date = parse_date(merged_params["from_delivery_date"].presence || merged_params[:from_delivery_date])
       to_delivery_date = parse_date(merged_params["to_delivery_date"].presence || merged_params[:to_delivery_date])
 
       filtered = filtered.select { |order| order[:customer_name].include?(search_word) } if search_word.present?
       filtered = filtered.select { |order| order[:status] == status } if status.present?
+      filtered = filter_by_confirmed(filtered, confirmed)
       filtered = filtered.select { |order| order[:delivery_date] >= from_delivery_date } if from_delivery_date
       filtered = filtered.select { |order| order[:delivery_date] <= to_delivery_date } if to_delivery_date
 
       sort_orders(filtered, merged_params["sort"].presence || merged_params[:sort])
+    end
+
+    def filter_by_confirmed(orders, confirmed)
+      case confirmed.to_s
+      when "true", "1", "yes", "はい"
+        orders.select { |order| order[:confirmed] == true }
+      when "false", "0", "no", "いいえ"
+        orders.select { |order| order[:confirmed] == false }
+      else
+        orders
+      end
     end
 
     def sort_orders(orders, sort)
@@ -589,12 +616,13 @@ module RailsTablePreferencesDemo
         "columns" => [
           { "key" => "order_no", "visible" => true, "order" => 10, "width" => 140, "pinned" => true },
           { "key" => "status", "visible" => true, "order" => 20, "width" => 120 },
-          { "key" => "amount", "visible" => true, "order" => 30, "width" => 120 },
-          { "key" => "customer_name", "visible" => true, "order" => 40, "width" => 240, "truncate" => 24 },
-          { "key" => "delivery_date", "visible" => true, "order" => 50, "width" => 140 },
-          { "key" => "shipping_code", "visible" => true, "order" => 60, "width" => 140, "overflow" => "nowrap" },
-          { "key" => "shipping_notes", "visible" => true, "order" => 70, "width" => 160, "overflow" => "wrap" },
-          { "key" => "memo", "visible" => false, "order" => 80, "width" => 180, "truncate" => 24 }
+          { "key" => "confirmed", "visible" => true, "order" => 30, "width" => 100 },
+          { "key" => "amount", "visible" => true, "order" => 40, "width" => 120 },
+          { "key" => "customer_name", "visible" => true, "order" => 50, "width" => 240, "truncate" => 24 },
+          { "key" => "delivery_date", "visible" => true, "order" => 60, "width" => 140 },
+          { "key" => "shipping_code", "visible" => true, "order" => 70, "width" => 140, "overflow" => "nowrap" },
+          { "key" => "shipping_notes", "visible" => true, "order" => 80, "width" => 160, "overflow" => "wrap" },
+          { "key" => "memo", "visible" => false, "order" => 90, "width" => 180, "truncate" => 24 }
         ],
         "filters" => {
           "status" => { "operator" => "in", "values" => ["未出荷", "保留"] }
@@ -612,10 +640,11 @@ module RailsTablePreferencesDemo
           { "key" => "customer_name", "visible" => true, "order" => 20, "width" => 240, "truncate" => 24 },
           { "key" => "delivery_date", "visible" => true, "order" => 30, "width" => 140 },
           { "key" => "status", "visible" => true, "order" => 40, "width" => 120 },
-          { "key" => "shipping_notes", "visible" => true, "order" => 50, "width" => 240, "overflow" => "wrap" },
-          { "key" => "shipping_code", "visible" => true, "order" => 60, "width" => 140, "overflow" => "nowrap" },
-          { "key" => "memo", "visible" => true, "order" => 70, "width" => 320, "truncate" => 40 },
-          { "key" => "amount", "visible" => true, "order" => 80, "width" => 120 }
+          { "key" => "confirmed", "visible" => true, "order" => 50, "width" => 100 },
+          { "key" => "shipping_notes", "visible" => true, "order" => 60, "width" => 240, "overflow" => "wrap" },
+          { "key" => "shipping_code", "visible" => true, "order" => 70, "width" => 140, "overflow" => "nowrap" },
+          { "key" => "memo", "visible" => true, "order" => 80, "width" => 320, "truncate" => 40 },
+          { "key" => "amount", "visible" => true, "order" => 90, "width" => 120 }
         ],
         "filters" => {},
         "sorts" => [
@@ -633,8 +662,9 @@ module RailsTablePreferencesDemo
           { "key" => "shipping_notes", "visible" => true, "order" => 40, "width" => 240, "overflow" => "wrap" },
           { "key" => "memo", "visible" => true, "order" => 50, "width" => 320, "truncate" => 32 },
           { "key" => "status", "visible" => true, "order" => 60, "width" => 120 },
-          { "key" => "shipping_code", "visible" => false, "order" => 70, "width" => 140, "overflow" => "nowrap" },
-          { "key" => "amount", "visible" => false, "order" => 80, "width" => 120 }
+          { "key" => "confirmed", "visible" => true, "order" => 70, "width" => 100 },
+          { "key" => "shipping_code", "visible" => false, "order" => 80, "width" => 140, "overflow" => "nowrap" },
+          { "key" => "amount", "visible" => false, "order" => 90, "width" => 120 }
         ],
         "filters" => {},
         "sorts" => [
