@@ -328,6 +328,7 @@ module RailsTablePreferencesDemo
           label: "金額",
           default_width: 120,
           group: { key: :order, label: "受注情報" },
+          filter: { type: :number, param: :amount },
           sortable: true
         ),
         table_preferences_column(
@@ -466,12 +467,18 @@ module RailsTablePreferencesDemo
       search_word = merged_params["search_word"].presence || merged_params[:search_word]
       status = merged_params["status"].presence || merged_params[:status]
       confirmed = merged_params["confirmed"].presence || merged_params[:confirmed]
+      amount = parse_amount(merged_params["amount"].presence || merged_params[:amount])
+      from_amount = parse_amount(merged_params["from_amount"].presence || merged_params[:from_amount])
+      to_amount = parse_amount(merged_params["to_amount"].presence || merged_params[:to_amount])
       from_delivery_date = parse_date(merged_params["from_delivery_date"].presence || merged_params[:from_delivery_date])
       to_delivery_date = parse_date(merged_params["to_delivery_date"].presence || merged_params[:to_delivery_date])
 
       filtered = filtered.select { |order| order[:customer_name].include?(search_word) } if search_word.present?
       filtered = filtered.select { |order| order[:status] == status } if status.present?
       filtered = filter_by_confirmed(filtered, confirmed)
+      filtered = filtered.select { |order| order[:amount].to_f == amount } if amount
+      filtered = filtered.select { |order| order[:amount].to_f >= from_amount } if from_amount
+      filtered = filtered.select { |order| order[:amount].to_f <= to_amount } if to_amount
       filtered = filtered.select { |order| order[:delivery_date] >= from_delivery_date } if from_delivery_date
       filtered = filtered.select { |order| order[:delivery_date] <= to_delivery_date } if to_delivery_date
 
@@ -495,6 +502,14 @@ module RailsTablePreferencesDemo
 
       sorted = orders.sort_by { |order| order[key.to_sym] || "" }
       sort.to_s.start_with?("-") ? sorted.reverse : sorted
+    end
+
+    def parse_amount(value)
+      return if value.blank?
+
+      Float(value.to_s.delete(","))
+    rescue ArgumentError, TypeError
+      nil
     end
 
     def parse_date(value)
