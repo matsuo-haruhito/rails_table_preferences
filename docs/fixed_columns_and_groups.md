@@ -125,6 +125,20 @@ This example is intentionally small:
 - pinned cells get an opaque background so scrolled content does not bleed through
 - final shadows, borders, and responsive polish stay in the host app
 
+## Focus and layering checks
+
+Pinned columns use `position: sticky`, a left offset, `z-index`, and an opaque background hook. Those defaults keep the gem predictable, but the host app still needs to verify the final stacking behavior with its real table markup and design system.
+
+Before shipping a screen with pinned columns, check at least one horizontally scrolled state with representative interactive content:
+
+- focused links, buttons, inputs, and filter buttons remain visible and clickable
+- focus outlines are not clipped by the scroll wrapper or hidden behind a pinned cell
+- pinned body cells, pinned header cells, filter panels, dropdowns, and surrounding app chrome have a clear `z-index` order
+- pinned cells use an opaque background so scrolled content does not show through underneath focused controls
+- the scroll container owns horizontal overflow without trapping keyboard focus outside the table workflow
+
+If a host app needs a different layering policy, override the provided CSS hooks near that table. For example, keep header cells above body cells, keep floating panels above pinned cells, and test the result with keyboard focus rather than relying only on mouse hover.
+
 ## Multiple pinned columns
 
 For multiple pinned columns, the host application may set explicit left offsets if the default automatic behavior is not enough for the table layout:
@@ -238,6 +252,7 @@ Host applications own:
 
 - table scroll container design
 - final sticky offset policy
+- focus outline, z-index, and background checks for the app's real table content
 - grouped table header markup
 - visual styling
 - export file formatting
