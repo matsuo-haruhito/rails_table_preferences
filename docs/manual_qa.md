@@ -24,6 +24,8 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 - [ ] Confirm the configured owner model matches the generated migration.
 - [ ] Confirm preferences are saved against the expected owner record.
 - [ ] Test at least two different owners and confirm preferences do not leak between owners.
+- [ ] If you use the generated demo example, confirm `Host app owner`, `Demo owner A`, and `Demo owner B` switch the owner context without changing authentication code.
+- [ ] If you use the generated demo example, confirm the `Current owner` summary follows the active owner link before saving or loading presets.
 
 ## 3. Basic rendering
 
@@ -76,14 +78,17 @@ The automated suite covers Ruby behavior, generator output, request behavior, he
 
 - [ ] Create or seed a shared preset and confirm it appears in the preset selector.
 - [ ] Create or seed a role preset and confirm it appears only for matching role context.
-- [ ] If you use the generated demo example, set `scope_context_method` to return `roles: ["operations"]` and confirm `担当ビュー [role:operations]` appears.
+- [ ] If you use the generated demo example, configure `scope_context_method = :table_preference_scope_context` once, use `Role preset lane`, and confirm `担当ビュー [role:operations]` appears.
 - [ ] Create or seed an organization preset and confirm it appears only for matching organization context.
-- [ ] If you use the generated demo example, set `scope_context_method` to return `organization: "tokyo-hq"` and confirm `東京組織ビュー [organization:tokyo-hq]` appears.
+- [ ] If you use the generated demo example, configure `scope_context_method = :table_preference_scope_context` once, use `Organization preset lane`, and confirm `東京組織ビュー [organization:tokyo-hq]` appears.
+- [ ] If you use the generated demo example, use `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` to switch the scope context without editing `ApplicationController` between requests.
+- [ ] If you use the generated demo example, confirm the `Current scope context` summary follows the active scope link before reading the preset selector.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
+- [ ] In the generated demo flow, use `Owner-only baseline` to clear representative role/organization context and compare the shared baseline again.
 - [ ] In the generated demo flow, clear any owner default and confirm `担当ビュー [role:operations]` wins before `共有ビュー [shared]`.
-- [ ] In the generated demo flow, use `organization: "tokyo-hq"` without a matching role default and confirm `東京組織ビュー [organization:tokyo-hq]` wins before `共有ビュー [shared]`.
+- [ ] In the generated demo flow, use `Organization preset lane` without a matching role default and confirm `東京組織ビュー [organization:tokyo-hq]` wins before `共有ビュー [shared]`.
 - [ ] Confirm shared presets are selectable by normal users.
 - [ ] Confirm shared/role/organization presets are not deleted from the normal user-facing editor.
 - [ ] Confirm the read-only hint explains that saving changes from a read-only scoped preset creates or updates an owner preset, rather than overwriting the shared preset.
