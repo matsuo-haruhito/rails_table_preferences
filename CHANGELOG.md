@@ -19,6 +19,8 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Hidden fields helper for submitting saved filter/sort params through existing search forms.
 - Export payload helper for host app CSV, Excel, or report generation.
 - Column definition helper with labels, locale lookup, visibility, order, width, truncation, filters, sorting, fixed/pinned metadata, groups, and ignored columns.
+- Resource table helpers for convention-first Active Record column inference, table profile overrides, and optional tree table rendering.
+- Renderer registries for mapping filter and editor metadata to host-app helper libraries such as Rails Fields Kit.
 - Column group helper for host app grouped table headers and grouped export headers.
 - Settings normalizer for current and legacy `ColumnAdjustment`-style settings payloads.
 - Bundled Stimulus controller for applying column visibility, order, width, truncation, filters, sorts, header drag reorder, resize handles, pinned column hooks, and preset editing behavior.
