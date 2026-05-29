@@ -23,7 +23,7 @@ The bundled editor and Stimulus controller provide:
 - a visible helper message when saving from a read-only preset will create or update the owner preset path instead of overwriting the shared preset directly
 - a visible helper message and `aria-describedby` context for the bundled default preset checkbox so users can tell it only takes effect when they save or save as new
 - a live `role="status"` region for bundled save/load/delete feedback
-- explanatory `title` and `aria-label` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings
+- a visible helper message plus explanatory `title`, `aria-label`, and `aria-describedby` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings without relying only on hover text
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
@@ -136,6 +136,7 @@ Representative locale keys include:
 - `rails_table_preferences.editor.saved_status`
 - `rails_table_preferences.editor.deleting_failed_status`
 - `rails_table_preferences.editor.reset_hint`
+- `rails_table_preferences.editor.reset_visible_hint`
 
 Those keys feed different bundled accessibility surfaces:
 
@@ -143,6 +144,7 @@ Those keys feed different bundled accessibility surfaces:
 - `read_only_preset_hint`: the helper text shown when a shared, role, or organization preset is read-only
 - `*_status`: the live `role="status"` region used for async preset feedback
 - `reset_hint`: the bundled reset button `title` and `aria-label`
+- `reset_visible_hint`: the visible helper text and `aria-describedby` context for the bundled reset button
 
 ## Choosing the copy override path
 
@@ -157,7 +159,7 @@ Typical locale-driven surfaces include:
 - preset selector and preset name helper text
 - action hint copy for `適用`, `保存`, and `別名で保存`
 - read-only preset helper text
-- reset and delete confirmation wording
+- reset visible helper and button wording
 - async status-region progress, success, and failure copy
 
 This is the best default when the same wording should stay consistent across every screen that uses the bundled editor.
@@ -214,6 +216,7 @@ ja:
       saved_status: 設定を保存しました。
       deleting_failed_status: 設定の削除を完了できませんでした。
       reset_hint: 保存前の変更を破棄して初期表示へ戻します。
+      reset_visible_hint: 初期状態に戻すと、保存前の変更は破棄されます。
 ```
 
 If the host app also needs per-screen wording, different markup, or a custom status surface, keep using the existing copy-based path by copying the bundled ERB partial or controller.
@@ -243,7 +246,7 @@ Before releasing a screen, check:
 - The preset selector helper copy or accessible description explains that it loads or switches the saved preset rather than setting the save target name.
 - The preset name helper copy or accessible description explains that save and save as new use that field as the edited preset name.
 - The default checkbox helper text or accessible description explains that it only takes effect when the user saves or saves as new.
-- The reset button hover text or accessible name explains that it discards unsaved editor changes and returns to the default settings.
+- The reset visible helper, hover text, and accessible name explain that current edits are discarded and defaults are restored.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Active filter buttons expose a short summary through `title` or `aria-label`.

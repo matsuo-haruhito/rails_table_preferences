@@ -8,10 +8,12 @@
 <% preset_name_hint_id = "#{editor_id_prefix}-preset-name-hint" %>
 <% default_preset_hint_id = "#{editor_id_prefix}-default-preset-hint" %>
 <% action_hint_id = "#{editor_id_prefix}-action-hint" %>
+<% reset_hint_id = "#{editor_id_prefix}-reset-hint" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
 <% reset_label = t("rails_table_preferences.editor.reset", default: "初期状態に戻す") %>
 <% reset_hint = t("rails_table_preferences.editor.reset_hint", default: "保存前の表示設定の変更を破棄して、初期状態に戻します。") %>
+<% reset_visible_hint = t("rails_table_preferences.editor.reset_visible_hint", default: "初期状態に戻すと、保存前の変更は破棄されます。") %>
 <% preset_select_hint = t("rails_table_preferences.editor.preset_select_hint", default: "読み込む保存済み設定を選びます。") %>
 <% preset_name_hint = t("rails_table_preferences.editor.preset_name_hint", default: "保存または別名保存で使う設定名を入力します。") %>
 <% default_preset_hint = t("rails_table_preferences.editor.default_preset_hint", default: "保存または別名保存すると、この設定を標準設定として登録します。") %>
@@ -108,6 +110,7 @@
        aria-label="<%= status_region_label %>"></div>
 
   <p id="<%= action_hint_id %>" class="rails-table-preferences-editor__hint"><%= action_hint %></p>
+  <p id="<%= reset_hint_id %>" class="rails-table-preferences-editor__hint"><%= reset_visible_hint %></p>
 
   <div class="rails-table-preferences-editor__actions">
     <button type="button"
@@ -132,6 +135,7 @@
     <button type="button"
             data-action="rails-table-preferences#resetEditor"
             title="<%= reset_hint %>"
-            aria-label="<%= reset_hint %>"><%= reset_label %></button>
+            aria-label="<%= reset_hint %>"
+            aria-describedby="<%= reset_hint_id %>"><%= reset_label %></button>
   </div>
 </div>
