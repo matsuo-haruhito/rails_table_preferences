@@ -210,6 +210,7 @@ export default class extends Controller {
     const presets = this.presets.length ? this.presets : [{ name: this.currentPresetName, default: false, editable: true }]
     presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset)))
     this.presetSelectTarget.value = this.currentPresetName
+    this.syncDeletePresetButtonContext()
   }
 
   buildPresetOption(preset) {
@@ -280,7 +281,22 @@ export default class extends Controller {
     })
     this.element.querySelectorAll("[data-action~='rails-table-preferences#deletePreset']").forEach((button) => {
       button.disabled = !editable
+      this.updateDeletePresetButtonContext(button)
     })
+  }
+
+  syncDeletePresetButtonContext() {
+    this.element.querySelectorAll("[data-action~='rails-table-preferences#deletePreset']").forEach((button) => {
+      this.updateDeletePresetButtonContext(button)
+    })
+  }
+
+  updateDeletePresetButtonContext(button) {
+    if (!button) return
+    const message = this.deletePresetConfirmationMessage()
+    const buttonLabel = button.textContent?.trim() || this.deleteConfirmLabelValue || "削除"
+    button.title = message || buttonLabel
+    button.setAttribute("aria-label", message ? `${buttonLabel}: ${message}` : buttonLabel)
   }
 
   setEditorRowsBusyState(busy) {
@@ -1185,10 +1201,18 @@ export default class extends Controller {
   }
 
   confirmDeletePreset() {
-    const message = this.deleteConfirmLabelValue?.trim()
+    const message = this.deletePresetConfirmationMessage()
     if (!message) return true
     if (typeof window === "undefined" || typeof window.confirm !== "function") return true
     return window.confirm(message)
+  }
+
+  deletePresetConfirmationMessage() {
+    const message = this.deleteConfirmLabelValue?.trim()
+    const displayName = this.currentDeletePresetDisplayName
+    if (!displayName) return message
+    if (!message) return displayName
+    return `${message}\n\n${displayName}`
   }
 
   setPresetNameInput(name) {
@@ -1211,6 +1235,10 @@ export default class extends Controller {
 
   columnDefinitionByKey(key) {
     return this.columnsValue.find((column) => column.key === key) || this.columnByKey(key)
+  }
+
+  normalizedPresetOptionText(option) {
+    return option?.textContent?.replace(/\s+\*$/, "").trim() || ""
   }
 
   orderValue(column) {
@@ -1243,6 +1271,13 @@ export default class extends Controller {
   get normalizedReorderSensitivity() { const value = Number(this.reorderSensitivityValue); return Number.isFinite(value) && value > 0 ? value : 1 }
   get reorderActivationRatio() { return Math.max(0.25, Math.min(0.5, 0.5 / this.normalizedReorderSensitivity)) }
   get currentPresetName() { return this.hasPresetNameTarget ? (this.presetNameTarget.value.trim() || "default") : (this.nameValue || "default") }
+  get currentDeletePresetDisplayName() {
+    const selectedOption = this.hasPresetSelectTarget ? this.presetSelectTarget.selectedOptions?.[0] : null
+    if (selectedOption && selectedOption.value === this.currentPresetName) {
+      return this.normalizedPresetOptionText(selectedOption)
+    }
+    return this.currentPresetName
+  }
   get defaultPresetChecked() { return this.hasDefaultPresetTarget ? this.defaultPresetTarget.checked : false }
   get editorRows() { return this.hasEditorRowsTarget ? Array.from(this.editorRowsTarget.querySelectorAll("[data-rails-table-preferences-column-key]")) : [] }
   get tableElement() { return this.element.tagName === "TABLE" ? this.element : this.element.querySelector("table") }
