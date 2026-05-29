@@ -30,7 +30,7 @@ The same demo controller also seeds one role preset named `担当ビュー` for 
 
 The same demo controller also seeds one organization preset named `東京組織ビュー` for the organization key `tokyo-hq`. If you return that organization without a matching owner or role default, the selector shows `東京組織ビュー [organization:tokyo-hq]` and default resolution prefers it over the shared preset.
 
-The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
+The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, true/false confirmation states, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
 
@@ -143,7 +143,7 @@ If you already created an owner default while testing Save or Save as new, clear
 The generated demo screen includes:
 
 - Japanese column labels
-- sample rows with repeated customer prefixes, varied status/date values, and long delivery notes for practical sort, filter, width, auto-fit, and overflow checks
+- sample rows with repeated customer prefixes, varied status/date values, true/false confirmation states, and long delivery notes for practical sort, filter, width, auto-fit, and overflow checks
 - column visibility
 - column order
 - table-header drag ordering
@@ -160,7 +160,7 @@ The generated demo screen includes:
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
 - one-shot async failure trigger for demo-only preset save/load/delete recovery checks
-- text/date/select filter metadata
+- text/date/select/boolean filter metadata
 - sortable header metadata
 - ignored column metadata
 - existing search form hidden fields
@@ -184,6 +184,7 @@ On the demo screen, confirm:
 - [ ] Horizontally scrolling the demo wrapper keeps `受注番号` visible.
 - [ ] After changing visibility or order, saving, and reloading, the grouped header row still matches the visible leaf headers.
 - [ ] Filter panel opens.
+- [ ] `確認済` exposes the boolean filter operators and its sample rows include both true and false values.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
 - [ ] Sorting by `納品日` or `金額` makes the row order visibly change.
