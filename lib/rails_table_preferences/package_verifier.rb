@@ -34,6 +34,14 @@ module RailsTablePreferences
       "CHANGELOG.md",
       "LICENSE",
       "docs/index.md",
+      "docs/visual_overview.md",
+      "docs/images/visual-overview-editor-and-table.svg",
+      "docs/quick_start.md",
+      "docs/demo.md",
+      "docs/export_integration.md",
+      "docs/accessibility.md",
+      "docs/troubleshooting.md",
+      "docs/release_checklist.md",
       "docs/package_verification.md"
     ].freeze
 
