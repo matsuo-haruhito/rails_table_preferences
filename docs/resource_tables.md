@@ -108,6 +108,11 @@ class OrdersController < ApplicationController
       )
     ]
 
+    @table_preference_settings = rails_table_preference_settings(
+      table_key: :orders,
+      name: params[:table_preference_name]
+    )
+
     preference_params = rails_table_preference_params(
       table_key: :orders,
       name: params[:table_preference_name],
@@ -143,6 +148,8 @@ View:
 
 <%= resource_table_for @orders, profile: OrdersTableProfile, table_key: :orders %>
 ```
+
+`rails_table_preference_params(...)` converts saved filter/sort UI state into the query params the controller can merge into the existing search call. `rails_table_preference_settings(...)` keeps the normalized saved settings available for the view so `table_preferences_hidden_fields(...)` can submit the same state with the next search form request.
 
 Why this split works:
 
