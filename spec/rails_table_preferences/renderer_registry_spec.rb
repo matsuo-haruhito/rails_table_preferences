@@ -3,8 +3,8 @@
 RSpec.describe RailsTablePreferences::RendererRegistry do
   subject(:registry) { described_class.new }
 
-  it "registers and calls a block renderer with keyword context" do
-    registry.register(:badge) { |value:, label:| "#{label}:#{value}" }
+  it "registers and calls a block renderer with the context hash" do
+    registry.register(:badge) { |context| "#{context.fetch(:label)}:#{context.fetch(:value)}" }
 
     expect(registry.fetch(:badge)).to respond_to(:call)
     expect(registry).to be_registered(:badge)
