@@ -97,6 +97,16 @@ Profiles are applied after Active Record column inference. They are for deltas, 
 
 Supported profile directives include `model`, `only`, `exclude`, `order`, `label`, `filter`, `editor`, `display`, and `column`.
 
+### Formatter argument contract
+
+Profile formatters declared with `display`, `cell`, or `column(..., &block)` use the same value resolver call contract:
+
+- one argument receives the row record
+- two arguments receive the row record and view context
+- three or more arguments receive the row record, normalized column metadata, and view context
+
+See [Resource table formatter contract](resource_table_formatter_contract.md) for examples and the nil-return / fallback boundary. Formatter code remains presentation-only; the host app still owns eager loading, authorization-aware redaction, and business-specific fallbacks.
+
 ### Default value formatting
 
 When a column does not provide a `display` formatter, the bundled value resolver reads the Active Record attribute, association reader, or zero-arity public reader for that column key and then applies a small display fallback.
