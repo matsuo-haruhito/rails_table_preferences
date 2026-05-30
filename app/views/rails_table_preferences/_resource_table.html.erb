@@ -8,6 +8,7 @@
 <% table_options = options.except(:class).merge(
   class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
 ) %>
+<% visible_columns = table_state.fetch("visible_columns") %>
 
 <%= table_preferences_table_tag(
   table_key: table_key,
@@ -18,7 +19,7 @@
 ) do %>
   <thead>
     <tr>
-      <% table_state.fetch("visible_columns").each do |column| %>
+      <% visible_columns.each do |column| %>
         <th data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
           <%= column["label"] || column.fetch("key") %>
         </th>
@@ -26,14 +27,22 @@
     </tr>
   </thead>
   <tbody>
-    <% records.each do |record| %>
-      <tr>
-        <% table_state.fetch("visible_columns").each do |column| %>
-          <td data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
-            <%= table_preferences_value(record, column) %>
-          </td>
-        <% end %>
+    <% if records.empty? %>
+      <tr class="rails-table-preferences-resource-table__empty-row">
+        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= visible_columns.size %>">
+          <%= I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
+        </td>
       </tr>
+    <% else %>
+      <% records.each do |record| %>
+        <tr>
+          <% visible_columns.each do |column| %>
+            <td data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
+              <%= table_preferences_value(record, column) %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
     <% end %>
   </tbody>
 <% end %>

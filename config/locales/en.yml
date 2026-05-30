@@ -1,5 +1,7 @@
 en:
   rails_table_preferences:
+    resource_table:
+      empty: No records to display
     editor:
       preset_select: Saved presets
       preset: Preset
