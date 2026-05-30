@@ -148,6 +148,15 @@ payload = rails_table_preference_export_payload(
 )
 ```
 
+`include_hidden: true` only changes how the saved visibility preference is applied to the export payload. It is not an authorization bypass and it does not make every hidden column safe to export.
+
+Before exporting hidden or sensitive columns, keep this decision in the host application:
+
+- maintain an allowlist or policy for exportable column keys before calling `public_send`, serializers, or report builders
+- treat hidden columns as a display preference, not as a sensitivity marker
+- exclude sensitive columns even when they are visible in the table unless the current user and export action are allowed to receive them
+- document or test whether `include_hidden: true` is available to all users, admin-only users, or only specific export flows
+
 ## Export keys
 
 Use `export_key` in a hash column definition when the display key differs from the export method or attribute:
@@ -198,4 +207,6 @@ The host application owns:
 - CSV/Excel/report file generation
 - formatting values
 - deciding whether hidden columns should be exportable
+- maintaining the allowlist or policy for exportable columns
 - deciding whether sensitive columns should ever be selected or rendered
+- testing export actions that use `include_hidden: true`
