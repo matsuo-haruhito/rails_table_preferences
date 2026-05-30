@@ -3,11 +3,6 @@
 require "spec_helper"
 
 class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationController
-  helper RailsTablePreferences::TablePreferencesHelper
-  include RailsTablePreferences::Controller
-  include RailsTablePreferences::TablePreferencesHelper
-
-  DEMO_TABLE_KEY = :rails_table_preferences_grouped_header_smoke_orders
   DEMO_COLUMN_DEFINITIONS = [
     { "key" => "order_no", "label" => "受注番号", "group" => { "key" => "order", "label" => "受注情報" } },
     { "key" => "status", "label" => "状態", "group" => { "key" => "order", "label" => "受注情報" } },
@@ -21,12 +16,7 @@ class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationContr
     <h1>Rails Table Preferences Grouped Header Smoke</h1>
 
     <div class="rails-table-preferences-demo-scroll">
-      <%= table_preferences_table_tag(
-        table_key: DEMO_TABLE_KEY,
-        settings: @table_preference_settings,
-        columns: @table_columns,
-        class: "table rails-table-preferences-demo-table"
-      ) do %>
+      <table class="table rails-table-preferences-demo-table">
         <thead>
           <% if @demo_visible_column_groups.any? %>
             <tr class="rails-table-preferences-demo-table__group-row">
@@ -48,32 +38,19 @@ class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationContr
             <% end %>
           </tr>
         </tbody>
-      <% end %>
+      </table>
     </div>
   ERB
 
   def index
-    @table_columns = table_columns
-    @table_preference_settings = settings_for_layout(params[:saved_layout])
-    @demo_visible_columns = demo_visible_columns(@table_preference_settings)
+    settings = settings_for_layout(params[:saved_layout])
+    @demo_visible_columns = demo_visible_columns(settings)
     @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
 
     render inline: TEMPLATE, type: :erb
   end
 
   private
-
-  def table_columns
-    [
-      table_preferences_column(:order_no, label: "受注番号", default_width: 120, group: { key: :order, label: "受注情報" }),
-      table_preferences_column(:status, label: "状態", default_width: 120, group: { key: :order, label: "受注情報" }),
-      table_preferences_column(:customer_name, label: "得意先名", default_width: 240, group: { key: :customer, label: "得意先情報" }),
-      table_preferences_column(:delivery_date, label: "納品日", default_width: 140, group: { key: :delivery, label: "配送情報" }),
-      table_preferences_column(:shipping_code, label: "配送コード", default_width: 140, group: { key: :delivery, label: "配送情報" }),
-      table_preferences_column(:memo, label: "備考", default_width: 180, group: { key: :delivery, label: "配送情報" }),
-      table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
-    ]
-  end
 
   def settings_for_layout(saved_layout)
     return delivery_focus_settings if saved_layout == "delivery_focus"
