@@ -1,142 +1,59 @@
 <h1>Rails Table Preferences Demo</h1>
 
 <p>
-  This demo screen uses in-memory rows for table display and the normal
-  <code>table_preferences</code> table for preference persistence.
+  Start with the editor and table below to verify preference changes, table
+  behavior, and persistence. The screen uses in-memory rows for table display
+  and the normal <code>table_preferences</code> table for saved preferences.
 </p>
 
-<p>
-  The generated demo also seeds one shared preset named <strong>共有ビュー</strong>.
-  Select it to confirm that a normal user can load a shared preset, cannot
-  delete it directly, and saves changes back into an owner preset instead of
-  overwriting the shared preset.
-</p>
-
-<p>
-  The demo also seeds one role preset named <strong>担当ビュー</strong> for the
-  role key <code>operations</code>. If the host app configures
-  <code>scope_context_method</code> to return <code>{ roles: ["operations"] }</code>,
-  the selector also shows <strong>担当ビュー [role:operations]</strong> and resolves
-  it before the shared preset while no owner default exists.
-</p>
-
-<p>
-  The demo also seeds one organization preset named <strong>東京組織ビュー</strong>
-  for the organization key <code>tokyo-hq</code>. If the host app returns
-  <code>{ organization: "tokyo-hq" }</code>, the selector shows
-  <strong>東京組織ビュー [organization:tokyo-hq]</strong>. With no owner default and
-  no matching role default, reloading the demo resolves it before the shared preset.
-</p>
-
-<section class="rails-table-preferences-demo-summary">
-  <h2>Current scope context</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-details">
+  <summary>Preset, scope, and sample-data checks included in this demo</summary>
 
   <p>
-    <strong>Current context:</strong>
-    <% if @demo_scope_context_summary["owner_only"] %>
-      owner-only
-    <% else %>
-      <% summary_parts = [] %>
-      <% if @demo_scope_context_summary.fetch("roles", []).any? %>
-        <% summary_parts << "roles: [#{@demo_scope_context_summary.fetch("roles").join(", ")}]" %>
-      <% end %>
-      <% if @demo_scope_context_summary["organization"].present? %>
-        <% summary_parts << "organization: #{@demo_scope_context_summary["organization"]}" %>
-      <% end %>
-      <code><%= summary_parts.join(" / ") %></code>
-    <% end %>
+    The generated demo seeds one shared preset named <strong>共有ビュー</strong>.
+    Select it to confirm that a normal user can load a shared preset, cannot
+    delete it directly, and saves changes back into an owner preset instead of
+    overwriting the shared preset.
   </p>
 
   <p>
-    Use this summary to confirm which scope the preset selector and default
-    resolution below should reflect before comparing owner, role, and
-    organization behavior.
+    The demo also seeds one role preset named <strong>担当ビュー</strong> for the
+    role key <code>operations</code>. If the host app configures
+    <code>scope_context_method</code> to return <code>{ roles: ["operations"] }</code>,
+    the selector also shows <strong>担当ビュー [role:operations]</strong> and resolves
+    it before the shared preset while no owner default exists.
   </p>
-</section>
-
-<section class="rails-table-preferences-demo-summary">
-  <h2>Owner switch</h2>
 
   <p>
-    Use these demo-only links to switch the active owner and confirm that saved
-    presets stay isolated between representative owners.
+    The demo also seeds one organization preset named <strong>東京組織ビュー</strong>
+    for the organization key <code>tokyo-hq</code>. If the host app returns
+    <code>{ organization: "tokyo-hq" }</code>, the selector shows
+    <strong>東京組織ビュー [organization:tokyo-hq]</strong>. With no owner default and
+    no matching role default, reloading the demo resolves it before the shared preset.
   </p>
-
-  <% if @demo_owner_switch_ready %>
-    <ul class="rails-table-preferences-demo-owner-switches">
-      <% @demo_owner_switches.each do |switch| %>
-        <li>
-          <%= link_to switch.fetch("label"),
-                      switch.fetch("path"),
-                      class: [
-                        "rails-table-preferences-demo-owner-switch",
-                        ("rails-table-preferences-demo-owner-switch--active" if switch["active"])
-                      ].compact.join(" "),
-                      "aria-current": ("page" if switch["active"]) %>
-          <span><%= switch.fetch("description") %></span>
-        </li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p class="rails-table-preferences-demo-owner-note">
-      Keep the host app owner and create at least one more owner record to
-      compare save/load isolation here.
-    </p>
-  <% end %>
-</section>
-
-<section class="rails-table-preferences-demo-summary">
-  <h2>Scope switch</h2>
 
   <p>
-    Use these demo-only links to compare owner, role, and organization preset
-    resolution without editing controller code between requests.
+    Sample rows intentionally mix statuses, delivery dates, repeated customer
+    prefixes, long shipping codes, long delivery notes, and memo lengths.
+    Search for <strong>東京</strong> or sort by <strong>納品日</strong> /
+    <strong>金額</strong> to make the differences easier to spot.
   </p>
 
-  <% unless @demo_scope_context_toggle_ready %>
-    <p class="rails-table-preferences-demo-scope-note">
-      Set <code>scope_context_method</code> to <code>table_preference_scope_context</code>
-      once to make the owner / role / organization links below drive the demo.
-    </p>
-  <% end %>
+  <p>
+    Double-click the resize handle on <strong>配送メモ</strong> or <strong>配送コード</strong>
+    to confirm auto-fit, then compare <strong>配送メモ</strong> (wrap),
+    <strong>配送コード</strong> (nowrap), and <strong>備考</strong> (ellipsis)
+    to see the overflow modes side by side.
+  </p>
 
-  <ul class="rails-table-preferences-demo-scope-switches">
-    <% @demo_scope_context_switches.each do |switch| %>
-      <li>
-        <%= link_to switch.fetch("label"),
-                    switch.fetch("path"),
-                    class: [
-                      "rails-table-preferences-demo-scope-switch",
-                      ("rails-table-preferences-demo-scope-switch--active" if switch["active"])
-                    ].compact.join(" "),
-                    "aria-current": ("page" if switch["active"]) %>
-        <span><%= switch.fetch("description") %></span>
-      </li>
-    <% end %>
-  </ul>
-</section>
-
-<p>
-  Sample rows intentionally mix statuses, delivery dates, repeated customer
-  prefixes, long shipping codes, long delivery notes, and memo lengths.
-  Search for <strong>東京</strong> or sort by <strong>納品日</strong> /
-  <strong>金額</strong> to make the differences easier to spot.
-</p>
-
-<p>
-  Double-click the resize handle on <strong>配送メモ</strong> or <strong>配送コード</strong>
-  to confirm auto-fit, then compare <strong>配送メモ</strong> (wrap),
-  <strong>配送コード</strong> (nowrap), and <strong>備考</strong> (ellipsis)
-  to see the overflow modes side by side.
-</p>
-
-<p>
-  The table below also keeps <strong>受注番号</strong> pinned inside a dedicated
-  horizontal scroll wrapper and shows one grouped header row
-  (<strong>受注情報</strong> / <strong>得意先情報</strong> / <strong>配送情報</strong>) that follows the
-  current saved visible-column order after reload, so fixed-column and column-group
-  behavior can be checked without additional host-app markup first.
-</p>
+  <p>
+    The table below also keeps <strong>受注番号</strong> pinned inside a dedicated
+    horizontal scroll wrapper and shows one grouped header row
+    (<strong>受注情報</strong> / <strong>得意先情報</strong> / <strong>配送情報</strong>) that follows the
+    current saved visible-column order after reload, so fixed-column and column-group
+    behavior can be checked without additional host-app markup first.
+  </p>
+</details>
 
 <style>
   .rails-table-preferences-demo-scroll {
@@ -183,6 +100,15 @@
 
   .rails-table-preferences-demo-summary dd {
     margin: 0.25rem 0 0;
+  }
+
+  .rails-table-preferences-demo-details summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .rails-table-preferences-demo-details p:last-child {
+    margin-bottom: 0;
   }
 
   .rails-table-preferences-demo-owner-note,
@@ -232,6 +158,13 @@
   }
 </style>
 
+<%= table_preferences_editor(
+  table_key: :rails_table_preferences_demo_orders,
+  settings: @table_preference_settings,
+  columns: @table_columns,
+  title: "デモ受注一覧の表示設定"
+) %>
+
 <section class="rails-table-preferences-demo-summary">
   <h2>Current owner</h2>
 
@@ -256,6 +189,94 @@
       <dd><%= @demo_owner_summary.fetch("identifier") %></dd>
     </div>
   </dl>
+</section>
+
+<section class="rails-table-preferences-demo-summary">
+  <h2>Owner switch</h2>
+
+  <p>
+    Use these demo-only links to switch the active owner and confirm that saved
+    presets stay isolated between representative owners.
+  </p>
+
+  <% if @demo_owner_switch_ready %>
+    <ul class="rails-table-preferences-demo-owner-switches">
+      <% @demo_owner_switches.each do |switch| %>
+        <li>
+          <%= link_to switch.fetch("label"),
+                      switch.fetch("path"),
+                      class: [
+                        "rails-table-preferences-demo-owner-switch",
+                        ("rails-table-preferences-demo-owner-switch--active" if switch["active"])
+                      ].compact.join(" "),
+                      "aria-current": ("page" if switch["active"]) %>
+          <span><%= switch.fetch("description") %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="rails-table-preferences-demo-owner-note">
+      Keep the host app owner and create at least one more owner record to
+      compare save/load isolation here.
+    </p>
+  <% end %>
+</section>
+
+<section class="rails-table-preferences-demo-summary">
+  <h2>Current scope context</h2>
+
+  <p>
+    <strong>Current context:</strong>
+    <% if @demo_scope_context_summary["owner_only"] %>
+      owner-only
+    <% else %>
+      <% summary_parts = [] %>
+      <% if @demo_scope_context_summary.fetch("roles", []).any? %>
+        <% summary_parts << "roles: [#{@demo_scope_context_summary.fetch("roles").join(", ")}]" %>
+      <% end %>
+      <% if @demo_scope_context_summary["organization"].present? %>
+        <% summary_parts << "organization: #{@demo_scope_context_summary["organization"]}" %>
+      <% end %>
+      <code><%= summary_parts.join(" / ") %></code>
+    <% end %>
+  </p>
+
+  <p>
+    Use this summary to confirm which scope the preset selector and default
+    resolution below should reflect before comparing owner, role, and
+    organization behavior.
+  </p>
+</section>
+
+<section class="rails-table-preferences-demo-summary">
+  <h2>Scope switch</h2>
+
+  <p>
+    Use these demo-only links to compare owner, role, and organization preset
+    resolution without editing controller code between requests.
+  </p>
+
+  <% unless @demo_scope_context_toggle_ready %>
+    <p class="rails-table-preferences-demo-scope-note">
+      Set <code>scope_context_method</code> to <code>table_preference_scope_context</code>
+      once to make the owner / role / organization links below drive the demo.
+    </p>
+  <% end %>
+
+  <ul class="rails-table-preferences-demo-scope-switches">
+    <% @demo_scope_context_switches.each do |switch| %>
+      <li>
+        <%= link_to switch.fetch("label"),
+                    switch.fetch("path"),
+                    class: [
+                      "rails-table-preferences-demo-scope-switch",
+                      ("rails-table-preferences-demo-scope-switch--active" if switch["active"])
+                    ].compact.join(" "),
+                    "aria-current": ("page" if switch["active"]) %>
+        <span><%= switch.fetch("description") %></span>
+      </li>
+    <% end %>
+  </ul>
 </section>
 
 <section class="rails-table-preferences-demo-summary">
@@ -322,13 +343,6 @@
      aria-live="polite"
      data-rails-table-preferences-demo-failure-status></p>
 </section>
-
-<%= table_preferences_editor(
-  table_key: :rails_table_preferences_demo_orders,
-  settings: @table_preference_settings,
-  columns: @table_columns,
-  title: "デモ受注一覧の表示設定"
-) %>
 
 <script>
   (() => {
