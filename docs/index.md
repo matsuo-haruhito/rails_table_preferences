@@ -12,6 +12,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, horizontal scroll-container baseline, and `group:` metadata.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
 - [Visual overview](visual_overview.md): representative screen illustrations for the editor, shared/scoped preset orientation, generated demo owner/scope cues, export preview, filter/sort state, and pinned-column table layout.
 - [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
@@ -50,11 +51,12 @@ This directory contains focused documentation for Rails Table Preferences.
 13. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
 14. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
 15. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-16. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-17. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
-18. Verify the feature in a sandbox Rails app.
-19. Run the manual QA checklist before asking real users to try the feature.
-20. Before release, run the release checklist and package verification guide.
+16. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+17. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+18. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
+19. Verify the feature in a sandbox Rails app.
+20. Run the manual QA checklist before asking real users to try the feature.
+21. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
