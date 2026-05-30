@@ -65,6 +65,27 @@ export default defineConfig({
 
 Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files.
 
+### TypeScript module declarations
+
+The gem currently ships JavaScript entrypoints, not packaged `.d.ts` files. In a TypeScript host app, the Vite resolver above can make the imports work at runtime while TypeScript may still report that it cannot find declarations for `rails_table_preferences` or `rails_table_preferences/controller`.
+
+When that happens, add a local declaration file in the host app, for example `app/frontend/types/rails_table_preferences.d.ts` or another directory included by the app's `tsconfig.json`:
+
+```ts
+declare module "rails_table_preferences/controller" {
+  import { Controller } from "@hotwired/stimulus"
+
+  const RailsTablePreferencesController: typeof Controller
+  export default RailsTablePreferencesController
+}
+
+declare module "rails_table_preferences" {
+  export { default, default as RailsTablePreferencesController } from "rails_table_preferences/controller"
+}
+```
+
+This local declaration only describes the current package entrypoints enough for `application.register("rails-table-preferences", RailsTablePreferencesController)` and the package-root named export. It does not mean Rails Table Preferences ships official TypeScript types yet. If the host app replaces the controller or relies on custom controller methods, keep those richer declarations in the host app until the gem deliberately adds packaged type definitions.
+
 ## Turbo Drive and Turbo Frame checks
 
 Rails Table Preferences does not need a Turbo-specific adapter when the host app already renders the editor and table through normal server-side HTML. The bundled controller is a Stimulus controller, so Turbo Drive navigation and Turbo Frame replacement should reconnect it as long as the rendered HTML still includes the same controller root and values.
