@@ -165,6 +165,60 @@
   title: "デモ受注一覧の表示設定"
 ) %>
 
+<%= form_with url: request.path, method: :get do %>
+  <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
+
+  <%= table_preferences_hidden_fields(
+    settings: @table_preference_settings,
+    columns: @table_columns
+  ) %>
+
+  <%= submit_tag "検索" %>
+<% end %>
+
+<div class="rails-table-preferences-demo-scroll">
+  <%= table_preferences_table_tag(
+    table_key: :rails_table_preferences_demo_orders,
+    settings: @table_preference_settings,
+    columns: @table_columns,
+    class: "table rails-table-preferences-demo-table"
+  ) do %>
+    <thead>
+      <% if @demo_visible_column_groups.any? %>
+        <tr class="rails-table-preferences-demo-table__group-row">
+          <% @demo_visible_column_groups.each do |group| %>
+            <th colspan="<%= group["colspan"] %>"><%= group["label"] %></th>
+          <% end %>
+        </tr>
+      <% end %>
+      <tr>
+        <% @demo_visible_columns.each do |column| %>
+          <th data-rails-table-preferences-column-key="<%= column["key"] %>"><%= column["label"] %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr>
+          <% @demo_visible_columns.each do |column| %>
+            <% key = column["key"] %>
+            <td data-rails-table-preferences-column-key="<%= key %>">
+              <% case key %>
+              <% when "delivery_date" %>
+                <%= l(order[:delivery_date]) %>
+              <% when "amount" %>
+                <%= number_with_delimiter(order[:amount]) %>
+              <% else %>
+                <%= order[key.to_sym] %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  <% end %>
+</div>
+
 <section class="rails-table-preferences-demo-summary">
   <h2>Current owner</h2>
 
@@ -392,57 +446,3 @@
     }
   })()
 </script>
-
-<%= form_with url: request.path, method: :get do %>
-  <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
-
-  <%= table_preferences_hidden_fields(
-    settings: @table_preference_settings,
-    columns: @table_columns
-  ) %>
-
-  <%= submit_tag "検索" %>
-<% end %>
-
-<div class="rails-table-preferences-demo-scroll">
-  <%= table_preferences_table_tag(
-    table_key: :rails_table_preferences_demo_orders,
-    settings: @table_preference_settings,
-    columns: @table_columns,
-    class: "table rails-table-preferences-demo-table"
-  ) do %>
-    <thead>
-      <% if @demo_visible_column_groups.any? %>
-        <tr class="rails-table-preferences-demo-table__group-row">
-          <% @demo_visible_column_groups.each do |group| %>
-            <th colspan="<%= group["colspan"] %>"><%= group["label"] %></th>
-          <% end %>
-        </tr>
-      <% end %>
-      <tr>
-        <% @demo_visible_columns.each do |column| %>
-          <th data-rails-table-preferences-column-key="<%= column["key"] %>"><%= column["label"] %></th>
-        <% end %>
-      </tr>
-    </thead>
-    <tbody>
-      <% @orders.each do |order| %>
-        <tr>
-          <% @demo_visible_columns.each do |column| %>
-            <% key = column["key"] %>
-            <td data-rails-table-preferences-column-key="<%= key %>">
-              <% case key %>
-              <% when "delivery_date" %>
-                <%= l(order[:delivery_date]) %>
-              <% when "amount" %>
-                <%= number_with_delimiter(order[:amount]) %>
-              <% else %>
-                <%= order[key.to_sym] %>
-              <% end %>
-            </td>
-          <% end %>
-        </tr>
-      <% end %>
-    </tbody>
-  <% end %>
-</div>
