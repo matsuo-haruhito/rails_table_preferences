@@ -30,6 +30,9 @@
   columns: columns,
   **table_options
 ) do %>
+  <% if caption.present? %>
+    <caption><%= caption %></caption>
+  <% end %>
   <thead>
     <tr>
       <% table_state.fetch("visible_columns").each do |column| %>
