@@ -147,7 +147,7 @@ RSpec.describe "rails_table_preferences demo grouped header smoke", type: :syste
   end
 
   def leaf_header_keys
-    page.all("thead tr:last-child th[data-rails-table-preferences-column-key]", visible: :all).map do |cell|
+    page.all("th[data-rails-table-preferences-column-key]", visible: :all).map do |cell|
       cell["data-rails-table-preferences-column-key"]
     end
   end
