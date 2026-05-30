@@ -10,6 +10,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal operating patterns.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, horizontal scroll-container baseline, and `group:` metadata.
+- [Column overflow metadata](column_overflow.md): canonical `overflow:` / `default_overflow:` values, compatibility aliases, and the boundary with `default_truncate:`.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
@@ -44,19 +45,20 @@ This directory contains focused documentation for Rails Table Preferences.
 6. For manually controlled tables, define table columns with `table_preferences_column`.
 7. Render `table_preferences_editor` and `table_preferences_table_tag`.
 8. Add `filter:` and `sortable: true` metadata where needed.
-9. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-10. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-11. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-12. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-13. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-14. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-15. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-16. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-17. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-18. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
-19. Verify the feature in a sandbox Rails app.
-20. Run the manual QA checklist before asking real users to try the feature.
-21. Before release, run the release checklist and package verification guide.
+9. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
+10. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+11. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+12. Configure `scope_context_method` only if shared, role, or organization presets are needed.
+13. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+14. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+15. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+16. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+17. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+18. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+19. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
+20. Verify the feature in a sandbox Rails app.
+21. Run the manual QA checklist before asking real users to try the feature.
+22. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
