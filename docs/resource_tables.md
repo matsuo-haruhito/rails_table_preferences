@@ -396,7 +396,11 @@ When the `tree_view` gem is installed, a tree table can use the same inferred co
 <%= tree_resource_table_for @projects, parent_id_method: :parent_project_id %>
 ```
 
-Rails Table Preferences owns the inferred columns, labels, saved table state, and default table partial. TreeView owns the hierarchical row rendering.
+The bundled default tree table partial expects `TreeView::Tree` to be available. If the host app calls `tree_resource_table_for` without loading the `tree_view` gem, the default partial raises `tree_resource_table_for requires the tree_view gem` instead of silently falling back to flat rows.
+
+Keep `tree_view` in the host app Gemfile when using `tree_resource_table_for`. If the screen should remain usable without TreeView, choose `resource_table_for` for the flat table path or provide a custom `tree_resource_table_partial` that owns that fallback explicitly.
+
+Rails Table Preferences owns the inferred columns, labels, saved table state, and default table partial. TreeView owns the hierarchical row rendering. The host app owns hierarchy query shape, authorization, eager loading, and whether a flat fallback is acceptable for that screen.
 
 ## Custom presentation
 
