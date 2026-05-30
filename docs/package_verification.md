@@ -91,18 +91,31 @@ README.md
 CHANGELOG.md
 LICENSE
 docs/index.md
-docs/visual_overview.md
-docs/images/visual-overview-editor-and-table.svg
 docs/quick_start.md
-docs/demo.md
+docs/resource_tables.md
+docs/resource_table_formatter_contract.md
+docs/decision_guide.md
+docs/scoped_presets.md
+docs/fixed_columns_and_groups.md
 docs/export_integration.md
 docs/accessibility.md
+docs/visual_overview.md
+docs/images/visual-overview-editor-and-table.svg
+docs/demo.md
+docs/sandbox.md
+docs/examples.md
 docs/troubleshooting.md
+docs/manual_qa.md
 docs/release_checklist.md
 docs/package_verification.md
+docs/controller_integration.md
+docs/filter_metadata.md
+docs/filter_adapters.md
+docs/javascript_entrypoints.md
+docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The documentation entries are representative package entrances from the README rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
 ## Why this matters
 
