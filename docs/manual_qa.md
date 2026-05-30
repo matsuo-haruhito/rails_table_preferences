@@ -4,6 +4,21 @@ Use this checklist before asking host application users to try Rails Table Prefe
 
 The automated suite covers Ruby behavior, generator output, request behavior, helper output, adapters, and source-level JavaScript invariants. Manual QA focuses on browser behavior, host app integration, accessibility, and visual/UX issues that are difficult to verify with the current test suite.
 
+## Quick smoke before the full checklist
+
+Use this short path when you need a first browser confidence check for a docs PR, release candidate, generated demo update, or early host-app adoption pass. It is not a replacement for the full checklist below. Run the full checklist before broader host-app rollout, before changing custom integration points, or when a quick smoke reveals anything suspicious.
+
+- [ ] Open the generated demo or a representative host-app list screen and confirm the editor and table both render.
+- [ ] Hide one non-sensitive column, apply the change, and confirm the table updates without hiding required actions or links.
+- [ ] Save the preset, reload the page, and confirm the saved visibility/order state returns.
+- [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
+- [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
+- [ ] Switch to another owner or demo owner link and confirm saved presets do not leak between owners.
+- [ ] Open one filter panel or preset action with keyboard focus and confirm focus, labels, and status copy remain understandable.
+- [ ] Check one narrow desktop width and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable.
+
+After this quick smoke, continue into the relevant sections below for the feature area you changed. For release sign-off or host-app launch, complete the full checklist and record any skipped areas in the sign-off notes.
+
 ## 1. Environment and installation
 
 - [ ] Create or select a Rails application for manual testing.
