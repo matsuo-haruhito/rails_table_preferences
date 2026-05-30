@@ -221,7 +221,8 @@ module RailsTablePreferences
       when :ransack
         RailsTablePreferences::Adapters::Ransack.to_params(
           filters: normalized_settings["filters"],
-          sorts: normalized_settings["sorts"]
+          sorts: normalized_settings["sorts"],
+          columns: normalized_columns
         )
       else
         raise ArgumentError, "Unsupported table preference adapter: #{adapter.inspect}"
