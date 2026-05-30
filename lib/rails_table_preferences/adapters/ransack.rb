@@ -35,7 +35,7 @@ module RailsTablePreferences
         filter_params(filters, columns: column_lookup).merge(sort_params(sorts, columns: column_lookup))
       end
 
-      def filter_params(filters, columns: [])
+      def filter_params(filters = {}, columns: [])
         column_lookup = columns_by_key(columns)
 
         filters.each_with_object({}) do |(key, condition), params|
@@ -49,7 +49,7 @@ module RailsTablePreferences
         end
       end
 
-      def sort_params(sorts, columns: [])
+      def sort_params(sorts = [], columns: [])
         column_lookup = columns_by_key(columns)
 
         values = Array(sorts).filter_map do |sort|
