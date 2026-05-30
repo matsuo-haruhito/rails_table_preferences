@@ -40,6 +40,55 @@ RSpec.describe RailsTablePreferences::SettingsNormalizer do
       )
     end
 
+    it "keeps numeric column boundaries explicit" do
+      settings = {
+        columns: [
+          {
+            key: :customer_code,
+            order: "-1",
+            width: 0,
+            truncate: "999999999999"
+          }
+        ]
+      }
+
+      expect(described_class.call(settings)["columns"]).to eq(
+        [
+          {
+            "key" => "customer_code",
+            "visible" => true,
+            "order" => -1,
+            "width" => 0,
+            "truncate" => 999_999_999_999,
+            "pinned" => false
+          }
+        ]
+      )
+    end
+
+    it "drops invalid numeric column values without changing the column" do
+      settings = {
+        columns: [
+          {
+            key: :customer_code,
+            order: "first",
+            width: "12.5",
+            truncate: nil
+          }
+        ]
+      }
+
+      expect(described_class.call(settings)["columns"]).to eq(
+        [
+          {
+            "key" => "customer_code",
+            "visible" => true,
+            "pinned" => false
+          }
+        ]
+      )
+    end
+
     it "normalizes legacy ColumnAdjustment keys" do
       settings = {
         columns: [
