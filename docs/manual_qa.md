@@ -126,6 +126,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Apply a blank/present condition.
 - [ ] Clear the filter.
 - [ ] Add a select filter column and choose one or more values.
+- [ ] In a short viewport, open a filter panel that includes a multi-select or several fields and confirm the panel scrolls enough to reach Apply and Clear.
 - [ ] Add a date filter column and set from/to values.
 - [ ] Add a number filter column and set from/to values.
 - [ ] Confirm multiple active filters still leave header controls usable while exposing summary context per column.
@@ -257,6 +258,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Check the screen with long table values.
 - [ ] Confirm editor inputs do not overlap.
 - [ ] Confirm filter panels are not clipped.
+- [ ] Confirm short viewport filter panels keep Apply and Clear reachable through panel scrolling.
 - [ ] Confirm column width controls remain usable.
 - [ ] Confirm table operation hit areas do not interfere with normal table links/buttons.
 
