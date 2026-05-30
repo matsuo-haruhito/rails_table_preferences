@@ -1,5 +1,5 @@
 <% unless defined?(TreeView::Tree) %>
-  <% raise "tree_resource_table_for requires the tree_view gem" %>
+  <% raise "tree_resource_table_for requires the tree_view gem. Add tree_view to the host app Gemfile, or use resource_table_for/custom tree_resource_table_partial when this screen should fall back to flat rows. See docs/resource_tables.md#treeview-integration." %>
 <% end %>
 
 <% tree = TreeView::Tree.new(records: records, parent_id_method: parent_id_method) %>
