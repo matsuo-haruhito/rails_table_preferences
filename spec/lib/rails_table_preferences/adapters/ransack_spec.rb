@@ -10,6 +10,17 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       ).to eq("customer_name_cont" => "山田")
     end
 
+    it "uses column filter param metadata when provided" do
+      expect(
+        described_class.filter_params(
+          { customer_id: { operator: :contains, value: "山田" } },
+          columns: [
+            { key: :customer_id, filter: { param: :customer_name } }
+          ]
+        )
+      ).to eq("customer_name_cont" => "山田")
+    end
+
     it "converts equality and comparison filters" do
       expect(
         described_class.filter_params(
@@ -75,6 +86,17 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       ).to eq("s" => ["delivery_date desc", "customer_code asc"])
     end
 
+    it "uses column sort param metadata when provided" do
+      expect(
+        described_class.sort_params(
+          [{ key: :customer_id, direction: :asc }],
+          columns: [
+            { key: :customer_id, sort_param: :customer_name }
+          ]
+        )
+      ).to eq("s" => ["customer_name asc"])
+    end
+
     it "ignores invalid sort directions" do
       expect(
         described_class.sort_params(
@@ -103,6 +125,30 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
         "customer_name_cont" => "山田",
         "status_in" => %w[未出荷 出荷済],
         "s" => ["delivery_date desc"]
+      )
+    end
+
+    it "uses column metadata while preserving fallback keys" do
+      expect(
+        described_class.to_params(
+          filters: {
+            customer_id: { operator: :contains, value: "山田" },
+            status: { operator: :equals, value: "出荷済" }
+          },
+          sorts: [
+            { key: :customer_id, direction: :asc },
+            { key: :created_at, direction: :desc }
+          ],
+          columns: [
+            { key: :customer_id, filter: { param: :customer_name }, sort_param: :customer_name },
+            { key: :status, filter: { type: :select } },
+            { key: :created_at }
+          ]
+        )
+      ).to eq(
+        "customer_name_cont" => "山田",
+        "status_eq" => "出荷済",
+        "s" => ["customer_name asc", "created_at desc"]
       )
     end
   end
