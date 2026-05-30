@@ -97,6 +97,7 @@ module RailsTablePreferences
     def apply(columns)
       normalized = Array(columns).map { |column| RailsTablePreferences::Adapters::ColumnLike.call(column) }
       normalized = apply_overrides(normalized)
+      normalized = append_virtual_columns(normalized)
       normalized = apply_order(normalized)
       normalized
     end
@@ -110,6 +111,23 @@ module RailsTablePreferences
         override = overrides[column.fetch("key").to_s]
         override ? column.merge(normalize_override(override)) : column
       end
+    end
+
+    def append_virtual_columns(columns)
+      existing_keys = columns.map { |column| column.fetch("key").to_s }.to_set
+      virtual_keys.filter_map do |key|
+        next if existing_keys.include?(key)
+
+        RailsTablePreferences::Adapters::ColumnLike.call({ "key" => key }.merge(normalize_override(self.class.column_overrides.fetch(key))))
+      end.then { |virtual_columns| columns + virtual_columns }
+    end
+
+    def virtual_keys
+      only = self.class.only_columns
+      excluded = self.class.excluded_columns
+      override_keys = self.class.column_overrides.keys
+      keys = only.empty? ? override_keys : only & override_keys
+      keys - excluded
     end
 
     def apply_order(columns)
