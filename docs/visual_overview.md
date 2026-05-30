@@ -4,6 +4,8 @@ This page gives a quick visual reference for the bundled demo surface before you
 
 The images below stay intentionally lightweight, but they now mirror the current generated demo more closely: Japanese labels, owner switch links, the seeded shared preset `共有ビュー`, scoped preset context, practical search/sort cues, and the same dense list-screen posture used elsewhere in the docs. Use the generated demo screen as the behavioral source of truth and treat these images as a compact orientation aid rather than a full QA substitute.
 
+The current generated demo keeps the longer orientation copy folded, then puts the editor, search form, and table surface before the owner/scope/export/async support sections. Start with those first-screen controls when you want to check the main scan path quickly, then use the support sections for scoped preset, export payload, reset, and failure-recovery checks.
+
 ## Editor and shared preset flow
 
 ![Bundled demo-aligned view showing the shared preset path, owner and scoped preset orientation, and the lightweight orders screen.](images/visual-overview-editor-and-table.svg)
