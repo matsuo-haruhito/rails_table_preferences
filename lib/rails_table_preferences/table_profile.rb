@@ -114,12 +114,14 @@ module RailsTablePreferences
     end
 
     def append_virtual_columns(columns)
-      existing_keys = columns.map { |column| column.fetch("key").to_s }.to_set
-      virtual_keys.filter_map do |key|
+      existing_keys = columns.map { |column| column.fetch("key").to_s }
+      virtual_columns = virtual_keys.filter_map do |key|
         next if existing_keys.include?(key)
 
         RailsTablePreferences::Adapters::ColumnLike.call({ "key" => key }.merge(normalize_override(self.class.column_overrides.fetch(key))))
-      end.then { |virtual_columns| columns + virtual_columns }
+      end
+
+      columns + virtual_columns
     end
 
     def virtual_keys
