@@ -52,4 +52,55 @@ RSpec.describe RailsTablePreferences::TableProfile do
       )
     end
   end
+
+  describe ".apply" do
+    it "appends profile columns that are not inferred" do
+      formatter = ->(record, _view) { record.customer_name }
+      profile = Class.new(described_class) do
+        column :customer_name,
+          label: "Customer",
+          filter: { type: "text", param: "customer_name" },
+          editor: { type: "readonly" },
+          sortable: false,
+          &formatter
+      end
+
+      columns = profile.apply([{ key: :order_no, label: "Order no" }])
+
+      expect(columns.map { |column| column.fetch("key") }).to eq(%w[order_no customer_name])
+      expect(columns.last).to include(
+        "key" => "customer_name",
+        "label" => "Customer",
+        "filter" => { "type" => "text", "param" => "customer_name" },
+        "editor" => { "type" => "readonly" },
+        "sortable" => false,
+        "formatter" => formatter
+      )
+    end
+
+    it "orders virtual columns alongside inferred columns" do
+      profile = Class.new(described_class) do
+        order :customer_name, :order_no
+        column :customer_name, label: "Customer"
+      end
+
+      columns = profile.apply([{ key: :order_no, label: "Order no" }, { key: :status, label: "Status" }])
+
+      expect(columns.map { |column| column.fetch("key") }).to eq(%w[customer_name order_no status])
+    end
+
+    it "respects only and exclude for virtual columns" do
+      profile = Class.new(described_class) do
+        only :order_no, :customer_name, :internal_score
+        exclude :internal_score
+        column :customer_name, label: "Customer"
+        column :internal_score, label: "Internal score"
+        column :ignored_note, label: "Ignored note"
+      end
+
+      columns = profile.apply([{ key: :order_no, label: "Order no" }])
+
+      expect(columns.map { |column| column.fetch("key") }).to eq(%w[order_no customer_name])
+    end
+  end
 end
