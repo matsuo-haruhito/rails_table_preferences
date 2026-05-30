@@ -6,7 +6,13 @@ RSpec.describe "resource table rendering", type: :helper do
   end
 
   it "renders an empty row with a visible-column colspan" do
-    html = helper.resource_table_for(User.none, model: User, table_key: :users, only: %i[name created_at])
+    html = helper.resource_table_for(
+      User.none,
+      model: User,
+      table_key: :users,
+      only: %i[id name],
+      include_id: true
+    )
 
     expect(html).to include('class="rails-table-preferences-resource-table__empty-cell" colspan="2"')
     expect(html).to include("No records to display")
