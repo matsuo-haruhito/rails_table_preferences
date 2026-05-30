@@ -19,18 +19,24 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Hidden fields helper for submitting saved filter/sort params through existing search forms.
 - Export payload helper for host app CSV, Excel, or report generation.
 - Column definition helper with labels, locale lookup, visibility, order, width, truncation, filters, sorting, fixed/pinned metadata, groups, and ignored columns.
-- Resource table helpers for convention-first Active Record column inference, table profile overrides, and optional tree table rendering.
+- Resource table helpers for convention-first Active Record column inference, table profile overrides, optional tree table rendering, and additive table semantics.
+- Resource table helpers can pass table HTML options such as `id`, `class`, `data`, and `aria` through to the rendered table while preserving gem-owned controller data attributes.
+- Resource table helpers support opt-in captions through `caption:` and keep the caption contract separate from table HTML options.
+- Resource table helpers support `render_editor: false` so host apps can render the generated editor separately while keeping the default editor-plus-table behavior unchanged.
+- Table profiles can add virtual or computed columns, including formatter-backed values that are not inferred from the Active Record model.
 - Renderer registries for mapping filter and editor metadata to host-app helper libraries such as Rails Fields Kit.
 - Column group helper for host app grouped table headers and grouped export headers.
 - Settings normalizer for current and legacy `ColumnAdjustment`-style settings payloads.
 - Bundled Stimulus controller for applying column visibility, order, width, truncation, filters, sorts, header drag reorder, resize handles, pinned column hooks, and preset editing behavior.
 - Copy-based JavaScript, stylesheet, view, and install generators.
 - Optional `--with-demo` install generator mode for local browser verification.
+- Generated demo verification includes owner, role, organization, export payload, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
-- Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, visual overview, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, and JavaScript controller notes.
+- Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, visual overview, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
 - Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
 - GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and 8.0.
+- Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 
 ### Changed
 
@@ -38,7 +44,10 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - README roadmap and current scope were updated to reflect the expanded v0.1 scope.
 - Generated migrations use nullable owner references and `scope_type` / `scope_key` to support owner, shared, role, and organization presets.
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
+- The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
+- The package and JavaScript verification path now smoke-loads the documented package root and controller entrypoints in a minimal Node sandbox.
+- Documentation now states the bundled sort UI single-sort boundary and leaves multi-sort composition to host apps.
 
 ### Fixed
 
