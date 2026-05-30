@@ -33,13 +33,14 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     expect(payload["column_keys"]).to include("internal_cost")
   end
 
-  it "keeps group and export key metadata" do
+  it "keeps display column keys separate from export key metadata" do
     columns = [
       { key: :customer_name, label: "得意先名", group: { key: :customer, label: "得意先情報" }, export_key: :customer_display_name }
     ]
 
     payload = described_class.call(settings: {}, columns: columns)
 
+    expect(payload["column_keys"]).to eq(%w[customer_name])
     expect(payload["columns"].first["group"]).to eq("key" => :customer, "label" => "得意先情報")
     expect(payload["columns"].first["export_key"]).to eq(:customer_display_name)
   end
