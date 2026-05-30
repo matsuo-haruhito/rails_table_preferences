@@ -27,7 +27,7 @@ module RailsTablePreferences
       tag.table(**options, &block)
     end
 
-    def table_preferences_editor(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], title: nil, partial: nil)
+    def table_preferences_editor(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], title: nil, partial: nil, editor_instance_key: nil)
       normalized_columns = table_preferences_columns(columns, ignored_columns: ignored_columns)
       normalized_settings = table_preferences_settings(settings, allowed_columns: normalized_columns)
       partial_name = partial.presence || RailsTablePreferences.configuration.editor_partial
@@ -42,6 +42,7 @@ module RailsTablePreferences
         columns_json: normalized_columns.to_json,
         preference_url: table_preferences_preference_url(table_key: table_key, name: name),
         collection_url: table_preferences_collection_url(table_key: table_key),
+        editor_instance_key: editor_instance_key,
         data_attributes: table_preferences_data_attributes(table_key: table_key, name: name, settings: normalized_settings, columns: normalized_columns)
       }
     end
