@@ -29,30 +29,37 @@ module RailsTablePreferences
         "desc" => "desc"
       }.freeze
 
-      def to_params(filters: {}, sorts: [])
-        filter_params(filters).merge(sort_params(sorts))
+      def to_params(filters: {}, sorts: [], columns: [])
+        column_lookup = columns_by_key(columns)
+
+        filter_params(filters, columns: column_lookup).merge(sort_params(sorts, columns: column_lookup))
       end
 
-      def filter_params(filters)
+      def filter_params(filters = nil, columns: [], **keyword_filters)
+        filters = keyword_filters if filters.nil?
+        column_lookup = columns_by_key(columns)
+
         filters.each_with_object({}) do |(key, condition), params|
           normalized = normalize_condition(condition)
           predicate = predicate_for(normalized["operator"])
           next unless predicate
 
-          param_key = "#{key}_#{predicate}"
+          param_key = "#{filter_key_for(key, column_lookup)}_#{predicate}"
           value = value_for(normalized)
           params[param_key] = value unless skip_value?(predicate, value)
         end
       end
 
-      def sort_params(sorts)
+      def sort_params(sorts = [], columns: [])
+        column_lookup = columns_by_key(columns)
+
         values = Array(sorts).filter_map do |sort|
           normalized = stringify_keys(sort)
           key = normalized["key"]
           direction = SORT_DIRECTIONS[normalized["direction"].to_s]
           next if blank?(key) || blank?(direction)
 
-          "#{key} #{direction}"
+          "#{sort_key_for(key, column_lookup)} #{direction}"
         end
 
         values.empty? ? {} : { "s" => values }
@@ -83,6 +90,33 @@ module RailsTablePreferences
         return false if %w[blank present true false].include?(predicate)
 
         blank?(value)
+      end
+
+      def columns_by_key(columns)
+        return columns if columns.is_a?(Hash) && columns.values.all? { |column| column.is_a?(Hash) }
+
+        Array(columns).each_with_object({}) do |column, lookup|
+          normalized = stringify_keys(column)
+          next unless normalized.is_a?(Hash)
+
+          key = normalized["key"]
+          lookup[key.to_s] = normalized unless blank?(key)
+        end
+      end
+
+      def filter_key_for(key, columns)
+        column = columns[key.to_s]
+        filter = stringify_keys(column&.fetch("filter", nil) || {})
+        param = filter["param"] if filter.is_a?(Hash)
+
+        blank?(param) ? key : param
+      end
+
+      def sort_key_for(key, columns)
+        column = columns[key.to_s]
+        param = column&.fetch("sort_param", nil)
+
+        blank?(param) ? key : param
       end
 
       def blank?(value)

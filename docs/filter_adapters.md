@@ -78,6 +78,34 @@ ransack_params = RailsTablePreferences::Adapters::Ransack.to_params(
 @orders = @q.result
 ```
 
+When the displayed column key differs from the Ransack field, pass normalized columns or use `table_preferences_params(adapter: :ransack)`. The adapter reads existing column metadata: `filter: { param: ... }` overrides the filter field before the predicate is appended, and `sort_param:` overrides the sort field. Without those metadata keys, the saved column key is used unchanged.
+
+```ruby
+columns = [
+  table_preferences_column(
+    :customer_id,
+    filter: { type: :text, param: :customer_name },
+    sort_param: :customer_name
+  )
+]
+
+settings = {
+  filters: { customer_id: { operator: :contains, value: "山田" } },
+  sorts: [{ key: :customer_id, direction: :asc }]
+}
+
+ransack_params = table_preferences_params(
+  settings: settings,
+  columns: columns,
+  adapter: :ransack
+)
+
+# => {
+#   "customer_name_cont" => "山田",
+#   "s" => ["customer_name asc"]
+# }
+```
+
 Supported operator mapping:
 
 | Neutral operator | Ransack predicate |
