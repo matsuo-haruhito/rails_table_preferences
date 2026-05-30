@@ -7,7 +7,7 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
       expect do
         helper.tree_resource_table_for(User.all, model: User)
-      end.to raise_error(RuntimeError) { |error|
+      end.to raise_error(ActionView::Template::Error) { |error|
         expect(error.message).to include("tree_resource_table_for requires the tree_view gem")
         expect(error.message).to include("Add tree_view to the host app Gemfile")
         expect(error.message).to include("resource_table_for/custom tree_resource_table_partial")
