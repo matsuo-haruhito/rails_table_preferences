@@ -13,6 +13,7 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
       package_dir = File.join(tmpdir, "app/javascript/rails_table_preferences")
       controller_dir = File.join(tmpdir, "app/javascript/controllers")
       stimulus_dir = File.join(tmpdir, "node_modules/@hotwired/stimulus")
+      package_root = File.join(tmpdir, "node_modules/rails_table_preferences")
 
       FileUtils.mkdir_p(package_dir)
       FileUtils.mkdir_p(controller_dir)
@@ -39,12 +40,16 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
       )
       File.write(File.join(stimulus_dir, "index.js"), "export class Controller {}\n")
 
+      FileUtils.mkdir_p(package_root)
+      File.write(File.join(package_root, "package.json"), File.read(File.join(repo_root, "package.json")))
+      FileUtils.cp_r(File.join(tmpdir, "app"), package_root)
+
       yield tmpdir
     end
   end
 
-  def run_node_entrypoint_check(*paths, script:)
-    stdout, stderr, status = Open3.capture3("node", "--input-type=module", "-e", script, *paths)
+  def run_node_entrypoint_check(*paths, script:, chdir: nil)
+    stdout, stderr, status = Open3.capture3("node", "--input-type=module", "-e", script, *paths, chdir:)
 
     expect(status).to be_success, <<~MESSAGE
       expected documented JavaScript entrypoints to load successfully
@@ -100,6 +105,25 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
       JS
 
       run_node_entrypoint_check(index_entrypoint_path, controller_entrypoint_path, script:)
+    end
+  end
+
+  it "loads documented package exports through Node package resolution" do
+    build_entrypoint_sandbox do |tmpdir|
+      script = <<~JS
+        const indexModule = await import("rails_table_preferences")
+        const controllerModule = await import("rails_table_preferences/controller")
+
+        if (indexModule.default !== controllerModule.default) {
+          throw new Error("package export map root no longer resolves to the controller entrypoint")
+        }
+
+        if (indexModule.RailsTablePreferencesController !== controllerModule.default) {
+          throw new Error("package export map named export no longer resolves to the controller entrypoint")
+        }
+      JS
+
+      run_node_entrypoint_check(script:, chdir: tmpdir)
     end
   end
 end
