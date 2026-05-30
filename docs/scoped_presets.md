@@ -76,6 +76,12 @@ Available presets are:
 - role presets matching the configured role context
 - organization presets matching the configured organization context
 
+Because the stored uniqueness scope includes the table, owner, `scope_type`, and `scope_key`, a host app can store the same `name` in more than one scope bucket. For example, an owner preset named `default`, a shared preset named `default`, and a role preset named `default` can all exist for the same table when their scopes differ.
+
+A requested named preset still resolves to one available record for the current request. If multiple scopes expose the same `name`, the resolver uses the same scope priority as defaults: owner first, then role, organization, and shared. Treat same-name presets as an explicit fallback pattern, not as a way to present several choices with identical labels in the bundled selector.
+
+For admin seeds and maintenance scripts, prefer names that remain clear when they are listed together, such as `operations-default`, `tokyo-default`, or `shared-baseline`. If you intentionally reuse a name across scopes, document the intended fallback order in the host app so future admin changes do not accidentally shadow the preset a user expects to load.
+
 ## API parameters
 
 Normal personal presets do not need any extra parameters:
