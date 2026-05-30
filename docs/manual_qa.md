@@ -60,6 +60,8 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Reorder columns by dragging editor rows.
 - [ ] Reorder columns by dragging table headers directly.
 - [ ] Resize a column using the header resize handle.
+- [ ] Hover the header resize handle and confirm a lightweight visual cue appears without covering the header label, filter button, or sort indicator.
+- [ ] Focus the header resize handle with the keyboard and confirm the focus cue is visible.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] Confirm the resize hit area is easy enough to grab.
 - [ ] Change a width value in the editor and apply it.
@@ -245,6 +247,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm bundled filter panel focus returns to the triggering button when closed with `Escape`.
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
+- [ ] Confirm focused resize handles have a visible cue while preserving the existing drag and double-click behavior.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
 - [ ] Confirm read-only scoped presets explain that saves fall back to the owner preset path without implying they only create a brand-new preset.
