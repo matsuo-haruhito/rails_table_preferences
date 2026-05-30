@@ -5,12 +5,16 @@
   columns: columns
 ) %>
 
+<% table_options = options.except(:class).merge(
+  class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
+) %>
+
 <%= table_preferences_table_tag(
   table_key: table_key,
   name: name,
   settings: settings,
   columns: columns,
-  class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
+  **table_options
 ) do %>
   <thead>
     <tr>
