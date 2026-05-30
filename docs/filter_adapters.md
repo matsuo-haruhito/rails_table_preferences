@@ -34,8 +34,9 @@ Saved settings should remain gem-neutral:
       "values": ["未出荷", "出荷済"]
     },
     "delivery_date": {
-      "operator": "lteq",
-      "value": "2026-01-31"
+      "operator": "between",
+      "from": "2026-01-01",
+      "to": "2026-01-31"
     }
   },
   "sorts": [
@@ -56,7 +57,8 @@ The initial adapter is a pure params converter. It does not require Ransack as a
 ```ruby
 filters = {
   customer_name: { operator: :contains, value: "山田" },
-  status: { operator: :in, values: ["未出荷", "出荷済"] }
+  status: { operator: :in, values: ["未出荷", "出荷済"] },
+  delivery_date: { operator: :between, from: "2026-01-01", to: "2026-01-31" }
 }
 
 sorts = [
@@ -71,12 +73,16 @@ ransack_params = RailsTablePreferences::Adapters::Ransack.to_params(
 # => {
 #   "customer_name_cont" => "山田",
 #   "status_in" => ["未出荷", "出荷済"],
+#   "delivery_date_gteq" => "2026-01-01",
+#   "delivery_date_lteq" => "2026-01-31",
 #   "s" => ["delivery_date desc"]
 # }
 
 @q = Order.ransack(ransack_params)
 @orders = @q.result
 ```
+
+`between` maps to lower and upper Ransack predicates instead of a single predicate. A `from` value becomes `<field>_gteq`, a `to` value becomes `<field>_lteq`, and blank bounds are omitted. The adapter does not parse dates, apply time zones, or execute the query.
 
 When the displayed column key differs from the Ransack field, pass normalized columns or use `table_preferences_params(adapter: :ransack)`. The adapter reads existing column metadata: `filter: { param: ... }` overrides the filter field before the predicate is appended, and `sort_param:` overrides the sort field. Without those metadata keys, the saved column key is used unchanged.
 
@@ -122,6 +128,7 @@ Supported operator mapping:
 | `gteq` | `gteq` |
 | `lt` | `lt` |
 | `lteq` | `lteq` |
+| `between` | `gteq` for `from`, `lteq` for `to` |
 | `blank` | `blank` |
 | `present` | `present` |
 | `true` | `true` |

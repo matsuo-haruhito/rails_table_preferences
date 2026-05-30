@@ -35,6 +35,43 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       )
     end
 
+    it "converts between filters to lower and upper predicates" do
+      expect(
+        described_class.filter_params(
+          delivery_date: { operator: :between, from: "2026-01-01", to: "2026-01-31" }
+        )
+      ).to eq(
+        "delivery_date_gteq" => "2026-01-01",
+        "delivery_date_lteq" => "2026-01-31"
+      )
+    end
+
+    it "keeps only present between bounds" do
+      expect(
+        described_class.filter_params(
+          delivery_date: { operator: :between, from: "2026-01-01", to: "" },
+          amount: { operator: :between, from: nil, to: 5000 }
+        )
+      ).to eq(
+        "delivery_date_gteq" => "2026-01-01",
+        "amount_lteq" => 5000
+      )
+    end
+
+    it "uses column filter param metadata for between filters" do
+      expect(
+        described_class.filter_params(
+          { customer_id: { operator: :between, from: 10, to: 20 } },
+          columns: [
+            { key: :customer_id, filter: { param: :orders_count } }
+          ]
+        )
+      ).to eq(
+        "orders_count_gteq" => 10,
+        "orders_count_lteq" => 20
+      )
+    end
+
     it "converts inclusion filters" do
       expect(
         described_class.filter_params(
@@ -124,6 +161,23 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       ).to eq(
         "customer_name_cont" => "山田",
         "status_in" => %w[未出荷 出荷済],
+        "s" => ["delivery_date desc"]
+      )
+    end
+
+    it "combines between filter params with sorts" do
+      expect(
+        described_class.to_params(
+          filters: {
+            delivery_date: { operator: :between, from: "2026-01-01", to: "2026-01-31" }
+          },
+          sorts: [
+            { key: :delivery_date, direction: :desc }
+          ]
+        )
+      ).to eq(
+        "delivery_date_gteq" => "2026-01-01",
+        "delivery_date_lteq" => "2026-01-31",
         "s" => ["delivery_date desc"]
       )
     end
