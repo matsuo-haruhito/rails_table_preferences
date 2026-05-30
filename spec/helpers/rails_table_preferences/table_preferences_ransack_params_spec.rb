@@ -16,11 +16,12 @@ RSpec.describe "table_preferences_params Ransack adapter", type: :helper do
       columns: [
         helper.table_preferences_column(
           :customer_id,
+          label: "Customer",
           filter: { type: :text, param: :customer_name },
           sort_param: :customer_name
         ),
-        helper.table_preferences_column(:status, filter: { type: :select }),
-        helper.table_preferences_column(:created_at)
+        helper.table_preferences_column(:status, label: "Status", filter: { type: :select }),
+        helper.table_preferences_column(:created_at, label: "Created at")
       ],
       adapter: :ransack
     )
