@@ -44,7 +44,13 @@ A future lightweight example or documentation page may be useful, but the gem sh
 
 A full Playwright-based browser test stack is not planned for the current stage.
 
-A lightweight browser smoke test may be considered later if manual verification becomes costly or UI regressions appear. The initial release should not be blocked by a heavy browser test dependency.
+That non-goal is about avoiding a heavy default browser dependency and a broad end-to-end matrix for every host-app behavior. It does not mean browser behavior is ignored. The current quality strategy still relies on:
+
+- manual QA for browser behavior, host app integration, accessibility, and visual/UX issues that are difficult to verify in the automated suite
+- the generated demo screen as a lightweight local verification surface for table behavior, preset flows, filters, sorting, fixed columns, column groups, and async recovery
+- narrowly scoped smoke checks when they protect an already-documented user-facing flow without turning the gem into a browser-test-heavy package
+
+Prefer keeping browser checks small and tied to documented demo or manual QA scenarios. If UI regressions become costly, add focused smoke coverage or demo verification before introducing a full Playwright suite by default.
 
 ### Right-pinned columns and complex sticky layouts
 
