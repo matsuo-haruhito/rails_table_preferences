@@ -151,6 +151,9 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Add `fixed: true` or `pinned: true` to a column.
 - [ ] Confirm pinned cells receive pinned/fixed class and data hooks.
 - [ ] Confirm the pinned column remains visible while horizontally scrolling the table container.
+- [ ] While horizontally scrolled, confirm focused links, buttons, inputs, and filter buttons remain visible and clickable near pinned cells.
+- [ ] Confirm focus outlines are not clipped by the scroll wrapper and are not hidden behind pinned header or body cells.
+- [ ] Confirm pinned cells use an opaque background and app-specific `z-index` order so scrolled content, filter panels, dropdowns, and surrounding app chrome do not visually conflict.
 - [ ] If you use the generated demo example, confirm the scroll wrapper keeps `受注番号` visible while the rest of the table moves.
 - [ ] Confirm multiple pinned columns do not overlap in the tested layout.
 - [ ] Resize a pinned column and confirm pinned offsets are still correct.
@@ -231,7 +234,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm read-only scoped presets explain that saves fall back to the owner preset path without implying they only create a brand-new preset.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
 - [ ] Confirm async preset actions also keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request finishes.
-- [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs.
+- [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs while the table is horizontally scrolled.
+- [ ] Confirm custom host app scroll containers, backgrounds, and `z-index` overrides keep focus outlines and interactive cell content visible.
 - [ ] Confirm custom host app colors meet the application's contrast requirements.
 
 ## 17. Customization
