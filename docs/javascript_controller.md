@@ -82,6 +82,23 @@ When a host app keeps its own `<table>` markup, the bundled controller still wor
 
 This is the supported path for server-rendered tables that come from an existing partial, Markdown/HTML rewrite, or another renderer that cannot directly use `table_preferences_table_tag(...)`.
 
+## Coexisting table controllers
+
+`table_preferences_table_tag(...)` can share the table root with host-app Stimulus controllers. Pass the host controller names through `data: { controller: ... }`; the helper keeps them and appends `rails-table-preferences` once.
+
+```erb
+<%= table_preferences_table_tag(
+  table_key: :orders,
+  columns: @table_columns,
+  data: { controller: "orders-table row-selection" },
+  class: "table"
+) do %>
+  ...
+<% end %>
+```
+
+Rails Table Preferences still owns the `data-rails-table-preferences-*` values it emits. Host controllers should use their own data attributes for analytics, selection, inline editing, or other table-local behavior.
+
 ## Manual root values when bypassing the table helper
 
 If the host app mounts the controller root manually instead of using the bundled table helper, provide the same core values that the controller reads from normal helper output:
