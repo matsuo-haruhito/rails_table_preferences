@@ -79,6 +79,35 @@ Profiles are applied after Active Record column inference. They are for deltas, 
 
 Supported profile directives include `model`, `only`, `exclude`, `order`, `label`, `filter`, `editor`, `display`, and `column`.
 
+### Virtual and computed columns
+
+A profile can also add a small virtual column that is not present in the inferred Active Record columns. Use this for values the record can expose through a public reader or a `display` formatter, such as a customer name, calculated status, or external summary.
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  order :order_no, :customer_name, :status
+
+  column :customer_name,
+         label: "Customer",
+         filter: { type: "text", param: "customer_name" },
+         sortable: false do |order, view|
+    view.link_to order.customer.name, view.customer_path(order.customer)
+  end
+end
+```
+
+Virtual columns use the same metadata shape as inferred columns for labels, filters, editors, display formatters, visibility, width, truncate, overflow, pinned state, and sortable metadata. They are appended after inferred columns unless `order` places them elsewhere.
+
+`only` and `exclude` apply to virtual columns too:
+
+- when `only` is empty, profile-defined virtual columns are included unless excluded
+- when `only` is present, a virtual column is included only if its key appears in `only`
+- `exclude` removes a virtual column even if it was defined with `column`
+
+Rails Table Preferences does not infer joins, eager loading, query execution, or authorization for virtual columns. The host app still owns the relation, any preloading needed by the formatter, and any search/sort behavior behind a virtual filter or sort param.
+
 ## Round-trip saved filter/sort params through an existing search form
 
 Use this pattern when the page wants `resource_table_for` for the visible table surface, but the surrounding search form should still round-trip saved filter/sort UI state.
