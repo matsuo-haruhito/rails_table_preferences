@@ -69,6 +69,19 @@ The default resource table partials pass basic table HTML options through to `ta
 
 `tree_resource_table_for` follows the same pass-through rule and keeps its default `tree-view-table` and `rails-table-preferences-tree-resource-table` classes.
 
+### Captions
+
+Pass `caption:` when the default resource table partial should render a semantic table caption without copying the partial:
+
+```erb
+<%= resource_table_for @orders, caption: "Orders" %>
+<%= tree_resource_table_for @projects, caption: "Projects" %>
+```
+
+The caption is rendered only when present, directly under `<table>` and before `<thead>`. It is not forwarded as a table HTML attribute, so `id`, `class`, `data`, and `aria` options keep the same pass-through behavior.
+
+Use `caption:` for a short semantic table name. The host app still owns page headings, explanatory copy, complex table semantics, and any custom partial layout beyond the bundled default markup.
+
 ## Profile overrides
 
 Use a profile when the inferred table is mostly right, but a screen needs small overrides.
@@ -254,10 +267,6 @@ A column filter or editor may also be an object that responds to `to_table_filte
 
 When the host app wants Rails Table Preferences to describe filter/editor metadata and Rails Fields Kit to render the actual controls, keep the flow in three steps:
 
-1. declare table column metadata
-2. register renderer mappings
-3. call the renderer helpers from the table partial
-
 ### 1. Declare metadata in the table profile
 
 ```ruby
@@ -351,6 +360,6 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-Custom partials receive `records`, `model`, `table_key`, `name`, `settings`, `columns`, `table_state`, `profile`, and `options`.
+Custom partials receive `records`, `model`, `table_key`, `name`, `settings`, `columns`, `table_state`, `profile`, `caption`, and `options`.
 
 Use `table_preferences_value(record, column)` when the default value resolver is enough, or provide a profile override with `display`.
