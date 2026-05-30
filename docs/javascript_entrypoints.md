@@ -65,6 +65,26 @@ export default defineConfig({
 
 Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files.
 
+## Turbo Drive and Turbo Frame checks
+
+Rails Table Preferences does not need a Turbo-specific adapter when the host app already renders the editor and table through normal server-side HTML. The bundled controller is a Stimulus controller, so Turbo Drive navigation and Turbo Frame replacement should reconnect it as long as the rendered HTML still includes the same controller root and values.
+
+When a table preference surface is rendered inside a Turbo Frame or replaced after Turbo navigation, check that the new HTML includes:
+
+- `data-controller="rails-table-preferences"`
+- `data-rails-table-preferences-table-key-value`
+- `data-rails-table-preferences-name-value` when the page uses named presets or a preset selector
+- `data-rails-table-preferences-columns-value`
+- `data-rails-table-preferences-settings-value`
+- the collection and member URL values used by the bundled JSON API
+- matching `data-rails-table-preferences-column-key` values on managed headers and cells
+
+Keep `table_key`, preference `name`, current settings, and column definitions stable across the Turbo-rendered response for the same logical screen. If a frame response changes those values accidentally, the controller may reconnect successfully but appear to load a different preset, lose saved column order, or stop applying display changes to the intended table.
+
+For Turbo Frames, prefer replacing the editor and its matching table together, or make sure both pieces receive the same current settings and column definitions from the controller action that renders the frame. Rails Table Preferences does not own the host app's frame routing, Turbo Stream responses, or query execution; it only reads the values present in the reconnected DOM.
+
+If behavior looks stale after navigation, inspect the frame response HTML first, then compare it with the manual root contract in [JavaScript controller notes](javascript_controller.md). Runtime workarounds should usually wait until the host app has confirmed the reconnecting DOM is complete and consistent.
+
 ## Custom controller path
 
 For jsbundling or a custom Stimulus setup that still uses the copied file, import and register it manually:
