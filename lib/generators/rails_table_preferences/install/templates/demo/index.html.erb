@@ -207,6 +207,7 @@
 
   .rails-table-preferences-demo-owner-switch,
   .rails-table-preferences-demo-scope-switch,
+  .rails-table-preferences-demo-reset-trigger,
   .rails-table-preferences-demo-failure-trigger {
     display: inline-flex;
     width: fit-content;
@@ -219,6 +220,10 @@
     font-weight: 600;
   }
 
+  .rails-table-preferences-demo-reset-trigger:disabled {
+    opacity: 0.7;
+  }
+
   .rails-table-preferences-demo-owner-switch--active,
   .rails-table-preferences-demo-scope-switch--active {
     border-color: #1d4ed8;
@@ -226,6 +231,7 @@
     color: #1e3a8a;
   }
 
+  .rails-table-preferences-demo-reset-status,
   .rails-table-preferences-demo-failure-status {
     margin-bottom: 0;
     font-weight: 600;
@@ -303,6 +309,27 @@
   </p>
 </section>
 
+<section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-reset>
+  <h2>Demo state reset</h2>
+
+  <p>
+    Use this demo-only button to delete owner-scoped presets for the current
+    owner and table, then reload into the seeded shared / role / organization
+    baseline without changing code.
+  </p>
+
+  <button type="button"
+          class="rails-table-preferences-demo-reset-trigger"
+          data-rails-table-preferences-demo-reset-trigger>
+    Reset demo verification state
+  </button>
+
+  <p class="rails-table-preferences-demo-reset-status"
+     role="status"
+     aria-live="polite"
+     data-rails-table-preferences-demo-reset-status></p>
+</section>
+
 <section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-failure>
   <h2>Async failure check</h2>
 
@@ -332,6 +359,62 @@
 
 <script>
   (() => {
+    if (!window.__railsTablePreferencesDemoResetInstalled) {
+      window.__railsTablePreferencesDemoResetInstalled = true
+
+      const resetStatusElements = () => document.querySelectorAll("[data-rails-table-preferences-demo-reset-status]")
+      const setDemoResetStatus = (message) => {
+        resetStatusElements().forEach((element) => { element.textContent = message })
+      }
+      const csrfToken = () => document.querySelector("meta[name='csrf-token']")?.content || ""
+      const demoControllerElement = () => document.querySelector("[data-controller~='rails-table-preferences']")
+      const collectionUrl = () => demoControllerElement()?.dataset.railsTablePreferencesCollectionUrlValue
+      const preferenceUrl = (url, name) => `${url}/${encodeURIComponent(name || "default")}`
+      const ownerPreferences = (preferences) => preferences.filter((preference) => (
+        preference.editable && (preference.scope_type || "owner") === "owner"
+      ))
+
+      document.addEventListener("click", async (event) => {
+        const trigger = event.target.closest("[data-rails-table-preferences-demo-reset-trigger]")
+        if (!trigger) return
+
+        event.preventDefault()
+        if (trigger.disabled) return
+
+        const url = collectionUrl()
+        if (!url) {
+          setDemoResetStatus("Demo reset is not available until the preset editor is rendered.")
+          return
+        }
+
+        trigger.disabled = true
+        setDemoResetStatus("Resetting owner presets for this demo table...")
+
+        try {
+          const response = await fetch(url, { headers: { "Accept": "application/json" } })
+          if (!response.ok) throw new Error(`Failed to load table preference presets: ${response.status}`)
+          const payload = await response.json()
+          const preferences = ownerPreferences(payload.preferences || [])
+
+          await Promise.all(preferences.map((preference) => fetch(preferenceUrl(url, preference.name), {
+            method: "DELETE",
+            headers: { "Accept": "application/json", "X-CSRF-Token": csrfToken() }
+          }).then((deleteResponse) => {
+            if (!deleteResponse.ok && deleteResponse.status !== 204) {
+              throw new Error(`Failed to delete table preference preset: ${deleteResponse.status}`)
+            }
+          })))
+
+          setDemoResetStatus("Demo owner presets were reset. Reloading the seeded baseline...")
+          window.location.reload()
+        } catch (error) {
+          trigger.disabled = false
+          setDemoResetStatus("Demo reset could not finish. Check the browser console or server log, then retry.")
+          console.error(error)
+        }
+      })
+    }
+
     if (window.__railsTablePreferencesDemoFailureInstalled) return
     window.__railsTablePreferencesDemoFailureInstalled = true
 

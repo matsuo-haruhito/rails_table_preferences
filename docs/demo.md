@@ -36,6 +36,8 @@ The same screen now includes a lightweight export payload preview. It shows the 
 
 The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup, and the grouped header follows the current visible columns after save/reload.
 
+The generated screen also includes a `Demo state reset` button. Use it to delete owner-scoped presets for the current owner and demo table, then reload into the seeded shared / role / organization baseline before repeating scoped precedence checks.
+
 The generated screen also includes an `Async failure check` button. Use it when you want the next preset save, load, or delete request to fail exactly once, then retry the same action to confirm the bundled status region and controls recover without browser request blocking.
 
 ## Add routes
@@ -136,7 +138,7 @@ With both demo presets seeded, those links make it easier to compare the selecto
 - `Role preset lane` makes the selector include `担当ビュー [role:operations]` and, with no owner default, reloading still resolves it before the shared preset.
 - `Organization preset lane` makes the selector include `東京組織ビュー [organization:tokyo-hq]` and, with no owner or matching role default, reloading still resolves it before the shared preset.
 
-If you already created an owner default while testing Save or Save as new, clear it before checking role/organization precedence. In the bundled editor, load the owner preset, uncheck `標準設定にする`, save, then reload. Deleting that temporary owner preset also works when you only created it for demo verification. The important part is to return to a state where no owner preset for this table is marked as default, because owner defaults always win before role, organization, and shared defaults.
+If you already created owner-scoped presets while testing Save or Save as new, click `Reset demo verification state` before checking role/organization precedence again. The demo reset deletes editable owner presets for the current owner and demo table through the normal mounted preset API, then reloads so the seeded shared / role / organization examples are still present. This is a demo-only cleanup helper; it is not a production preset-management or authorization surface.
 
 ## What the demo covers
 
@@ -157,6 +159,7 @@ The generated demo screen includes:
 - one shared preset example with read-only fallback behavior
 - one role preset example for `roles: ["operations"]`, including role-over-shared default resolution
 - one organization preset example for `organization: "tokyo-hq"`, including organization-over-shared default resolution when no owner or matching role default exists
+- demo-only owner preset reset for returning to the seeded baseline
 - bundled status feedback for async preset actions
 - temporary busy-state disabling for preset controls and action buttons while bundled async preset actions run
 - one-shot async failure trigger for demo-only preset save/load/delete recovery checks
@@ -200,6 +203,7 @@ On the demo screen, confirm:
 - [ ] After switching owners, the `Current owner` summary follows the active owner link.
 - [ ] Saving under `Demo owner A`, then switching to `Demo owner B`, makes it easy to confirm those presets do not leak across owners.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
+- [ ] `Reset demo verification state` removes owner-scoped presets for the current owner and table, then reloads with `共有ビュー`, `担当ビュー`, and `東京組織ビュー` still available.
 - [ ] After enabling `scope_context_method = :table_preference_scope_context`, the `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` links switch the current scope without editing application code.
 - [ ] The `Current scope context` summary matches whichever scope link is active.
 - [ ] `Owner-only baseline` returns the summary to `owner-only` and makes it easy to compare the shared baseline again.
@@ -215,6 +219,16 @@ On the demo screen, confirm:
 - [ ] Retrying the same preset action after the one-shot failure succeeds normally.
 - [ ] The export payload preview excludes hidden columns by default.
 - [ ] After saving a new visible-column order, the export payload preview shows the same header order and column key order.
+
+## Reset demo state before scoped checks
+
+Use the generated `Demo state reset` section when previous save testing left owner-scoped presets behind and you want to repeat role / organization default resolution from a clean owner baseline.
+
+1. Open the demo screen with the owner you want to clean up.
+2. Click `Reset demo verification state`.
+3. Wait for the success message and reload.
+4. Confirm owner-scoped presets for the current table are gone while `共有ビュー [shared]`, `担当ビュー [role:operations]`, and `東京組織ビュー [organization:tokyo-hq]` remain available when their scopes match.
+5. Use `Owner-only baseline`, `Role preset lane`, or `Organization preset lane` to repeat the scoped precedence checks without manually unchecking `標準設定にする` or deleting temporary owner presets one by one.
 
 ## Reproduce one async failure quickly
 
@@ -234,11 +248,11 @@ If you need to test a custom host-app wrapper outside the generated demo, browse
 
 ## Strict CSP in host applications
 
-The generated demo is a development verification surface. To keep the copied files self-contained, the demo view includes inline style and inline script for the sample screen and the one-shot async failure helper.
+The generated demo is a development verification surface. To keep the copied files self-contained, the demo view includes inline style and inline script for the sample screen, the demo state reset helper, and the one-shot async failure helper.
 
-If the host application runs a strict Content Security Policy in development, those inline blocks may be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, or the `Async failure check` button not triggering the next request failure.
+If the host application runs a strict Content Security Policy in development, those inline blocks may be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
 
-When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, either allow the copied demo route under a development-only policy or use browser request blocking for the async failure check instead. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
+When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, either allow the copied demo route under a development-only policy or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
 
 ## Production note
 
@@ -282,3 +296,4 @@ Good next automated checks are:
 - sortable header click changes sort state directly
 - bundled filter panel close on container scroll
 - one-shot async failure trigger from the generated demo surface
+- demo-only reset removes owner-scoped presets before scoped default precedence checks
