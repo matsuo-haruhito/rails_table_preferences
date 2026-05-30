@@ -1,0 +1,178 @@
+# frozen_string_literal: true
+
+require "spec_helper"
+
+class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationController
+  helper RailsTablePreferences::TablePreferencesHelper
+  include RailsTablePreferences::Controller
+  include RailsTablePreferences::TablePreferencesHelper
+
+  DEMO_TABLE_KEY = :rails_table_preferences_grouped_header_smoke_orders
+
+  TEMPLATE = <<~ERB
+    <h1>Rails Table Preferences Grouped Header Smoke</h1>
+
+    <div class="rails-table-preferences-demo-scroll">
+      <%= table_preferences_table_tag(
+        table_key: DEMO_TABLE_KEY,
+        settings: @table_preference_settings,
+        columns: @table_columns,
+        class: "table rails-table-preferences-demo-table"
+      ) do %>
+        <thead>
+          <% if @demo_visible_column_groups.any? %>
+            <tr class="rails-table-preferences-demo-table__group-row">
+              <% @demo_visible_column_groups.each do |group| %>
+                <th colspan="<%= group["colspan"] %>"><%= group["label"] %></th>
+              <% end %>
+            </tr>
+          <% end %>
+          <tr>
+            <% @demo_visible_columns.each do |column| %>
+              <th data-rails-table-preferences-column-key="<%= column["key"] %>"><%= column["label"] %></th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <% @demo_visible_columns.each do |column| %>
+              <td data-rails-table-preferences-column-key="<%= column["key"] %>"><%= column["label"] %></td>
+            <% end %>
+          </tr>
+        </tbody>
+      <% end %>
+    </div>
+  ERB
+
+  def index
+    @table_columns = table_columns
+    @table_preference_settings = settings_for_layout(params[:saved_layout])
+    @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
+    @demo_visible_columns = @demo_table_state.fetch("visible_columns")
+    @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
+
+    render inline: TEMPLATE, type: :erb
+  end
+
+  private
+
+  def table_columns
+    [
+      table_preferences_column(:order_no, label: "受注番号", default_width: 120, group: { key: :order, label: "受注情報" }),
+      table_preferences_column(:status, label: "状態", default_width: 120, group: { key: :order, label: "受注情報" }),
+      table_preferences_column(:customer_name, label: "得意先名", default_width: 240, group: { key: :customer, label: "得意先情報" }),
+      table_preferences_column(:delivery_date, label: "納品日", default_width: 140, group: { key: :delivery, label: "配送情報" }),
+      table_preferences_column(:shipping_code, label: "配送コード", default_width: 140, group: { key: :delivery, label: "配送情報" }),
+      table_preferences_column(:memo, label: "備考", default_width: 180, group: { key: :delivery, label: "配送情報" }),
+      table_preferences_column(:internal_cost, label: "内部原価", ignored: true)
+    ]
+  end
+
+  def settings_for_layout(saved_layout)
+    return delivery_focus_settings if saved_layout == "delivery_focus"
+
+    {
+      "columns" => [
+        { "key" => "order_no", "visible" => true, "order" => 10 },
+        { "key" => "status", "visible" => true, "order" => 20 },
+        { "key" => "customer_name", "visible" => true, "order" => 30 },
+        { "key" => "delivery_date", "visible" => true, "order" => 40 },
+        { "key" => "shipping_code", "visible" => true, "order" => 50 },
+        { "key" => "memo", "visible" => false, "order" => 60 }
+      ]
+    }
+  end
+
+  def delivery_focus_settings
+    {
+      "columns" => [
+        { "key" => "order_no", "visible" => true, "order" => 10 },
+        { "key" => "status", "visible" => false, "order" => 20 },
+        { "key" => "customer_name", "visible" => false, "order" => 30 },
+        { "key" => "delivery_date", "visible" => true, "order" => 40 },
+        { "key" => "shipping_code", "visible" => true, "order" => 50 },
+        { "key" => "memo", "visible" => false, "order" => 60 }
+      ]
+    }
+  end
+
+  def demo_visible_column_groups(visible_columns)
+    visible_columns
+      .chunk { |column| demo_column_group(column) }
+      .filter_map do |group, grouped_columns|
+        next if group["label"].blank?
+
+        group.merge(
+          "columns" => grouped_columns,
+          "colspan" => grouped_columns.length
+        )
+      end
+  end
+
+  def demo_column_group(column)
+    group = column["group"] || column[:group]
+    return { "key" => "", "label" => "" } if group.blank?
+
+    case group
+    when Hash
+      stringified = group.deep_stringify_keys
+      {
+        "key" => stringified.fetch("key", stringified.fetch("label", "")).to_s,
+        "label" => stringified.fetch("label", stringified.fetch("key", "")).to_s
+      }
+    else
+      { "key" => group.to_s, "label" => group.to_s }
+    end
+  end
+end
+
+Rails.application.routes.disable_clear_and_finalize = true
+Rails.application.routes.append do
+  get "/rails_table_preferences_grouped_header_smoke/orders", to: "rails_table_preferences_grouped_header_smoke_orders#index"
+end
+Rails.application.reload_routes!
+
+RSpec.describe "rails_table_preferences demo grouped header smoke", type: :system do
+  def visit_grouped_header_smoke(saved_layout: nil)
+    path = "/rails_table_preferences_grouped_header_smoke/orders"
+    path = "#{path}?saved_layout=#{saved_layout}" if saved_layout
+
+    visit path
+  end
+
+  def grouped_headers
+    page.all("thead tr.rails-table-preferences-demo-table__group-row th", visible: :all).map do |cell|
+      { "label" => cell.text, "colspan" => cell["colspan"].to_i }
+    end
+  end
+
+  def leaf_header_keys
+    page.all("thead tr:last-child th[data-rails-table-preferences-column-key]", visible: :all).map do |cell|
+      cell["data-rails-table-preferences-column-key"]
+    end
+  end
+
+  it "keeps grouped headers aligned with the default visible demo columns" do
+    visit_grouped_header_smoke
+
+    expect(leaf_header_keys).to eq(%w[order_no status customer_name delivery_date shipping_code])
+    expect(grouped_headers).to eq([
+      { "label" => "受注情報", "colspan" => 2 },
+      { "label" => "得意先情報", "colspan" => 1 },
+      { "label" => "配送情報", "colspan" => 2 }
+    ])
+    expect(grouped_headers.sum { |header| header.fetch("colspan") }).to eq(leaf_header_keys.length)
+  end
+
+  it "keeps grouped headers aligned after reloading a saved visible-column layout" do
+    visit_grouped_header_smoke(saved_layout: "delivery_focus")
+
+    expect(leaf_header_keys).to eq(%w[order_no delivery_date shipping_code])
+    expect(grouped_headers).to eq([
+      { "label" => "受注情報", "colspan" => 1 },
+      { "label" => "配送情報", "colspan" => 2 }
+    ])
+    expect(grouped_headers.map { |header| header.fetch("label") }).not_to include("得意先情報")
+    expect(grouped_headers.sum { |header| header.fetch("colspan") }).to eq(leaf_header_keys.length)
+  end
+end
