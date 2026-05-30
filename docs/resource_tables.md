@@ -97,6 +97,19 @@ Profiles are applied after Active Record column inference. They are for deltas, 
 
 Supported profile directives include `model`, `only`, `exclude`, `order`, `label`, `filter`, `editor`, `display`, and `column`.
 
+### Default value formatting
+
+When a column does not provide a `display` formatter, the bundled value resolver reads the Active Record attribute, association reader, or zero-arity public reader for that column key and then applies a small display fallback.
+
+The fallback is intentionally narrow:
+
+- `nil` renders as an empty string.
+- Active Record enum attributes use `#{key}_i18n` when the record exposes it; otherwise the raw value is shown.
+- Boolean attributes use `rails_table_preferences.boolean.true` or `rails_table_preferences.boolean.false`, with `Yes` / `No` as the default English fallback.
+- Time-like values use the view context `l(...)` helper when it is available; if localization cannot handle the value, the original value is shown.
+
+Use this fallback for simple resource tables where the model value is already safe to show. Add a `display` formatter when the screen needs links, badges, association preloading, authorization-aware redaction, business-specific copy, or export/display divergence. The host app still owns those policies; Rails Table Preferences only provides the compact default presentation path.
+
 ### Virtual and computed columns
 
 A profile can also add a small virtual column that is not present in the inferred Active Record columns. Use this for values the record can expose through a public reader or a `display` formatter, such as a customer name, calculated status, or external summary.
@@ -226,7 +239,7 @@ Custom partials can then call:
 
 ```erb
 <%= table_preferences_filter_input(form: form, column: column) %>
-<%= table_preferences_cell_editor(form: form, record: record, column: column) %>
+<%= table_preferences_cell_editor(form: form, record: order, column: column) %>
 ```
 
 When a column has no filter/editor metadata, or when the metadata type has no registered renderer, the helper returns the `fallback:` value. Use that to keep custom partials explicit about the empty state they want:
