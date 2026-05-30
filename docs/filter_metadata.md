@@ -81,6 +81,10 @@ The current sort state is saved in the neutral `sorts` array:
 }
 ```
 
+The bundled header click UI is intentionally single-sort. Each header click replaces `sorts` with either one sort entry for the clicked column or an empty array when the cycle clears the sort. The array shape is still neutral so adapters, imports, exports, and host-app customizations can read the same saved settings shape; it is not a promise that the bundled controller provides multi-column sort interactions.
+
+Host applications that need multi-sort UI should provide that interaction in their own controller or copied controller and write the resulting ordered sort entries into `settings["sorts"]`. Rails Table Preferences can still carry and adapt the neutral array, but the default header click behavior only manages one active sort at a time.
+
 The header also receives `aria-sort` and a minimal visual indicator:
 
 - ascending: `▲`
