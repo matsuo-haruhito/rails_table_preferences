@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
+  before do
+    RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
+  end
+
   describe "#table_preferences_hidden_fields" do
     it "renders controller params with scalar and array values" do
       html = helper.table_preferences_hidden_fields(
