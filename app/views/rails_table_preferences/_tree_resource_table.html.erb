@@ -22,6 +22,7 @@
 <% table_options = options.except(:class).merge(
   class: ["tree-view-table", "rails-table-preferences-tree-resource-table", options[:class]].compact.join(" ")
 ) %>
+<% visible_columns = table_state.fetch("visible_columns") %>
 
 <%= table_preferences_table_tag(
   table_key: table_key,
@@ -32,7 +33,7 @@
 ) do %>
   <thead>
     <tr>
-      <% table_state.fetch("visible_columns").each do |column| %>
+      <% visible_columns.each do |column| %>
         <th data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
           <%= column["label"] || column.fetch("key") %>
         </th>
@@ -40,6 +41,14 @@
     </tr>
   </thead>
   <tbody>
-    <%= tree_view_rows(render_state) %>
+    <% if records.empty? %>
+      <tr class="rails-table-preferences-resource-table__empty-row">
+        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= visible_columns.size %>">
+          <%= I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
+        </td>
+      </tr>
+    <% else %>
+      <%= tree_view_rows(render_state) %>
+    <% end %>
   </tbody>
 <% end %>
