@@ -112,9 +112,9 @@ This example intentionally keeps file generation in the host app. Rails Table Pr
 
 - `headers`: write the exported header row in the same order the user sees in the table.
 - `columns`: use when export values need metadata such as `export_key`, `label`, `group`, or visibility state.
-- `column_keys`: use when the export layer only needs a lightweight ordered list for serializer mapping, SELECT whitelists, or downstream report builders.
+- `column_keys`: use when the export layer only needs the ordered display/preference keys for serializer mapping, SELECT whitelists, or downstream report builders. This list stays based on each column's `key`; it does not switch to `export_key` when export metadata is present.
 
-When the host app already has a serializer or report object, `column_keys` is often the smallest integration surface. When labels or grouped headers matter, prefer `headers` and `columns`.
+When the host app already has a serializer or report object keyed by the displayed table columns, `column_keys` is often the smallest integration surface. When value extraction needs a different method or attribute, read `export_key` from each `columns` entry instead.
 
 ## Direct object usage
 
@@ -167,6 +167,8 @@ Then export code can read:
 ```ruby
 column["export_key"] || column["key"]
 ```
+
+`export_key` is stored on each `columns` entry as value-extraction metadata. It does not rename the display/preference key returned in `column_keys`.
 
 ## Column groups
 
