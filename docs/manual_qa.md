@@ -62,6 +62,8 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] Confirm the resize hit area is easy enough to grab.
+- [ ] Hover the resize handle and confirm a visible resize affordance appears without shifting header text, filter buttons, or sort indicators.
+- [ ] Move keyboard focus to the resize handle and confirm the focus-visible affordance remains visible with long labels and nearby header controls.
 - [ ] Change a width value in the editor and apply it.
 - [ ] Change a truncation value and confirm long text is truncated.
 - [ ] Add representative `wrap`, `nowrap`, and `ellipsis` columns and confirm each overflow mode stays visually distinct.
@@ -245,6 +247,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm bundled filter panel focus returns to the triggering button when closed with `Escape`.
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
+- [ ] Confirm resize handles show a visible focus indicator when reached by keyboard.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
 - [ ] Confirm read-only scoped presets explain that saves fall back to the owner preset path without implying they only create a brand-new preset.
@@ -275,6 +278,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm filter panels are not clipped.
 - [ ] Confirm short viewport filter panels keep Apply and Clear reachable through panel scrolling.
 - [ ] Confirm column width controls remain usable.
+- [ ] Confirm resize handle hover/focus affordance does not collide with header text, filter buttons, sort indicators, or long labels.
 - [ ] Confirm table operation hit areas do not interfere with normal table links/buttons.
 
 ## 19. Regression checklist from early implementation issues
