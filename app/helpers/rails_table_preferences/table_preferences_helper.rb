@@ -20,7 +20,8 @@ module RailsTablePreferences
     end
 
     def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], **options, &block)
-      options[:data] = (options[:data] || {}).merge(
+      options[:data] = table_preferences_merge_data_attributes(
+        options[:data],
         table_preferences_data_attributes(table_key: table_key, name: name, settings: settings, columns: columns, ignored_columns: ignored_columns)
       )
 
@@ -245,6 +246,26 @@ module RailsTablePreferences
     end
 
     private
+
+    def table_preferences_merge_data_attributes(host_data, table_preferences_data)
+      host_data = (host_data || {}).dup
+      host_controller = host_data.delete(:controller)
+      host_controller = host_data.delete("controller") if host_controller.blank?
+      table_preferences_data = table_preferences_data.dup
+      table_preferences_controller = table_preferences_data.delete(:controller) || table_preferences_data.delete("controller")
+
+      merged_data = host_data.dup
+      table_preferences_data.each do |key, value|
+        merged_data.delete(key.to_s)
+        merged_data[key] = value
+      end
+      merged_data[:controller] = table_preferences_merge_controller_names(host_controller, table_preferences_controller)
+      merged_data
+    end
+
+    def table_preferences_merge_controller_names(*controllers)
+      controllers.flat_map { |controller| controller.to_s.split(/\s+/) }.reject(&:blank?).uniq.join(" ")
+    end
 
     def table_preferences_model_for(records, profile: nil)
       return profile.model if profile.respond_to?(:model) && profile.model

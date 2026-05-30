@@ -129,6 +129,49 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
     end
   end
 
+  describe "#table_preferences_table_tag" do
+    it "preserves host controllers when adding the table preferences controller" do
+      html = helper.table_preferences_table_tag(
+        table_key: :orders,
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code")],
+        data: { controller: "orders-table" }
+      ) { "content" }
+
+      expect(html).to include('data-controller="orders-table rails-table-preferences"')
+      expect(html).to include('data-rails-table-preferences-table-key-value="orders"')
+      expect(html).to include('data-rails-table-preferences-collection-url-value="/rails_table_preferences/preferences/orders"')
+    end
+
+    it "does not duplicate the table preferences controller when the host already includes it" do
+      html = helper.table_preferences_table_tag(
+        table_key: :orders,
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code")],
+        data: { controller: "orders-table rails-table-preferences" }
+      ) { "content" }
+
+      expect(html).to include('data-controller="orders-table rails-table-preferences"')
+      expect(html).not_to include('rails-table-preferences rails-table-preferences')
+    end
+
+    it "keeps table preference data values authoritative while merging controllers" do
+      html = helper.table_preferences_table_tag(
+        table_key: :orders,
+        name: "inspection",
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code")],
+        data: {
+          controller: "orders-table",
+          rails_table_preferences_table_key_value: "wrong",
+          "rails_table_preferences_url_value" => "/wrong"
+        }
+      ) { "content" }
+
+      expect(html).to include('data-controller="orders-table rails-table-preferences"')
+      expect(html).to include('data-rails-table-preferences-table-key-value="orders"')
+      expect(html).to include('data-rails-table-preferences-url-value="/rails_table_preferences/preferences/orders/inspection"')
+      expect(html).not_to include("/wrong")
+    end
+  end
+
   describe "#table_preferences_column" do
     it "builds a column definition hash" do
       expect(helper.table_preferences_column(:customer_code, label: "Customer Code", default_order: 10)).to eq(
