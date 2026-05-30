@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require "json"
 require "rubygems/package"
+require "zlib"
 
 module RailsTablePreferences
   class PackageVerifier
@@ -81,12 +83,17 @@ module RailsTablePreferences
 
     def call
       missing = required_paths - packaged_files
+      missing_package_export_targets = package_export_targets.reject do |export_target|
+        packaged_files.include?(export_target.fetch(:target))
+      end
 
       {
         gem_path: gem_path,
         packaged_files: packaged_files,
         missing: missing,
-        ok: missing.empty?
+        missing_package_export_targets: missing_package_export_targets,
+        package_json_errors: package_json_errors,
+        ok: missing.empty? && missing_package_export_targets.empty? && package_json_errors.empty?
       }
     end
 
@@ -94,6 +101,70 @@ module RailsTablePreferences
 
     def packaged_files
       @packaged_files ||= Gem::Package.new(gem_path).spec.files.sort
+    end
+
+    def package_export_targets
+      @package_export_targets ||= begin
+        return [] unless packaged_files.include?("package.json")
+
+        exports = package_json.fetch("exports", {})
+        export_targets_for(exports).sort_by { |target| [target.fetch(:export), target.fetch(:target)] }
+      end
+    end
+
+    def package_json
+      @package_json ||= JSON.parse(packaged_file_contents("package.json"))
+    rescue JSON::ParserError => e
+      package_json_errors << "package.json could not be parsed: #{e.message}"
+      {}
+    end
+
+    def package_json_errors
+      @package_json_errors ||= []
+    end
+
+    def export_targets_for(value, export_name = ".")
+      case value
+      when String
+        [{ export: export_name, target: normalize_package_target(value) }]
+      when Hash
+        value.flat_map do |key, nested_value|
+          export_targets_for(nested_value, key.to_s.start_with?(".") ? key.to_s : export_name)
+        end
+      else
+        package_json_errors << "package.json exports entry #{export_name.inspect} must point to a string or object"
+        []
+      end
+    end
+
+    def normalize_package_target(target)
+      target.to_s.sub(%r{\A\./}, "")
+    end
+
+    def packaged_file_contents(path)
+      File.open(gem_path, "rb") do |file|
+        Gem::Package::TarReader.new(file) do |gem_tar|
+          gem_tar.each do |entry|
+            next unless entry.full_name == "data.tar.gz"
+
+            return contents_from_data_tar(entry, path)
+          end
+        end
+      end
+
+      raise KeyError, "#{path} was not found in #{gem_path}"
+    end
+
+    def contents_from_data_tar(entry, path)
+      Zlib::GzipReader.wrap(entry) do |gzip|
+        Gem::Package::TarReader.new(gzip) do |data_tar|
+          data_tar.each do |data_entry|
+            return data_entry.read if data_entry.full_name == path
+          end
+        end
+      end
+
+      raise KeyError, "#{path} was not found in #{gem_path}"
     end
   end
 end
