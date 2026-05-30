@@ -8,6 +8,7 @@
   ) %>
 <% end %>
 
+<% caption = local_assigns.fetch(:caption, nil) %>
 <% table_options = options.except(:class, :render_editor).merge(
   class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
 ) %>
@@ -20,6 +21,9 @@
   columns: columns,
   **table_options
 ) do %>
+  <% if caption.present? %>
+    <caption><%= caption %></caption>
+  <% end %>
   <thead>
     <tr>
       <% visible_columns.each do |column| %>
