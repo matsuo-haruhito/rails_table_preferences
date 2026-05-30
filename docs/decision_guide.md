@@ -355,6 +355,20 @@ The payload gives the host app ordered columns, column keys, headers, and metada
 
 See [Export integration](export_integration.md).
 
+## I want resource table filters or cell editors to use my form helper library
+
+Start with the standard resource table helpers when display-only inferred columns are enough. Add renderer registries when the column metadata should stay in the profile but the actual filter input or cell editor HTML should come from a host-app form helper library, such as Rails Fields Kit.
+
+Use a custom partial only when the table markup, cell layout, or empty-state behavior needs to change beyond renderer lookup.
+
+In short:
+
+- Standard helper: use `resource_table_for` when inferred columns and default table markup are enough.
+- Renderer registry: register `filter_renderers` or `editor_renderers` when metadata should render through host-app helpers.
+- Custom partial: copy or configure a partial when the table structure itself needs different markup.
+
+See [Resource table adapters](resource_tables.md#renderer-registries).
+
 ## I want to customize the editor markup
 
 Use the views generator:
