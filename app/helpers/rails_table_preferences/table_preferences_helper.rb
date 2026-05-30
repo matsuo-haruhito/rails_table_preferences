@@ -200,7 +200,7 @@ module RailsTablePreferences
       normalized_settings = SettingsNormalizer.call(settings || {})
       return normalized_settings unless allowed_columns
 
-      allowed_keys = allowed_columns.map { |column| column["key"].to_s).to_set
+      allowed_keys = allowed_columns.map { |column| column["key"].to_s }.to_set
       normalized_settings.merge(
         "columns" => normalized_settings.fetch("columns", []).select { |column| allowed_keys.include?(column["key"].to_s) },
         "filters" => normalized_settings.fetch("filters", {}).select { |key, _condition| allowed_keys.include?(key.to_s) },
