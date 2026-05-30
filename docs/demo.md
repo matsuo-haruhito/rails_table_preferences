@@ -232,6 +232,14 @@ Use the generated `Async failure check` section to fail one preset API request o
 
 If you need to test a custom host-app wrapper outside the generated demo, browser devtools request blocking is still a useful fallback. Block the configured `mount_path` for one request, then unblock it before retrying.
 
+## Strict CSP in host applications
+
+The generated demo is a development verification surface. To keep the copied files self-contained, the demo view includes inline style and inline script for the sample screen and the one-shot async failure helper.
+
+If the host application runs a strict Content Security Policy in development, those inline blocks may be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, or the `Async failure check` button not triggering the next request failure.
+
+When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, either allow the copied demo route under a development-only policy or use browser request blocking for the async failure check instead. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
+
 ## Production note
 
 The demo files are intended for development and verification only.
