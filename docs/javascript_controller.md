@@ -17,7 +17,7 @@ The default controller currently handles:
 - text truncation application
 - filter button and filter panel UI
 - saved filter condition updates
-- sortable header click UI
+- single-sort header click UI
 - sort indicators and `aria-sort`
 
 ## Event boundaries
@@ -39,6 +39,12 @@ The controller keeps these separate through `shouldIgnoreHeaderAction(target)`. 
 - textareas
 
 The sort handler also ignores active drag and resize operations.
+
+## Bundled sort boundary
+
+The bundled header click UI manages one active sort at a time. A sortable header click cycles the clicked column through ascending, descending, and clear, then replaces `settingsValue.sorts` with a one-item array or an empty array.
+
+The saved settings shape remains an array so adapters and host-app customizations can share the same neutral format. Host applications that need multi-column sort interactions should provide custom or copied controller behavior and write the ordered sort entries into `settings["sorts"]`; the default controller should not be treated as a bundled multi-sort UI.
 
 ## Bundled filter panel contract
 
