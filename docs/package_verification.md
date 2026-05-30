@@ -73,9 +73,19 @@ lib/generators/rails_table_preferences/stylesheets/stylesheets_generator.rb
 lib/generators/rails_table_preferences/views/views_generator.rb
 lib/tasks/rails_table_preferences.rake
 lib/rails_table_preferences.rb
+lib/rails_table_preferences/adapters/active_record_columns.rb
+lib/rails_table_preferences/adapters/column_like.rb
+lib/rails_table_preferences/adapters/controller_params.rb
+lib/rails_table_preferences/adapters/ransack.rb
+lib/rails_table_preferences/column_definition.rb
+lib/rails_table_preferences/configuration.rb
 lib/rails_table_preferences/export_payload.rb
 lib/rails_table_preferences/package_verifier.rb
+lib/rails_table_preferences/renderer_registry.rb
 lib/rails_table_preferences/settings_normalizer.rb
+lib/rails_table_preferences/table_profile.rb
+lib/rails_table_preferences/table_state.rb
+lib/rails_table_preferences/value_resolver.rb
 package.json
 README.md
 CHANGELOG.md
@@ -92,11 +102,11 @@ docs/release_checklist.md
 docs/package_verification.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The documentation entries are representative package entrances from the README rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The documentation entries are representative package entrances from the README rather than a complete freeze of every file under `docs/`.
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, visual overview assets, or README-linked docs usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
