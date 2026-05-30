@@ -156,6 +156,23 @@
   cursor: col-resize;
 }
 
+.rails-table-preferences-resize-handle:not(:disabled):hover,
+.rails-table-preferences-resize-handle:not(:disabled):focus-visible {
+  opacity: 1 !important;
+  background: linear-gradient(
+    to right,
+    transparent calc(50% - 1px),
+    currentColor calc(50% - 1px),
+    currentColor calc(50% + 1px),
+    transparent calc(50% + 1px)
+  ) !important;
+}
+
+.rails-table-preferences-resize-handle:not(:disabled):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
 .rails-table-preferences-sortable-column {
   cursor: pointer;
   user-select: none;
