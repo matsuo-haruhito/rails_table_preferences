@@ -3,9 +3,9 @@
 RSpec.describe "resource table captions", type: :helper do
   let(:columns) { [{ "key" => "customer_name", "label" => "Customer" }] }
   let(:table_state) { { "visible_columns" => columns } }
-  let(:model_name) { instance_double(ActiveModel::Name, route_key: "orders") }
-  let(:model) { class_double("Order", model_name: model_name) }
-  let(:records) { instance_double(ActiveRecord::Relation, klass: model) }
+  let(:model_name) { double("model_name", route_key: "orders") }
+  let(:model) { double("Order", model_name: model_name) }
+  let(:records) { double("records", klass: model) }
 
   before do
     allow(helper).to receive(:table_preferences_resource_columns).and_return(columns)
