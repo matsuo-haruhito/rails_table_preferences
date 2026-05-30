@@ -19,14 +19,28 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
     it "guards representative README-linked docs and visual assets" do
       expect(described_class::REQUIRED_PATHS).to include(
-        "docs/visual_overview.md",
-        "docs/images/visual-overview-editor-and-table.svg",
         "docs/quick_start.md",
-        "docs/demo.md",
+        "docs/resource_tables.md",
+        "docs/resource_table_formatter_contract.md",
+        "docs/decision_guide.md",
+        "docs/scoped_presets.md",
+        "docs/fixed_columns_and_groups.md",
         "docs/export_integration.md",
         "docs/accessibility.md",
+        "docs/visual_overview.md",
+        "docs/images/visual-overview-editor-and-table.svg",
+        "docs/demo.md",
+        "docs/sandbox.md",
+        "docs/examples.md",
         "docs/troubleshooting.md",
-        "docs/release_checklist.md"
+        "docs/manual_qa.md",
+        "docs/release_checklist.md",
+        "docs/package_verification.md",
+        "docs/controller_integration.md",
+        "docs/filter_metadata.md",
+        "docs/filter_adapters.md",
+        "docs/javascript_entrypoints.md",
+        "docs/javascript_controller.md"
       )
     end
   end
