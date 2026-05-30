@@ -21,6 +21,59 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(result[:ok]).to eq(false)
       expect(result[:missing]).to eq(%w[CHANGELOG.md docs/index.md])
     end
+
+    it "reports success when package exports point to packaged JavaScript entrypoints" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
+      allow(verifier).to receive(:packaged_files).and_return(
+        %w[
+          app/javascript/rails_table_preferences/controller.js
+          app/javascript/rails_table_preferences/index.js
+          package.json
+        ]
+      )
+      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return(package_json)
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(true)
+      expect(result[:missing_package_export_targets]).to eq([])
+      expect(result[:package_json_errors]).to eq([])
+    end
+
+    it "reports package exports that point to files missing from the built gem" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
+      allow(verifier).to receive(:packaged_files).and_return(
+        %w[
+          app/javascript/rails_table_preferences/index.js
+          package.json
+        ]
+      )
+      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return(package_json)
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(false)
+      expect(result[:missing]).to eq([])
+      expect(result[:missing_package_export_targets]).to eq(
+        [
+          {
+            export: "./controller",
+            target: "app/javascript/rails_table_preferences/controller.js"
+          }
+        ]
+      )
+    end
+
+    it "reports invalid packaged package metadata" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
+      allow(verifier).to receive(:packaged_files).and_return(%w[package.json])
+      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return("{")
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(false)
+      expect(result[:package_json_errors].join).to include("package.json could not be parsed")
+    end
   end
 
   describe "required packaged docs" do
@@ -52,5 +105,14 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
       expect(described_class::REQUIRED_PATHS).to include(*expected_docs)
     end
+  end
+
+  def package_json
+    {
+      "exports" => {
+        "." => "./app/javascript/rails_table_preferences/index.js",
+        "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+      }
+    }.to_json
   end
 end
