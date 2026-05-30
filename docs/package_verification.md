@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, or documentation files are missing.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
 
 A successful run prints a message like:
 
@@ -26,7 +26,7 @@ A successful run prints a message like:
 Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 ```
 
-If required files are missing, the task prints the missing paths and exits with failure.
+If required files or package export targets are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
 
 ## Manual inspection
 
@@ -116,6 +116,17 @@ docs/javascript_controller.md
 ```
 
 Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+
+## Package export targets
+
+The package verification task reads the packaged `package.json` and confirms every string target under `exports` is included in the built gem. For the current package metadata, that means:
+
+```text
+. -> app/javascript/rails_table_preferences/index.js
+./controller -> app/javascript/rails_table_preferences/controller.js
+```
+
+This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target check catches drift between `package.json` and the gem contents.
 
 ## Why this matters
 
