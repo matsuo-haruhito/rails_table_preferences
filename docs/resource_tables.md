@@ -51,6 +51,24 @@ If the same management page also includes a search form, pagination, a create fo
 <%= resource_table_for @orders, include_id: true %>
 ```
 
+## Table HTML options
+
+The default resource table partials pass basic table HTML options through to `table_preferences_table_tag` while preserving the gem-owned controller data attributes.
+
+```erb
+<%= resource_table_for(
+  @orders,
+  id: "orders-table",
+  class: "orders-table",
+  data: { turbo_frame: "orders-frame" },
+  aria: { label: "Orders" }
+) %>
+```
+
+`class:` is appended to the default resource table class instead of replacing it. Generic `data:` attributes can coexist with the Rails Table Preferences controller data, but the gem-owned `data-rails-table-preferences-*` values remain authoritative.
+
+`tree_resource_table_for` follows the same pass-through rule and keeps its default `tree-view-table` and `rails-table-preferences-tree-resource-table` classes.
+
 ## Profile overrides
 
 Use a profile when the inferred table is mostly right, but a screen needs small overrides.
