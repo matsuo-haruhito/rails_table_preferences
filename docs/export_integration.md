@@ -127,6 +127,8 @@ payload = RailsTablePreferences::ExportPayload.call(
 )
 ```
 
+For direct object usage, treat `columns`, `column_keys`, and `headers` as the export source of truth. They are built from the current column definitions and saved display preferences, so stale saved column keys are not reintroduced into the ordered export column list. The returned `settings` value is the normalized settings snapshot and may still include saved filter, sort, or column entries for keys that no longer exist in the current `columns` list.
+
 ## Hidden columns
 
 Hidden columns are excluded by default:
