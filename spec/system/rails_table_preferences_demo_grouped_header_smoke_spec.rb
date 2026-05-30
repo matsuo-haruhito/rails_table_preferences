@@ -8,6 +8,14 @@ class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationContr
   include RailsTablePreferences::TablePreferencesHelper
 
   DEMO_TABLE_KEY = :rails_table_preferences_grouped_header_smoke_orders
+  DEMO_COLUMN_DEFINITIONS = [
+    { "key" => "order_no", "label" => "受注番号", "group" => { "key" => "order", "label" => "受注情報" } },
+    { "key" => "status", "label" => "状態", "group" => { "key" => "order", "label" => "受注情報" } },
+    { "key" => "customer_name", "label" => "得意先名", "group" => { "key" => "customer", "label" => "得意先情報" } },
+    { "key" => "delivery_date", "label" => "納品日", "group" => { "key" => "delivery", "label" => "配送情報" } },
+    { "key" => "shipping_code", "label" => "配送コード", "group" => { "key" => "delivery", "label" => "配送情報" } },
+    { "key" => "memo", "label" => "備考", "group" => { "key" => "delivery", "label" => "配送情報" } }
+  ].freeze
 
   TEMPLATE = <<~ERB
     <h1>Rails Table Preferences Grouped Header Smoke</h1>
@@ -47,8 +55,7 @@ class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationContr
   def index
     @table_columns = table_columns
     @table_preference_settings = settings_for_layout(params[:saved_layout])
-    @demo_table_state = table_preferences_state(settings: @table_preference_settings, columns: @table_columns)
-    @demo_visible_columns = @demo_table_state.fetch("visible_columns")
+    @demo_visible_columns = demo_visible_columns(@table_preference_settings)
     @demo_visible_column_groups = demo_visible_column_groups(@demo_visible_columns)
 
     render inline: TEMPLATE, type: :erb
@@ -94,6 +101,19 @@ class RailsTablePreferencesGroupedHeaderSmokeOrdersController < ApplicationContr
         { "key" => "memo", "visible" => false, "order" => 60 }
       ]
     }
+  end
+
+  def demo_visible_columns(settings)
+    settings_by_key = settings.fetch("columns").index_by { |column| column.fetch("key") }
+
+    DEMO_COLUMN_DEFINITIONS
+      .filter_map do |column|
+        settings_column = settings_by_key.fetch(column.fetch("key"), {})
+        next if settings_column.fetch("visible", true) == false
+
+        column.merge("order" => settings_column.fetch("order", 0))
+      end
+      .sort_by { |column| column.fetch("order") }
   end
 
   def demo_visible_column_groups(visible_columns)
