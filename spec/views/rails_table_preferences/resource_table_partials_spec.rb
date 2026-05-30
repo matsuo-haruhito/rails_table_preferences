@@ -53,7 +53,7 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
 
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
-    allow(view).to receive(:tree_view_rows).and_return("".html_safe)
+    view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
 
     render partial: "rails_table_preferences/tree_resource_table", locals: base_locals.merge(
       parent_id_method: :parent_id,
