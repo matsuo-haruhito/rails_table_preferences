@@ -69,6 +69,28 @@ The default resource table partials pass basic table HTML options through to `ta
 
 `tree_resource_table_for` follows the same pass-through rule and keeps its default `tree-view-table` and `rails-table-preferences-tree-resource-table` classes.
 
+## Editor placement
+
+By default, `resource_table_for` and `tree_resource_table_for` render the bundled table preferences editor immediately before the table surface. Use `render_editor: false` when the screen wants to place the editor in a toolbar, drawer, tab, or separate partial while keeping the default table partial.
+
+```erb
+<%= table_preferences_editor(
+  table_key: :orders,
+  settings: @table_preference_settings,
+  columns: @preference_columns
+) %>
+
+<%= resource_table_for(
+  @orders,
+  profile: OrdersTableProfile,
+  table_key: :orders,
+  settings: @table_preference_settings,
+  render_editor: false
+) %>
+```
+
+The opt-out only controls the default editor placement. The table still receives the same settings, columns, table state, HTML options, and Rails Table Preferences data attributes. `tree_resource_table_for` accepts the same option. If the table markup itself needs to change, use a custom partial instead of overloading `render_editor:`.
+
 ## Profile overrides
 
 Use a profile when the inferred table is mostly right, but a screen needs small overrides.
