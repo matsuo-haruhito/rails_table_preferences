@@ -170,7 +170,7 @@ class OrderFilterrificParams
     {
       search_query: filters.dig("customer_name", "value"),
       with_status: filters.dig("status", "values"),
-      sorted_by: first_sort && "#{sort["key"]}_#{sort["direction"]}"
+      sorted_by: first_sort && "#{first_sort["key"]}_#{first_sort["direction"]}"
     }.compact
   end
 end
