@@ -52,6 +52,9 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
   end
 
   it "renders only the tree resource table surface when render_editor is false" do
+    stub_tree_view_for_partial
+    allow(view).to receive(:tree_view_rows).and_return("".html_safe)
+
     render partial: "rails_table_preferences/tree_resource_table", locals: base_locals.merge(
       parent_id_method: :parent_id,
       options: { render_editor: false }
@@ -61,5 +64,33 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).to include("tree-view-table")
     expect(rendered).to include("rails-table-preferences-tree-resource-table")
     expect(rendered).to include("data-rails-table-preferences-table-key-value=\"users\"")
+    expect(rendered).not_to include("render_editor")
+  end
+
+  def stub_tree_view_for_partial
+    stub_const("TreeView", Module.new) unless defined?(TreeView)
+
+    stub_const("TreeView::Tree", Class.new do
+      def initialize(records:, parent_id_method:)
+      end
+
+      def root_items
+        []
+      end
+    end)
+
+    stub_const("TreeView::UiConfigBuilder", Class.new do
+      def initialize(context:, node_prefix:)
+      end
+
+      def build_static
+        Object.new
+      end
+    end)
+
+    stub_const("TreeView::RenderState", Class.new do
+      def initialize(**)
+      end
+    end)
   end
 end
