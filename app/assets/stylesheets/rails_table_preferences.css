@@ -193,6 +193,9 @@
   gap: 0.75rem;
   min-width: 16rem;
   max-width: min(24rem, calc(100vw - 2rem));
+  max-height: min(32rem, calc(100vh - 2rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0.75rem;
   border: 1px solid currentColor;
   border-radius: 0.5rem;
@@ -250,6 +253,12 @@ th.rails-table-preferences-fixed,
 th[data-rails-table-preferences-pinned="true"],
 th[data-rails-table-preferences-fixed="true"] {
   z-index: 3;
+}
+
+@supports (height: 100dvh) {
+  .rails-table-preferences-filter-panel {
+    max-height: min(32rem, calc(100dvh - 2rem));
+  }
 }
 
 @media (max-width: 64rem) {
