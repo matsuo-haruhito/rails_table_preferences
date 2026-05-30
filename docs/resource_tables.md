@@ -182,6 +182,25 @@ Custom partials can then call:
 <%= table_preferences_cell_editor(form: form, record: record, column: column) %>
 ```
 
+When a column has no filter/editor metadata, or when the metadata type has no registered renderer, the helper returns the `fallback:` value. Use that to keep custom partials explicit about the empty state they want:
+
+```erb
+<%= table_preferences_filter_input(
+  form: form,
+  column: column,
+  fallback: "".html_safe
+) %>
+
+<%= table_preferences_cell_editor(
+  form: form,
+  record: order,
+  column: column,
+  fallback: table_preferences_value(order, column)
+) %>
+```
+
+Choose an empty fallback when an unsupported filter/editor should render nothing, or a plain value fallback when the table should remain readable without an editor renderer. Registering a renderer is still the host app's responsibility; Rails Table Preferences only looks up the type and calls the registered mapping.
+
 A column filter or editor may also be an object that responds to `to_table_filter` or `to_table_cell_editor`.
 
 ## Rails Fields Kit end-to-end example
