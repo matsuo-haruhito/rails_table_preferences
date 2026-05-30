@@ -41,10 +41,17 @@ module RailsTablePreferences
 
         filters.each_with_object({}) do |(key, condition), params|
           normalized = normalize_condition(condition)
+          filter_key = filter_key_for(key, column_lookup)
+
+          if normalized["operator"].to_s == "between"
+            assign_between_params(params, filter_key, normalized)
+            next
+          end
+
           predicate = predicate_for(normalized["operator"])
           next unless predicate
 
-          param_key = "#{filter_key_for(key, column_lookup)}_#{predicate}"
+          param_key = "#{filter_key}_#{predicate}"
           value = value_for(normalized)
           params[param_key] = value unless skip_value?(predicate, value)
         end
@@ -84,6 +91,14 @@ module RailsTablePreferences
         else
           condition["value"]
         end
+      end
+
+      def assign_between_params(params, filter_key, condition)
+        from = condition["from"]
+        to = condition["to"]
+
+        params["#{filter_key}_gteq"] = from unless blank?(from)
+        params["#{filter_key}_lteq"] = to unless blank?(to)
       end
 
       def skip_value?(predicate, value)
