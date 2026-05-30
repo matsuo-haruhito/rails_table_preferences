@@ -92,6 +92,18 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       )
     end
 
+    it "converts true and false filters without requiring a user value" do
+      expect(
+        described_class.filter_params(
+          active: { operator: :true },
+          archived: { operator: :false, value: "" }
+        )
+      ).to eq(
+        "active_true" => true,
+        "archived_false" => true
+      )
+    end
+
     it "skips empty values for value-based predicates" do
       expect(
         described_class.filter_params(

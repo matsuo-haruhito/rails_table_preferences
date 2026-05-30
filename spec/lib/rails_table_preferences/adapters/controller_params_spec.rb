@@ -137,6 +137,28 @@ RSpec.describe RailsTablePreferences::Adapters::ControllerParams do
       ).to eq("memo_operator" => "blank")
     end
 
+    it "keeps boolean filters as operator params without requiring values" do
+      columns = [
+        {
+          key: :active,
+          filter: { type: :boolean, param: :enabled, operator_param: :enabled_operator }
+        }
+      ]
+
+      expect(
+        described_class.filter_params(
+          filters: {
+            active: { operator: :true },
+            archived: { operator: :false, value: "" }
+          },
+          columns: columns
+        )
+      ).to eq(
+        "enabled_operator" => "true",
+        "archived_operator" => "false"
+      )
+    end
+
     it "skips blank values" do
       expect(
         described_class.filter_params(
