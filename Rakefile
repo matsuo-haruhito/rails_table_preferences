@@ -19,8 +19,24 @@ namespace :package do
       puts "Package verification passed: #{File.basename(gem_path)}"
     else
       warn "Package verification failed: #{File.basename(gem_path)}"
-      warn "Missing files:"
-      result[:missing].each { |path| warn "  - #{path}" }
+
+      unless result[:missing].empty?
+        warn "Missing files:"
+        result[:missing].each { |path| warn "  - #{path}" }
+      end
+
+      unless result[:missing_package_export_targets].empty?
+        warn "Missing package export targets:"
+        result[:missing_package_export_targets].each do |export_target|
+          warn "  - #{export_target.fetch(:export)} -> #{export_target.fetch(:target)}"
+        end
+      end
+
+      unless result[:package_json_errors].empty?
+        warn "Package metadata errors:"
+        result[:package_json_errors].each { |error| warn "  - #{error}" }
+      end
+
       abort "Package verification failed."
     end
   end
