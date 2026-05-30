@@ -49,7 +49,8 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
   end
 
   def run_node_entrypoint_check(*paths, script:, chdir: nil)
-    stdout, stderr, status = Open3.capture3("node", "--input-type=module", "-e", script, *paths, chdir:)
+    options = chdir ? { chdir: chdir } : {}
+    stdout, stderr, status = Open3.capture3("node", "--input-type=module", "-e", script, *paths, **options)
 
     expect(status).to be_success, <<~MESSAGE
       expected documented JavaScript entrypoints to load successfully
