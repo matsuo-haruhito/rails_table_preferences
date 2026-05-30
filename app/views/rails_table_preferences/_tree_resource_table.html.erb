@@ -12,14 +12,17 @@
   row_locals: { table_state: table_state }
 ) %>
 
-<%= table_preferences_editor(
-  table_key: table_key,
-  name: name,
-  settings: settings,
-  columns: columns
-) %>
+<% render_editor = options.fetch(:render_editor, true) %>
+<% if render_editor %>
+  <%= table_preferences_editor(
+    table_key: table_key,
+    name: name,
+    settings: settings,
+    columns: columns
+  ) %>
+<% end %>
 
-<% table_options = options.except(:class).merge(
+<% table_options = options.except(:class, :render_editor).merge(
   class: ["tree-view-table", "rails-table-preferences-tree-resource-table", options[:class]].compact.join(" ")
 ) %>
 
