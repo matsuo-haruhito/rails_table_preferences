@@ -74,7 +74,7 @@ module RailsTablePreferences
       def add_demo_route
         return unless options[:with_demo_route]
 
-        routes_path = destination_path("config/routes.rb")
+        routes_path = File.join(destination_root, "config/routes.rb")
         if File.exist?(routes_path) && File.read(routes_path).include?(DEMO_ROUTE)
           say_status :identical, "config/routes.rb"
         else
