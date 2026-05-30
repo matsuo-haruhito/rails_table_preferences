@@ -5,7 +5,7 @@ This directory contains focused documentation for Rails Table Preferences.
 ## Start here
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
-- [Resource table adapters](resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and optionally connect TreeView or Rails Fields Kit.
+- [Resource table adapters](resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and choose when to add renderer registries for TreeView or Rails Fields Kit integrations.
 - [Resource table formatter contract](resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal operating patterns.
@@ -39,21 +39,22 @@ This directory contains focused documentation for Rails Table Preferences.
 2. Mount the engine if you use the bundled JSON API.
 3. Confirm the Stimulus controller registration path for the host app. Use the default manifest for `stimulus-rails`, or the package entrypoint for Vite / `app/frontend` apps.
 4. For convention-first tables, try `resource_table_for @records` and review [Resource table adapters](resource_tables.md).
-5. For manually controlled tables, define table columns with `table_preferences_column`.
-6. Render `table_preferences_editor` and `table_preferences_table_tag`.
-7. Add `filter:` and `sortable: true` metadata where needed.
-8. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-9. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-10. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-11. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-12. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-13. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-14. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-15. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-16. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
-17. Verify the feature in a sandbox Rails app.
-18. Run the manual QA checklist before asking real users to try the feature.
-19. Before release, run the release checklist and package verification guide.
+5. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use renderer registries from [Resource table adapters](resource_tables.md) before copying a custom partial.
+6. For manually controlled tables, define table columns with `table_preferences_column`.
+7. Render `table_preferences_editor` and `table_preferences_table_tag`.
+8. Add `filter:` and `sortable: true` metadata where needed.
+9. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+10. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+11. Configure `scope_context_method` only if shared, role, or organization presets are needed.
+12. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+13. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+14. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+15. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+16. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+17. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
+18. Verify the feature in a sandbox Rails app.
+19. Run the manual QA checklist before asking real users to try the feature.
+20. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
@@ -68,6 +69,7 @@ Rails Table Preferences owns:
 - filter/sort UI state
 - adapter params for host applications or search gems
 - resource table column inference and profile overrides when the helper path is used
+- renderer registry lookup for filter/editor metadata when a host app registers renderers
 - export column payloads derived from saved display preferences
 - baseline accessibility hooks for generated controls
 
@@ -80,6 +82,7 @@ Host applications own:
 - semantic page/table structure around the generated controls
 - sticky column offset and scroll-container polish for complex layouts
 - grouped table header markup
+- renderer registrations and concrete form-helper HTML for filter/editor metadata
 - CSV, Excel, and report file generation
 - administration UI for shared, role, or organization presets
 - final styling and UI polish
