@@ -273,7 +273,7 @@ module RailsTablePreferences
       first_record = records.respond_to?(:first) ? records.first : nil
       return first_record.class if first_record
 
-      raise ArgumentError, "model: is required when records do not expose klass and are empty"
+      raise ArgumentError, "model: is required when records do not expose klass and are empty. Pass model: or use a profile model for empty plain Array or manually assembled collections; ActiveRecord::Relation can still be inferred through records.klass."
     end
 
     def table_preferences_resource_columns(model:, only:, except:, include_id:, include_associations:, profile:)
@@ -283,7 +283,7 @@ module RailsTablePreferences
       columns = RailsTablePreferences::Adapters::ActiveRecordColumns.call(
         model: model,
         only: resolved_only,
-        except: resolved_except,
+        except: except,
         include_id: include_id,
         include_associations: include_associations
       )
