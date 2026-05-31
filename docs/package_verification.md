@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
 
 A successful run prints a message like:
 
@@ -62,6 +62,9 @@ app/javascript/controllers/rails_table_preferences_controller.js
 app/javascript/rails_table_preferences/controller.js
 app/javascript/rails_table_preferences/index.js
 app/views/rails_table_preferences/_editor.html.erb
+app/views/rails_table_preferences/_resource_table.html.erb
+app/views/rails_table_preferences/_tree_resource_table.html.erb
+app/views/rails_table_preferences/_tree_resource_table_row.html.erb
 config/routes.rb
 lib/generators/rails_table_preferences/install/install_generator.rb
 lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb
@@ -119,7 +122,7 @@ docs/javascript_entrypoints.md
 docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
 ## Package export targets
 
