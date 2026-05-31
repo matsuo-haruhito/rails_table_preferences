@@ -10,6 +10,7 @@ module RailsTablePreferences
       include ActiveRecord::Generators::Migration
 
       source_root File.expand_path("templates", __dir__)
+      DEMO_ROUTE = 'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
 
       class_option :owner_model,
                    type: :string,
@@ -36,6 +37,11 @@ module RailsTablePreferences
                    default: false,
                    desc: "Copy a lightweight demo controller and view for local browser verification."
 
+      class_option :with_demo_route,
+                   type: :boolean,
+                   default: false,
+                   desc: "Also add the demo route to config/routes.rb. Implies --with-demo."
+
       desc "Copies Rails Table Preferences migrations, initializer, JavaScript, and stylesheets into the host application."
 
       def copy_initializer
@@ -59,10 +65,21 @@ module RailsTablePreferences
       end
 
       def copy_demo
-        return unless options[:with_demo]
+        return unless demo_requested?
 
         copy_file "demo/orders_controller.rb", "app/controllers/rails_table_preferences_demo/orders_controller.rb"
         copy_file "demo/index.html.erb", "app/views/rails_table_preferences_demo/orders/index.html.erb"
+      end
+
+      def add_demo_route
+        return unless options[:with_demo_route]
+
+        routes_path = File.join(destination_root, "config/routes.rb")
+        if File.exist?(routes_path) && File.read(routes_path).include?(DEMO_ROUTE)
+          say_status :identical, "config/routes.rb"
+        else
+          route DEMO_ROUTE
+        end
       end
 
       def show_post_install_message
@@ -85,11 +102,15 @@ module RailsTablePreferences
           say "     For Vite/app/frontend entrypoints, import rails_table_preferences/controller and register it manually."
         end
 
-        if options[:with_demo]
-          say "  5. Add this route if you want to open the copied demo screen:"
-          say "       get \"/rails_table_preferences_demo/orders\", to: \"rails_table_preferences_demo/orders#index\""
+        if demo_requested?
+          if options[:with_demo_route]
+            say "  5. Demo route added to config/routes.rb:"
+          else
+            say "  5. Add this route if you want to open the copied demo screen, or rerun with --with-demo-route:"
+          end
+          say "       #{DEMO_ROUTE}"
           say "     The demo uses the configured current-user method and the table_preferences table."
-          say "     Remove the copied demo controller/view before production release if they are not needed."
+          say "     Remove the copied demo controller/view and route before production release if they are not needed."
         end
 
         say ""
@@ -113,6 +134,12 @@ module RailsTablePreferences
 
       def self.next_migration_number(dirname)
         ActiveRecord::Generators::Base.next_migration_number(dirname)
+      end
+
+      private
+
+      def demo_requested?
+        options[:with_demo] || options[:with_demo_route]
       end
     end
   end

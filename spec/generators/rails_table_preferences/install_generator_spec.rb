@@ -143,6 +143,25 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("配送情報")
   end
 
+  it "does not add the demo route when only demo files are requested" do
+    prepare_routes_file
+
+    run_generator %w[--with-demo]
+
+    expect(file("config/routes.rb").read).not_to include(demo_route)
+  end
+
+  it "can add the optional demo route without duplicating it" do
+    prepare_routes_file
+
+    run_generator %w[--with-demo-route]
+    run_generator %w[--with-demo-route]
+
+    expect(file("app/controllers/rails_table_preferences_demo/orders_controller.rb")).to exist
+    expect(file("app/views/rails_table_preferences_demo/orders/index.html.erb")).to exist
+    expect(file("config/routes.rb").read.scan(demo_route).size).to eq(1)
+  end
+
   it "provides post-install next steps in the generator source" do
     source = File.read(File.expand_path("../../../lib/generators/rails_table_preferences/install/install_generator.rb", __dir__))
 
@@ -153,6 +172,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(source).to include("Stimulus controller")
     expect(source).to include("rails_table_preferences/controller")
     expect(source).to include("with_demo")
+    expect(source).to include("with_demo_route")
     expect(source).to include("rails_table_preferences_demo/orders#index")
   end
 
@@ -163,6 +183,14 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   def prepare_destination
     rm_rf(destination_root)
     mkdir_p(destination_root)
+  end
+
+  def prepare_routes_file
+    mkdir_p(File.join(destination_root, "config"))
+    File.write(
+      File.join(destination_root, "config/routes.rb"),
+      "Rails.application.routes.draw do\nend\n"
+    )
   end
 
   def run_generator(args = [])
@@ -181,5 +209,9 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
   def generated_migration
     Pathname.new(Dir[File.join(destination_root, "db/migrate/*_create_table_preferences.rb")].first.to_s)
+  end
+
+  def demo_route
+    'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
   end
 end
