@@ -162,7 +162,7 @@ module RailsTablePreferences
       "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
-    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def table_preferences_column(key, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil, export_key: nil)
       ColumnDefinition.new(
         key: key,
         label: label,
@@ -182,7 +182,8 @@ module RailsTablePreferences
         ignore: ignore,
         filter: filter,
         sortable: sortable,
-        sort_param: sort_param
+        sort_param: sort_param,
+        export_key: export_key
       ).to_h
     end
 
@@ -301,7 +302,7 @@ module RailsTablePreferences
     def table_preferences_filter_metadata(column)
       filter = column["filter"] || column[:filter]
       filter = filter.to_table_filter if filter.respond_to?(:to_table_filter)
-      filter.respond_to?(:to_h) ? filter.to_h.deep_stringify_keys : filter
+      filter.respond_to?(:h) ? filter.to_h.deep_stringify_keys : filter
     end
 
     def table_preferences_editor_metadata(column)
