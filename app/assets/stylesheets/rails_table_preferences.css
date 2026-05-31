@@ -299,13 +299,17 @@ th[data-rails-table-preferences-fixed="true"] {
 
 @media (max-width: 48rem) {
   .rails-table-preferences-editor__row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(8rem, 1fr));
   }
 
   .rails-table-preferences-editor__drag-handle,
   .rails-table-preferences-editor__visible {
     grid-column: 1 / -1;
     grid-row: 1;
+  }
+
+  .rails-table-preferences-editor__row > label:not(.rails-table-preferences-editor__visible) {
+    overflow-wrap: anywhere;
   }
 
   .rails-table-preferences-editor__row > label:nth-of-type(2) {
@@ -319,7 +323,31 @@ th[data-rails-table-preferences-fixed="true"] {
   }
 
   .rails-table-preferences-editor__row > label:nth-of-type(4) {
-    grid-column: 3;
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 34rem) {
+  .rails-table-preferences-editor__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(2),
+  .rails-table-preferences-editor__row > label:nth-of-type(3),
+  .rails-table-preferences-editor__row > label:nth-of-type(4) {
+    grid-column: 1;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(2) {
     grid-row: 2;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(3) {
+    grid-row: 3;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(4) {
+    grid-row: 4;
   }
 }
