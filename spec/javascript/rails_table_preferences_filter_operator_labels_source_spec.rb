@@ -27,6 +27,6 @@ RSpec.describe "rails_table_preferences filter operator label overrides" do
   it "documents the root data value used by host apps" do
     expect(docs_source).to include("data-rails-table-preferences-filter-operator-labels-value")
     expect(docs_source).to include("Keys are operator names")
-    expect(docs_source).to include("omitted operator keeps the bundled default label")
+    expect(docs_source).to include("Operators omitted from the object keep the bundled Japanese defaults")
   end
 end
