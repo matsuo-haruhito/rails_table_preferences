@@ -11,7 +11,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Initial table preference persistence model and Rails engine structure.
 - Owner-specific table preference records with configurable owner model and owner foreign key.
 - Scoped preset support for owner, shared, role, and organization presets.
-- Default preset resolution across owner, shared, role, and organization scopes.
+- Default preset resolution across owner, role, organization, and shared scopes.
 - JSON API for listing, loading, creating, updating, and deleting presets.
 - Rails controller helpers for resolving saved settings and converting saved filter/sort state into host app params.
 - Plain controller params adapter for existing `search(params)` / `order_by(params[:sort])` style controllers.
@@ -37,7 +37,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, visual overview, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
 - Documentation for the resource table formatter contract, including formatter arity, nil-return behavior, and host-app formatting responsibility.
 - Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
-- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request compatibility lanes for Rails 7.0, 7.1, 7.2, and 8.0.
+- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 
 ### Changed
