@@ -283,7 +283,7 @@ module RailsTablePreferences
       columns = RailsTablePreferences::Adapters::ActiveRecordColumns.call(
         model: model,
         only: resolved_only,
-        except: except,
+        except: resolved_except,
         include_id: include_id,
         include_associations: include_associations
       )
