@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, TypeScript declaration, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
 
 A successful run prints a message like:
 
@@ -59,7 +59,9 @@ app/controllers/concerns/rails_table_preferences/controller.rb
 app/helpers/rails_table_preferences/table_preferences_helper.rb
 app/helpers/rails_table_preferences/column_options_helper.rb
 app/javascript/controllers/rails_table_preferences_controller.js
+app/javascript/rails_table_preferences/controller.d.ts
 app/javascript/rails_table_preferences/controller.js
+app/javascript/rails_table_preferences/index.d.ts
 app/javascript/rails_table_preferences/index.js
 app/views/rails_table_preferences/_editor.html.erb
 config/routes.rb
@@ -125,15 +127,19 @@ Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIR
 The package verification task reads the packaged `package.json` and confirms every string target under `exports` is included in the built gem. For the current package metadata, that means:
 
 ```text
+. -> app/javascript/rails_table_preferences/index.d.ts
 . -> app/javascript/rails_table_preferences/index.js
+./controller -> app/javascript/rails_table_preferences/controller.d.ts
 ./controller -> app/javascript/rails_table_preferences/controller.js
 ```
+
+The `.d.ts` targets are intentionally narrow entrypoint declarations. They help TypeScript host apps import the packaged controller without local module declarations, but they do not describe the bundled controller's private methods or a host app's custom controller API.
 
 This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target check catches drift between `package.json` and the gem contents.
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, TypeScript declarations, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
