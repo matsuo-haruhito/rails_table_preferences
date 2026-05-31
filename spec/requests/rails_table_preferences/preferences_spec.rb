@@ -7,6 +7,11 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
     Thread.current[:rails_table_preferences_current_user] = user
   end
 
+  def force_record_invalid(preference)
+    preference.errors.add(:base, "forced failure")
+    ActiveRecord::RecordInvalid.new(preference)
+  end
+
   describe "GET /rails_table_preferences/preferences/:table_key" do
     it "returns preferences available to the current user and table" do
       RailsTablePreferences::Preference.create!(
@@ -185,7 +190,7 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       expect(RailsTablePreferences::Preference.find_for(user: user, table_key: "orders", name: "inspection").default_flag).to eq(true)
     end
 
-    it "keeps the existing owner default when creating a duplicate default fails" do
+    it "keeps the existing owner default when creating a new default fails" do
       existing = RailsTablePreferences::Preference.create!(
         user: user,
         table_key: "orders",
@@ -193,12 +198,15 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
         default_flag: true,
         settings: { "columns" => [] }
       )
-      duplicate = RailsTablePreferences::Preference.create!(
+      failing_preference = RailsTablePreferences::Preference.new(
         user: user,
         table_key: "orders",
         name: "inspection",
-        settings: { "columns" => [] }
+        settings: { "columns" => [] },
+        default_flag: true
       )
+      allow(RailsTablePreferences::Preference).to receive(:new).and_return(failing_preference)
+      allow(failing_preference).to receive(:save!).and_raise(force_record_invalid(failing_preference))
 
       expect do
         post "/rails_table_preferences/preferences/orders", params: {
@@ -209,35 +217,7 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       end.to raise_error(ActiveRecord::RecordInvalid)
 
       expect(existing.reload.default_flag).to eq(true)
-      expect(duplicate.reload.default_flag).to eq(false)
-    end
-
-    it "keeps the existing shared default when creating a duplicate shared default fails" do
-      existing = RailsTablePreferences::Preference.create!(
-        scope_type: "shared",
-        table_key: "orders",
-        name: "default",
-        default_flag: true,
-        settings: { "columns" => [] }
-      )
-      duplicate = RailsTablePreferences::Preference.create!(
-        scope_type: "shared",
-        table_key: "orders",
-        name: "inspection",
-        settings: { "columns" => [] }
-      )
-
-      expect do
-        post "/rails_table_preferences/preferences/orders", params: {
-          name: "inspection",
-          scope_type: "shared",
-          default: true,
-          settings: { columns: [] }
-        }
-      end.to raise_error(ActiveRecord::RecordInvalid)
-
-      expect(existing.reload.default_flag).to eq(true)
-      expect(duplicate.reload.default_flag).to eq(false)
+      expect(RailsTablePreferences::Preference.find_for(user: user, table_key: "orders", name: "inspection")).to be_nil
     end
   end
 
@@ -294,6 +274,35 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       expect(response).to have_http_status(:ok)
       expect(existing.reload.default_flag).to eq(false)
       expect(target.reload.default_flag).to eq(true)
+    end
+
+    it "keeps the existing shared default when updating a shared default fails" do
+      existing = RailsTablePreferences::Preference.create!(
+        scope_type: "shared",
+        table_key: "orders",
+        name: "default",
+        default_flag: true,
+        settings: { "columns" => [] }
+      )
+      target = RailsTablePreferences::Preference.create!(
+        scope_type: "shared",
+        table_key: "orders",
+        name: "inspection",
+        settings: { "columns" => [] }
+      )
+      allow(RailsTablePreferences::Preference).to receive(:find_or_initialize_for).and_return(target)
+      allow(target).to receive(:save!).and_raise(force_record_invalid(target))
+
+      expect do
+        patch "/rails_table_preferences/preferences/orders/inspection", params: {
+          scope_type: "shared",
+          default: true,
+          settings: { columns: [] }
+        }
+      end.to raise_error(ActiveRecord::RecordInvalid)
+
+      expect(existing.reload.default_flag).to eq(true)
+      expect(target.reload.default_flag).to eq(false)
     end
   end
 
