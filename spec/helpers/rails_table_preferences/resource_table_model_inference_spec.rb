@@ -12,8 +12,9 @@ RSpec.describe "resource table model inference", type: :helper do
   end
 
   it "keeps empty relation-like collections inferable through klass" do
+    model_value = model
     records = Object.new
-    records.define_singleton_method(:klass) { model }
+    records.define_singleton_method(:klass) { model_value }
 
     expect(helper).to receive(:render).with(
       partial: RailsTablePreferences.configuration.resource_table_partial,
@@ -24,8 +25,9 @@ RSpec.describe "resource table model inference", type: :helper do
   end
 
   it "keeps profile model inference available for empty plain arrays" do
+    model_value = model
     profile = Object.new
-    profile.define_singleton_method(:model) { model }
+    profile.define_singleton_method(:model) { model_value }
 
     expect(helper).to receive(:render).with(
       partial: RailsTablePreferences.configuration.resource_table_partial,
@@ -36,8 +38,10 @@ RSpec.describe "resource table model inference", type: :helper do
   end
 
   it "keeps first record class fallback for plain arrays with rows" do
-    inferred_model = Class.new
-    allow(inferred_model).to receive(:model_name).and_return(model_name)
+    model_name_value = model_name
+    inferred_model = Class.new do
+      define_singleton_method(:model_name) { model_name_value }
+    end
     records = [inferred_model.new]
 
     expect(helper).to receive(:render).with(
