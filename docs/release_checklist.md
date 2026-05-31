@@ -41,7 +41,7 @@ Confirm:
 - [ ] JavaScript syntax check passes.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
-- [ ] Representative Rails 7.0 / 7.1 / Rails 7.2 / Rails 8.0 RSpec checks pass.
+- [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
 ## 3. CI checks
