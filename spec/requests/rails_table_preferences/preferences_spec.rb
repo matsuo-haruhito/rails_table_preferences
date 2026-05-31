@@ -208,14 +208,13 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       allow(RailsTablePreferences::Preference).to receive(:new).and_return(failing_preference)
       allow(failing_preference).to receive(:save!).and_raise(force_record_invalid(failing_preference))
 
-      expect do
-        post "/rails_table_preferences/preferences/orders", params: {
-          name: "inspection",
-          default: true,
-          settings: { columns: [] }
-        }
-      end.to raise_error(ActiveRecord::RecordInvalid)
+      post "/rails_table_preferences/preferences/orders", params: {
+        name: "inspection",
+        default: true,
+        settings: { columns: [] }
+      }
 
+      expect(response).to have_http_status(:internal_server_error)
       expect(existing.reload.default_flag).to eq(true)
       expect(RailsTablePreferences::Preference.find_for(user: user, table_key: "orders", name: "inspection")).to be_nil
     end
@@ -293,14 +292,13 @@ RSpec.describe "RailsTablePreferences::Preferences", type: :request do
       allow(RailsTablePreferences::Preference).to receive(:find_or_initialize_for).and_return(target)
       allow(target).to receive(:save!).and_raise(force_record_invalid(target))
 
-      expect do
-        patch "/rails_table_preferences/preferences/orders/inspection", params: {
-          scope_type: "shared",
-          default: true,
-          settings: { columns: [] }
-        }
-      end.to raise_error(ActiveRecord::RecordInvalid)
+      patch "/rails_table_preferences/preferences/orders/inspection", params: {
+        scope_type: "shared",
+        default: true,
+        settings: { columns: [] }
+      }
 
+      expect(response).to have_http_status(:internal_server_error)
       expect(existing.reload.default_flag).to eq(true)
       expect(target.reload.default_flag).to eq(false)
     end
