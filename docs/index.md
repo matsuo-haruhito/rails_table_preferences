@@ -21,7 +21,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Editor root HTML options](editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
 - [Visual overview](visual_overview.md): representative screen illustrations for the editor, shared/scoped preset orientation, generated demo owner/scope cues, export preview, filter/sort state, and pinned-column table layout.
-- [Demo screen generator](demo.md): `--with-demo` generator option for copying a lightweight browser verification screen into a host app.
+- [Demo screen generator](demo.md): `--with-demo` and `--with-demo-route` generator options for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
@@ -65,7 +65,7 @@ This directory contains focused documentation for Rails Table Preferences.
 19. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
 20. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
 21. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-22. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
+22. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
 23. Verify the feature in a sandbox Rails app.
 24. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
 25. Run the manual QA checklist before asking real users to try the feature.
