@@ -67,24 +67,16 @@ Any equivalent resolver is fine. The important part is that the host app's bundl
 
 ### TypeScript module declarations
 
-The gem currently ships JavaScript entrypoints, not packaged `.d.ts` files. In a TypeScript host app, the Vite resolver above can make the imports work at runtime while TypeScript may still report that it cannot find declarations for `rails_table_preferences` or `rails_table_preferences/controller`.
-
-When that happens, add a local declaration file in the host app, for example `app/frontend/types/rails_table_preferences.d.ts` or another directory included by the app's `tsconfig.json`:
+The package entrypoints include minimal `.d.ts` files for `rails_table_preferences` and `rails_table_preferences/controller`. They describe the import shape enough for a TypeScript host app to register the bundled Stimulus controller without adding local declarations only for these package imports:
 
 ```ts
-declare module "rails_table_preferences/controller" {
-  import { Controller } from "@hotwired/stimulus"
-
-  const RailsTablePreferencesController: typeof Controller
-  export default RailsTablePreferencesController
-}
-
-declare module "rails_table_preferences" {
-  export { default, default as RailsTablePreferencesController } from "rails_table_preferences/controller"
-}
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+import { RailsTablePreferencesController as NamedRailsTablePreferencesController } from "rails_table_preferences"
 ```
 
-This local declaration only describes the current package entrypoints enough for `application.register("rails-table-preferences", RailsTablePreferencesController)` and the package-root named export. It does not mean Rails Table Preferences ships official TypeScript types yet. If the host app replaces the controller or relies on custom controller methods, keep those richer declarations in the host app until the gem deliberately adds packaged type definitions.
+These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.
+
+If the host app uses an older gem version without packaged declarations, or if it replaces the controller and wants richer local typing for custom methods, keep a local declaration file in the host app. For example, `app/frontend/types/rails_table_preferences.d.ts` can still refine the app-specific contract as long as the directory is included by the app's `tsconfig.json`.
 
 ## Turbo Drive and Turbo Frame checks
 
