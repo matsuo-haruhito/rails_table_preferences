@@ -127,4 +127,74 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
       run_node_entrypoint_check(script:, chdir: tmpdir)
     end
   end
+
+  it "preserves host-provided sortable header titles while keeping generated sort hints for untitled headers" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const indicator = () => ({ textContent: "" })
+        const cell = ({ key, title = "" }) => {
+          const sortIndicator = indicator()
+          return {
+            title,
+            dataset: { railsTablePreferencesColumnKey: key },
+            attributes: {},
+            sortIndicator,
+            hasAttribute(name) { return name === "title" && title !== "" },
+            classList: { add() {}, toggle() {} },
+            addEventListener() {},
+            appendChild(node) { this.sortIndicator = node },
+            querySelector(selector) {
+              return selector === "[data-rails-table-preferences-sort-indicator]" ? this.sortIndicator : null
+            },
+            setAttribute(name, value) { this.attributes[name] = value }
+          }
+        }
+
+        const hostTitleCell = cell({ key: "account", title: "Business owner help" })
+        const generatedHintCell = cell({ key: "total" })
+        const controller = new ControllerClass()
+        let activeSort = null
+
+        Object.defineProperty(controller, "headerCells", { value: [hostTitleCell, generatedHintCell] })
+        controller.columnDefinitionByKey = () => ({ sortable: true })
+        controller.sortFor = (key) => activeSort?.key === key ? activeSort : undefined
+        controller.sortAscLabelValue = "Sort ascending"
+        controller.sortDescLabelValue = "Sort descending"
+        controller.sortClearLabelValue = "Clear sort"
+
+        controller.installSortControls()
+
+        if (hostTitleCell.title !== "Business owner help") {
+          throw new Error("host title was overwritten during sort control install")
+        }
+
+        if (generatedHintCell.title !== "Sort ascending") {
+          throw new Error("generated sort hint was not applied to an untitled sortable header")
+        }
+
+        activeSort = { key: "account", direction: "desc" }
+        controller.syncSortStates()
+
+        if (hostTitleCell.title !== "Business owner help") {
+          throw new Error("host title was overwritten during sort state sync")
+        }
+
+        if (hostTitleCell.attributes["aria-sort"] !== "descending") {
+          throw new Error("aria-sort no longer tracks the active descending sort")
+        }
+
+        if (hostTitleCell.sortIndicator.textContent !== "▼") {
+          throw new Error("sort indicator no longer tracks the active descending sort")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
 end
