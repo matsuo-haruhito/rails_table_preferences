@@ -207,6 +207,30 @@ The key must match the `table_preferences_column` key:
 table_preferences_column(:customer_name, label: "得意先名")
 ```
 
+## resource_table_for raises model: only when there are no rows
+
+Symptoms:
+
+- `resource_table_for(@orders.to_a)` or `tree_resource_table_for(@projects.to_a)` works while rows exist.
+- The same page raises `model: is required` only after a search, filter, or first render returns an empty plain array.
+
+Relation-like collections such as `Order.where(...)` can be inferred even when empty because they expose `records.klass`. Plain arrays do not carry that model metadata once they are empty, and Rails Table Preferences does not guess from constants or global state.
+
+Pass `model:` for empty plain arrays or manually assembled collections:
+
+```erb
+<%= resource_table_for(@orders.to_a, model: Order) %>
+<%= tree_resource_table_for(@projects.to_a, model: Project) %>
+```
+
+A table profile with `model Order` also satisfies the same requirement:
+
+```erb
+<%= resource_table_for(@orders.to_a, profile: OrdersTableProfile) %>
+```
+
+For the broader model inference rules and empty collection examples, see [Resource table adapters](resource_tables.md#model-inference-and-empty-collections).
+
 ## Preset labels or helper text point to another editor instance
 
 Symptoms:
