@@ -51,6 +51,41 @@ If the same management page also includes a search form, pagination, a create fo
 <%= resource_table_for @orders, include_id: true %>
 ```
 
+### Association columns
+
+By default, `resource_table_for` also infers `belongs_to` associations whose foreign key is present on the model. For example, an `Order` with `belongs_to :customer` and a `customer_id` attribute can receive an inferred `customer` column in addition to the attribute columns.
+
+The association column reads through the association reader. Without a profile formatter, that means Rails Table Preferences passes the associated object through the default value fallback rather than deciding how a customer should be labeled, linked, redacted, or preloaded.
+
+Use profile overrides when the screen needs a human-facing association value:
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  order :order_no, :customer, :status, :delivery_date
+  label :customer, "Customer"
+
+  display :customer do |order, view|
+    next unless order.customer
+
+    view.link_to order.customer.name, view.customer_path(order.customer)
+  end
+end
+```
+
+Choose the column key by the behavior the host app wants:
+
+- use the association key, such as `customer`, when the table should present the associated record and the profile owns the label/link/badge/redaction formatter
+- use the foreign key attribute, such as `customer_id`, when the raw stored id is intentionally part of the operator workflow
+- use `include_associations: false` when the page wants attribute-only inference, avoids association readers for that table, or will add explicit virtual/profile columns instead
+
+```erb
+<%= resource_table_for @orders, include_associations: false %>
+```
+
+Rails Table Preferences does not infer joins, eager loading, authorization policy, or business-specific association labels. Keep those decisions in the host application and avoid documenting a formatter as authorization-aware unless the formatter actually performs that check.
+
 ## Table HTML options
 
 The default resource table partials pass basic table HTML options through to `table_preferences_table_tag` while preserving the gem-owned controller data attributes.
