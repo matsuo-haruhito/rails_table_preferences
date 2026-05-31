@@ -33,6 +33,7 @@ What this view highlights:
 - grouped-header and pinned-column guidance using the same Japanese business-table vocabulary as the demo docs
 - `東京` search and `納品日` sort cues that match the demo-oriented QA flow
 - fixed/pinned metadata staying visible without implying that the gem owns final host-app markup
+- a visible boundary after the fixed `受注番号` column, so the static overview shows where host-app scroll polish may need a separator or shadow
 - the same dense list-screen posture used across the quick-start and maintenance docs
 
 ## Notes
