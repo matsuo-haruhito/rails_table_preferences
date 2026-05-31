@@ -26,8 +26,8 @@ class OrdersController < ApplicationController
     )
 
     rows = Order.search(params).find_each.map do |order|
-      export_payload["columns"].map do |column|
-        order.public_send(column["export_key"] || column["key"])
+      export_payload["export_keys"].map do |key|
+        order.public_send(key)
       end
     end
 
@@ -52,6 +52,7 @@ The returned payload contains:
 {
   "columns" => [...],
   "column_keys" => ["customer_name", "order_no"],
+  "export_keys" => ["customer_display_name", "order_no"],
   "headers" => ["得意先名", "受注番号"],
   "settings" => {...}
 }
@@ -96,8 +97,8 @@ def export
     csv << export_payload["headers"]
 
     scoped_orders.find_each do |order|
-      csv << export_payload["columns"].map do |column|
-        order.public_send(column["export_key"] || column["key"])
+      csv << export_payload["export_keys"].map do |key|
+        order.public_send(key)
       end
     end
   end
@@ -112,9 +113,10 @@ This example intentionally keeps file generation in the host app. Rails Table Pr
 
 - `headers`: write the exported header row in the same order the user sees in the table.
 - `columns`: use when export values need metadata such as `export_key`, `label`, `group`, or visibility state.
-- `column_keys`: use when the export layer only needs the ordered display/preference keys for serializer mapping, SELECT whitelists, or downstream report builders. This list stays based on each column's `key`; it does not switch to `export_key` when export metadata is present.
+- `column_keys`: use when the export layer needs the ordered display/preference keys for serializer mapping, SELECT whitelists, or downstream report builders keyed to the table surface. This list stays based on each column's `key`; it does not switch to `export_key` when export metadata is present.
+- `export_keys`: use when the export layer only needs the ordered value-extraction keys. This list uses each column's `export_key` when present and falls back to the display/preference `key`.
 
-When the host app already has a serializer or report object keyed by the displayed table columns, `column_keys` is often the smallest integration surface. When value extraction needs a different method or attribute, read `export_key` from each `columns` entry instead.
+When the host app already has a serializer or report object keyed by the displayed table columns, `column_keys` is often the smallest integration surface. When value extraction needs a different method or attribute, use `export_keys` directly or read `export_key` from each `columns` entry when extra metadata is needed.
 
 ## Direct object usage
 
@@ -125,9 +127,14 @@ payload = RailsTablePreferences::ExportPayload.call(
   settings: settings,
   columns: columns
 )
+
+payload["column_keys"] # display/preference keys
+payload["export_keys"] # value-extraction keys
 ```
 
-For direct object usage, treat `columns`, `column_keys`, and `headers` as the export source of truth. They are built from the current column definitions and saved display preferences, so stale saved column keys are not reintroduced into the ordered export column list. The returned `settings` value is the normalized settings snapshot and may still include saved filter, sort, or column entries for keys that no longer exist in the current `columns` list.
+The direct object and controller helper return the same payload keys.
+
+For direct object usage, treat `columns`, `column_keys`, `export_keys`, and `headers` as the export source of truth. They are built from the current column definitions and saved display preferences, so stale saved column keys are not reintroduced into the ordered export column list. The returned `settings` value is the normalized settings snapshot and may still include saved filter, sort, or column entries for keys that no longer exist in the current `columns` list.
 
 ## Hidden columns
 
@@ -150,7 +157,7 @@ payload = rails_table_preference_export_payload(
 )
 ```
 
-`include_hidden: true` only changes how the saved visibility preference is applied to the export payload. It is not an authorization bypass and it does not make every hidden column safe to export.
+`include_hidden: true` only changes how the saved visibility preference is applied to the export payload. It applies to `columns`, `column_keys`, `export_keys`, and `headers` using the same filtered and ordered column list. It is not an authorization bypass and it does not make every hidden column safe to export.
 
 Before exporting hidden or sensitive columns, keep this decision in the host application:
 
@@ -173,7 +180,14 @@ columns = [
 ]
 ```
 
-Then export code can read:
+Then export code can read the ordered value-extraction keys directly:
+
+```ruby
+export_payload["export_keys"]
+# => [:customer_display_name]
+```
+
+For integrations that need labels, groups, visibility, or other per-column metadata, use the equivalent value on each column entry:
 
 ```ruby
 column["export_key"] || column["key"]

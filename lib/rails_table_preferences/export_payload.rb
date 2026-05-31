@@ -16,6 +16,7 @@ module RailsTablePreferences
       {
         "columns" => export_columns,
         "column_keys" => export_columns.map { |column| column["key"] },
+        "export_keys" => export_columns.map { |column| column["export_key"] || column["key"] },
         "headers" => export_columns.map { |column| column["label"] || column["key"] },
         "settings" => settings
       }

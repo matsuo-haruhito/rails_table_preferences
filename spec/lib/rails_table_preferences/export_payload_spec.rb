@@ -18,6 +18,7 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     payload = described_class.call(settings: settings, columns: columns)
 
     expect(payload["column_keys"]).to eq(%w[customer_name order_no])
+    expect(payload["export_keys"]).to eq(%w[customer_name order_no])
     expect(payload["headers"]).to eq(%w[得意先名 受注番号])
   end
 
@@ -31,6 +32,7 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     payload = described_class.call(settings: settings, columns: columns, include_hidden: true)
 
     expect(payload["column_keys"]).to include("internal_cost")
+    expect(payload["export_keys"]).to include("internal_cost")
   end
 
   it "keeps direct payload settings normalized while export columns come from current column definitions" do
@@ -77,7 +79,31 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     payload = described_class.call(settings: {}, columns: columns)
 
     expect(payload["column_keys"]).to eq(%w[customer_name])
+    expect(payload["export_keys"]).to eq([:customer_display_name])
     expect(payload["columns"].first["group"]).to eq("key" => :customer, "label" => "得意先情報")
     expect(payload["columns"].first["export_key"]).to eq(:customer_display_name)
+  end
+
+  it "uses the same filter and order for export keys when hidden columns are included" do
+    columns = [
+      { key: :order_no, label: "受注番号", export_key: :number_for_export },
+      { key: :customer_name, label: "得意先名", export_key: :customer_display_name },
+      { key: :internal_cost, label: "内部原価", export_key: :cost_cents }
+    ]
+    settings = {
+      columns: [
+        { key: :internal_cost, visible: false, order: 10 },
+        { key: :customer_name, visible: true, order: 20 },
+        { key: :order_no, visible: true, order: 30 }
+      ]
+    }
+
+    visible_payload = described_class.call(settings: settings, columns: columns)
+    full_payload = described_class.call(settings: settings, columns: columns, include_hidden: true)
+
+    expect(visible_payload["column_keys"]).to eq(%w[customer_name order_no])
+    expect(visible_payload["export_keys"]).to eq(%i[customer_display_name number_for_export])
+    expect(full_payload["column_keys"]).to eq(%w[internal_cost customer_name order_no])
+    expect(full_payload["export_keys"]).to eq(%i[cost_cents customer_display_name number_for_export])
   end
 end
