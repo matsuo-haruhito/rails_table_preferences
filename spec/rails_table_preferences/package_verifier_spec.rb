@@ -25,6 +25,13 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       )
     end
 
+    it "guards editor helper extensions that are documented package entrypoints" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "app/helpers/rails_table_preferences/table_preferences_editor_html_options_helper.rb",
+        "docs/editor_root_options.md"
+      )
+    end
+
     it "guards representative README-linked docs and visual assets" do
       expect(described_class::REQUIRED_PATHS).to include(
         "docs/quick_start.md",
@@ -37,6 +44,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/export_integration.md",
         "docs/accessibility.md",
         "docs/editor_i18n.md",
+        "docs/editor_root_options.md",
         "docs/non_goals.md",
         "docs/visual_overview.md",
         "docs/images/visual-overview-editor-and-table.svg",
