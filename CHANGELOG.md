@@ -29,11 +29,12 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Settings normalizer for current and legacy `ColumnAdjustment`-style settings payloads.
 - Bundled Stimulus controller for applying column visibility, order, width, truncation, filters, sorts, header drag reorder, resize handles, pinned column hooks, and preset editing behavior.
 - Copy-based JavaScript, stylesheet, view, and install generators.
-- Optional `--with-demo` and `--with-demo-route` install generator modes for local browser verification.
+- Optional `--with-demo` install generator mode for local browser verification.
+- Optional `--with-demo-route` install generator mode for copying the demo screen and adding its route in one explicit opt-in step.
 - Generated demo verification includes owner, role, organization, export payload, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
-- Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow metadata, export integration, accessibility baseline, bundled editor i18n keys, visual overview, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
+- Documentation for quick start, resource table adapters, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, export integration, accessibility baseline, visual overview, non-goals, demo, sandbox verification, troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
 - Documentation for the resource table formatter contract, including formatter arity, nil-return behavior, and host-app formatting responsibility.
 - Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
 - GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and 8.0.
