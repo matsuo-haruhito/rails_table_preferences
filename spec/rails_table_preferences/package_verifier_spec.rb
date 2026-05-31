@@ -17,6 +17,15 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(documented_paths).to eq(described_class::REQUIRED_PATHS)
     end
 
+    it "guards packaged JavaScript entrypoints and TypeScript declarations" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "app/javascript/rails_table_preferences/controller.d.ts",
+        "app/javascript/rails_table_preferences/controller.js",
+        "app/javascript/rails_table_preferences/index.d.ts",
+        "app/javascript/rails_table_preferences/index.js"
+      )
+    end
+
     it "guards representative README-linked docs and visual assets" do
       expect(described_class::REQUIRED_PATHS).to include(
         "docs/quick_start.md",

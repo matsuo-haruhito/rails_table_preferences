@@ -65,26 +65,27 @@ export default defineConfig({
 
 Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files.
 
-### TypeScript module declarations
+### TypeScript declarations
 
-The gem currently ships JavaScript entrypoints, not packaged `.d.ts` files. In a TypeScript host app, the Vite resolver above can make the imports work at runtime while TypeScript may still report that it cannot find declarations for `rails_table_preferences` or `rails_table_preferences/controller`.
-
-When that happens, add a local declaration file in the host app, for example `app/frontend/types/rails_table_preferences.d.ts` or another directory included by the app's `tsconfig.json`:
+Rails Table Preferences packages minimal `.d.ts` files for the package root and controller entrypoint. TypeScript host apps can import the bundled controller without adding local module declarations for the normal registration path:
 
 ```ts
-declare module "rails_table_preferences/controller" {
-  import { Controller } from "@hotwired/stimulus"
+import { Application } from "@hotwired/stimulus"
+import RailsTablePreferencesController from "rails_table_preferences/controller"
 
-  const RailsTablePreferencesController: typeof Controller
-  export default RailsTablePreferencesController
-}
-
-declare module "rails_table_preferences" {
-  export { default, default as RailsTablePreferencesController } from "rails_table_preferences/controller"
-}
+const application = Application.start()
+application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
 
-This local declaration only describes the current package entrypoints enough for `application.register("rails-table-preferences", RailsTablePreferencesController)` and the package-root named export. It does not mean Rails Table Preferences ships official TypeScript types yet. If the host app replaces the controller or relies on custom controller methods, keep those richer declarations in the host app until the gem deliberately adds packaged type definitions.
+The package root declaration mirrors the JavaScript named export:
+
+```ts
+import { RailsTablePreferencesController } from "rails_table_preferences"
+```
+
+These packaged declarations intentionally describe only the entrypoint surface: the default Stimulus controller constructor and the package-root `RailsTablePreferencesController` named export. They do not document private controller methods, root value internals, custom copied-controller methods, or host-app replacement controller APIs.
+
+If the host app replaces the controller or relies on custom controller methods, keep those richer declarations in the host app. For older Rails Table Preferences versions that did not package `.d.ts` files, a host app can also keep a local declaration file such as `app/frontend/types/rails_table_preferences.d.ts` until it upgrades.
 
 ## Turbo Drive and Turbo Frame checks
 

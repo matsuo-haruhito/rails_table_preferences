@@ -17,10 +17,17 @@ RSpec.describe "rails_table_preferences package metadata" do
     )
   end
 
-  it "publishes stable JavaScript entrypoints for bundlers" do
+  it "publishes stable JavaScript entrypoints and declaration targets for bundlers" do
+    expect(package_metadata.fetch("types")).to eq("./app/javascript/rails_table_preferences/index.d.ts")
     expect(package_metadata.fetch("exports")).to eq(
-      "." => "./app/javascript/rails_table_preferences/index.js",
-      "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+      "." => {
+        "types" => "./app/javascript/rails_table_preferences/index.d.ts",
+        "default" => "./app/javascript/rails_table_preferences/index.js"
+      },
+      "./controller" => {
+        "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
+        "default" => "./app/javascript/rails_table_preferences/controller.js"
+      }
     )
   end
 end
