@@ -205,6 +205,8 @@ Check the main user paths:
 - [ ] README links to Package verification.
 - [ ] README links to JavaScript entrypoints.
 - [ ] `docs/index.md` links to all major docs.
+- [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
+- [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
 - [ ] Demo docs clearly say the demo route must be added manually.
