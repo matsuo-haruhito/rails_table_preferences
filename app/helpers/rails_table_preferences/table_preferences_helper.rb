@@ -118,6 +118,14 @@ module RailsTablePreferences
       RailsTablePreferences::ValueResolver.call(record, column, view_context: self)
     end
 
+    def table_preferences_column_data_attributes(column)
+      normalized = table_preferences_column_hash(column)
+      data_attributes = { rails_table_preferences_column_key: normalized.fetch("key") }
+      filter_type = table_preferences_filter_metadata(normalized)&.fetch("type", nil).presence
+      data_attributes[:rails_table_preferences_filter_type] = filter_type if filter_type
+      data_attributes
+    end
+
     def table_preferences_filter_input(form:, column:, method: nil, fallback: nil)
       filter = table_preferences_filter_metadata(column)
       return fallback unless filter
