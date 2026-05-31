@@ -53,6 +53,22 @@ The metadata is serialized into `columns_json` so the front-end can decide which
 
 For bundled `select` filters, `options:` is currently a scalar list. Each option is used as both the HTML `<option value>` and the visible option text, and saved filter summaries display the saved scalar values. If a host app needs separate machine values and human labels, keep that mapping in host-app code, provide a copied/custom controller or filter UI, or wait for a dedicated value/label pair feature rather than documenting `{ value:, label: }` as supported by the bundled controller today.
 
+## Bundled default filter operators
+
+When `operators:` is omitted, the bundled controller chooses a default operator list from the filter type. `filter: true` and `filter: { type: :text }` both use the default text row.
+
+| Filter type | Default operators |
+| --- | --- |
+| `text` / default | `contains`, `equals`, `starts_with`, `ends_with`, `blank`, `present` |
+| `number` | `equals`, `gteq`, `lteq`, `gt`, `lt`, `blank`, `present` |
+| `date` | `equals`, `gteq`, `lteq`, `between`, `blank`, `present` |
+| `select` | `in`, `not_in`, `blank`, `present` |
+| `boolean` | `true`, `false`, `blank`, `present` |
+
+Passing `operators:` replaces the default list instead of appending to it. The order in the array is the order shown in the bundled filter panel, so use a short explicit list when the host app search layer only supports a subset of predicates.
+
+The bundled controller has labels for additional operators such as `not_contains` and `not_equals`, but those operators are not included in the default text set. Host apps may opt in by passing them through `operators:`, but Rails Table Preferences still only saves neutral filter state and shapes adapter params. Query execution, unsupported predicate handling, joins, and authorization remain the responsibility of the host application or search adapter.
+
 If the host app only needs to change bundled filter/sort wording such as `絞り込み`, `条件`, `開始`, `終了`, or sort labels, treat that as a copy-override concern rather than metadata design. See [Accessibility baseline](accessibility.md) and [JavaScript controller notes](javascript_controller.md).
 
 Supported overflow values are:
