@@ -18,6 +18,7 @@ The bundled editor and demo screen are intentionally lightweight, but they still
 Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Support matrix](docs/support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](docs/resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and optionally connect TreeView or Rails Fields Kit.
 - [Resource table formatter contract](docs/resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
@@ -60,7 +61,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 
 ## Supported versions
 
-Rails Table Preferences targets Rails 7.0 and later.
+Rails Table Preferences targets Rails 7.0 and later. See the [Support matrix](docs/support_matrix.md) for the Ruby/Rails runtime requirements, representative CI coverage, and newer host-app verification guidance.
 
 Current representative CI compatibility coverage is:
 
