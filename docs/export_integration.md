@@ -161,14 +161,26 @@ Before exporting hidden or sensitive columns, keep this decision in the host app
 
 ## Export keys
 
-Use `export_key` in a hash column definition when the display key differs from the export method or attribute:
+Use `export_key` when the display/preference key differs from the export method or attribute:
+
+```ruby
+columns = [
+  table_preferences_column(
+    :customer_id,
+    label: "得意先",
+    export_key: :customer_name
+  )
+]
+```
+
+Hash column definitions can use the same metadata shape:
 
 ```ruby
 columns = [
   {
-    key: :customer_name,
-    label: "得意先名",
-    export_key: :customer_display_name
+    key: :customer_id,
+    label: "得意先",
+    export_key: :customer_name
   }
 ]
 ```
@@ -179,7 +191,7 @@ Then export code can read:
 column["export_key"] || column["key"]
 ```
 
-`export_key` is stored on each `columns` entry as value-extraction metadata. It does not rename the display/preference key returned in `column_keys`.
+`export_key` is stored on each `columns` entry as value-extraction metadata. It does not rename the display/preference key returned in `column_keys`. If `export_key` is omitted, export code should keep falling back to the column `key`.
 
 ## Column groups
 
