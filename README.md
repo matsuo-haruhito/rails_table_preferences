@@ -23,6 +23,7 @@ Focused documentation is available under [`docs/`](docs/index.md):
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](docs/scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal host-app operating patterns.
 - [Fixed columns and column groups](docs/fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
+- [Column overflow metadata](docs/column_overflow.md): canonical `overflow:` / `default_overflow:` values, compatibility aliases, and the boundary with `default_truncate:`.
 - [Export integration](docs/export_integration.md): reuse saved column visibility, order, labels, and metadata for CSV, Excel, or report exports.
 - [Accessibility baseline](docs/accessibility.md): accessibility hooks provided by the bundled editor/controller and host app responsibilities.
 - [Bundled editor i18n keys](docs/editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
