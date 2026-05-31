@@ -17,6 +17,14 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(documented_paths).to eq(described_class::REQUIRED_PATHS)
     end
 
+    it "guards resource table default partials used by public helpers" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "app/views/rails_table_preferences/_resource_table.html.erb",
+        "app/views/rails_table_preferences/_tree_resource_table.html.erb",
+        "app/views/rails_table_preferences/_tree_resource_table_row.html.erb"
+      )
+    end
+
     it "guards representative README-linked docs and visual assets" do
       expect(described_class::REQUIRED_PATHS).to include(
         "docs/quick_start.md",
