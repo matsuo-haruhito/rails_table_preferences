@@ -67,6 +67,9 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Change a width value in the editor and apply it.
 - [ ] Change a truncation value and confirm long text is truncated.
 - [ ] Add representative `wrap`, `nowrap`, and `ellipsis` columns and confirm each overflow mode stays visually distinct.
+- [ ] Apply display changes, save the preset, reload the page, and confirm current column labels, width/truncation values, and overflow modes are still taken from the current column definition where the saved settings do not override them.
+- [ ] With a stale saved preset or fixture, confirm current `label:`, `overflow:` / `default_overflow:`, and fixed/pinned metadata override old saved display metadata instead of keeping obsolete labels or hooks.
+- [ ] Reset settings after a saved display change and confirm labels, pinned/fixed hooks, and overflow behavior return to the current column definition defaults.
 - [ ] Reset settings and confirm the table returns to default display settings.
 - [ ] Confirm the visible reset helper explains that unsaved editor changes are discarded and defaults are restored without relying on hover text.
 - [ ] Hover or focus the reset button and confirm the button hint matches the visible reset helper.
@@ -289,6 +292,6 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] The settings dialog/editor remains visible after CSS changes.
 - [ ] Table drag, resize, filter, and sort interactions do not block each other.
 - [ ] Saved filter/sort state survives editor apply operations.
-- [ ] Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
+- [ ] Current column metadata overrides stale saved metadata for labels, overflow modes, filters, sortable state, and pinned/fixed state after apply, save, reload, and reset flows.
 
 ## Sign-off
