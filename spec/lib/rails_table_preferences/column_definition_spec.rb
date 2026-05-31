@@ -43,4 +43,19 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       "label" => "customer"
     )
   end
+
+  it "keeps export_key metadata as a string" do
+    column = described_class.new(key: :customer_id, label: "得意先", export_key: :customer_name)
+
+    expect(column.to_h).to include(
+      "key" => "customer_id",
+      "export_key" => "customer_name"
+    )
+  end
+
+  it "omits blank export_key metadata" do
+    column = described_class.new(key: :customer_id, label: "得意先", export_key: "")
+
+    expect(column.to_h).not_to have_key("export_key")
+  end
 end

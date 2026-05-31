@@ -29,11 +29,12 @@ module RailsTablePreferences
                 :filter,
                 :sortable,
                 :sort_param,
+                :export_key,
                 :model,
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil, export_key: nil)
       @key = key.to_s
       @model = model
       @model_name = model_name
@@ -50,6 +51,7 @@ module RailsTablePreferences
       @filter = normalize_filter(filter)
       @sortable = normalize_sortable(sortable)
       @sort_param = sort_param&.to_s
+      @export_key = normalize_export_key(export_key)
     end
 
     def to_h
@@ -66,7 +68,8 @@ module RailsTablePreferences
         "ignored" => ignored,
         "filter" => filter,
         "sortable" => sortable,
-        "sort_param" => sort_param
+        "sort_param" => sort_param,
+        "export_key" => export_key
       }.compact
     end
 
@@ -195,6 +198,12 @@ module RailsTablePreferences
       return nil if value.nil?
 
       ActiveModel::Type::Boolean.new.cast(value)
+    end
+
+    def normalize_export_key(value)
+      return if value.blank?
+
+      value.to_s
     end
 
     def normalize_overflow(value)
