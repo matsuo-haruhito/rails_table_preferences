@@ -128,6 +128,54 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "uses package entrypoint filter operator label overrides and falls back to bundled labels" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+
+        controller.filterOperatorLabelsValue = {
+          contains: "Includes",
+          between: 42,
+          equals: "",
+          blank: null,
+          present: undefined
+        }
+
+        if (controller.filterOperatorText("contains") !== "Includes") {
+          throw new Error("filterOperatorLabelsValue override was not used for contains")
+        }
+
+        if (controller.filterOperatorText("between") !== "42") {
+          throw new Error("filterOperatorLabelsValue override was not stringified")
+        }
+
+        if (controller.filterOperatorText("equals") !== "一致") {
+          throw new Error("blank override did not fall back to the bundled equals label")
+        }
+
+        if (controller.filterOperatorText("blank") !== "空白") {
+          throw new Error("null override did not fall back to the bundled blank label")
+        }
+
+        if (controller.filterOperatorText("present") !== "空白以外") {
+          throw new Error("undefined override did not fall back to the bundled present label")
+        }
+
+        if (controller.filterOperatorText("starts_with") !== "で始まる") {
+          throw new Error("missing override did not fall back to the bundled starts_with label")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "preserves host-provided sortable header titles while keeping generated sort hints for untitled headers" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
