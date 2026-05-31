@@ -2,8 +2,7 @@
 
 RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
   describe "resource table row hooks" do
-    OrderRow = Struct.new(:customer_name)
-
+    let(:order_row_class) { Struct.new(:customer_name) }
     let(:columns) do
       [
         {
@@ -34,8 +33,8 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
     it "adds the stable row hook to each non-empty flat resource table row" do
       render_resource_table([
-        OrderRow.new("Acme"),
-        OrderRow.new("Beta")
+        order_row_class.new("Acme"),
+        order_row_class.new("Beta")
       ])
 
       expect(rendered.scan('data-rails-table-preferences-resource-row="true"').size).to eq(2)
