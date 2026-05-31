@@ -44,7 +44,7 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
     )
   end
 
-  it "keeps select filter label/value option metadata as string-keyed hashes" do
+  it "normalizes select filter label/value option metadata" do
     column = described_class.new(
       key: :status,
       label: "状態",
@@ -54,7 +54,7 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
     expect(column.to_h["filter"]).to eq(
       "type" => "select",
       "options" => [
-        { "value" => :pending, "label" => "未出荷" },
+        { "value" => "pending", "label" => "未出荷" },
         "出荷済"
       ]
     )
