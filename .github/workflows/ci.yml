@@ -40,7 +40,7 @@ jobs:
 
   pr_rails_matrix:
     if: github.event_name == 'pull_request'
-    name: PR Rails compatibility (${{ matrix.rails }})
+    name: PR Rails compatibility (${{ matrix.rails }}, Ruby ${{ matrix.ruby-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -48,7 +48,7 @@ jobs:
         include:
           - rails: "7.0"
             gemfile: gemfiles/rails_7_0.gemfile
-            ruby-version: "3.2"
+            ruby-version: "3.1"
           - rails: "7.1"
             gemfile: gemfiles/rails_7_1.gemfile
             ruby-version: "3.2"
