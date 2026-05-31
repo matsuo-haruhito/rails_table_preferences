@@ -20,6 +20,8 @@ Run the minimum local checks:
 ```bash
 bundle exec rspec
 node --check app/javascript/controllers/rails_table_preferences_controller.js
+node --check app/javascript/rails_table_preferences/controller.js
+node --check app/javascript/rails_table_preferences/index.js
 bundle exec rake build
 bundle exec rake package:verify
 ```
@@ -38,7 +40,7 @@ These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compat
 Confirm:
 
 - [ ] RSpec passes.
-- [ ] JavaScript syntax check passes.
+- [ ] JavaScript syntax checks pass for the copied controller and package entrypoints.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
