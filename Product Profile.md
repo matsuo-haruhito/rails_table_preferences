@@ -23,9 +23,10 @@ Typical adopters need:
 Current repository scope includes:
 
 - table column definitions with labels, visibility, order, width, overflow/truncation, fixed/pinned metadata, groups, filters, sorts, and ignored columns
-- resource table helpers that infer Active Record columns, apply table profile overrides, and optionally connect TreeView-style tree tables
+- resource table helpers that infer Active Record columns, apply table profile overrides, expose stable body-cell metadata hooks, and optionally connect TreeView-style tree tables
+- table data attribute merge rules that let host apps add their own controllers while preserving gem-owned table preference bindings
 - renderer registries that let host apps map filter/editor metadata to helper libraries such as Rails Fields Kit without making this gem depend on those libraries
-- editor and table helpers for rendering a configurable table-preference UI
+- editor and table helpers for rendering a configurable table-preference UI, including root HTML option pass-through for host-app placement attributes
 - owner/shared/role/organization preset persistence and default resolution
 - controller helpers for merging saved filter/sort state into host-app params
 - export payload helpers for CSV/Excel/report code implemented by the host app
@@ -40,6 +41,7 @@ Rails Table Preferences owns:
 - saved filter/sort UI state as UI metadata
 - column/preset metadata and helper/controller integration
 - Active Record column inference, table profile override application, and renderer registry lookup for resource table helpers
+- body-cell data attributes, editor root HTML option merging, and table preference data-attribute protection for generated helper surfaces
 - baseline accessibility hooks and lightweight demo/sandbox guidance
 
 Host applications own:
@@ -47,6 +49,7 @@ Host applications own:
 - actual search/query execution
 - authorization and tenant/business rules
 - grouped header markup and advanced scroll/sticky layout polish
+- CSS and manual QA for dense headers, horizontal scroll containers, and resize/auto-fit usability in the final screen
 - CSV, Excel, or report file generation
 - resource table partial layout, route URLs, and behavior behind rendered filter/editor controls
 - full administrative management UI for non-owner presets
@@ -98,8 +101,13 @@ Start with these files when orienting yourself:
 
 - `README.md`
 - `docs/index.md`
-- `docs/json_api.md`
 - `docs/resource_tables.md`
+- `docs/resource_table_cell_hooks.md`
+- `docs/table_data_attributes.md`
 - `docs/resource_table_formatter_contract.md`
+- `docs/editor_root_options.md`
+- `docs/resize_auto_fit.md`
+- `docs/json_api.md`
+- `docs/package_verification.md`
 - `AGENTS.md`
 - `CHANGELOG.md`
