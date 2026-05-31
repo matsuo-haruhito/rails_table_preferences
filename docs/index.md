@@ -5,6 +5,7 @@ This directory contains focused documentation for Rails Table Preferences.
 ## Start here
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
+- [Support matrix](support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and choose when to add renderer registries for TreeView or Rails Fields Kit integrations.
 - [Resource table formatter contract](resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
@@ -57,8 +58,9 @@ This directory contains focused documentation for Rails Table Preferences.
 18. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
 19. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
 20. Verify the feature in a sandbox Rails app.
-21. Run the manual QA checklist before asking real users to try the feature.
-22. Before release, run the release checklist and package verification guide.
+21. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+22. Run the manual QA checklist before asking real users to try the feature.
+23. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
