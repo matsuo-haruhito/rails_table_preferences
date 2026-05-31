@@ -12,7 +12,8 @@ RSpec.describe "resource table model inference", type: :helper do
   end
 
   it "keeps empty relation-like collections inferable through klass" do
-    records = double("records", klass: model)
+    records = Object.new
+    records.define_singleton_method(:klass) { model }
 
     expect(helper).to receive(:render).with(
       partial: RailsTablePreferences.configuration.resource_table_partial,
@@ -23,7 +24,8 @@ RSpec.describe "resource table model inference", type: :helper do
   end
 
   it "keeps profile model inference available for empty plain arrays" do
-    profile = double("profile", model: model)
+    profile = Object.new
+    profile.define_singleton_method(:model) { model }
 
     expect(helper).to receive(:render).with(
       partial: RailsTablePreferences.configuration.resource_table_partial,
