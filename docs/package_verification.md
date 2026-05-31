@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
 
 A successful run prints a message like:
 
@@ -60,7 +60,9 @@ app/helpers/rails_table_preferences/table_preferences_helper.rb
 app/helpers/rails_table_preferences/column_options_helper.rb
 app/javascript/controllers/rails_table_preferences_controller.js
 app/javascript/rails_table_preferences/controller.js
+app/javascript/rails_table_preferences/controller.d.ts
 app/javascript/rails_table_preferences/index.js
+app/javascript/rails_table_preferences/index.d.ts
 app/views/rails_table_preferences/_editor.html.erb
 app/views/rails_table_preferences/_resource_table.html.erb
 app/views/rails_table_preferences/_tree_resource_table.html.erb
@@ -124,7 +126,7 @@ docs/javascript_entrypoints.md
 docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
 ## Required path selection criteria
 
@@ -133,29 +135,31 @@ Add a file to `REQUIRED_PATHS` when its absence would make the packaged gem unus
 Use these criteria when adding or reviewing required paths:
 
 - Runtime entrypoints that host apps call directly, such as public helpers, controllers, adapters, registry files, resource table partials, rake tasks, and copied generator templates.
-- JavaScript package entrypoints and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata.
+- JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
 - Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
 
 Do not add every repository file just because it exists. In particular, avoid requiring all docs, all examples, temporary/generated intermediate files, test files, mockups, or future proposal notes unless they are promoted to a packaged public entry point. For a new docs guide, first decide whether README or `docs/index.md` should make it a primary package entrance; if not, a normal link from a nearby guide may be enough without adding it to `REQUIRED_PATHS`.
 
-When a new public helper, partial, package export, README-linked guide, or required visual asset is added, update `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`, the package verifier spec, and this guide together. If the choice is unclear, leave the fixed list unchanged and document the follow-up question in the relevant Issue or PR instead of broadening the guardrail by default.
+When a new public helper, partial, package export, packaged declaration, README-linked guide, or required visual asset is added, update `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`, the package verifier spec, and this guide together. If the choice is unclear, leave the fixed list unchanged and document the follow-up question in the relevant Issue or PR instead of broadening the guardrail by default.
 
 ## Package export targets
 
 The package verification task reads the packaged `package.json` and confirms every string target under `exports` is included in the built gem. For the current package metadata, that means:
 
 ```text
-. -> app/javascript/rails_table_preferences/index.js
-./controller -> app/javascript/rails_table_preferences/controller.js
+. types -> app/javascript/rails_table_preferences/index.d.ts
+. default -> app/javascript/rails_table_preferences/index.js
+./controller types -> app/javascript/rails_table_preferences/controller.d.ts
+./controller default -> app/javascript/rails_table_preferences/controller.js
 ```
 
-This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target check catches drift between `package.json` and the gem contents.
+This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files and declarations, while the export target check catches drift between `package.json` and the gem contents.
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
