@@ -423,6 +423,23 @@ If the metadata uses a different Rails Fields Kit field type, map that type to t
 
 This split keeps the table gem independent from a specific form helper library while still giving the host app a copyable end-to-end path.
 
+## Cross-gem metadata boundary
+
+Use Rails Table Preferences metadata as the table-column contract, not as a shared domain model for every gem on the page. That keeps TreeView, Rails Fields Kit, and host-app query code from depending on each other's private state.
+
+| Area | Stable owner | What crosses the boundary |
+| --- | --- | --- |
+| Column identity | Rails Table Preferences | `column["key"]`, label, visibility, order, width, overflow, filter, sort, editor, and formatter metadata |
+| Tree row identity | TreeView / host app | record id, parent id, node key, hierarchy, expansion, selection, lazy-loading, and row-level hooks |
+| Form control rendering | Rails Fields Kit | concrete `rfk_*` helper HTML, Tom Select behavior, selected/lookup URLs, and field-level metadata objects |
+| Query and permissions | host app | authorization, relation scope, preloading, search params, sorting, pagination, export params, and business actions |
+
+Do not treat a Rails Table Preferences column key as a TreeView node key. A column key such as `customer_id`, `status`, or `customer_name` identifies one visible table field and the saved display/filter/sort state for that field. A TreeView row or node key identifies a record or hierarchy node. They may both derive from the same Active Record model, but they serve different contracts and should be mapped explicitly in the host app or custom partial.
+
+Likewise, filter and editor metadata can carry Rails Fields Kit objects or renderer types, but Rails Table Preferences only stores that metadata and dispatches to the registered renderer. Rails Fields Kit renders the input; the host app decides which query params are accepted, which records are visible, and which preload or authorization rules apply.
+
+For cross-gem adoption guides or docs-portal matrices, document the smallest explicit mapping: which Rails Table Preferences column key is displayed, which TreeView record or node identity owns the row, which Rails Fields Kit helper renders the control, and which controller/search object consumes the submitted params.
+
 ## TreeView integration
 
 When the `tree_view` gem is installed, a tree table can use the same inferred column set:
