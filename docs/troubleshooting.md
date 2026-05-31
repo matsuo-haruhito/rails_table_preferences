@@ -411,6 +411,8 @@ Existing search form example:
 ) %>
 ```
 
+If a bundled select filter appears in the UI but the result set does not change, use [Select filter troubleshooting](select_filter_troubleshooting.md) to verify `values_param`, scalar `options:`, and host-app query ownership.
+
 ## Ransack params are not what you expect
 
 Use `adapter: :ransack` when converting saved filters/sorts for Ransack:
