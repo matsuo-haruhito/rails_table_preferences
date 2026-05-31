@@ -1,6 +1,6 @@
 <svg width="1400" height="920" viewBox="0 0 1400 920" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Rails Table Preferences demo-aligned grouped header and fixed column overview</title>
-  <desc id="desc">A representative documentation image showing grouped headers, a fixed leading order column, and the same Japanese search and sort cues used in the generated demo.</desc>
+  <desc id="desc">A representative documentation image showing grouped headers, a fixed leading order column, a visible separator after the fixed column, and the same Japanese search and sort cues used in the generated demo.</desc>
   <rect width="1400" height="920" fill="#F5F7FB"/>
   <rect x="72" y="56" width="1256" height="88" rx="22" fill="#FFFFFF" stroke="#D6DEEB"/>
   <text x="108" y="102" fill="#162033" font-family="Arial, sans-serif" font-size="28" font-weight="700">Grouped headers and fixed-column context</text>
@@ -29,7 +29,7 @@
   <text x="132" y="644" fill="#283548" font-family="Arial, sans-serif" font-size="17" font-weight="700">Reading notes</text>
   <text x="132" y="680" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- Group labels still come from host-app header markup.</text>
   <text x="132" y="712" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- The pinned first column preserves orientation.</text>
-  <text x="132" y="744" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- The search and sort cues stay close to the demo QA flow.</text>
+  <text x="132" y="744" fill="#4D5B71" font-family="Arial, sans-serif" font-size="15">- The separator marks where host apps may add final polish.</text>
 
   <rect x="472" y="176" width="856" height="664" rx="24" fill="#FFFFFF" stroke="#D6DEEB"/>
   <text x="508" y="226" fill="#162033" font-family="Arial, sans-serif" font-size="24" font-weight="700">Representative table state</text>
@@ -70,6 +70,12 @@
   <rect x="508" y="550" width="120" height="62" rx="12" fill="#EEF2FF"/>
   <rect x="508" y="618" width="120" height="62" rx="12" fill="#EEF2FF"/>
   <rect x="508" y="686" width="120" height="62" rx="12" fill="#EEF2FF"/>
+  <rect x="628" y="356" width="10" height="392" fill="#1F2A44" fill-opacity="0.08"/>
+  <line x1="628" y1="356" x2="628" y2="748" stroke="#4338CA" stroke-width="3"/>
+  <circle cx="628" cy="754" r="5" fill="#4338CA"/>
+  <path d="M628 754 C664 762 686 774 710 790" stroke="#4338CA" stroke-width="2" stroke-linecap="round"/>
+  <rect x="708" y="768" width="318" height="36" rx="18" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="730" y="792" fill="#312E81" font-family="Arial, sans-serif" font-size="14" font-weight="700">Fixed column boundary / host-app polish point</text>
   <text x="544" y="520" fill="#312E81" font-family="Arial, sans-serif" font-size="15" font-weight="700">A001</text>
   <text x="664" y="520" fill="#283548" font-family="Arial, sans-serif" font-size="15">山田商事 東京本店</text>
   <text x="842" y="520" fill="#B45309" font-family="Arial, sans-serif" font-size="15" font-weight="700">未出荷</text>
@@ -92,5 +98,5 @@
   <text x="1206" y="724" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="15">104,000</text>
 
   <rect x="508" y="780" width="784" height="28" rx="14" fill="#E8F0FF"/>
-  <text x="532" y="799" fill="#35517A" font-family="Arial, sans-serif" font-size="14">The grouped-header overview now reads like the rest of the demo-oriented docs instead of switching to a different placeholder vocabulary.</text>
+  <text x="532" y="799" fill="#35517A" font-family="Arial, sans-serif" font-size="14">The grouped-header overview now calls out the fixed column boundary without making final shadow or border policy a gem default.</text>
 </svg>
