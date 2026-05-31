@@ -138,7 +138,14 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('button.setAttribute("aria-label", label)')
     expect(source).to include("button.title = label")
     expect(source).to include('if (operator === "between")')
+    expect(source).to include('if (from && to) return `${operatorText}: ${from} - ${to}`')
+    expect(source).to include('if (from) return `${operatorText}: ${this.filterFromLabelValue} ${from}`')
+    expect(source).to include('if (to) return `${operatorText}: ${this.filterToLabelValue} ${to}`')
+    expect(source).to include('if (["blank", "present", "true", "false"].includes(operator)) return operatorText')
+    expect(source).to include('if (values.length > 0) return `${operatorText}: ${this.filterSummaryValues(values)}`')
+    expect(source).to include('return value ? `${operatorText}: ${value}` : operatorText')
     expect(source).to include('return `${values.slice(0, 2).join(", ")} +${values.length - 2}`')
+    expect(source).to include('return text.length > 24 ? `${text.slice(0, 21)}...` : text')
   end
 
   it "builds filter panels and stores neutral filter conditions" do
