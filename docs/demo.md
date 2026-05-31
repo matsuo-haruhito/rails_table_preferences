@@ -22,6 +22,13 @@ app/controllers/rails_table_preferences_demo/orders_controller.rb
 app/views/rails_table_preferences_demo/orders/index.html.erb
 ```
 
+If you also want the generator to add the demo route to `config/routes.rb`, use `--with-demo-route`. This implies `--with-demo`, copies the same demo files, and skips adding a duplicate route when the route already exists:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-demo-route
+bin/rails db:migrate
+```
+
 The demo controller uses in-memory order rows for display. It does not create an orders table. Preference persistence still uses the normal `table_preferences` table and the mounted engine API.
 
 The generated screen also seeds one shared preset named `共有ビュー`. This gives you a minimal way to confirm that a normal owner can load a shared preset, cannot delete it from the normal editor, and saves changes back into an owner preset instead of overwriting the shared preset.
@@ -49,7 +56,7 @@ Mount the engine if it is not already mounted:
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
 
-Add the demo route:
+If you generated with `--with-demo-route`, the install generator adds the demo route for you. Otherwise, add it manually:
 
 ```ruby
 # config/routes.rb
@@ -265,7 +272,7 @@ app/controllers/rails_table_preferences_demo/orders_controller.rb
 app/views/rails_table_preferences_demo/orders/index.html.erb
 ```
 
-Also remove the demo route:
+Also remove the demo route, including routes added by `--with-demo-route`:
 
 ```ruby
 get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"
