@@ -31,8 +31,7 @@ module RailsTablePreferences
         settings: SettingsNormalizer.call(settings_params),
         default_flag: default_param?
       )
-      clear_other_defaults(preference) if preference.default_flag?
-      preference.save!
+      save_default_preference(preference)
 
       render json: preference_payload(preference), status: :created
     end
@@ -50,8 +49,7 @@ module RailsTablePreferences
       preference.scope_key = scope_key_param
       preference.settings = SettingsNormalizer.call(settings_params)
       preference.default_flag = default_param? if params.key?(:default)
-      clear_other_defaults(preference) if preference.default_flag?
-      preference.save!
+      save_default_preference(preference)
 
       render json: preference_payload(preference), status: :ok
     end
@@ -137,6 +135,13 @@ module RailsTablePreferences
         raw_settings
       else
         {}
+      end
+    end
+
+    def save_default_preference(preference)
+      Preference.transaction do
+        clear_other_defaults(preference) if preference.default_flag?
+        preference.save!
       end
     end
 
