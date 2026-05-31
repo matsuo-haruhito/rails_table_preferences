@@ -41,7 +41,7 @@ Confirm:
 - [ ] JavaScript syntax check passes.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
-- [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
+- [ ] Representative Rails 7.0 / 7.1 / Rails 7.2 / Rails 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
 ## 3. CI checks
@@ -205,6 +205,8 @@ Check the main user paths:
 - [ ] README links to Package verification.
 - [ ] README links to JavaScript entrypoints.
 - [ ] `docs/index.md` links to all major docs.
+- [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
+- [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
 - [ ] Demo docs clearly say the demo route must be added manually.
