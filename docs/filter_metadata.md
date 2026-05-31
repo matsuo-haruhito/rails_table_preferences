@@ -51,7 +51,27 @@ table_preferences_column(:internal_note, label: "内部メモ", filter: false, o
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
 
-For bundled `select` filters, `options:` is currently a scalar list. Each option is used as both the HTML `<option value>` and the visible option text, and saved filter summaries display the saved scalar values. If a host app needs separate machine values and human labels, keep that mapping in host-app code, provide a copied/custom controller or filter UI, or wait for a dedicated value/label pair feature rather than documenting `{ value:, label: }` as supported by the bundled controller today.
+For bundled `select` filters, `options:` accepts scalar values or label/value hashes. Scalar options keep the historical behavior: the same value is used for the HTML `<option value>`, visible option text, saved filter value, and adapter params.
+
+Use `{ value:, label: }` when the saved/search value should be stable machine data and the UI should show a human label:
+
+```ruby
+table_preferences_column(
+  :status,
+  label: "状態",
+  filter: {
+    type: :select,
+    values_param: :statuses,
+    options: [
+      { value: "pending", label: "未出荷" },
+      { value: "shipped", label: "出荷済" },
+      { value: "hold", label: "保留" }
+    ]
+  }
+)
+```
+
+The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
 
 ## Bundled default filter operators
 
@@ -180,7 +200,7 @@ Saved filter conditions use a neutral format:
     },
     "status": {
       "operator": "in",
-      "values": ["未出荷", "出荷済"]
+      "values": ["pending", "shipped"]
     },
     "delivery_date": {
       "operator": "between",
@@ -243,7 +263,7 @@ Example output:
 ```ruby
 {
   "search_word" => "山田",
-  "statuses" => ["未出荷", "出荷済"],
+  "statuses" => ["pending", "shipped"],
   "from_date" => "2026-01-01",
   "to_date" => "2026-01-31",
   "sort" => "-delivery_date"
