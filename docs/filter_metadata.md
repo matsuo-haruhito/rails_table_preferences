@@ -140,6 +140,17 @@ Supported plain-param metadata:
 | `operator_param` | Optional param that receives the selected operator |
 | `sort_param` | Sort key name passed as the sort value |
 
+`operator_param` is not emitted for every operator. The ControllerParams adapter currently maps operators as follows:
+
+- `between` writes the `from` and `to` values to `from_param` / `to_param`, or to `from_<param>` / `to_<param>` fallbacks. It does not emit `operator_param`.
+- `gteq` and `gt` write the scalar value to `from_param`, or to the `from_<param>` fallback. They do not emit `operator_param`.
+- `lteq` and `lt` write the scalar value to `to_param`, or to the `to_<param>` fallback. They do not emit `operator_param`.
+- `in` and `not_in` write an array to `values_param`, or to the base `param` fallback. They do not emit `operator_param`.
+- `blank`, `present`, `true`, and `false` emit the operator as the signal because they do not carry a separate value. They use `operator_param` when provided, otherwise `<param>_operator`.
+- Other scalar operators such as `contains` and `equals` write the scalar value to `param`. They also emit `operator_param` only when that metadata key is present.
+
+If an existing `search(params)` implementation expects an operator name for every condition, normalize that expectation in host-app code or provide metadata/UI conventions that match the adapter output. Rails Table Preferences keeps this adapter as a params-shaping helper; it does not execute the query or infer a host application's predicate semantics.
+
 ## Saved filter settings
 
 Saved filter conditions use a neutral format:
