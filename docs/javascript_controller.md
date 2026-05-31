@@ -110,7 +110,15 @@ If the host app mounts the controller root manually instead of using the bundled
 - `data-rails-table-preferences-columns-value`
 - `data-rails-table-preferences-settings-value`
 
-Optional UI labels such as `data-rails-table-preferences-filter-label-value` and `data-rails-table-preferences-sort-asc-label-value` can also be overridden when the host app needs localized copy different from the defaults.
+Optional UI labels such as `data-rails-table-preferences-filter-label-value`, `data-rails-table-preferences-filter-operator-labels-value`, and `data-rails-table-preferences-sort-asc-label-value` can also be overridden when the host app needs localized copy different from the defaults.
+
+Use `data-rails-table-preferences-filter-operator-labels-value` with a JSON object when only operator wording needs to change. Keys are operator names, and values are the labels used by both the filter panel select options and active filter summaries:
+
+```erb
+data-rails-table-preferences-filter-operator-labels-value='<%= { contains: "含める", equals: "完全一致" }.to_json %>'
+```
+
+Operators omitted from the object keep the bundled Japanese defaults. Unknown custom operator names fall back to the operator string unless the object provides a label for that key. This root value changes display wording only; filter metadata, saved settings shape, adapters, and query execution remain host-app responsibilities.
 
 When the page also renders the bundled editor or preset select, pass `data-rails-table-preferences-name-value` too so the helper-free table root stays aligned with the current preset name.
 
@@ -174,6 +182,7 @@ Representative controller-root label values include:
 - `data-rails-table-preferences-filter-apply-label-value`
 - `data-rails-table-preferences-filter-clear-label-value`
 - `data-rails-table-preferences-filter-operator-label-value`
+- `data-rails-table-preferences-filter-operator-labels-value`
 - `data-rails-table-preferences-filter-value-label-value`
 - `data-rails-table-preferences-filter-from-label-value`
 - `data-rails-table-preferences-filter-to-label-value`
@@ -187,10 +196,10 @@ Representative controller-root label values include:
 
 In practice that means:
 
-- filter/sort labels and scope fallback labels can be overridden per controller root through `data-rails-table-preferences-*-label-value`
+- filter/sort labels, filter operator labels, and scope fallback labels can be overridden per controller root through `data-rails-table-preferences-*-label-value` or `data-rails-table-preferences-filter-operator-labels-value`
 - bundled helper/status/reset wording is usually better changed through host-app locale entries
 - copied ERB is only needed when the host app wants different markup, helper-text placement, or a custom status surface
-- copied or replacement JavaScript is needed when the host app wants controller vocabulary or behavior that is not exposed as a root value, such as custom filter operator wording or different busy-state logic
+- copied or replacement JavaScript is still needed when the host app wants controller vocabulary or behavior that is not exposed as a root value, such as different busy-state logic
 
 For a route-by-route decision guide and locale example, see [Accessibility baseline](accessibility.md).
 
@@ -238,6 +247,7 @@ Important invariants include:
 - Japanese default UI labels remain available
 - table cell effects are table-scoped
 - filters and sorts are preserved by editor actions
+- filter operator label overrides fall back to bundled defaults
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
 - document listeners and detached filter panels are cleaned up
