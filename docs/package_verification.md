@@ -117,6 +117,7 @@ docs/release_checklist.md
 docs/package_verification.md
 docs/support_matrix.md
 docs/controller_integration.md
+docs/json_api.md
 docs/filter_metadata.md
 docs/filter_adapters.md
 docs/javascript_entrypoints.md
