@@ -53,6 +53,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/json_api.md",
         "docs/filter_metadata.md",
         "docs/filter_adapters.md",
+        "docs/select_filter_troubleshooting.md",
         "docs/javascript_entrypoints.md",
         "docs/javascript_controller.md"
       )
