@@ -302,7 +302,7 @@ module RailsTablePreferences
     def table_preferences_filter_metadata(column)
       filter = column["filter"] || column[:filter]
       filter = filter.to_table_filter if filter.respond_to?(:to_table_filter)
-      filter.respond_to?(:h) ? filter.to_h.deep_stringify_keys : filter
+      filter.respond_to?(:to_h) ? filter.to_h.deep_stringify_keys : filter
     end
 
     def table_preferences_editor_metadata(column)
