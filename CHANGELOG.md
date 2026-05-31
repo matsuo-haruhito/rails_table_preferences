@@ -30,6 +30,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Bundled Stimulus controller for applying column visibility, order, width, truncation, filters, sorts, header drag reorder, resize handles, pinned column hooks, and preset editing behavior.
 - Copy-based JavaScript, stylesheet, view, and install generators.
 - Optional `--with-demo` install generator mode for local browser verification.
+- Optional `--with-demo-route` install generator mode for copying the demo screen and adding its route in one explicit opt-in step.
 - Generated demo verification includes owner, role, organization, export payload, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
