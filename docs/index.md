@@ -7,6 +7,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Support matrix](support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and choose when to add renderer registries for TreeView or Rails Fields Kit integrations.
+- [Resource table cell hooks](resource_table_cell_hooks.md): stable body-cell data attributes for light host-app styling and the boundary with custom partials.
 - [Table data attribute merge boundary](table_data_attributes.md): host app `data-controller` coexistence and gem-owned `data-rails-table-preferences-*` protection rules for rendered tables.
 - [Resource table formatter contract](resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
@@ -45,26 +46,27 @@ This directory contains focused documentation for Rails Table Preferences.
 2. Mount the engine if you use the bundled JSON API.
 3. Confirm the Stimulus controller registration path for the host app. Use the default manifest for `stimulus-rails`, or the package entrypoint for Vite / `app/frontend` apps.
 4. For convention-first tables, try `resource_table_for @records` and review [Resource table adapters](resource_tables.md).
-5. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use renderer registries from [Resource table adapters](resource_tables.md) before copying a custom partial.
-6. For manually controlled tables, define table columns with `table_preferences_column`.
-7. Render `table_preferences_editor` and `table_preferences_table_tag`.
-8. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
-9. Add `filter:` and `sortable: true` metadata where needed.
-10. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
-11. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-12. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-13. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-14. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-15. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-16. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-17. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-18. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-19. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-20. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
-21. Verify the feature in a sandbox Rails app.
-22. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-23. Run the manual QA checklist before asking real users to try the feature.
-24. Before release, run the release checklist and package verification guide.
+5. If the inferred resource table only needs light cell styling, use [Resource table cell hooks](resource_table_cell_hooks.md) before copying the default partial.
+6. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use renderer registries from [Resource table adapters](resource_tables.md) before copying a custom partial.
+7. For manually controlled tables, define table columns with `table_preferences_column`.
+8. Render `table_preferences_editor` and `table_preferences_table_tag`.
+9. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
+10. Add `filter:` and `sortable: true` metadata where needed.
+11. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
+12. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+13. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+14. Configure `scope_context_method` only if shared, role, or organization presets are needed.
+15. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+16. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+17. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+18. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+19. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+20. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+21. Optionally generate the demo screen with `--with-demo` for quick local browser verification, after confirming the configured current-owner method returns a persisted owner record.
+22. Verify the feature in a sandbox Rails app.
+23. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+24. Run the manual QA checklist before asking real users to try the feature.
+25. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
@@ -79,6 +81,7 @@ Rails Table Preferences owns:
 - filter/sort UI state
 - adapter params for host applications or search gems
 - resource table column inference and profile overrides when the helper path is used
+- resource table body-cell metadata hooks for light host-app styling
 - renderer registry lookup for filter/editor metadata when a host app registers renderers
 - export column payloads derived from saved display preferences
 - baseline accessibility hooks for generated controls
@@ -92,6 +95,7 @@ Host applications own:
 - semantic page/table structure around the generated controls
 - sticky column offset and scroll-container polish for complex layouts
 - grouped table header markup
+- cell styling rules, badges, and complex custom table presentation
 - renderer registrations and concrete form-helper HTML for filter/editor metadata
 - CSV, Excel, and report file generation
 - administration UI for shared, role, or organization presets
