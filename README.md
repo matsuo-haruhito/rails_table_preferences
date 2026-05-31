@@ -384,6 +384,7 @@ The settings payload includes column display preferences plus neutral filter and
     }
   ]
 }
+```
 
 Existing `ColumnAdjustment` style keys are accepted by the normalizer:
 
