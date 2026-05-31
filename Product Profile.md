@@ -98,6 +98,7 @@ Start with these files when orienting yourself:
 
 - `README.md`
 - `docs/index.md`
+- `docs/json_api.md`
 - `docs/resource_tables.md`
 - `docs/resource_table_formatter_contract.md`
 - `AGENTS.md`
