@@ -111,6 +111,7 @@ docs/troubleshooting.md
 docs/manual_qa.md
 docs/release_checklist.md
 docs/package_verification.md
+docs/support_matrix.md
 docs/controller_integration.md
 docs/filter_metadata.md
 docs/filter_adapters.md
