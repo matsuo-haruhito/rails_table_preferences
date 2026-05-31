@@ -66,7 +66,15 @@ The bundled editor passes these values to the controller root so the Stimulus co
 
 Host apps can also override the generated controller-root attributes for a single mounted table, such as `data-rails-table-preferences-filter-label-value` or `data-rails-table-preferences-sort-asc-label-value`, when one screen needs wording that differs from the global locale.
 
-Filter operator option text such as `contains`, `equals`, or range-specific summaries is still controller vocabulary. Use copied or replacement JavaScript if a host app needs to change behavior or vocabulary that is not exposed through locale keys or root values.
+Filter operator option text such as `contains`, `equals`, or range-specific summaries is controller vocabulary. When a host app uses the packaged `rails_table_preferences/controller` entrypoint, it can override that vocabulary per controller root with `data-rails-table-preferences-filter-operator-labels-value`:
+
+```erb
+data-rails-table-preferences-filter-operator-labels-value='<%= { contains: "含める", equals: "完全一致" }.to_json %>'
+```
+
+The value is a JSON object keyed by operator name. Operators omitted from the object keep the bundled defaults, and unknown custom operators fall back to the raw operator string unless the object provides a label.
+
+This root value is provided by the package entrypoint subclass. Host apps that copy or register the base generated controller directly should not assume the package entrypoint-only value is present; use copied or replacement JavaScript when changing controller behavior, adding new operators, or supporting a controller path that does not include the package entrypoint subclass.
 
 ## Scope labels
 
@@ -126,7 +134,8 @@ Use the lightest path that matches the change:
 
 1. Locale keys for global wording changes across every bundled editor.
 2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, or scope fallback wording.
-3. Copied ERB when markup, helper-text placement, or status-region structure needs to change.
-4. Copied or replacement JavaScript when controller behavior, filter operator vocabulary, busy-state logic, or filter panel interaction needs to change.
+3. Package entrypoint `data-rails-table-preferences-filter-operator-labels-value` when a packaged-controller table only needs different filter operator display text.
+4. Copied ERB when markup, helper-text placement, or status-region structure needs to change.
+5. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, or filter panel interaction needs to change.
 
 See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.
