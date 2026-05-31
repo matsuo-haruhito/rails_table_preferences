@@ -222,6 +222,7 @@ If changing settings structure, helper options, or JSON API shape, confirm:
 - [ ] Existing controller params adapter behavior is preserved.
 - [ ] Existing Ransack adapter behavior is preserved.
 - [ ] Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
+- [ ] Run the display preference behavior section in [Manual QA checklist](manual_qa.md) when changing column labels, overflow metadata, fixed/pinned metadata, or reset/default handling.
 
 ## 11. Release notes
 
