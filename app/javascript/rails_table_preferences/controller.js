@@ -27,6 +27,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     })
   }
 
+  clearFiltersAndSorts(event) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
+    this.closeFilterPanel()
+    this.apply()
+  }
+
   filterOperatorText(operator) {
     const key = String(operator)
     const override = this.filterOperatorLabelsValue?.[key]
