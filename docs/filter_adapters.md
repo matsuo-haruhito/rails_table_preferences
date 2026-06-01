@@ -9,6 +9,8 @@ The preferred boundary is:
 
 This lets the gem work alongside tools such as Ransack, Datagrid, Filterrific, or a host application's own search objects.
 
+Use this guide when you need adapter-shape examples for neutral filters and sorts. For full list-screen walkthroughs that keep `search(params)` / `order_by(params[:sort])` in the host app, start with [Practical examples](examples.md) and then return here for the Ransack, Datagrid, Filterrific, or custom search-object mapping boundary.
+
 ## Neutral filter format
 
 Saved settings should remain gem-neutral:
