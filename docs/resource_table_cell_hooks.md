@@ -58,8 +58,8 @@ Use these hooks when the host app only needs small CSS adjustments such as align
 
 ## Responsibility boundary
 
-The data hooks describe generic row presence and column metadata; they do not add built-in badges, enum colors, alignment rules, record identity, or business-specific value formatting. Keep complex presentation in a profile `display` formatter or a custom partial.
+The data hooks describe generic flat row presence and column metadata; they do not add built-in badges, enum colors, alignment rules, record identity, or business-specific value formatting. Keep complex presentation in a profile `display` formatter or a custom partial.
 
 If a column has no filter metadata, `data-rails-table-preferences-filter-type` is omitted instead of emitting an empty value. This keeps selectors explicit and avoids treating unknown metadata as a stable styling contract.
 
-Tree resource tables use the same row-cell hooks as flat resource tables. Tree row markup, indentation, hierarchy controls, and row expansion remain owned by TreeView, so TreeView-specific row selectors should come from TreeView or a custom tree row partial rather than the flat resource row hook.
+Tree resource tables use the same cell hooks as flat resource tables. Tree row markup, indentation, hierarchy controls, and row expansion remain owned by TreeView, so TreeView-specific row selectors should come from TreeView or a custom tree row partial rather than the flat resource row hook.
