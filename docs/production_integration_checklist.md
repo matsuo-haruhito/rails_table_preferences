@@ -8,10 +8,13 @@ The goal is to choose the smallest production path, keep demo-only setup separat
 
 - Confirm `RailsTablePreferences.config.owner_model` matches the model that owns table preferences in the host app.
 - Confirm `RailsTablePreferences.config.current_user_method` returns a persisted owner record for normal requests.
+- Confirm `RailsTablePreferences.config.parent_controller_class_name` points to the host controller that should own the mounted JSON API boundary, such as `ApplicationController` or an authenticated base controller.
 - Mount `RailsTablePreferences::Engine` when the screen uses the bundled JSON API.
+- Confirm the mounted API routes inherit the expected host-app authentication, CSRF handling, locale/tenant setup, and other `before_action` callbacks from the configured parent controller.
 - If the mount path is not `/rails_table_preferences`, keep `config.mount_path` aligned with the route.
+- If shared, role, or organization presets are enabled, confirm `RailsTablePreferences.config.scope_context_method` is available from the parent controller and returns the identifiers those presets use.
 
-See [Quick start](quick_start.md) and [Install path options](install_paths.md) for the generator and mount-path setup.
+See [Quick start](quick_start.md), [Install path options](install_paths.md), and [Mounted JSON API](json_api.md) for the generator, mount-path, and engine-boundary setup.
 
 ## 2. Choose the table rendering path
 
@@ -58,12 +61,15 @@ Before asking real users to try the screen, verify this path in the real host ap
 4. Submit the existing search form and confirm saved filter/sort state still round-trips.
 5. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
 6. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
-7. Review keyboard focus, resize handles, sticky columns, and narrow viewport behavior on the production layout.
+7. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
+8. Review keyboard focus, resize handles, sticky columns, and narrow viewport behavior on the production layout.
 
 See [Manual QA checklist](manual_qa.md), [Troubleshooting](troubleshooting.md), and [Support matrix](support_matrix.md) for the broader verification path.
 
 ## Boundary reminders
 
 Rails Table Preferences owns the editor UI, saved settings payload, preset API calls, managed-column data attributes, and helper-generated export payloads.
+
+The mounted engine inherits `RailsTablePreferences.config.parent_controller_class_name`; the configured host controller is where authentication, CSRF handling, tenant or locale setup, and other request-wide callbacks should be checked.
 
 The host app still owns authentication, authorization, query execution, joins, pagination, unmanaged columns, export file generation, and final screen styling.
