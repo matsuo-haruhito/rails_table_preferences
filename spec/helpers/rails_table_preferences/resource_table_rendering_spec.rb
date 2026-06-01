@@ -5,6 +5,27 @@ RSpec.describe "resource table rendering", type: :helper do
     RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
   end
 
+  def stub_tree_view_resource_table_dependencies
+    stub_const("TreeView", Module.new)
+    stub_const("TreeView::Tree", Class.new do
+      attr_reader :root_items
+
+      def initialize(records:, parent_id_method:)
+        @root_items = records
+      end
+    end)
+    stub_const("TreeView::UiConfigBuilder", Class.new do
+      def initialize(context:, node_prefix:); end
+
+      def build_static
+        {}
+      end
+    end)
+    stub_const("TreeView::RenderState", Class.new do
+      def initialize(**); end
+    end)
+  end
+
   it "renders an empty row with a visible-column colspan" do
     html = helper.resource_table_for(
       User.none,
@@ -57,6 +78,8 @@ RSpec.describe "resource table rendering", type: :helper do
   end
 
   it "keeps the default tree resource table markup unwrapped" do
+    stub_tree_view_resource_table_dependencies
+
     html = helper.tree_resource_table_for(
       User.none,
       model: User,
@@ -72,6 +95,8 @@ RSpec.describe "resource table rendering", type: :helper do
   end
 
   it "renders an optional tree resource scroll wrapper without moving table options" do
+    stub_tree_view_resource_table_dependencies
+
     html = helper.tree_resource_table_for(
       User.none,
       model: User,
@@ -96,6 +121,8 @@ RSpec.describe "resource table rendering", type: :helper do
   end
 
   it "keeps the tree resource all-hidden fallback inside the optional wrapper" do
+    stub_tree_view_resource_table_dependencies
+
     item = double("item", id: 1, parent_id: nil, name: "Root")
 
     html = helper.render(
