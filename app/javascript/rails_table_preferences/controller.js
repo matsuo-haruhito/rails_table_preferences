@@ -27,6 +27,25 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     })
   }
 
+  installResizeHandles() {
+    super.installResizeHandles()
+    this.element.querySelectorAll("[data-rails-table-preferences-resize-handle]").forEach((handle) => {
+      if (handle.dataset.railsTablePreferencesKeyboardAutoFitInstalled === "true") return
+      handle.dataset.railsTablePreferencesKeyboardAutoFitInstalled = "true"
+      handle.addEventListener("keydown", this.autoFitColumnFromResizeHandleKeyboard.bind(this))
+    })
+  }
+
+  autoFitColumnFromResizeHandleKeyboard(event) {
+    if (!this.isResizeHandleAutoFitKey(event)) return
+    event.preventDefault()
+    this.autoFitColumnFromHandle(event)
+  }
+
+  isResizeHandleAutoFitKey(event) {
+    return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
+  }
+
   filterOperatorText(operator) {
     const key = String(operator)
     const override = this.filterOperatorLabelsValue?.[key]
