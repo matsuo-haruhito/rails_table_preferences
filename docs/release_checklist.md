@@ -194,6 +194,7 @@ Confirm controller integration behavior:
 Check the main user paths:
 
 - [ ] README links to Quick start.
+- [ ] README links to Production integration checklist.
 - [ ] README links to Decision guide.
 - [ ] README links to Scoped presets.
 - [ ] README links to Fixed columns and column groups.
@@ -212,6 +213,7 @@ Check the main user paths:
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
 - [ ] Demo docs clearly say the demo route must be added manually.
+- [ ] `docs/production_integration_checklist.md` stays discoverable as the bridge from quick start or demo verification to a real host-app index screen.
 - [ ] `docs/demo.md`, `docs/manual_qa.md`, and `docs/release_checklist.md` stay aligned on the current demo verification surface, including owner/scope summaries, scoped preset precedence, export payload preview, grouped-header consistency, and async preset recovery.
 - [ ] Troubleshooting covers Stimulus, Vite entrypoints, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
 - [ ] Responsibility boundary is clear: host app owns database search, authorization, complex sticky layout polish, export file generation, and shared preset admin UI.
