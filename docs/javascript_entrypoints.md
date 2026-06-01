@@ -34,6 +34,17 @@ import { RailsTablePreferencesController } from "rails_table_preferences"
 
 Use the package entrypoint when the host app should not depend on a copied controller path under `app/javascript/controllers` from an `app/frontend` entrypoint.
 
+### Package-only controller boundary
+
+The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`.
+
+Current package-only behavior is intentionally small:
+
+- `filterOperatorLabelsValue` allows package-entrypoint users to override bundled filter operator labels without editing a copied controller.
+- Sortable header handling preserves host-provided `title` attributes while still generating sort hints for untitled headers.
+
+Do not assume those package-only values or overrides exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
+
 ### Resolve the gem entrypoint explicitly
 
 Vite does not automatically resolve `app/javascript` files that live inside a Ruby gem. When the host app imports `rails_table_preferences` or `rails_table_preferences/controller`, add an alias or an equivalent bundler resolver that points those specifiers at the installed gem.
