@@ -12,9 +12,19 @@ app/javascript/controllers/rails_table_preferences_controller.js
 
 For Rails applications using the default `stimulus-rails` manifest loader, files ending in `_controller.js` under `app/javascript/controllers` are usually registered automatically. In that setup, no extra import is needed after running the install generator.
 
+If the host app will register the package entrypoint instead, skip this copied file during install:
+
+```bash
+bin/rails generate rails_table_preferences:install --skip-javascript
+```
+
 ## Vite / app/frontend path
 
-For apps that use Vite and an entrypoint such as `app/frontend/entrypoints/application.js`, register the controller explicitly from the gem package entrypoint:
+For apps that use Vite and an entrypoint such as `app/frontend/entrypoints/application.js`, use the existing `--skip-javascript` generator option and register the controller explicitly from the gem package entrypoint:
+
+```bash
+bin/rails generate rails_table_preferences:install --skip-javascript
+```
 
 ```js
 import { Application } from "@hotwired/stimulus"
@@ -101,7 +111,9 @@ This local declaration only describes the current package entrypoints enough for
 
 Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, or already depends on copied JavaScript for behavior changes that are not exposed through controller-root values.
 
-Prefer the package entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. This path is also the lighter choice for wording and label changes that can stay in Rails locale files or controller-root values such as `data-rails-table-preferences-filter-operator-labels-value`.
+Prefer the package entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. Use `--skip-javascript` for this path so the generator still creates the migration and initializer while leaving controller registration to the host app entrypoint.
+
+This path is also the lighter choice for wording and label changes that can stay in Rails locale files or controller-root values such as `data-rails-table-preferences-filter-operator-labels-value`.
 
 Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass.
 
@@ -153,5 +165,7 @@ If the host application wants to maintain its own JavaScript implementation, ski
 ```bash
 bin/rails generate rails_table_preferences:install --skip-javascript
 ```
+
+That is the same install option used by package entrypoint apps; the difference is only whether the host app registers `rails_table_preferences/controller` or a compatible host-owned controller.
 
 Rails Table Preferences does not require importmap-specific setup.

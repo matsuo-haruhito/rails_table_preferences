@@ -8,13 +8,15 @@ Use this guide when the host app has more than one reasonable installation path 
 | --- | --- | --- |
 | Default Rails app using `stimulus-rails` controller manifests | `bin/rails generate rails_table_preferences:install` | Continue with [Quick start](quick_start.md) and mount the engine. |
 | Host app uses another owner model, such as `Customer` | `bin/rails generate rails_table_preferences:install --owner-model customers` | Set `config.owner_model` and `config.current_user_method` before opening the editor, API, or demo. |
-| Vite, `app/frontend`, or another bundler should import the package entrypoint | `bin/rails generate rails_table_preferences:install` | Register `rails_table_preferences/controller` from the host app entrypoint and add the resolver from [JavaScript entrypoints](javascript_entrypoints.md). |
-| Host app wants to avoid copying the bundled controller | `bin/rails generate rails_table_preferences:install --skip-javascript` | Register a host-owned controller with the same Stimulus name, or import the package entrypoint manually. |
+| Vite, `app/frontend`, or another bundler should import the package entrypoint | `bin/rails generate rails_table_preferences:install --skip-javascript` | Register `rails_table_preferences/controller` from the host app entrypoint and add the resolver from [JavaScript entrypoints](javascript_entrypoints.md). |
+| Host app wants to provide its own controller implementation | `bin/rails generate rails_table_preferences:install --skip-javascript` | Register a host-owned controller with the `rails-table-preferences` Stimulus name. |
 | Host app wants to avoid copying the default stylesheet | `bin/rails generate rails_table_preferences:install --skip-stylesheets` | Load equivalent host-app CSS for the editor, table state, resize handles, and fixed-column hooks. |
 | Local browser verification before real screen integration | `bin/rails generate rails_table_preferences:install --with-demo` | Add the demo route manually, then follow [Demo screen generator](demo.md). |
 | Local browser verification with the demo route added by the generator | `bin/rails generate rails_table_preferences:install --with-demo-route` | Open `/rails_table_preferences_demo/orders` after migration and engine mount. |
 
 All paths still create the migration and initializer. Run `bin/rails db:migrate` after generation unless the host app is intentionally inspecting copied files before applying the database change.
+
+`--skip-javascript` only skips the copied `app/javascript/controllers/rails_table_preferences_controller.js` file. It does not remove the JavaScript requirement: the host app must still register either the package entrypoint or a compatible host-owned controller with the `rails-table-preferences` Stimulus name.
 
 ## Owner requirement for demo and API checks
 
@@ -35,7 +37,13 @@ The method must return a persisted record. `--with-demo` and `--with-demo-route`
 
 The default install copies `app/javascript/controllers/rails_table_preferences_controller.js` for apps that rely on the normal `stimulus-rails` manifest path.
 
-Use the package entrypoint when the host app starts Stimulus from another entrypoint, such as Vite or `app/frontend`:
+Use the package entrypoint when the host app starts Stimulus from another entrypoint, such as Vite or `app/frontend`. In that path, run the install generator with `--skip-javascript` so the app does not also receive a copied controller it will not register:
+
+```bash
+bin/rails generate rails_table_preferences:install --skip-javascript
+```
+
+Then register the package entrypoint from the host app's existing Stimulus application:
 
 ```js
 import RailsTablePreferencesController from "rails_table_preferences/controller"
@@ -45,7 +53,7 @@ application.register("rails-table-preferences", RailsTablePreferencesController)
 
 For Vite and similar bundlers, also add a resolver for `rails_table_preferences` and `rails_table_preferences/controller`. Keep [JavaScript entrypoints](javascript_entrypoints.md) as the source of truth for the full resolver example, TypeScript declaration note, and the package-only controller behavior boundary.
 
-When choosing between the copied controller, the package entrypoint, and `--skip-javascript`, verify any screen-specific controller-root values against that boundary. Package-only values such as `data-rails-table-preferences-filter-operator-labels-value` are available only when the registered controller comes from `rails_table_preferences/controller`; host-owned or copied controller paths need their own JavaScript for equivalent behavior.
+When choosing between the copied controller, the package entrypoint, and a host-owned controller, verify any screen-specific controller-root values against that boundary. Package-only values such as `data-rails-table-preferences-filter-operator-labels-value` are available only when the registered controller comes from `rails_table_preferences/controller`; host-owned or copied controller paths need their own JavaScript for equivalent behavior.
 
 ## Demo option boundary
 
