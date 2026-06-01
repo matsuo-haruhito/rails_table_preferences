@@ -45,6 +45,16 @@ Current package-only behavior is intentionally small:
 
 Do not assume those package-only values or overrides exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
 
+Use this matrix when checking which behavior a host app receives:
+
+| Host app registration path | Controller source | Receives shared base behavior | Receives package-only behavior | Typical use |
+| --- | --- | --- | --- | --- |
+| Default `stimulus-rails` install | Copied `app/javascript/controllers/rails_table_preferences_controller.js` | Yes | No | Conventional Rails apps that want inspectable copied assets. |
+| Vite / `app/frontend` package import | `rails_table_preferences/controller` | Yes, through subclassing the copied controller | Yes | Bundled entrypoints that should pick up package-level adapter behavior. |
+| `--skip-javascript` or host-owned replacement | Host app controller registered as `rails-table-preferences` | Only if the host app imports or reuses it | Only if the host app imports `rails_table_preferences/controller` | Apps that intentionally own controller behavior. |
+
+When adding future package-only behavior, update this section and check whether copied-controller users need the same behavior. If they do, implement and test it in the base copied controller instead of only in the package subclass. If they do not, keep the behavior package-only, note the registration path here, and avoid implying that default `stimulus-rails` installs receive it automatically.
+
 ### Resolve the gem entrypoint explicitly
 
 Vite does not automatically resolve `app/javascript` files that live inside a Ruby gem. When the host app imports `rails_table_preferences` or `rails_table_preferences/controller`, add an alias or an equivalent bundler resolver that points those specifiers at the installed gem.
