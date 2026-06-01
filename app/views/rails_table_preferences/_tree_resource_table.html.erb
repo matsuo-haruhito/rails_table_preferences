@@ -27,6 +27,7 @@
   class: ["tree-view-table", "rails-table-preferences-tree-resource-table", options[:class]].compact.join(" ")
 ) %>
 <% visible_columns = table_state.fetch("visible_columns") %>
+<% empty_colspan = [visible_columns.size, 1].max %>
 
 <%= table_preferences_table_tag(
   table_key: table_key,
@@ -50,7 +51,7 @@
   <tbody>
     <% if records.empty? %>
       <tr class="rails-table-preferences-resource-table__empty-row">
-        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= visible_columns.size %>">
+        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= empty_colspan %>">
           <%= I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
         </td>
       </tr>
