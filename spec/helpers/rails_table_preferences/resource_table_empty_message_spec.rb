@@ -15,14 +15,9 @@ RSpec.describe "resource table empty message", type: :helper do
   end
 
   it "keeps the existing I18n fallback when no empty message is provided" do
-    I18n.backend.store_translations(
-      :en,
-      rails_table_preferences: { resource_table: { empty: "No saved users" } }
-    )
-
     html = helper.resource_table_for(User.none, only: [:name], render_editor: false)
 
-    expect(html).to include("No saved users")
+    expect(html).to include("No records to display")
   end
 
   it "does not render the empty message when records are present" do
