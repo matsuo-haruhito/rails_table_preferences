@@ -167,10 +167,14 @@ CI runs:
 ```bash
 bundle exec rspec
 node --check app/javascript/controllers/rails_table_preferences_controller.js
+node --check app/javascript/rails_table_preferences/controller.js
+node --check app/javascript/rails_table_preferences/index.js
 bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The RSpec suite includes a JavaScript entrypoint smoke spec that loads the documented package root and controller entrypoints inside a minimal Node sandbox. That complements the syntax check and package file verification by guarding the export wiring itself.
+The JavaScript syntax step checks the copied controller, the package controller entrypoint, and the package root entrypoint. Keep this snippet synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
+
+The RSpec suite includes a JavaScript entrypoint smoke spec that loads the documented package root and controller entrypoints inside a minimal Node sandbox. It also verifies Node package resolution for `rails_table_preferences` and `rails_table_preferences/controller`, keeps package-only controller values out of the copied controller contract, and guards representative package-entrypoint behavior such as filter operator labels and sort-title preservation. That complements the syntax check and package file verification by guarding the export wiring and runtime entrypoint shape itself.
 
 Manual package inspection is still recommended before tagging a release.
