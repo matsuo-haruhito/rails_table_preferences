@@ -49,6 +49,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Render `table_preferences_table_tag` around the target table.
 - [ ] Confirm the editor is visible.
 - [ ] Confirm the target table is visible.
+- [ ] If using `resource_table_for` or `tree_resource_table_for` with `caption:`, confirm the rendered caption is a short semantic table name and does not duplicate the page heading or surrounding instructions.
 - [ ] Confirm every target header and cell has the matching `data-rails-table-preferences-column-key`.
 - [ ] Confirm Japanese column labels are shown when host app locale entries are present.
 - [ ] Confirm explicit `label:` values override locale lookup.
@@ -247,6 +248,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm the preset name helper copy or accessible description explains that save and save as new use that field as the edited preset name.
 - [ ] Confirm the reset visible helper, hover text, or accessible name explains that current edits are discarded and defaults are restored.
 - [ ] Confirm the bundled `role="status"` region announces preset action progress and result copy.
+- [ ] Confirm `resource_table_for` and `tree_resource_table_for` captions are present when a short semantic table name is needed, and that longer explanations remain in host-app headings or copy.
 - [ ] Confirm filter buttons expose a useful accessible label.
 - [ ] Confirm active filter buttons update `aria-pressed`.
 - [ ] Confirm active filter buttons expose a short operator/value summary in `title` or `aria-label`.
