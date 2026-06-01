@@ -43,7 +43,9 @@ import RailsTablePreferencesController from "rails_table_preferences/controller"
 application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
 
-For Vite and similar bundlers, also add a resolver for `rails_table_preferences` and `rails_table_preferences/controller`. Keep [JavaScript entrypoints](javascript_entrypoints.md) as the source of truth for the full resolver example and TypeScript declaration note.
+For Vite and similar bundlers, also add a resolver for `rails_table_preferences` and `rails_table_preferences/controller`. Keep [JavaScript entrypoints](javascript_entrypoints.md) as the source of truth for the full resolver example, TypeScript declaration note, and the package-only controller behavior boundary.
+
+When choosing between the copied controller, the package entrypoint, and `--skip-javascript`, verify any screen-specific controller-root values against that boundary. Package-only values such as `data-rails-table-preferences-filter-operator-labels-value` are available only when the registered controller comes from `rails_table_preferences/controller`; host-owned or copied controller paths need their own JavaScript for equivalent behavior.
 
 ## Demo option boundary
 
