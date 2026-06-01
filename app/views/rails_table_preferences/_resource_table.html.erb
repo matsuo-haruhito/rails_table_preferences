@@ -9,7 +9,8 @@
 <% end %>
 
 <% caption = local_assigns.fetch(:caption, nil) %>
-<% table_options = options.except(:class, :render_editor).merge(
+<% empty_message = options.fetch(:empty_message) { I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") } %>
+<% table_options = options.except(:class, :render_editor, :empty_message).merge(
   class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
 ) %>
 <% visible_columns = table_state.fetch("visible_columns") %>
@@ -38,7 +39,7 @@
     <% if records.empty? %>
       <tr class="rails-table-preferences-resource-table__empty-row">
         <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= empty_colspan %>">
-          <%= I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
+          <%= empty_message %>
         </td>
       </tr>
     <% else %>
