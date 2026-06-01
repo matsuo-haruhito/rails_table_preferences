@@ -174,6 +174,7 @@ Representative attributes include:
 - `data-rails-table-preferences-filter-apply-label-value`
 - `data-rails-table-preferences-filter-clear-label-value`
 - `data-rails-table-preferences-filter-operator-label-value`
+- `data-rails-table-preferences-filter-operator-labels-value`
 - `data-rails-table-preferences-filter-value-label-value`
 - `data-rails-table-preferences-filter-from-label-value`
 - `data-rails-table-preferences-filter-to-label-value`
@@ -185,7 +186,9 @@ Representative attributes include:
 - `data-rails-table-preferences-scope-role-label-value`
 - `data-rails-table-preferences-scope-organization-label-value`
 
-These values affect controller-owned text such as filter button `aria-label` / `title`, bundled filter panel field labels, sort announcements, and scope fallback labels for preset options. The bundled helper output already passes default values from I18n, but host apps can override a single controller root when a specific screen needs different wording. For the controller-side contract, see [JavaScript controller notes](javascript_controller.md).
+These values affect controller-owned text such as filter button `aria-label` / `title`, bundled filter panel field labels, sort announcements, operator option labels and active-filter summaries, and scope fallback labels for preset options. The bundled helper output already passes default values from I18n, but host apps can override a single controller root when a specific screen needs different wording.
+
+The `data-rails-table-preferences-filter-operator-labels-value` attribute is a JSON object supported by the packaged `rails_table_preferences/controller` entrypoint. Keys are operator names such as `contains` or `equals`, and values are the labels shown in the bundled filter panel and active-filter summary. Host apps that use a copied base controller directly should not assume this package entrypoint-only value is available. For the controller-side contract, see [JavaScript controller notes](javascript_controller.md).
 
 ### 3. Copied ERB or copied JavaScript for markup or logic changes
 
@@ -197,12 +200,12 @@ Copy the bundled ERB partial when the host app needs different markup or helper-
 
 Copy or replace the bundled JavaScript when the host app needs controller logic or vocabulary that is not exposed through root values, such as:
 
-- different filter operator option text or summary wording from `filterOperatorText(...)`
+- new filter operator semantics or operator display rules beyond `filterOperatorLabels`
 - different busy-state or status-update behavior
 - custom filter panel interaction rules
 - extra confirmation flow beyond the bundled delete confirm
 
-In other words, changing `絞り込み`, `条件`, `開始`, `終了`, or scope fallback labels can stay in locale entries and root values, but changing operator vocabulary such as `含む`, `一致`, or `範囲` still requires copied JavaScript today.
+In other words, changing `絞り込み`, `条件`, `開始`, `終了`, scope fallback labels, or packaged-controller operator labels can stay in locale entries and root values. Changing operator behavior, adding new operator semantics, or using a controller path that does not include the package entrypoint subclass still requires copied JavaScript today.
 
 Minimal host-app override example:
 
@@ -245,7 +248,7 @@ Before releasing a screen, check:
 - The bundled action hint or accessible names explain the difference between apply, save, and save as new.
 - The preset selector helper copy or accessible description explains that it loads or switches the saved preset rather than setting the save target name.
 - The preset name helper copy or accessible description explains that save and save as new use that field as the edited preset name.
-- The default checkbox helper text or accessible description explains that it only takes effect when the user saves or saves as new.
+- The default checkbox helper text or accessible description explains that it only takes effect when the user saves or save as new.
 - The reset visible helper, hover text, and accessible name explain that current edits are discarded and defaults are restored.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
