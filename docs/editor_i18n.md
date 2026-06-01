@@ -37,6 +37,8 @@ These keys drive the bundled action buttons, button context, delete confirmation
 
 The context keys are used in `title` / `aria-label` text so users can tell whether an action applies the current view, saves to the current preset name, or creates a new preset.
 
+The bundled reset action keeps its existing behavior: it discards unsaved editor changes and reapplies the table's default column settings from the current column definitions. It does not roll back to the preset that was last loaded from the selector. Host apps that need a "return to loaded preset" affordance should provide separate copy, markup, or controller behavior instead of reusing the bundled reset wording.
+
 ## Column editor labels
 
 These keys label generated editor rows and table-header affordances:

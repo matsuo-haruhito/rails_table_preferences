@@ -385,7 +385,7 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         expect(html).to include("保存")
         expect(html).to include("別名で保存")
         expect(html).to include("削除")
-        expect(html).to include("初期状態に戻す")
+        expect(html).to include("テーブル初期設定に戻す")
       end
     end
 
