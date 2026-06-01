@@ -323,3 +323,45 @@ th[data-rails-table-preferences-fixed="true"] {
     grid-row: 2;
   }
 }
+
+@media (max-width: 36rem) {
+  .rails-table-preferences-editor__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 0.5rem;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(3) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(4) {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 24rem) {
+  .rails-table-preferences-editor__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(2),
+  .rails-table-preferences-editor__row > label:nth-of-type(3),
+  .rails-table-preferences-editor__row > label:nth-of-type(4) {
+    grid-column: 1;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(3) {
+    grid-row: 3;
+  }
+
+  .rails-table-preferences-editor__row > label:nth-of-type(4) {
+    grid-row: 4;
+  }
+}
