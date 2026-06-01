@@ -51,6 +51,52 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "renders a valid empty row colspan when no flat resource table columns are visible" do
+    all_hidden_columns = [
+      {
+        "key" => "name",
+        "label" => "Name",
+        "visible" => false,
+        "pinned" => false
+      }
+    ]
+
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      columns: all_hidden_columns,
+      table_state: { "visible_columns" => [] },
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("rails-table-preferences-resource-table__empty-cell")
+    expect(rendered).to include("colspan=\"1\"")
+    expect(rendered).not_to include("colspan=\"0\"")
+  end
+
+  it "keeps the flat resource table empty row colspan aligned with visible columns" do
+    visible_columns = [
+      {
+        "key" => "name",
+        "label" => "Name",
+        "visible" => true,
+        "pinned" => false
+      },
+      {
+        "key" => "email",
+        "label" => "Email",
+        "visible" => true,
+        "pinned" => false
+      }
+    ]
+
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      columns: visible_columns,
+      table_state: { "visible_columns" => visible_columns },
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("colspan=\"2\"")
+  end
+
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
     view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
