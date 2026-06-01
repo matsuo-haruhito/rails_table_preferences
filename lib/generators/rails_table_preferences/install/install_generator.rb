@@ -25,7 +25,7 @@ module RailsTablePreferences
       class_option :skip_javascript,
                    type: :boolean,
                    default: false,
-                   desc: "Skip copying the Stimulus controller into app/javascript/controllers."
+                   desc: "Skip copying the Stimulus controller. Use with the package entrypoint or a host-owned controller."
 
       class_option :skip_stylesheets,
                    type: :boolean,
@@ -96,10 +96,15 @@ module RailsTablePreferences
           say "     For Sass/CSS bundling, import the copied file from your application stylesheet."
         end
 
-        unless options[:skip_javascript]
-          say "  4. Ensure the Stimulus controller is registered."
+        if options[:skip_javascript]
+          say "  4. Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name."
+          say "     Package entrypoint example: import rails_table_preferences/controller and register it from your app entrypoint."
+          say "     See docs/javascript_entrypoints.md for Vite/app/frontend resolver notes."
+        else
+          say "  4. Ensure the copied Stimulus controller is registered."
           say "     stimulus-rails default manifests usually register app/javascript/controllers/*_controller.js automatically."
-          say "     For Vite/app/frontend entrypoints, import rails_table_preferences/controller and register it manually."
+          say "     For Vite/app/frontend package entrypoint installs, rerun with --skip-javascript and register rails_table_preferences/controller manually."
+          say "     See docs/javascript_entrypoints.md for resolver notes."
         end
 
         if demo_requested?
