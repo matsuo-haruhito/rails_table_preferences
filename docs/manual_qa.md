@@ -10,6 +10,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 
 - [ ] Open the generated demo or a representative host-app list screen and confirm the editor and table both render.
 - [ ] Hide one non-sensitive column, apply the change, and confirm the table updates without hiding required actions or links.
+- [ ] Change one editor order input, apply the change, and confirm the table order updates without using drag and drop.
 - [ ] Save the preset, reload the page, and confirm the saved visibility/order state returns.
 - [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
@@ -59,6 +60,8 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Show the column again and apply it.
 - [ ] Reorder columns by dragging editor rows.
 - [ ] Reorder columns by dragging table headers directly.
+- [ ] Using only the keyboard, change a column's numeric order input, move to `適用`, and confirm the table order changes.
+- [ ] At a narrow width or on a touch device, confirm the editor order input remains usable as the fallback when table-header drag is awkward or unavailable.
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] Confirm the resize hit area is easy enough to grab.
@@ -252,6 +255,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
 - [ ] Confirm resize handles show a visible focus indicator when reached by keyboard.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
+- [ ] Confirm keyboard-only reordering can be completed with the numeric order input and `適用`, without using editor-row drag or table-header drag.
+- [ ] Confirm touch or narrow-viewport users can use editor order inputs as the fallback when direct table-header drag is not comfortable.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
 - [ ] Confirm read-only scoped presets explain that saves fall back to the owner preset path without implying they only create a brand-new preset.
 - [ ] Confirm async preset actions temporarily disable preset controls and re-enable them after success or failure.
@@ -281,6 +286,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm filter panels are not clipped.
 - [ ] Confirm short viewport filter panels keep Apply and Clear reachable through panel scrolling.
 - [ ] Confirm column width controls remain usable.
+- [ ] Confirm editor order inputs remain reachable and readable at narrow widths.
+- [ ] On a touch device or touch emulator, confirm table-header drag is not the only practical reorder path because the editor order input still works.
 - [ ] Confirm resize handle hover/focus affordance does not collide with header text, filter buttons, sort indicators, or long labels.
 - [ ] Confirm table operation hit areas do not interfere with normal table links/buttons.
 
