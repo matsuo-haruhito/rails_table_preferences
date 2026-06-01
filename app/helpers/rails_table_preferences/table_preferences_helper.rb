@@ -77,7 +77,7 @@ module RailsTablePreferences
       }
     end
 
-    def tree_resource_table_for(records, model: nil, table_key: nil, parent_id_method: :parent_id, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, profile: nil, partial: nil, caption: nil, **options)
+    def tree_resource_table_for(records, model: nil, table_key: nil, parent_id_method: :parent_id, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, profile: nil, partial: nil, caption: nil, scroll_wrapper: false, wrapper_options: {}, **options)
       model ||= table_preferences_model_for(records, profile: profile)
       table_key ||= "#{model.model_name.route_key}_tree"
       columns = table_preferences_resource_columns(
@@ -101,6 +101,8 @@ module RailsTablePreferences
         table_state: table_state,
         profile: profile,
         caption: caption,
+        scroll_wrapper: scroll_wrapper,
+        wrapper_options: wrapper_options,
         options: options
       }
     end
