@@ -41,6 +41,24 @@ en:
       resize_column: Resize column
       filter: Filter
       filter_operator: Operator
+      filter_operator_labels:
+        contains: Contains
+        not_contains: Does not contain
+        equals: Equals
+        not_equals: Does not equal
+        starts_with: Starts with
+        ends_with: Ends with
+        in: Any of
+        not_in: Not in
+        gt: Greater than
+        gteq: Greater than or equal to
+        lt: Less than
+        lteq: Less than or equal to
+        between: Between
+        blank: Blank
+        present: Present
+        "true": Yes
+        "false": No
       filter_value: Value
       filter_from: From
       filter_to: To
