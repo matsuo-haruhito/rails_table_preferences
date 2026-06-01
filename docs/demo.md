@@ -257,9 +257,11 @@ If you need to test a custom host-app wrapper outside the generated demo, browse
 
 The generated demo is a development verification surface. To keep the copied files self-contained, the demo view includes inline style and inline script for the sample screen, the demo state reset helper, and the one-shot async failure helper.
 
-If the host application runs a strict Content Security Policy in development, those inline blocks may be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
+When Rails exposes `content_security_policy_nonce`, the generated demo adds the current request nonce to those inline `<style>` and `<script>` blocks. In host applications whose development CSP allows Rails nonces for `style-src` and `script-src`, the demo-only styling, reset helper, and async failure helper can run without adding a separate demo asset pipeline or generator option.
 
-When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, either allow the copied demo route under a development-only policy or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
+If the host application runs a strict Content Security Policy in development but does not allow those nonces, the inline blocks may still be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
+
+When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, allow Rails nonces for the copied demo route under a development-only policy, allow the copied demo route under another development-only policy, or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
 
 ## Production note
 
