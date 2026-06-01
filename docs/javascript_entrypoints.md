@@ -86,6 +86,28 @@ declare module "rails_table_preferences" {
 
 This local declaration only describes the current package entrypoints enough for `application.register("rails-table-preferences", RailsTablePreferencesController)` and the package-root named export. It does not mean Rails Table Preferences ships official TypeScript types yet. If the host app replaces the controller or relies on custom controller methods, keep those richer declarations in the host app until the gem deliberately adds packaged type definitions.
 
+## Choosing between copied assets and the package entrypoint
+
+Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, or already depends on copied JavaScript for behavior changes that are not exposed through controller-root values.
+
+Prefer the package entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. This path is also the lighter choice for wording and label changes that can stay in Rails locale files or controller-root values such as `data-rails-table-preferences-filter-operator-labels-value`.
+
+Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass.
+
+## Moving from a copied controller to the package entrypoint
+
+When an existing host app moves from the copied controller to `rails_table_preferences/controller`, check these items before removing the copied file from active registration:
+
+- The host app has exactly one Stimulus application registration for `rails-table-preferences`.
+- The bundler resolves both `rails_table_preferences/controller` and, if used, `rails_table_preferences`.
+- Any local changes in `app/javascript/controllers/rails_table_preferences_controller.js` have been classified as wording, markup, or behavior changes.
+- Wording-only changes have moved to Rails locale keys or controller-root label values where possible.
+- Markup changes remain in copied ERB, not in the package entrypoint import.
+- Behavior changes that are not represented by packaged root values stay in a host-owned controller or copied JavaScript path.
+- Screens that rely on packaged-only root values, such as `data-rails-table-preferences-filter-operator-labels-value`, are registered through the package entrypoint.
+
+After switching registration, re-run the manual checks for editor load, preset save/load/delete, filter panels, sort controls, resize handles, Turbo reconnects, and any screen-specific label overrides.
+
 ## Turbo Drive and Turbo Frame checks
 
 Rails Table Preferences does not need a Turbo-specific adapter when the host app already renders the editor and table through normal server-side HTML. The bundled controller is a Stimulus controller, so Turbo Drive navigation and Turbo Frame replacement should reconnect it as long as the rendered HTML still includes the same controller root and values.
