@@ -23,10 +23,12 @@
 <% end %>
 
 <% caption = local_assigns.fetch(:caption, nil) %>
-<% table_options = options.except(:class, :render_editor).merge(
+<% empty_message = options.fetch(:empty_message) { I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") } %>
+<% table_options = options.except(:class, :render_editor, :empty_message).merge(
   class: ["tree-view-table", "rails-table-preferences-tree-resource-table", options[:class]].compact.join(" ")
 ) %>
 <% visible_columns = table_state.fetch("visible_columns") %>
+<% empty_colspan = [visible_columns.size, 1].max %>
 
 <%= table_preferences_table_tag(
   table_key: table_key,
@@ -50,8 +52,8 @@
   <tbody>
     <% if records.empty? %>
       <tr class="rails-table-preferences-resource-table__empty-row">
-        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= visible_columns.size %>">
-          <%= I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
+        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= empty_colspan %>">
+          <%= empty_message %>
         </td>
       </tr>
     <% else %>
