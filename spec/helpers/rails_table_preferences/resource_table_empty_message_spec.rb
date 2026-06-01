@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe "resource table empty message", type: :helper do
+  before do
+    RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
+  end
+
   it "renders a table-specific empty message for empty records" do
     html = helper.resource_table_for(
       User.none,
