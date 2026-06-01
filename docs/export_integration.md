@@ -12,6 +12,12 @@ Use `rails_table_preference_export_payload` from a controller that includes `Rai
 
 ```ruby
 class OrdersController < ApplicationController
+  EXPORT_VALUE_EXTRACTORS = {
+    "order_no" => ->(order) { order.order_no },
+    "customer_name" => ->(order) { order.customer_name },
+    "amount" => ->(order) { order.amount }
+  }.freeze
+
   def index
     @columns = table_columns
     @orders = Order.search(params)
@@ -27,7 +33,7 @@ class OrdersController < ApplicationController
 
     rows = Order.search(params).find_each.map do |order|
       export_payload["export_keys"].map do |key|
-        order.public_send(key)
+        EXPORT_VALUE_EXTRACTORS.fetch(key.to_s).call(order)
       end
     end
 
@@ -45,6 +51,8 @@ class OrdersController < ApplicationController
   end
 end
 ```
+
+`export_keys` is ordered value-extraction metadata, not an authorization allowlist. Keep the extraction map, serializer, policy check, or explicit case statement in the host app so saved display preferences cannot call arbitrary model methods.
 
 The returned payload contains:
 
@@ -92,13 +100,18 @@ def export
   )
 
   scoped_orders = Order.search(params)
+  value_extractors = {
+    "order_no" => ->(order) { order.order_no },
+    "customer_name" => ->(order) { order.customer_name },
+    "amount" => ->(order) { order.amount }
+  }
 
   csv_string = CSV.generate do |csv|
     csv << export_payload["headers"]
 
     scoped_orders.find_each do |order|
       csv << export_payload["export_keys"].map do |key|
-        order.public_send(key)
+        value_extractors.fetch(key.to_s).call(order)
       end
     end
   end
@@ -107,7 +120,7 @@ def export
 end
 ```
 
-This example intentionally keeps file generation in the host app. Rails Table Preferences only provides ordered column metadata and the selected preset name.
+This example intentionally keeps file generation, value extraction, and authorization policy in the host app. Rails Table Preferences only provides ordered column metadata and the selected preset name.
 
 ## How to use each payload key
 
@@ -117,6 +130,8 @@ This example intentionally keeps file generation in the host app. Rails Table Pr
 - `export_keys`: use when the export layer only needs the ordered value-extraction keys. This list uses each column's `export_key` when present and falls back to the display/preference `key`.
 
 When the host app already has a serializer or report object keyed by the displayed table columns, `column_keys` is often the smallest integration surface. When value extraction needs a different method or attribute, use `export_keys` directly or read `export_key` from each `columns` entry when extra metadata is needed.
+
+Do not treat `column_keys` or `export_keys` as permission checks by themselves. Both arrays come from the table preference surface. The host app should still apply an export allowlist, serializer, or policy-aware extractor before reading values.
 
 ## Direct object usage
 
