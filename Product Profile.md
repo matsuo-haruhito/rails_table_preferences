@@ -97,10 +97,14 @@ The project does not aim to become:
 
 ## Maintainer references
 
-Start with these files when orienting yourself:
+Start with these files when orienting yourself. Treat `docs/index.md` as the source of truth for the full focused-docs catalog; this list only highlights the entries most useful for onboarding, release readiness, and operational QA.
 
 - `README.md`
 - `docs/index.md`
+- `docs/quick_start.md`
+- `docs/install_paths.md`
+- `docs/support_matrix.md`
+- `docs/decision_guide.md`
 - `docs/resource_tables.md`
 - `docs/resource_table_cell_hooks.md`
 - `docs/table_data_attributes.md`
@@ -108,6 +112,9 @@ Start with these files when orienting yourself:
 - `docs/editor_root_options.md`
 - `docs/resize_auto_fit.md`
 - `docs/json_api.md`
+- `docs/manual_qa.md`
+- `docs/release_checklist.md`
 - `docs/package_verification.md`
+- `docs/troubleshooting.md`
 - `AGENTS.md`
 - `CHANGELOG.md`
