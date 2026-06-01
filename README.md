@@ -18,6 +18,7 @@ The bundled editor and demo screen are intentionally lightweight, but they still
 Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Production integration checklist](docs/production_integration_checklist.md): move from a working demo or quick start to a real host-app index screen.
 - [Install path options](docs/install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](docs/support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](docs/resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and optionally connect TreeView or Rails Fields Kit.
@@ -84,6 +85,7 @@ If you are evaluating the gem in a newer host app release such as Rails 8.1, tre
 A compact verification path for those newer host-app Rails releases is:
 
 - [Demo screen generator](docs/demo.md): check the bundled editor surface, scoped preset examples, current scope context summary, and export payload preview in a lightweight browser-facing screen.
+- [Production integration checklist](docs/production_integration_checklist.md): bridge the working demo or quick start into a real host-app index screen, including owner, route, query params, authorization, layout, and export boundaries.
 - [Sandbox Rails app verification](docs/sandbox.md): confirm install, engine mount, copied/package JavaScript and CSS, and end-to-end preference wiring in a minimal Rails app.
 - [Manual QA checklist](docs/manual_qa.md): finish in the real host app to verify authentication, authorization, layout, accessibility, and existing search/export integration.
 
@@ -173,7 +175,7 @@ get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/or
 
 The copied demo reuses the same configured current-owner method as the normal editor flow. If the host app does not use `User` / `current_user`, set `config.owner_model` and `config.current_user_method` first, and make sure that method returns a persisted owner record before opening the demo screen.
 
-See [Demo screen generator](docs/demo.md), [Quick start](docs/quick_start.md), and [Sandbox Rails app verification](docs/sandbox.md) for the full local verification flow.
+See [Demo screen generator](docs/demo.md), [Quick start](docs/quick_start.md), [Production integration checklist](docs/production_integration_checklist.md), and [Sandbox Rails app verification](docs/sandbox.md) for the full local verification flow.
 
 If preferences should belong to a model other than `User`, pass an owner model. The value can be singular or plural:
 
