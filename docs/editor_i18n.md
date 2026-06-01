@@ -76,7 +76,7 @@ data-rails-table-preferences-filter-operator-labels-value='<%= { contains: "å«ã
 
 The value is a JSON object keyed by operator name. Operators omitted from the object keep the bundled defaults, and unknown custom operators fall back to the raw operator string unless the object provides a label.
 
-This root value is provided by the package entrypoint subclass. Host apps that copy or register the base generated controller directly should not assume the package entrypoint-only value is present; use copied or replacement JavaScript when changing controller behavior, adding new operators, or supporting a controller path that does not include the package entrypoint subclass.
+This root value is provided by the package entrypoint subclass. Host apps that copy or register the base generated controller directly should not assume the package entrypoint-only value is present; use copied or replacement JavaScript when changing controller behavior, adding new operators, or supporting a controller path that does not include the package entrypoint subclass. See [JavaScript entrypoints](javascript_entrypoints.md) before relying on package-only controller behavior from a copied or host-owned controller path.
 
 ## Scope labels
 
