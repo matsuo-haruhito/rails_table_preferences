@@ -12,7 +12,7 @@ en:
       save_as_new: Save as new
       delete: Delete
       delete_confirm: Delete this saved preset?
-      read_only_preset_hint: This preset cannot be overwritten directly. Saving will create a new personal preset.
+      read_only_preset_hint: The selected saved preset cannot be overwritten directly. Check its name and scope in the saved presets list; saving will create or update a personal preset.
       scope_owner: owner
       scope_shared: shared
       scope_role: role
