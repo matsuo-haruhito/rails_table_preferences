@@ -22,6 +22,18 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
     expect(column.to_h["pinned"]).to eq(false)
   end
 
+  it "normalizes draggable metadata when provided" do
+    column = described_class.new(key: :help_link, label: "Help", draggable: "false")
+
+    expect(column.to_h["draggable"]).to eq(false)
+  end
+
+  it "omits draggable metadata when it is not provided" do
+    column = described_class.new(key: :order_no, label: "受注番号")
+
+    expect(column.to_h).not_to have_key("draggable")
+  end
+
   it "normalizes hash group metadata" do
     column = described_class.new(
       key: :customer_name,
