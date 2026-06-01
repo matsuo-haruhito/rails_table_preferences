@@ -80,7 +80,7 @@ Repository-level release confidence is expected to come from:
 - `node --check app/javascript/controllers/rails_table_preferences_controller.js`
 - `bundle exec rake build`
 - `bundle exec rake package:verify`
-- representative pull-request compatibility lanes for Rails 7.0 / 7.1 / 7.2 / 8.0
+- representative pull-request compatibility lanes for Rails 7.0 / Rails 7.1 / Rails 7.2 / Rails 8.0
 - sandbox/demo verification
 - manual QA and package verification docs
 
@@ -97,17 +97,24 @@ The project does not aim to become:
 
 ## Maintainer references
 
-Start with these files when orienting yourself:
+Start with these files when orienting yourself. This is a representative maintainer map, not a complete docs catalog; use `docs/index.md` as the source of truth for the full guide inventory.
 
-- `README.md`
-- `docs/index.md`
-- `docs/resource_tables.md`
-- `docs/resource_table_cell_hooks.md`
-- `docs/table_data_attributes.md`
-- `docs/resource_table_formatter_contract.md`
-- `docs/editor_root_options.md`
-- `docs/resize_auto_fit.md`
-- `docs/json_api.md`
-- `docs/package_verification.md`
-- `AGENTS.md`
-- `CHANGELOG.md`
+- `README.md`: newcomer-facing overview, documentation entry points, supported versions, and installation basics.
+- `docs/index.md`: full documentation hub and recommended integration order.
+- `docs/install_paths.md`: generator option paths for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, and demo verification.
+- `docs/support_matrix.md`: Ruby/Rails requirements, representative CI coverage, and newer host-app verification guidance.
+- `docs/resource_tables.md`: resource table helper scope, profile overrides, renderer registrations, and TreeView/Rails Fields Kit integration boundaries.
+- `docs/resource_table_cell_hooks.md`: stable body-cell metadata hooks and the boundary with custom partials.
+- `docs/table_data_attributes.md`: host app `data-controller` coexistence and gem-owned table preference binding protection.
+- `docs/resource_table_formatter_contract.md`: formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
+- `docs/editor_root_options.md`: host-app root `id`, class, `data-*`, and `aria-*` pass-through without copying the bundled editor partial.
+- `docs/resize_auto_fit.md`: resize handle roots, double-click auto-fit bounds, and dense-table manual QA focus.
+- `docs/demo.md`: generated demo screen paths and current-owner preparation for lightweight browser verification.
+- `docs/sandbox.md`: minimal Rails app verification before real app integration.
+- `docs/manual_qa.md`: browser and host application checks before handing the feature to real users.
+- `docs/release_checklist.md`: release readiness checks across packaging, generators, CI, docs, and sandbox verification.
+- `docs/package_verification.md`: build and inspect the gem package before tagging or publishing a release.
+- `docs/troubleshooting.md`: common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
+- `docs/json_api.md`: owner preset endpoints, payloads, and the boundary with non-owner scoped preset administration.
+- `AGENTS.md`: repository guardrails, source-of-truth order, and change boundaries for assisted maintenance work.
+- `CHANGELOG.md`: current unreleased scope and release narrative.
