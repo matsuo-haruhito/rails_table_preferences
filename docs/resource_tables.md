@@ -106,7 +106,7 @@ The default resource table partials pass basic table HTML options through to `ta
 
 ### Horizontal scroll wrapper
 
-`resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
+`resource_table_for` and `tree_resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
 
 ```erb
 <%= resource_table_for(
@@ -119,13 +119,24 @@ The default resource table partials pass basic table HTML options through to `ta
   },
   class: "orders-table"
 ) %>
+
+<%= tree_resource_table_for(
+  @projects,
+  parent_id_method: :parent_project_id,
+  scroll_wrapper: true,
+  wrapper_options: {
+    class: "projects-tree-scroll",
+    data: { role: "tree-resource-table-scroll" }
+  },
+  class: "projects-tree"
+) %>
 ```
 
 `scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>`. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
 
-Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
+Use this option for simple `overflow-x: auto` containers or design-system hooks around bundled resource tables. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, nested row indentation polish, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
 
-`tree_resource_table_for` does not receive this option yet. If a tree table needs a wrapper, keep it in host markup or a custom partial until the tree path is planned separately.
+For tree tables, the wrapper surrounds the rendered table only. TreeView still owns row hierarchy, expansion markup, nested row rendering, and node identity; Rails Table Preferences only adds the opt-in outer overflow container and keeps table options on the table element.
 
 ### Captions
 
@@ -225,7 +236,7 @@ class OrdersTableProfile < RailsTablePreferences::TableProfile
 
   column :customer_name,
          label: "Customer",
-         filter: { type: "text", param: "customer_name" },
+         filter: { type: :text, param: :customer_name },
          sortable: false do |order, view|
     view.link_to order.customer.name, view.customer_path(order.customer)
   end
@@ -475,7 +486,7 @@ The bundled default tree table partial expects `TreeView::Tree` to be available.
 
 Keep `tree_view` in the host app Gemfile when using `tree_resource_table_for`. If the screen should remain usable without TreeView, choose `resource_table_for` for the flat table path or provide a custom `tree_resource_table_partial` that owns that fallback explicitly.
 
-Rails Table Preferences owns the inferred columns, labels, saved table state, and default table partial. TreeView owns the hierarchical row rendering. The host app owns hierarchy query shape, authorization, eager loading, and whether a flat fallback is acceptable for that screen.
+Rails Table Preferences owns the inferred columns, labels, saved table state, default table partial, and the optional simple scroll wrapper. TreeView owns the hierarchical row rendering. The host app owns hierarchy query shape, authorization, eager loading, sticky column polish, nested row visual treatment, and whether a flat fallback is acceptable for that screen.
 
 ## Custom presentation
 
