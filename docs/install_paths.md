@@ -33,6 +33,20 @@ end
 
 The method must return a persisted record. `--with-demo` and `--with-demo-route` copy verification files; they do not create the owner record or bypass the normal owner lookup.
 
+## Parent controller and mounted API boundary
+
+The mounted engine controller inherits `RailsTablePreferences.config.parent_controller_class_name`, which defaults to the host app's `ApplicationController`. Keep that value pointed at the controller that should own authentication, CSRF handling, tenant or locale setup, and other request-wide callbacks for the mounted JSON API.
+
+If the host app uses a separate authenticated base controller, update the initializer before production verification:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.parent_controller_class_name = "Admin::BaseController"
+end
+```
+
+`current_user_method` and `scope_context_method` are called on that inherited controller, including private methods. After mounting the engine, verify the API routes through the real host-app authentication and callback boundary in [Production integration checklist](production_integration_checklist.md). For the route and payload shape, see [Mounted JSON API](json_api.md).
+
 ## Package entrypoint versus copied controller
 
 The default install copies `app/javascript/controllers/rails_table_preferences_controller.js` for apps that rely on the normal `stimulus-rails` manifest path.
