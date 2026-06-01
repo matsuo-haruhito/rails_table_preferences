@@ -1,5 +1,7 @@
 import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
 
+const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])
+
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
     ...RailsTablePreferencesBaseController.values,
@@ -25,6 +27,19 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         cell.title = cell.dataset.railsTablePreferencesHostTitle
       }
     })
+  }
+
+  filterOperatorsFor(filter) {
+    if (Array.isArray(filter.operators) && filter.operators.length > 0) return filter.operators.map(String)
+    if (DATE_TIME_FILTER_TYPES.has(String(filter.type))) return ["equals", "gteq", "lteq", "between", "blank", "present"]
+    return super.filterOperatorsFor(filter)
+  }
+
+  filterInputType(filter) {
+    const type = String(filter.type)
+    if (type === "datetime" || type === "datetime-local") return "datetime-local"
+    if (type === "time") return "time"
+    return super.filterInputType(filter)
   }
 
   filterOperatorText(operator) {
