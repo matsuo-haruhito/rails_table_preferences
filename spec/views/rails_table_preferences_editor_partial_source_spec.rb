@@ -7,12 +7,14 @@ RSpec.describe "rails_table_preferences editor partial" do
 
   let(:source) { File.read(source_path) }
 
-  it "makes the bundled reset action explain that current edits are discarded" do
-    expect(source).to include('reset_label = t("rails_table_preferences.editor.reset", default: "初期状態に戻す")')
-    expect(source).to include('reset_hint = t("rails_table_preferences.editor.reset_hint", default: "保存前の表示設定の変更を破棄して、初期状態に戻します。")')
+  it "makes the bundled reset action explain that it returns to table defaults" do
+    expect(source).to include('reset_label = t("rails_table_preferences.editor.reset", default: "テーブル初期設定に戻す")')
+    expect(source).to include('reset_hint = t("rails_table_preferences.editor.reset_hint", default: "保存前の表示設定の変更を破棄し、読み込んだ保存済み設定ではなくテーブルの初期表示設定に戻します。")')
+    expect(source).to include('reset_visible_hint = t("rails_table_preferences.editor.reset_visible_hint", default: "テーブル初期設定に戻すと、保存前の変更は破棄されます。読み込んだ保存済み設定へ戻す操作ではありません。")')
     expect(source).to include('data-action="rails-table-preferences#resetEditor"')
     expect(source).to include('title="<%= reset_hint %>"')
     expect(source).to include('aria-label="<%= reset_hint %>"')
+    expect(source).to include('aria-describedby="<%= reset_hint_id %>"')
     expect(source).to include('><%= reset_label %></button>')
   end
 
