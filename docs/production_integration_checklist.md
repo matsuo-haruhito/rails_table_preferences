@@ -8,6 +8,9 @@ The goal is to choose the smallest production path, keep demo-only setup separat
 
 - Confirm `RailsTablePreferences.config.owner_model` matches the model that owns table preferences in the host app.
 - Confirm `RailsTablePreferences.config.current_user_method` returns a persisted owner record for normal requests.
+- Confirm `RailsTablePreferences.config.parent_controller_class_name` points at the host-app controller that should wrap the mounted JSON API.
+- Verify that this parent controller applies the expected authentication, CSRF, locale, tenant, and other `before_action` behavior to the mounted Rails Table Preferences requests.
+- If the app uses `scope_context_method`, confirm the method is available to the parent controller, returns a hash-like context, and does not require a separate public route helper.
 - Mount `RailsTablePreferences::Engine` when the screen uses the bundled JSON API.
 - If the mount path is not `/rails_table_preferences`, keep `config.mount_path` aligned with the route.
 
