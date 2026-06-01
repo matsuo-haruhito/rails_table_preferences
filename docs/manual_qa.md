@@ -62,6 +62,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Reorder columns by dragging table headers directly.
 - [ ] Using only the keyboard, change a column's numeric order input, move to `適用`, and confirm the table order changes.
 - [ ] At a narrow width or on a touch device, confirm the editor order input remains usable as the fallback when table-header drag is awkward or unavailable.
+- [ ] At 320px, 375px, and 390px-equivalent widths or narrow containers, confirm long Japanese and long unbroken editor row labels wrap without covering the drag handle, visible checkbox, or order/width/truncate inputs.
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] Confirm the resize hit area is easy enough to grab.
@@ -284,6 +285,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Check the screen with long Japanese labels.
 - [ ] Check the screen with long table values.
 - [ ] Confirm editor inputs do not overlap.
+- [ ] At 320px, 375px, and 390px-equivalent widths or narrow containers, confirm editor row labels wrap above the numeric controls and each order/width/truncate input keeps a usable tap and keyboard target.
 - [ ] Confirm filter panels are not clipped.
 - [ ] Confirm short viewport filter panels keep Apply and Clear reachable through panel scrolling.
 - [ ] Confirm column width controls remain usable.
