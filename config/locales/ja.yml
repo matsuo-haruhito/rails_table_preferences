@@ -2,6 +2,7 @@ ja:
   rails_table_preferences:
     resource_table:
       empty: 表示できるレコードがありません
+      all_columns_hidden: すべての列が非表示です
     editor:
       preset_select: 保存済み設定
       preset: 設定名

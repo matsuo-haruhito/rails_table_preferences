@@ -2,6 +2,7 @@ en:
   rails_table_preferences:
     resource_table:
       empty: No records to display
+      all_columns_hidden: All columns are hidden
     editor:
       preset_select: Saved presets
       preset: Preset
