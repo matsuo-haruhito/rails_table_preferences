@@ -18,6 +18,7 @@ The bundled editor and demo screen are intentionally lightweight, but they still
 Focused documentation is available under [`docs/`](docs/index.md):
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
+- [Install path options](docs/install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](docs/support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](docs/resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and optionally connect TreeView or Rails Fields Kit.
 - [Resource table cell hooks](docs/resource_table_cell_hooks.md): stable body-cell data attributes for light host-app styling and the boundary with custom partials.
