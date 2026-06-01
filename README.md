@@ -15,40 +15,17 @@ The bundled editor and demo screen are intentionally lightweight, but they still
 
 ## Documentation
 
-Focused documentation is available under [`docs/`](docs/index.md):
+Focused documentation is available under [`docs/`](docs/index.md). Start with the short integration path below, then use the docs index for the full catalog of focused guides.
 
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
 - [Production integration checklist](docs/production_integration_checklist.md): move from a working demo or quick start to a real host-app index screen.
 - [Install path options](docs/install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](docs/support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
-- [Resource table adapters](docs/resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and optionally connect TreeView or Rails Fields Kit.
-- [Resource table cell hooks](docs/resource_table_cell_hooks.md): stable body-cell data attributes for light host-app styling and the boundary with custom partials.
-- [Table data attribute merge boundary](docs/table_data_attributes.md): host app `data-controller` coexistence and gem-owned `data-rails-table-preferences-*` protection rules for rendered tables.
-- [Resource table formatter contract](docs/resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
-- [Scoped presets](docs/scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal host-app operating patterns.
-- [Fixed columns and column groups](docs/fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, and `group:` metadata.
-- [Column overflow metadata](docs/column_overflow.md): canonical `overflow:` / `default_overflow:` values, compatibility aliases, and the boundary with `default_truncate:`.
-- [Resize and auto-fit guidance](docs/resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
-- [Export integration](docs/export_integration.md): reuse saved column visibility, order, labels, and metadata for CSV, Excel, or report exports.
-- [Accessibility baseline](docs/accessibility.md): accessibility hooks provided by the bundled editor/controller and host app responsibilities.
-- [Bundled editor i18n keys](docs/editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
-- [Editor root HTML options](docs/editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
-- [Non-goals and deferred directions](docs/non_goals.md): intentionally deferred areas such as query builder behavior, export generation, full admin UI, heavy browser tests, and complex sticky layouts.
-- [Demo screen generator](docs/demo.md): `--with-demo` and `--with-demo-route` generator options for copying a lightweight browser verification screen into a host app.
-- [Sandbox Rails app verification](docs/sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
-- [Manual QA checklist](docs/manual_qa.md): browser and host application checks to run before asking real users to try the feature.
-- [Release checklist](docs/release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
-- [Package verification](docs/package_verification.md): build and inspect the gem package before tagging or publishing a release.
-- [Practical examples](docs/examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
+- [Demo screen generator](docs/demo.md): copy a lightweight browser verification screen into a host app.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
-- [Select filter troubleshooting](docs/select_filter_troubleshooting.md): `values_param`, scalar select options, and host-app query ownership when select filters do not affect results.
-- [Controller integration](docs/controller_integration.md): resolving saved preferences and passing filter/sort/export params to existing Rails controllers.
-- [Filter metadata](docs/filter_metadata.md): declaring filterable/sortable columns and understanding neutral filter/sort settings.
-- [Filter adapters](docs/filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
-- [Mounted JSON API](docs/json_api.md): owner preset endpoints, request/response payloads, and the boundary with non-owner scoped preset administration.
-- [JavaScript entrypoints](docs/javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, and custom JS bundlers.
-- [JavaScript controller notes](docs/javascript_controller.md): bundled Stimulus controller responsibilities and safety boundaries.
+
+Core topic guides are grouped in the [docs index](docs/index.md), including resource tables, scoped presets, fixed columns, filter metadata, filter adapters, controller integration, export integration, accessibility, JavaScript entrypoints, mounted JSON API, manual QA, release checks, and package verification.
 
 ## Maintainer docs
 
