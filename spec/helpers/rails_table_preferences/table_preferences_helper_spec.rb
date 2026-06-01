@@ -1,338 +1,353 @@
 # frozen_string_literal: true
 
 RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
+  before do
+    RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
+  end
+
+  describe "#table_preferences_preference_url" do
+    it "builds a URL using the configured mount path" do
+      RailsTablePreferences.configuration.mount_path = "/preferences_engine"
+
+      expect(helper.table_preferences_preference_url(table_key: :orders, name: "default")).to eq(
+        "/preferences_engine/preferences/orders/default"
+      )
+    end
+
+    it "URL-encodes table key and name" do
+      expect(helper.table_preferences_preference_url(table_key: "order details", name: "my default")).to eq(
+        "/rails_table_preferences/preferences/order%20details/my%20default"
+      )
+    end
+  end
+
+  describe "#table_preferences_collection_url" do
+    it "builds a collection URL for table presets" do
+      expect(helper.table_preferences_collection_url(table_key: :orders)).to eq(
+        "/rails_table_preferences/preferences/orders"
+      )
+    end
+  end
+
+  describe "#table_preferences_data_attributes" do
+    it "returns Stimulus data attributes for a table" do
+      attributes = helper.table_preferences_data_attributes(
+        table_key: :orders,
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code", default_width: 120)]
+      )
+
+      expect(attributes).to include(
+        controller: "rails-table-preferences",
+        rails_table_preferences_table_key_value: "orders",
+        rails_table_preferences_name_value: "default",
+        rails_table_preferences_url_value: "/rails_table_preferences/preferences/orders/default",
+        rails_table_preferences_collection_url_value: "/rails_table_preferences/preferences/orders"
+      )
+      expect(JSON.parse(attributes[:rails_table_preferences_settings_value])).to eq(
+        "columns" => [],
+        "filters" => {},
+        "sorts" => []
+      )
+      expect(JSON.parse(attributes[:rails_table_preferences_columns_value])).to eq(
+        [
+          {
+            "key" => "customer_code",
+            "label" => "Customer Code",
+            "visible" => true,
+            "width" => 120,
+            "pinned" => false
+          }
+        ]
+      )
+    end
+
+    it "includes filter, sortable, and overflow metadata in columns JSON" do
+      attributes = helper.table_preferences_data_attributes(
+        table_key: :orders,
+        columns: [
+          helper.table_preferences_column(
+            :customer_name,
+            label: "得意先名",
+            filter: { type: :text, operators: %i[contains equals blank] },
+            sortable: true,
+            overflow: :ellipsis
+          )
+        ]
+      )
+
+      expect(JSON.parse(attributes[:rails_table_preferences_columns_value])).to eq(
+        [
+          {
+            "key" => "customer_name",
+            "label" => "得意先名",
+            "visible" => true,
+            "pinned" => false,
+            "overflow" => "ellipsis",
+            "filter" => {
+              "type" => "text",
+              "operators" => %w[contains equals blank]
+            },
+            "sortable" => true
+          }
+        ]
+      )
+    end
+
+    it "excludes ignored columns from columns and saved settings" do
+      attributes = helper.table_preferences_data_attributes(
+        table_key: :orders,
+        columns: [
+          helper.table_preferences_column(:customer_code, label: "Customer Code"),
+          helper.table_preferences_column(:internal_cost, label: "Internal Cost", ignored: true),
+          helper.table_preferences_column(:secret_note, label: "Secret Note")
+        ],
+        ignored_columns: [:secret_note],
+        settings: {
+          columns: [
+            { key: "customer_code", visible: true, order: 10 },
+            { key: "internal_cost", visible: true, order: 20 },
+            { key: "secret_note", visible: true, order: 30 }
+          ],
+          filters: {
+            customer_code: { operator: :contains, value: "001" },
+            internal_cost: { operator: :gteq, value: 100 },
+            secret_note: { operator: :contains, value: "hidden" }
+          },
+          sorts: [
+            { key: :customer_code, direction: :asc },
+            { key: :internal_cost, direction: :desc },
+            { key: :secret_note, direction: :asc }
+          ]
+        }
+      )
+
+      settings = JSON.parse(attributes[:rails_table_preferences_settings_value])
+      expect(JSON.parse(attributes[:rails_table_preferences_columns_value]).map { |column| column["key"] }).to eq(["customer_code"])
+      expect(settings["columns"].map { |column| column["key"] }).to eq(["customer_code"])
+      expect(settings["filters"].keys).to eq(["customer_code"])
+      expect(settings["sorts"].map { |sort| sort["key"] }).to eq(["customer_code"])
+    end
+  end
+
   describe "#table_preferences_table_tag" do
-    it "renders a table with preference metadata" do
+    it "preserves host controllers when adding the table preferences controller" do
       html = helper.table_preferences_table_tag(
         table_key: :orders,
-        columns: [:customer_code, :customer_name]
-      ) { "<tbody></tbody>".html_safe }
-
-      expect(html).to include("data-controller=\"rails-table-preferences\"")
-      expect(html).to include("data-rails-table-preferences-table-key-value=\"orders\"")
-      expect(html).to include("data-rails-table-preferences-columns-value=")
-      expect(html).to include("data-rails-table-preferences-settings-value=")
-      expect(html).to include("<tbody></tbody>")
-    end
-
-    it "merges a custom data-controller with the default controller" do
-      html = helper.table_preferences_table_tag(
-        table_key: :orders,
-        columns: [:customer_code],
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code")],
         data: { controller: "orders-table" }
-      ) { "".html_safe }
+      ) { "content" }
 
-      expect(html).to include("data-controller=\"orders-table rails-table-preferences\"")
+      expect(html).to include('data-controller="orders-table rails-table-preferences"')
+      expect(html).to include('data-rails-table-preferences-table-key-value="orders"')
+      expect(html).to include('data-rails-table-preferences-collection-url-value="/rails_table_preferences/preferences/orders"')
     end
 
-    it "keeps the default controller when the custom controller already includes it" do
+    it "does not duplicate the table preferences controller when the host already includes it" do
       html = helper.table_preferences_table_tag(
         table_key: :orders,
-        columns: [:customer_code],
-        data: { controller: "rails-table-preferences orders-table" }
-      ) { "".html_safe }
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code")],
+        data: { controller: "orders-table rails-table-preferences" }
+      ) { "content" }
 
-      expect(html).to include("data-controller=\"rails-table-preferences orders-table\"")
+      expect(html).to include('data-controller="orders-table rails-table-preferences"')
+      expect(html).not_to include('rails-table-preferences rails-table-preferences')
     end
 
-    it "merges custom classes" do
+    it "keeps table preference data values authoritative while merging controllers" do
       html = helper.table_preferences_table_tag(
         table_key: :orders,
-        columns: [:customer_code],
-        class: "table table-striped"
-      ) { "".html_safe }
+        name: "inspection",
+        columns: [helper.table_preferences_column(:customer_code, label: "Customer Code")],
+        data: {
+          controller: "orders-table",
+          rails_table_preferences_table_key_value: "wrong",
+          "rails_table_preferences_url_value" => "/wrong"
+        }
+      ) { "content" }
 
-      expect(html).to include("class=\"rails-table-preferences-table table table-striped\"")
-    end
-
-    it "marks configured columns" do
-      html = helper.table_preferences_table_tag(
-        table_key: :orders,
-        columns: [:customer_code]
-      ) do
-        tag.thead do
-          tag.tr do
-            tag.th("顧客コード", data: { rails_table_preferences_column_key: "customer_code" })
-          end
-        end
-      end
-
-      expect(html).to include("data-rails-table-preferences-column-key=\"customer_code\"")
-    end
-
-    it "passes preference urls" do
-      html = helper.table_preferences_table_tag(
-        table_key: :orders,
-        columns: [:customer_code],
-        preference_url: "/preferences/orders/default",
-        collection_url: "/preferences/orders"
-      ) { "".html_safe }
-
-      expect(html).to include("data-rails-table-preferences-url-value=\"/preferences/orders/default\"")
-      expect(html).to include("data-rails-table-preferences-collection-url-value=\"/preferences/orders\"")
-    end
-
-    it "passes an explicit preference name" do
-      html = helper.table_preferences_table_tag(
-        table_key: :orders,
-        name: "current-user",
-        columns: [:customer_code]
-      ) { "".html_safe }
-
-      expect(html).to include("data-rails-table-preferences-name-value=\"current-user\"")
-    end
-
-    it "accepts TableColumn objects and keeps extra metadata" do
-      columns = [
-        RailsTablePreferences::TableColumn.new(
-          key: :customer_code,
-          label: "顧客コード",
-          visible: true,
-          order: 2,
-          width: "12rem",
-          truncate: 24
-        )
-      ]
-
-      html = helper.table_preferences_table_tag(table_key: :orders, columns: columns) { "".html_safe }
-
-      expect(html).to include("customer_code")
-      expect(html).to include("顧客コード")
-      expect(html).to include("12rem")
-      expect(html).to include("24")
-    end
-
-    it "builds column definitions from hashes" do
-      columns = [
-        { key: :customer_code, label: "顧客コード", visible: false, order: 1, width: "10rem", truncate: 12 }
-      ]
-
-      html = helper.table_preferences_table_tag(table_key: :orders, columns: columns) { "".html_safe }
-
-      expect(html).to include("customer_code")
-      expect(html).to include("顧客コード")
-      expect(html).to include("false")
-      expect(html).to include("10rem")
-      expect(html).to include("12")
-    end
-
-    it "uses column definition helper output" do
-      helper.table_preferences_column(:customer_code, label: "顧客コード")
-      helper.table_preferences_column(:customer_name, label: "顧客名")
-
-      html = helper.table_preferences_table_tag(table_key: :orders) { "".html_safe }
-
-      expect(html).to include("customer_code")
-      expect(html).to include("customer_name")
-      expect(html).to include("顧客コード")
-      expect(html).to include("顧客名")
-    end
-
-    it "raises when columns are missing" do
-      expect do
-        helper.table_preferences_table_tag(table_key: :orders) { "".html_safe }
-      end.to raise_error(ArgumentError, /columns must be provided/)
-    end
-
-    it "raises when table_key is missing" do
-      expect do
-        helper.table_preferences_table_tag(columns: [:customer_code]) { "".html_safe }
-      end.to raise_error(ArgumentError, /table_key is required/)
+      expect(html).to include('data-controller="orders-table rails-table-preferences"')
+      expect(html).to include('data-rails-table-preferences-table-key-value="orders"')
+      expect(html).to include('data-rails-table-preferences-url-value="/rails_table_preferences/preferences/orders/inspection"')
+      expect(html).not_to include("/wrong")
     end
   end
 
   describe "#table_preferences_column" do
-    it "builds and stores a column definition" do
-      helper.table_preferences_column(:customer_code, label: "顧客コード", visible: false, order: 4, width: "10rem", truncate: 20)
-
-      definitions = helper.table_preferences_columns
-      expect(definitions.size).to eq(1)
-      expect(definitions.first).to be_a(RailsTablePreferences::TableColumn)
-      expect(definitions.first.key).to eq("customer_code")
-      expect(definitions.first.label).to eq("顧客コード")
-      expect(definitions.first.visible).to be(false)
-      expect(definitions.first.order).to eq(4)
-      expect(definitions.first.width).to eq("10rem")
-      expect(definitions.first.truncate).to eq(20)
-    end
-
-    it "supports filter and sortable metadata" do
-      helper.table_preferences_column(:customer_name, label: "顧客名", filter: { type: :text }, sortable: true)
-
-      definition = helper.table_preferences_columns.first
-      expect(definition.filter).to eq({ "type" => "text" })
-      expect(definition.sortable).to be(true)
-    end
-
-    it "supports pinned and export metadata" do
-      helper.table_preferences_column(:customer_name, label: "顧客名", pinned: true, export_key: :customer_name_for_export)
-
-      definition = helper.table_preferences_columns.first
-      expect(definition.pinned).to be(true)
-      expect(definition.export_key).to eq("customer_name_for_export")
-    end
-
-    it "supports filter option metadata" do
-      helper.table_preferences_column(:status, label: "状態", filter: { type: :select, options: ["pending", { value: "shipped", label: "出荷済み" }] })
-
-      definition = helper.table_preferences_columns.first
-      expect(definition.filter["options"]).to eq(["pending", { "value" => "shipped", "label" => "出荷済み" }])
-    end
-
-    it "supports grouped metadata" do
-      helper.table_preferences_column(:customer_name, label: "顧客名", group: "Customer")
-
-      definition = helper.table_preferences_columns.first
-      expect(definition.group).to eq("Customer")
-      expect(definition.to_h["group"]).to eq("Customer")
-    end
-
-    it "keeps empty optional metadata out of the JSON payload" do
-      helper.table_preferences_column(:customer_name, label: "顧客名", width: "", truncate: nil, filter: {}, group: "", pinned: false, export_key: "")
-
-      payload = helper.table_preferences_columns.first.to_h
-
-      expect(payload).not_to have_key("width")
-      expect(payload).not_to have_key("truncate")
-      expect(payload).not_to have_key("filter")
-      expect(payload).not_to have_key("group")
-      expect(payload).not_to have_key("pinned")
-      expect(payload).not_to have_key("export_key")
-    end
-  end
-
-  describe "#rails_table_preference_settings" do
-    it "generates default settings for the provided columns" do
-      settings = helper.rails_table_preference_settings([
-        RailsTablePreferences::TableColumn.new(key: :customer_code, label: "顧客コード", visible: true, order: 2, width: "12rem"),
-        RailsTablePreferences::TableColumn.new(key: :customer_name, label: "顧客名", visible: false, order: 1)
-      ])
-
-      expect(settings["columns"].map { |column| column["key"] }).to eq(%w[customer_name customer_code])
-      expect(settings["columns"].first).to include("visible" => false, "order" => 1)
-      expect(settings["columns"].last).to include("visible" => true, "order" => 2, "width" => "12rem")
-    end
-
-    it "builds settings from hash columns" do
-      settings = helper.rails_table_preference_settings([
-        { key: :customer_code, label: "顧客コード", visible: false, order: 3 }
-      ])
-
-      expect(settings["columns"].first).to include("key" => "customer_code", "label" => "顧客コード", "visible" => false, "order" => 3)
-    end
-
-    it "returns deep copies so callers can mutate safely" do
-      column = RailsTablePreferences::TableColumn.new(key: :customer_code, label: "顧客コード", filter: { type: :text })
-
-      settings = helper.rails_table_preference_settings([column])
-      settings["columns"].first["filter"]["type"] = "select"
-
-      expect(column.filter["type"]).to eq("text")
-    end
-  end
-
-  describe "#rails_table_preference_params" do
-    let(:params) do
-      ActionController::Parameters.new(
-        table_preferences: {
-          orders: {
-            columns: {
-              customer_code: { visible: "0", order: "2", width: "12rem" },
-              customer_name: { visible: "1", order: "1", width: "" },
-              internal_note: { visible: "false" },
-              missing_column: { visible: "1", width: "100px" }
-            },
-            filters: {
-              customer_name: { "operator" => "contains", "value" => "山田" }
-            },
-            sorts: ["delivery_date desc"]
-          }
-        }
+    it "builds a column definition hash" do
+      expect(helper.table_preferences_column(:customer_code, label: "Customer Code", default_order: 10)).to eq(
+        "key" => "customer_code",
+        "label" => "Customer Code",
+        "visible" => true,
+        "order" => 10,
+        "pinned" => false,
+        "ignored" => false
       )
     end
 
-    it "extracts settings for a table" do
-      result = helper.rails_table_preference_params(params, table_key: :orders)
-
-      expect(result).to include("columns", "filters", "sorts")
-      expect(result["columns"]["customer_code"]).to include("visible" => false, "order" => 2, "width" => "12rem")
-      expect(result["columns"]["customer_name"]).to include("visible" => true, "order" => 1)
-      expect(result["columns"]).not_to have_key("missing_column")
-      expect(result["filters"]).to eq({ "customer_name" => { "operator" => "contains", "value" => "山田" } })
-      expect(result["sorts"]).to eq(["delivery_date desc"])
+    it "builds a filterable, sortable, and overflow-aware column definition hash" do
+      expect(
+        helper.table_preferences_column(
+          :status,
+          label: "状態",
+          filter: :select,
+          sortable: true,
+          overflow: :wrap
+        )
+      ).to include(
+        "key" => "status",
+        "label" => "状態",
+        "filter" => { "type" => "select" },
+        "sortable" => true,
+        "overflow" => "wrap"
+      )
     end
 
-    it "raises when table_key is missing" do
-      expect do
-        helper.rails_table_preference_params(params)
-      end.to raise_error(ArgumentError, /table_key is required/)
-    end
+    it "uses locale-backed labels when locale rules are configured" do
+      RailsTablePreferences.configuration.label_resolution = %i[activerecord_attribute_i18n]
+      I18n.backend.store_translations(:en, activerecord: { attributes: { order: { customer_code: "Customer Code from locale" } } })
 
-    it "returns an empty hash when params do not include table preferences" do
-      empty_params = ActionController::Parameters.new({})
-
-      expect(helper.rails_table_preference_params(empty_params, table_key: :orders)).to eq({})
-    end
-
-    it "handles missing filters and sorts" do
-      params[:table_preferences][:orders].delete(:filters)
-      params[:table_preferences][:orders].delete(:sorts)
-
-      result = helper.rails_table_preference_params(params, table_key: :orders)
-
-      expect(result["filters"]).to eq({})
-      expect(result["sorts"]).to eq([])
+      expect(helper.table_preferences_column(:customer_code, model_name: :order)["label"]).to eq("Customer Code from locale")
     end
   end
 
-  describe "#rails_table_preference_merged_params" do
-    it "merges submitted settings with current column definitions" do
-      existing = {
-        "columns" => {
-          "customer_code" => { "visible" => false, "order" => 2, "width" => "12rem" },
-          "missing_column" => { "visible" => true, "order" => 99 }
-        },
-        "filters" => {
-          "customer_name" => { "operator" => "contains", "value" => "山田" }
-        },
-        "sorts" => ["delivery_date desc"]
-      }
+  describe "#table_preferences_columns" do
+    it "filters ignored columns" do
+      columns = helper.table_preferences_columns(
+        [
+          :customer_code,
+          { key: :internal_cost, ignored: true },
+          { key: :secret_note }
+        ],
+        ignored_columns: ["secret_note"]
+      )
 
-      current_columns = [
-        RailsTablePreferences::TableColumn.new(key: :customer_code, label: "顧客コード", visible: true, order: 1),
-        RailsTablePreferences::TableColumn.new(key: :customer_name, label: "顧客名", visible: true, order: 2)
-      ]
-
-      result = helper.rails_table_preference_merged_params(existing, current_columns)
-
-      expect(result["columns"]["customer_code"]).to include("visible" => false, "order" => 2)
-      expect(result["columns"]["customer_name"]).to include("visible" => true, "order" => 2)
-      expect(result["columns"]).not_to have_key("missing_column")
-      expect(result["filters"]).to eq(existing["filters"])
-      expect(result["sorts"]).to eq(existing["sorts"])
+      expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
+      expect(columns.first).not_to have_key("ignored")
     end
 
-    it "ignores malformed column entries" do
-      result = helper.rails_table_preference_merged_params({ "columns" => { "customer_code" => "bad" } }, [])
+    it "filters unresolved labels when unresolved labels are hidden" do
+      RailsTablePreferences.configuration.unresolved_label_behavior = :hide
 
-      expect(result["columns"]).to eq({})
+      columns = helper.table_preferences_columns(
+        [
+          { key: :customer_code, label: "Customer Code" },
+          { key: :internal_cost }
+        ]
+      )
+
+      expect(columns.map { |column| column["key"] }).to eq(["customer_code"])
+    end
+
+    it "preserves filter, sortable, and overflow metadata from hash definitions" do
+      columns = helper.table_preferences_columns(
+        [
+          { key: :customer_name, filter: { type: :text }, sortable: true, overflow: :clip }
+        ]
+      )
+
+      expect(columns.first).to include(
+        "filter" => { "type" => "text" },
+        "sortable" => true,
+        "overflow" => "clip"
+      )
+    end
+  end
+
+  describe "#table_preferences_params" do
+    it "returns controller params adapter output" do
+      params = helper.table_preferences_params(
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "山田" },
+            status: { operator: :in, values: %w[未出荷 出荷済] }
+          },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [
+          { key: :customer_name, filter: { param: :search_word } },
+          { key: :status, filter: { values_param: :statuses } },
+          { key: :delivery_date, sort_param: :delivery_on }
+        ]
+      )
+
+      expect(params).to eq(
+        "search_word" => "山田",
+        "statuses" => %w[未出荷 出荷済],
+        "sort" => "-delivery_on"
+      )
+    end
+
+    it "returns Ransack adapter output" do
+      params = helper.table_preferences_params(
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "山田" } },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [:customer_name, :delivery_date],
+        adapter: :ransack
+      )
+
+      expect(params).to eq(
+        "customer_name_cont" => "山田",
+        "s" => ["delivery_date desc"]
+      )
+    end
+
+    it "filters ignored columns before converting params" do
+      params = helper.table_preferences_params(
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "山田" },
+            secret_note: { operator: :contains, value: "hidden" }
+          },
+          sorts: [
+            { key: :secret_note, direction: :desc }
+          ]
+        },
+        columns: [
+          { key: :customer_name, filter: { param: :search_word } },
+          { key: :secret_note, filter: true, sortable: true }
+        ],
+        ignored_columns: [:secret_note]
+      )
+
+      expect(params).to eq("search_word" => "山田")
     end
   end
 
   describe "#table_preferences_hidden_fields" do
-    it "renders hidden inputs for columns, filters, and sorts" do
-      settings = {
-        "columns" => {
-          "customer_code" => { "visible" => "0", "order" => "2", "width" => "12rem" },
-          "customer_name" => { "visible" => "1", "order" => "1" }
+    it "renders hidden fields for scalar, array, and sort params" do
+      html = helper.table_preferences_hidden_fields(
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "山田" },
+            status: { operator: :in, values: %w[未出荷 出荷済] }
+          },
+          sorts: [{ key: :delivery_date, direction: :desc }]
         },
-        "filters" => {
-          "customer_name" => { "operator" => "contains", "value" => "山田" }
-        },
-        "sorts" => ["delivery_date desc"]
-      }
+        columns: [
+          { key: :customer_name, filter: { param: :search_word } },
+          { key: :status, filter: { values_param: :statuses } },
+          { key: :delivery_date, sort_param: :delivery_on }
+        ]
+      )
 
-      html = helper.table_preferences_hidden_fields(settings, param_namespace: "q")
+      expect(html).to include('type="hidden" name="search_word" value="山田"')
+      expect(html).to include('type="hidden" name="statuses[]" value="未出荷"')
+      expect(html).to include('type="hidden" name="statuses[]" value="出荷済"')
+      expect(html).to include('type="hidden" name="sort" value="-delivery_on"')
+    end
+
+    it "renders namespaced hidden fields" do
+      html = helper.table_preferences_hidden_fields(
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "山田" } },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        },
+        columns: [:customer_name, :delivery_date],
+        adapter: :ransack,
+        namespace: :q
+      )
 
       expect(html).to include('type="hidden" name="q[customer_name_cont]" value="山田"')
       expect(html).to include('type="hidden" name="q[s][]" value="delivery_date desc"')
