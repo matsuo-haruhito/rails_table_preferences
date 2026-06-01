@@ -55,7 +55,7 @@
   </p>
 </details>
 
-<style>
+<style<%= respond_to?(:content_security_policy_nonce) && content_security_policy_nonce.present? ? tag.attributes(nonce: content_security_policy_nonce) : nil %>>
   .rails-table-preferences-demo-scroll {
     max-width: 100%;
     overflow-x: auto;
@@ -425,7 +425,7 @@
      data-rails-table-preferences-demo-failure-status></p>
 </section>
 
-<script>
+<script<%= respond_to?(:content_security_policy_nonce) && content_security_policy_nonce.present? ? tag.attributes(nonce: content_security_policy_nonce) : nil %>>
   (() => {
     if (!window.__railsTablePreferencesDemoResetInstalled) {
       window.__railsTablePreferencesDemoResetInstalled = true
