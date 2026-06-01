@@ -80,7 +80,7 @@ Repository-level release confidence is expected to come from:
 - `node --check app/javascript/controllers/rails_table_preferences_controller.js`
 - `bundle exec rake build`
 - `bundle exec rake package:verify`
-- representative pull-request compatibility lanes for Rails 7.0 / Rails 7.1 / Rails 7.2 / Rails 8.0
+- representative pull-request compatibility lanes for Rails 7.0 / 7.1 / 7.2 / 8.0
 - sandbox/demo verification
 - manual QA and package verification docs
 
