@@ -27,6 +27,7 @@ The bundled editor and Stimulus controller provide:
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
+- optional semantic table captions for the default `resource_table_for` and `tree_resource_table_for` partials when the host app passes `caption:`
 
 ## Sortable headers
 
@@ -82,6 +83,19 @@ Resize handles are generated as buttons and receive an `aria-label`:
 The bundled controller prefers the configured column label for that accessible name, falls back to the visible header text when needed, and only uses the raw column key when neither user-facing label is available.
 
 The default behavior is pointer-oriented. Host applications that need full keyboard resizing should provide a custom controller or additional keyboard shortcuts.
+
+## Resource table captions
+
+When the host app uses the default `resource_table_for` or `tree_resource_table_for` partial, it can pass `caption:` to render a native `<caption>` immediately under the generated `<table>`:
+
+```erb
+<%= resource_table_for @orders, caption: "Orders" %>
+<%= tree_resource_table_for @projects, caption: "Projects" %>
+```
+
+Use this for a short semantic table name that helps users distinguish the table surface. The caption is optional and only appears when the host app passes it.
+
+Rails Table Preferences does not try to generate page-level explanations, complex table summaries, or business-specific instructions. Keep those in the host application around the generated table, or use a custom partial when the caption needs richer markup than the default surface provides.
 
 ## Drag and drop
 
@@ -230,9 +244,9 @@ If the host app also needs per-screen wording, different markup, or a custom sta
 
 The host application owns:
 
-- semantic table markup
-- table captions when needed
+- semantic table markup beyond the default resource table caption surface
 - page-level headings and instructions
+- complex table captions, explanatory copy, and custom partial layouts
 - focus order around surrounding UI
 - color contrast after applying app-specific styles
 - keyboard behavior beyond native form controls
@@ -264,6 +278,7 @@ Before releasing a screen, check:
 - Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
+- Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
 - Resize handles announce the user-facing column label rather than only an internal column key.
 - Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.
 - Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
