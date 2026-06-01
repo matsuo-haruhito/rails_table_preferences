@@ -33,6 +33,23 @@ end
 
 The method must return a persisted record. `--with-demo` and `--with-demo-route` copy verification files; they do not create the owner record or bypass the normal owner lookup.
 
+## Parent controller and mounted API boundary
+
+The engine controller inherits from `RailsTablePreferences.config.parent_controller_class_name`, which defaults to `ApplicationController`. It calls the configured `current_user_method` and, when set, `scope_context_method` on that inherited controller.
+
+Keep the parent controller aligned with the route you mount for `RailsTablePreferences::Engine`. If the host app has separate public, admin, API-only, or tenant-specific base controllers, choose the class that should own authentication, CSRF handling, locale, tenancy, and other request guards for the table preference JSON API.
+
+A conventional app can keep the default:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.parent_controller_class_name = "ApplicationController"
+  config.current_user_method = :current_user
+end
+```
+
+Before using the bundled editor in production, verify that a normal signed-in owner can save and load preferences through the mounted API, and that an unauthenticated or wrong-scope request is handled the same way the host app expects for that parent controller. Rails Table Preferences does not add a separate authentication framework or route constraint.
+
 ## Package entrypoint versus copied controller
 
 The default install copies `app/javascript/controllers/rails_table_preferences_controller.js` for apps that rely on the normal `stimulus-rails` manifest path.
