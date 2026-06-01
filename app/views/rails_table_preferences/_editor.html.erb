@@ -22,6 +22,9 @@
 <% apply_context = t("rails_table_preferences.editor.apply_context", default: "現在の表示に反映") %>
 <% save_context = t("rails_table_preferences.editor.save_context", default: "現在の設定名に保存") %>
 <% save_as_new_context = t("rails_table_preferences.editor.save_as_new_context", default: "新しい設定名として保存") %>
+<% primary_action_group_label = t("rails_table_preferences.editor.primary_action_group", default: "表示に反映する操作") %>
+<% save_action_group_label = t("rails_table_preferences.editor.save_action_group", default: "設定を保存する操作") %>
+<% maintenance_action_group_label = t("rails_table_preferences.editor.maintenance_action_group", default: "保存済み設定の削除や初期設定に戻す操作") %>
 <% status_region_label = t("rails_table_preferences.editor.status_region", default: "保存状態") %>
 
 <div data-controller="rails-table-preferences"
@@ -113,29 +116,43 @@
   <p id="<%= reset_hint_id %>" class="rails-table-preferences-editor__hint"><%= reset_visible_hint %></p>
 
   <div class="rails-table-preferences-editor__actions">
-    <button type="button"
-            data-action="rails-table-preferences#applyFromEditor"
-            title="<%= apply_context %>"
-            aria-label="<%= "#{t("rails_table_preferences.editor.apply", default: "適用")}: #{apply_context}" %>"
-            aria-describedby="<%= action_hint_id %>"><%= t("rails_table_preferences.editor.apply", default: "適用") %></button>
-    <button type="button"
-            data-action="rails-table-preferences#saveFromEditor"
-            title="<%= save_context %>"
-            aria-label="<%= "#{t("rails_table_preferences.editor.save", default: "保存")}: #{save_context}" %>"
-            aria-describedby="<%= action_hint_id %>"><%= t("rails_table_preferences.editor.save", default: "保存") %></button>
-    <button type="button"
-            data-action="rails-table-preferences#createPresetFromEditor"
-            title="<%= save_as_new_context %>"
-            aria-label="<%= "#{t("rails_table_preferences.editor.save_as_new", default: "別名で保存")}: #{save_as_new_context}" %>"
-            aria-describedby="<%= action_hint_id %>"><%= t("rails_table_preferences.editor.save_as_new", default: "別名で保存") %></button>
-    <button type="button"
-            data-action="mouseover->rails-table-preferences#syncDeletePresetButtonContext focus->rails-table-preferences#syncDeletePresetButtonContext rails-table-preferences#deletePreset"
-            title="<%= delete_confirm_label %>"
-            aria-label="<%= "#{delete_label}: #{delete_confirm_label}" %>"><%= delete_label %></button>
-    <button type="button"
-            data-action="rails-table-preferences#resetEditor"
-            title="<%= reset_hint %>"
-            aria-label="<%= reset_hint %>"
-            aria-describedby="<%= reset_hint_id %>"><%= reset_label %></button>
+    <div class="rails-table-preferences-editor__action-group rails-table-preferences-editor__action-group--primary"
+         role="group"
+         aria-label="<%= primary_action_group_label %>">
+      <button type="button"
+              data-action="rails-table-preferences#applyFromEditor"
+              title="<%= apply_context %>"
+              aria-label="<%= "#{t("rails_table_preferences.editor.apply", default: "適用")}: #{apply_context}" %>"
+              aria-describedby="<%= action_hint_id %>"><%= t("rails_table_preferences.editor.apply", default: "適用") %></button>
+    </div>
+
+    <div class="rails-table-preferences-editor__action-group rails-table-preferences-editor__action-group--save"
+         role="group"
+         aria-label="<%= save_action_group_label %>">
+      <button type="button"
+              data-action="rails-table-preferences#saveFromEditor"
+              title="<%= save_context %>"
+              aria-label="<%= "#{t("rails_table_preferences.editor.save", default: "保存")}: #{save_context}" %>"
+              aria-describedby="<%= action_hint_id %>"><%= t("rails_table_preferences.editor.save", default: "保存") %></button>
+      <button type="button"
+              data-action="rails-table-preferences#createPresetFromEditor"
+              title="<%= save_as_new_context %>"
+              aria-label="<%= "#{t("rails_table_preferences.editor.save_as_new", default: "別名で保存")}: #{save_as_new_context}" %>"
+              aria-describedby="<%= action_hint_id %>"><%= t("rails_table_preferences.editor.save_as_new", default: "別名で保存") %></button>
+    </div>
+
+    <div class="rails-table-preferences-editor__action-group rails-table-preferences-editor__action-group--maintenance"
+         role="group"
+         aria-label="<%= maintenance_action_group_label %>">
+      <button type="button"
+              data-action="mouseover->rails-table-preferences#syncDeletePresetButtonContext focus->rails-table-preferences#syncDeletePresetButtonContext rails-table-preferences#deletePreset"
+              title="<%= delete_confirm_label %>"
+              aria-label="<%= "#{delete_label}: #{delete_confirm_label}" %>"><%= delete_label %></button>
+      <button type="button"
+              data-action="rails-table-preferences#resetEditor"
+              title="<%= reset_hint %>"
+              aria-label="<%= reset_hint %>"
+              aria-describedby="<%= reset_hint_id %>"><%= reset_label %></button>
+    </div>
   </div>
 </div>
