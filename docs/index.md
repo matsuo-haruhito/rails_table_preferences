@@ -5,6 +5,7 @@ This directory contains focused documentation for Rails Table Preferences.
 ## Start here
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
+- [Install path options](install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and choose when to add renderer registries for TreeView or Rails Fields Kit integrations.
 - [Resource table cell hooks](resource_table_cell_hooks.md): stable body-cell data attributes for light host-app styling and the boundary with custom partials.
