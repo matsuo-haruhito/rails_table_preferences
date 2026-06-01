@@ -31,6 +31,13 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       }
     end
 
+    def render_tree_resource_table_row(item)
+      render partial: "rails_table_preferences/tree_resource_table_row", locals: {
+        item: item,
+        table_state: table_state
+      }
+    end
+
     it "adds the stable row hook to each non-empty flat resource table row" do
       render_resource_table([
         order_row_class.new("Acme"),
@@ -47,6 +54,14 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
       expect(rendered).to include('class="rails-table-preferences-resource-table__empty-row"')
       expect(rendered).not_to include("data-rails-table-preferences-resource-row")
+    end
+
+    it "keeps TreeView resource rows limited to cell hooks" do
+      render_tree_resource_table_row(order_row_class.new("Acme"))
+
+      expect(rendered).not_to include("data-rails-table-preferences-resource-row")
+      expect(rendered).to include('data-rails-table-preferences-column-key="customer_name"')
+      expect(rendered).to include('data-rails-table-preferences-filter-type="text"')
     end
   end
 end
