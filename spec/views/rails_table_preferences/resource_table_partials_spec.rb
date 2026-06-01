@@ -51,6 +51,19 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "keeps resource empty row colspan valid when every column is hidden" do
+    hidden_columns = columns.map { |column| column.merge("visible" => false) }
+
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      columns: hidden_columns,
+      table_state: { "visible_columns" => [] },
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("rails-table-preferences-resource-table__empty-cell")
+    expect(rendered).to include("colspan=\"1\"")
+  end
+
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
     view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
