@@ -85,9 +85,11 @@ The default behavior is pointer-oriented. Host applications that need full keybo
 
 ## Drag and drop
 
-The default column reorder behavior uses native drag and drop. The editor still exposes numeric order inputs, so users are not forced to rely only on drag and drop.
+The default column reorder behavior uses native drag and drop for editor rows and table headers. Treat those drag affordances as pointer-oriented shortcuts, not as the only supported reorder path.
 
-For applications with stricter accessibility requirements, prefer documenting the numeric order inputs as the keyboard-friendly reorder path or replacing the drag behavior in a custom controller.
+The bundled editor also exposes numeric order inputs. Keyboard-only users can change a column's order number, move to the bundled `適用` action, and apply the editor state without relying on drag and drop. This is the bundled keyboard-friendly fallback for reordering.
+
+For touch and narrow-viewport checks, do not assume table-header drag is the primary guaranteed path. Confirm the editor order inputs remain reachable and that applying those values updates the table order. Host applications that need stronger touch reordering, up/down controls, or full keyboard shortcuts should add those controls in a copied/custom controller rather than treating the bundled drag handles as a complete reorder design system.
 
 ## Read-only scoped presets
 
@@ -263,6 +265,8 @@ Before releasing a screen, check:
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
 - Resize handles announce the user-facing column label rather than only an internal column key.
+- Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.
+- Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
 - Custom colors still meet the host application's contrast requirements.
