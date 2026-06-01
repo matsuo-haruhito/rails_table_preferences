@@ -2,7 +2,7 @@
 
 Rails Table Preferences provides controller helpers for host applications that want to apply saved filter and sort preferences to existing list actions.
 
-The helpers do not execute searches. They resolve saved preferences and convert saved filter/sort settings into params that can be passed to the host application's existing search layer.
+The helpers do not execute searches. They resolve saved preferences and convert saved filter/sort settings into params that can be passed to the host application's existing search layer. They can also return an ordered export payload for CSV, Excel, or report code that the host application owns.
 
 ## Helpers
 
@@ -11,9 +11,10 @@ The engine includes `RailsTablePreferences::Controller` into `ActionController::
 Available controller helpers:
 
 ```ruby
-rails_table_preference(table_key:, name: nil, owner: nil)
-rails_table_preference_settings(table_key:, name: nil, owner: nil, fallback: {})
-rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, adapter: :controller_params, sort_param: "sort")
+rails_table_preference(table_key:, name: nil, owner: nil, scope_context: nil)
+rails_table_preference_settings(table_key:, name: nil, owner: nil, scope_context: nil, fallback: {})
+rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort")
+rails_table_preference_export_payload(table_key:, columns:, name: nil, owner: nil, scope_context: nil, include_hidden: false, fallback: {})
 rails_table_preference_merged_params(params_source = params, **options)
 ```
 
@@ -36,6 +37,10 @@ When `name:` is omitted:
 1. Use the preset with `default_flag = true`.
 2. If there is no default preset, use the preset named `default`.
 3. If neither exists, return `nil` or normalized fallback settings.
+
+When shared, role, or organization presets are enabled, the controller helpers resolve available presets using the current scope context. By default that context comes from `RailsTablePreferences.configuration.scope_context_method`. Pass `scope_context:` only when an action needs to resolve preferences for a different request context than the configured method would return.
+
+See [Scoped presets](scoped_presets.md) for scope types, resolution priority, and admin-maintenance patterns.
 
 ## Existing search(params) / order_by(params[:sort]) controllers
 
@@ -203,6 +208,60 @@ preference_params = rails_table_preference_params(
 )
 ```
 
+## Explicit scope context
+
+By default, role and organization preset availability comes from the configured scope context method:
+
+```ruby
+RailsTablePreferences.configure do |config|
+  config.scope_context_method = :table_preference_scope_context
+end
+```
+
+```ruby
+class ApplicationController < ActionController::Base
+  private
+
+  def table_preference_scope_context
+    {
+      roles: current_user.roles.pluck(:key),
+      organization: current_organization.slug
+    }
+  end
+end
+```
+
+That is usually the right path for normal list actions because every helper call resolves presets for the same current request.
+
+Pass `scope_context:` when a controller action intentionally needs a different context. For example, an admin preview can resolve the same table for a selected role without changing the current signed-in user:
+
+```ruby
+class Admin::WarehouseStockPreviewsController < ApplicationController
+  def show
+    columns = warehouse_stock_columns
+    preview_scope_context = { roles: [params.require(:role_key)] }
+
+    preference_params = rails_table_preference_params(
+      table_key: :warehouse_stocks,
+      name: params[:table_preference_name],
+      columns: columns,
+      scope_context: preview_scope_context
+    )
+
+    export_payload = rails_table_preference_export_payload(
+      table_key: :warehouse_stocks,
+      columns: columns,
+      scope_context: preview_scope_context
+    )
+
+    @warehouse_stocks = WarehouseStock.search(params.to_unsafe_h.merge(preference_params))
+    @export_columns = export_payload["columns"]
+  end
+end
+```
+
+Keep the values in `scope_context:` aligned with the `scope_key` values stored for role or organization presets. Rails Table Preferences resolves and normalizes the matching preset, but the host application still decides who may preview, create, update, or export data for that context.
+
 ## Responsibility boundary
 
 Rails Table Preferences is responsible for:
@@ -210,6 +269,7 @@ Rails Table Preferences is responsible for:
 - resolving the saved preference
 - normalizing settings
 - converting saved filter/sort settings to params
+- returning an ordered export payload from saved display settings
 - rendering optional hidden fields for existing forms
 
 The host application remains responsible for:
@@ -219,3 +279,5 @@ The host application remains responsible for:
 - joins and associations
 - validating searchable fields
 - business-specific search behavior
+- CSV, Excel, or report file generation
+- admin UI and permission checks for shared, role, or organization presets
