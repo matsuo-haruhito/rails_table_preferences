@@ -128,6 +128,36 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "keeps package-only controller values out of the copied controller contract" do
+    build_entrypoint_sandbox do |tmpdir|
+      base_controller_path = File.join(tmpdir, "app/javascript/controllers/rails_table_preferences_controller.js")
+      package_controller_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const baseUrl = pathToFileURL(process.argv[1]).href
+        const packageUrl = pathToFileURL(process.argv[2]).href
+        const { default: BaseController } = await import(baseUrl)
+        const { default: PackageController } = await import(packageUrl)
+
+        if (!(PackageController.prototype instanceof BaseController)) {
+          throw new Error("package entrypoint no longer subclasses the copied controller")
+        }
+
+        if (Object.hasOwn(BaseController.values, "filterOperatorLabels")) {
+          throw new Error("package-only filterOperatorLabels value leaked into the copied controller")
+        }
+
+        if (!Object.hasOwn(PackageController.values, "filterOperatorLabels")) {
+          throw new Error("package entrypoint no longer exposes filterOperatorLabels as a package-only value")
+        }
+      JS
+
+      run_node_entrypoint_check(base_controller_path, package_controller_path, script:)
+    end
+  end
+
   it "uses package entrypoint filter operator label overrides and falls back to bundled labels" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
