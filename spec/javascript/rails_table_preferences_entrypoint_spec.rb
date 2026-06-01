@@ -176,6 +176,52 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "dispatches public controller lifecycle events with stable detail payloads" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const events = []
+
+        controller.dispatch = (name, options = {}) => events.push({ name, detail: options.detail })
+        controller.tableKeyValue = "orders"
+        controller.nameValue = "default"
+        controller.settingsValue = { columns: [{ key: "total", visible: true }], filters: {}, sorts: [] }
+        controller.hasPresetNameTarget = false
+        controller.settingsFromEditor = () => ({ columns: [{ key: "total", visible: false }], filters: { total: { operator: "gt", value: "100" } }, sorts: [] })
+        controller.apply = () => {}
+
+        controller.applyFromEditor({ preventDefault() {} })
+
+        const applied = events.find((event) => event.name === "applied")
+        if (!applied) throw new Error("applied event was not dispatched")
+        if (applied.detail.tableKey !== "orders") throw new Error("applied event missing tableKey")
+        if (applied.detail.name !== "default") throw new Error("applied event missing preset name")
+        if (applied.detail.action !== "apply") throw new Error("applied event missing action")
+        if (applied.detail.settings.filters.total.value !== "100") throw new Error("applied event missing settings snapshot")
+
+        await controller.withPreferenceAction("save", async () => {
+          controller.handleOperationError(new Error("boom"), "Save failed")
+        })
+
+        const failure = events.find((event) => event.name === "error")
+        if (!failure) throw new Error("error event was not dispatched")
+        if (failure.detail.action !== "save") throw new Error("error event missing stable action")
+        if (failure.detail.message !== "Save failed") throw new Error("error event missing stable message")
+        if (Object.prototype.hasOwnProperty.call(failure.detail, "error")) {
+          throw new Error("error event leaked the Error object")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "preserves host-provided sortable header titles while keeping generated sort hints for untitled headers" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
