@@ -117,6 +117,21 @@ The caption is rendered only when present, directly under `<table>` and before `
 
 Use `caption:` for a short semantic table name. The host app still owns page headings, explanatory copy, complex table semantics, and any custom partial layout beyond the bundled default markup.
 
+### Empty messages
+
+Pass `empty_message:` when the default `resource_table_for` partial should show short table-specific copy for an empty collection:
+
+```erb
+<%= resource_table_for(
+  @orders,
+  empty_message: "No orders match this search"
+) %>
+```
+
+When `empty_message:` is omitted or blank, the partial keeps using `I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display")`.
+
+`empty_message:` is plain text copy for the bundled empty table cell. It is rendered through normal ERB escaping, so do not use it for links, buttons, onboarding CTAs, or authorization-aware business actions. Use a custom resource table partial when the empty state needs richer markup or behavior.
+
 ## Editor placement
 
 By default, `resource_table_for` and `tree_resource_table_for` render the bundled table preferences editor immediately before the table surface. Use `render_editor: false` when the screen wants to place the editor in a toolbar, drawer, tab, or separate partial while keeping the default table partial.
