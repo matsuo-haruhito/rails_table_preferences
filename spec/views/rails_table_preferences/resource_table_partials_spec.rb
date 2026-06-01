@@ -51,6 +51,25 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "adds a generic data hook to non-empty resource table rows" do
+    records = [User.new(name: "Ada"), User.new(name: "Grace")]
+
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      records: records,
+      options: { render_editor: false }
+    )
+
+    expect(rendered.scan("data-rails-table-preferences-resource-row=\"true\"").size).to eq(2)
+    expect(rendered).to include("data-rails-table-preferences-column-key=\"name\"")
+  end
+
+  it "does not add the record row hook to the resource table empty row" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(options: { render_editor: false })
+
+    expect(rendered).to include("rails-table-preferences-resource-table__empty-row")
+    expect(rendered).not_to include("data-rails-table-preferences-resource-row")
+  end
+
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
     view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
