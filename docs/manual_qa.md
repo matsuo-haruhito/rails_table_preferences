@@ -72,6 +72,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Add representative `wrap`, `nowrap`, and `ellipsis` columns and confirm each overflow mode stays visually distinct.
 - [ ] Apply display changes, save the preset, reload the page, and confirm current column labels, width/truncation values, and overflow modes are still taken from the current column definition where the saved settings do not override them.
 - [ ] With a stale saved preset or fixture, confirm current `label:`, `overflow:` / `default_overflow:`, and fixed/pinned metadata override old saved display metadata instead of keeping obsolete labels or hooks.
+- [ ] In `resource_table_for` and `tree_resource_table_for`, hide every column while records still exist and confirm the default partial shows the all-hidden fallback row instead of an empty `<tr>` or invalid `colspan="0"` markup.
 - [ ] Reset settings after a saved display change and confirm labels, pinned/fixed hooks, and overflow behavior return to the current column definition defaults.
 - [ ] Reset settings and confirm the table returns to default display settings.
 - [ ] Confirm the visible reset helper explains that unsaved editor changes are discarded and defaults are restored without relying on hover text.
