@@ -85,37 +85,10 @@ module RailsTablePreferences
       def show_post_install_message
         say "\nRails Table Preferences installed.", :green
         say "\nNext steps:"
-        say "  1. Run: bin/rails db:migrate"
-        say "  2. Mount the engine in config/routes.rb:"
-        say "       mount RailsTablePreferences::Engine, at: \"/rails_table_preferences\""
 
-        unless options[:skip_stylesheets]
-          say "  3. Ensure app/assets/stylesheets/rails_table_preferences.css is loaded by your application stylesheet."
-          say "     For Sprockets, add this if needed:"
-          say "       *= require rails_table_preferences"
-          say "     For Sass/CSS bundling, import the copied file from your application stylesheet."
-        end
-
-        if options[:skip_javascript]
-          say "  4. Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name."
-          say "     Package entrypoint example: import rails_table_preferences/controller and register it from your app entrypoint."
-          say "     See docs/javascript_entrypoints.md for Vite/app/frontend resolver notes."
-        else
-          say "  4. Ensure the copied Stimulus controller is registered."
-          say "     stimulus-rails default manifests usually register app/javascript/controllers/*_controller.js automatically."
-          say "     For Vite/app/frontend package entrypoint installs, rerun with --skip-javascript and register rails_table_preferences/controller manually."
-          say "     See docs/javascript_entrypoints.md for resolver notes."
-        end
-
-        if demo_requested?
-          if options[:with_demo_route]
-            say "  5. Demo route added to config/routes.rb:"
-          else
-            say "  5. Add this route if you want to open the copied demo screen, or rerun with --with-demo-route:"
-          end
-          say "       #{DEMO_ROUTE}"
-          say "     The demo uses the configured current-user method and the table_preferences table."
-          say "     Remove the copied demo controller/view and route before production release if they are not needed."
+        post_install_steps.each.with_index(1) do |lines, index|
+          say "  #{index}. #{lines.first}"
+          lines.drop(1).each { |line| say line }
         end
 
         say ""
@@ -142,6 +115,59 @@ module RailsTablePreferences
       end
 
       private
+
+      def post_install_steps
+        steps = [
+          ["Run: bin/rails db:migrate"],
+          [
+            "Mount the engine in config/routes.rb:",
+            "       mount RailsTablePreferences::Engine, at: \"/rails_table_preferences\""
+          ]
+        ]
+
+        unless options[:skip_stylesheets]
+          steps << [
+            "Ensure app/assets/stylesheets/rails_table_preferences.css is loaded by your application stylesheet.",
+            "     For Sprockets, add this if needed:",
+            "       *= require rails_table_preferences",
+            "     For Sass/CSS bundling, import the copied file from your application stylesheet."
+          ]
+        end
+
+        steps << if options[:skip_javascript]
+                   [
+                     "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name.",
+                     "     Package entrypoint example: import rails_table_preferences/controller and register it from your app entrypoint.",
+                     "     See docs/javascript_entrypoints.md for Vite/app/frontend resolver notes."
+                   ]
+                 else
+                   [
+                     "Ensure the copied Stimulus controller is registered.",
+                     "     stimulus-rails default manifests usually register app/javascript/controllers/*_controller.js automatically.",
+                     "     For Vite/app/frontend package entrypoint installs, rerun with --skip-javascript and register rails_table_preferences/controller manually.",
+                     "     See docs/javascript_entrypoints.md for resolver notes."
+                   ]
+                 end
+
+        if demo_requested?
+          steps << [
+            demo_route_step_heading,
+            "       #{DEMO_ROUTE}",
+            "     The demo uses the configured current-user method and the table_preferences table.",
+            "     Remove the copied demo controller/view and route before production release if they are not needed."
+          ]
+        end
+
+        steps
+      end
+
+      def demo_route_step_heading
+        if options[:with_demo_route]
+          "Demo route added to config/routes.rb:"
+        else
+          "Add this route if you want to open the copied demo screen, or rerun with --with-demo-route:"
+        end
+      end
 
       def demo_requested?
         options[:with_demo] || options[:with_demo_route]
