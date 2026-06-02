@@ -240,6 +240,20 @@ ja:
 
 If the host app also needs per-screen wording, different markup, or a custom status surface, keep using the existing copy-based path by copying the bundled ERB partial or controller.
 
+## Forced-colors and high contrast checks
+
+The bundled CSS intentionally relies on lightweight system-friendly values such as `currentColor`, `canvas`, and `canvastext`. That keeps the default surface adaptable, but host applications should still verify the final rendered table in the application's high contrast or forced-colors mode.
+
+When checking a release candidate or host-app rollout, confirm the representative table still exposes these states without relying on color alone:
+
+- active filter buttons remain distinguishable from inactive filter buttons through the accessible name, pressed state, and visible affordance
+- sorted headers keep `aria-sort` and a visible sorted-state cue
+- focused resize handles have a visible focus outline and remain reachable near filter and sort controls
+- the open filter panel container remains visually separate from the table background and surrounding app chrome
+- pinned or fixed columns keep an opaque background and do not hide focused links, buttons, inputs, or filter controls while horizontally scrolled
+
+If the host app's theme makes one of those states ambiguous in forced-colors mode, prefer the smallest host-app or copied-stylesheet adjustment that restores the state cue. Do not treat the bundled gem CSS as a full design-system high contrast theme for every host application.
+
 ## Host application responsibilities
 
 The host application owns:
@@ -284,6 +298,7 @@ Before releasing a screen, check:
 - Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
 - The table remains understandable when columns are hidden.
 - Sticky/fixed columns do not cover focused content.
+- Forced-colors or high contrast checks still leave active filters, sorted headers, focused resize handles, filter panel boundaries, and pinned columns distinguishable.
 - Custom colors still meet the host application's contrast requirements.
 - If the host app overrides bundled helper or status copy, the locale entries still match the intended action and accessibility context.
 
