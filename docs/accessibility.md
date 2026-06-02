@@ -145,7 +145,7 @@ Host applications can still replace or restyle this surface through the existing
 
 The packaged `rails_table_preferences/controller` entrypoint adds a small visible helper when the editor settings differ from the last loaded or saved preset settings. This helper is separate from the async `role="status"` region, so progress and success messages such as loading, saving, and deleting are not overwritten by the persistent unsaved-change cue.
 
-The helper is shown after editor input changes, column reorder, resize, filter, or sort changes. It stays visible after `適用` when the applied settings have not been saved yet. It is cleared after a successful preset load, save, or save as new response updates the saved snapshot.
+The helper is shown after editor input changes, column reorder, resize, filter, or sort changes. It stays visible after `適用` when the applied settings have not been saved yet. It is cleared after a successful preset load, save, save as new, or delete response updates the saved snapshot.
 
 The default text is `未保存の変更があります。`. Host applications that use the package entrypoint can override the visible text per controller root with `data-rails-table-preferences-dirty-state-label-value`. Host apps using the copied base controller path should not assume this package entrypoint-only helper is available unless they copy the same behavior.
 
@@ -228,3 +228,84 @@ Copy or replace the bundled JavaScript when the host app needs controller logic 
 
 - new filter operator semantics or operator display rules beyond `filterOperatorLabels`
 - different busy-state or status-update behavior
+- custom filter panel interaction rules
+- extra confirmation flow beyond the bundled delete confirm
+
+In other words, changing `絞り込み`, `条件`, `開始`, `終了`, scope fallback labels, dirty-state helper copy, or packaged-controller operator labels can stay in locale entries and root values. Changing operator behavior, adding new operator semantics, or using a controller path that does not include the package entrypoint subclass still requires copied JavaScript today.
+
+Minimal host-app override example:
+
+```yaml
+ja:
+  rails_table_preferences:
+    editor:
+      action_hint: 適用は現在の表示だけを更新し、保存は現在の設定名へ反映、別名で保存は新しい設定として残します。
+      read_only_preset_hint: この設定は直接更新できません。保存すると個人用設定として保存されます。
+      loading_status: 設定を読み込み中です...
+      saved_status: 設定を保存しました。
+      deleting_failed_status: 設定の削除を完了できませんでした。
+      reset_hint: 保存前の変更を破棄して初期表示へ戻します。
+      reset_visible_hint: 初期状態に戻すと、保存前の変更は破棄されます。
+```
+
+If the host app also needs per-screen wording, different markup, or a custom status surface, keep using the existing copy-based path by copying the bundled ERB partial or controller.
+
+## Host application responsibilities
+
+The host application owns:
+
+- semantic table markup beyond the default resource table caption surface
+- page-level headings and instructions
+- complex table captions, explanatory copy, and custom partial layouts
+- focus order around surrounding UI
+- color contrast after applying app-specific styles
+- keyboard behavior beyond native form controls
+- custom confirmation dialogs
+- authorization messaging
+- testing with the application's real design system
+
+## Manual checks
+
+Before releasing a screen, check:
+
+- All editor controls can receive focus.
+- Focus order is understandable.
+- The preset select, preset name, default checkbox, action buttons, and status region are labeled.
+- The bundled action hint or accessible names explain the difference between apply, save, and save as new.
+- The preset selector helper copy or accessible description explains that it loads or switches the saved preset rather than setting the save target name.
+- The preset name helper copy or accessible description explains that save and save as new use that field as the edited preset name.
+- The default checkbox helper text or accessible description explains that it only takes effect when the user saves or save as new.
+- The reset visible helper, hover text, and accessible name explain that current edits are discarded and defaults are restored.
+- The dirty-state helper appears separately from async status feedback and clears after successful load, save, save as new, or delete actions.
+- Sortable headers expose the current sort state.
+- Active filters expose an active pressed state.
+- Active filter buttons expose a short summary through `title` or `aria-label`.
+- Filter buttons expose expanded state only while their panel is open.
+- Opening a filter panel moves focus into the first bundled field.
+- `Escape` closes the bundled filter panel and returns focus to the triggering filter button.
+- Scroll or viewport resize does not leave the bundled filter panel detached from its header context.
+- Read-only scoped presets disable destructive/default controls.
+- Read-only scoped presets show helper text that explains the save fallback goes to the owner preset path without implying it always creates a brand-new preset.
+- Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
+- Async preset actions temporarily disable controls and re-enable them after completion.
+- Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
+- Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
+- Resize handles announce the user-facing column label rather than only an internal column key.
+- Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.
+- Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
+- The table remains understandable when columns are hidden.
+- Sticky/fixed columns do not cover focused content.
+- Custom colors still meet the host application's contrast requirements.
+- If the host app overrides bundled helper or status copy, the locale entries still match the intended action and accessibility context.
+
+## Customization path
+
+If the default behavior is not sufficient, use the existing copy-based customization path:
+
+```bash
+bin/rails generate rails_table_preferences:views
+bin/rails generate rails_table_preferences:javascript
+bin/rails generate rails_table_preferences:stylesheets
+```
+
+Then adjust the generated ERB, Stimulus controller, or CSS in the host application.
