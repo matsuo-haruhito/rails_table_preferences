@@ -56,6 +56,10 @@
   line-height: 1.5;
 }
 
+.rails-table-preferences-editor__dirty-state {
+  font-weight: 700;
+}
+
 .rails-table-preferences-editor__rows {
   display: grid;
   gap: 0.625rem;
