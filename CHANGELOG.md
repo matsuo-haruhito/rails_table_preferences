@@ -6,6 +6,8 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 
 ## [Unreleased]
 
+Until v0.1.0 is tagged, the detailed entries in this section are the temporary source for the initial release contents. In the release-prep or tag PR, move the landed entries into `[0.1.0] - YYYY-MM-DD`, leave a fresh empty `[Unreleased]` section for post-release work, and keep open pull requests or proposal issues out of the dated release entry until they land.
+
 ### Release highlights
 
 - Table preference persistence and preset resolution cover owner, shared, role, and organization scopes for dense business index screens.
