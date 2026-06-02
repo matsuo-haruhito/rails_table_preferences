@@ -194,6 +194,7 @@ Confirm controller integration behavior:
 Check the main user paths:
 
 - [ ] README links to Quick start.
+- [ ] README links to Japanese quick start.
 - [ ] README links to Production integration checklist.
 - [ ] README links to Decision guide.
 - [ ] README links to Scoped presets.
@@ -209,6 +210,7 @@ Check the main user paths:
 - [ ] README links to JavaScript entrypoints.
 - [ ] `docs/index.md` links to all major docs.
 - [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
+- [ ] `docs/quick_start_ja.md` remains a low-drift entry point: its links and short summaries follow the current README and focused English docs without becoming a full translation.
 - [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
