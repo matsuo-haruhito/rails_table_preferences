@@ -6,6 +6,14 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 
 ## [Unreleased]
 
+### Release highlights
+
+- Table preference persistence and preset resolution cover owner, shared, role, and organization scopes for dense business index screens.
+- Resource table helpers, column metadata, fixed/pinned columns, column groups, renderer registries, and data-attribute boundaries provide convention-first table integration without taking over host-app presentation.
+- Filter, sort, controller params, Ransack, hidden-field, and export payload helpers let host apps reuse saved display state while keeping business queries and file generation in the host app.
+- Bundled Stimulus, copied/package entrypoints, install/demo generators, and package verification support both default `stimulus-rails` and custom bundler integration paths.
+- Focused user and maintainer documentation now covers quick start, production integration, support, accessibility, demo/sandbox/manual QA, release checks, Product Profile, and assisted-maintenance guardrails.
+
 ### Added
 
 - Initial table preference persistence model and Rails engine structure.
@@ -36,7 +44,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - Legacy `ColumnAdjustment` import rake task.
 - Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
 - Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
-- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and 8.0.
+- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and Rails 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 
 ### Changed
