@@ -4,6 +4,8 @@ Rails Table Preferences supports owner, shared, role, and organization scoped pr
 
 The feature is intended for applications that want one or more default table layouts to be provided by the application, an administrator, a role, or an organization, while still allowing each user to save personal overrides.
 
+For the first non-owner preset, start with [Minimal operating patterns](#minimal-operating-patterns). Those patterns describe the host-app-owned setup path for seed data, admin forms, service objects, and maintenance scripts without turning Rails Table Preferences into an admin UI or authorization framework.
+
 ## Scope types
 
 | Scope type | Meaning | Owner foreign key | Scope key |
@@ -51,6 +53,8 @@ end
 The method may be public or private. If no method is configured, the context is empty.
 
 Role and organization preset matching is string-based. Use the same stable identifiers in `scope_key` that the configured scope context method returns.
+
+When administrators create non-owner presets through a seed task, console script, internal admin form, or service object, store the same `scope_key` values that this method will return at request time. Rails Table Preferences owns the resolver contract; the host app owns the operation that creates those scoped records and the policy for who may change them.
 
 ## Default resolution order
 
@@ -184,6 +188,8 @@ For user-facing screens:
 - host applications may provide a separate admin screen for managing shared, role, or organization presets
 
 ## Minimal operating patterns
+
+Use this section as the first-preset recipe for shared, role, and organization presets. The goal is to show how a host app can create and maintain scoped records while Rails Table Preferences continues to own only the storage, normalization, and resolver behavior.
 
 The following patterns keep the bundled editor simple while still giving the host application a clear place to manage non-owner presets.
 
