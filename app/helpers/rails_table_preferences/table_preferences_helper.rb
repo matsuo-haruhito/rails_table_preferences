@@ -330,13 +330,22 @@ module RailsTablePreferences
         when Hash
           table_preferences_hidden_field_tags(value, namespace: nil, prefix: field_name)
         when Array
-          value.reject(&:blank?).map do |item|
+          value.reject { |item| table_preferences_hidden_field_blank?(item) }.map do |item|
             hidden_field_tag("#{field_name}[]", item, id: nil)
           end
         else
-          value.blank? ? [] : hidden_field_tag(field_name, value, id: nil)
+          table_preferences_hidden_field_blank?(value) ? [] : hidden_field_tag(field_name, value, id: nil)
         end
       end
+    end
+
+    def table_preferences_hidden_field_blank?(value)
+      return true if value.nil?
+      return false if value == false
+      return value.blank? if value.respond_to?(:blank?)
+      return value.empty? if value.respond_to?(:empty?)
+
+      false
     end
 
     def table_preferences_field_name(key, namespace: nil, prefix: nil)
