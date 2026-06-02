@@ -62,8 +62,11 @@ module RailsTablePreferences
 
     def normalize_filters(value)
       normalize_hash(value).each_with_object({}) do |(key, condition), filters|
+        normalized_key = key.to_s
+        next if normalized_key.blank?
+
         normalized = normalize_filter_condition(condition)
-        filters[key.to_s] = normalized if normalized.present?
+        filters[normalized_key] = normalized if normalized.present?
       end
     end
 
