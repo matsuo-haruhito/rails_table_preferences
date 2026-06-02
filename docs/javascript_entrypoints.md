@@ -52,8 +52,11 @@ Current package-only behavior is intentionally small:
 
 - `filterOperatorLabelsValue` allows package-entrypoint users to override bundled filter operator labels without editing a copied controller.
 - Sortable header handling preserves host-provided `title` attributes while still generating sort hints for untitled headers.
+- Resize handles also listen for `Enter`, Space, and legacy `Spacebar` key presses and route them to the packaged keyboard auto-fit behavior after the base controller installs the handles.
 
-Do not assume those package-only values or overrides exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
+Do not assume those package-only values, overrides, or keyboard affordances exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
+
+When future package-entrypoint behavior is added, update this list and re-run the entrypoint-specific manual checks for sortable header titles, filter operator label overrides, and resize handle keyboard auto-fit. The copied controller path should still be checked separately when a host app registers the generated `app/javascript/controllers/rails_table_preferences_controller.js` file.
 
 ### Resolve the gem entrypoint explicitly
 
