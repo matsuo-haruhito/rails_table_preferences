@@ -47,9 +47,12 @@ See [Export integration](export_integration.md).
 
 - Owner presets work without extra scope setup.
 - Configure `scope_context_method` only when the same screen needs shared, role, or organization presets.
+- Use the scoped presets minimal operating patterns before creating the first shared, role, or organization preset.
 - Keep shared, role, and organization preset administration in a host-app admin flow or a separate operating process.
+- Confirm the admin-created `scope_key` values match the identifiers returned by `scope_context_method`.
+- Confirm normal users can read available non-owner presets while regular editor writes still create owner presets.
 
-See [Scoped presets](scoped_presets.md).
+See [Scoped presets](scoped_presets.md) and its [minimal operating patterns](scoped_presets.md#minimal-operating-patterns).
 
 ## 6. Run the quick host-app smoke
 
@@ -62,7 +65,8 @@ Before asking real users to try the screen, verify this path in the real host ap
 5. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
 6. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
 7. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
-8. Check the dense table layout in the real production shell:
+8. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
+9. Check the dense table layout in the real production shell:
    - Move keyboard focus through editor controls, filter buttons, resize handles, sortable headers, sticky/fixed columns, and row actions.
    - Resize one managed column and confirm the handle remains visible and does not collide with header text, filter buttons, or sort indicators.
    - Horizontally scroll a table with sticky/fixed columns and confirm focused links, buttons, and inputs are not covered.
@@ -84,4 +88,4 @@ Rails Table Preferences owns the editor UI, saved settings payload, preset API c
 
 The mounted engine inherits `RailsTablePreferences.config.parent_controller_class_name`; the configured host controller is where authentication, CSRF handling, tenant or locale setup, and other request-wide callbacks should be checked.
 
-The host app still owns authentication, authorization, query execution, joins, pagination, unmanaged columns, export file generation, and final screen styling.
+The host app still owns authentication, authorization, query execution, joins, pagination, unmanaged columns, export file generation, shared/role/organization preset administration, and final screen styling.
