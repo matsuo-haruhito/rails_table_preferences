@@ -241,6 +241,18 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         const controller = new ControllerClass()
         let currentSettings = { columns: [{ key: "name", visible: true, order: 10 }], filters: {}, sorts: [] }
 
+        globalThis.document = {
+          createElement() {
+            return {
+              className: "",
+              dataset: {},
+              attributes: {},
+              hidden: false,
+              textContent: "",
+              setAttribute(name, value) { this.attributes[name] = value }
+            }
+          }
+        }
         controller.element = { appendChild(element) { dirtyElements.push(element) } }
         controller.dirtyStateLabelValue = "Unsaved changes"
         Object.defineProperty(controller, "hasDirtyStateTarget", { get() { return dirtyElements.length > 0 } })
@@ -250,6 +262,7 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         Object.defineProperty(controller, "hasEditorRowsTarget", { get() { return true } })
         Object.defineProperty(controller, "editorRowsTarget", { get() { return editorRowsTarget } })
         controller.settingsFromEditor = () => JSON.parse(JSON.stringify(currentSettings))
+        controller.apply = () => {}
 
         controller.installDirtyStateTracking()
         controller.markEditorClean()
