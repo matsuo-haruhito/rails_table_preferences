@@ -307,3 +307,22 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Current column metadata overrides stale saved metadata for labels, overflow modes, filters, sortable state, and pinned/fixed state after apply, save, reload, and reset flows.
 
 ## Sign-off
+
+Use a short sign-off note for release candidates, host-app launch checks, or any run where skipped areas could affect the next reviewer. Keep the note compact: it should say what was checked, what was skipped, why it was skipped, and where follow-up work lives.
+
+```markdown
+### Manual QA sign-off
+
+- Date:
+- Tester:
+- Build, branch, or PR:
+- Environment:
+- Screen or workflow checked:
+- Checklist scope completed:
+- Skipped areas and reasons:
+- Issues found:
+- Follow-up Issue / PR links:
+- Release or rollout recommendation:
+```
+
+For a quick smoke, record the quick smoke items that passed and the specific full-checklist sections you did not run. For full release or host-app launch sign-off, note any skipped section by number and include the risk or reason, such as not using Ransack, not testing exports in that host app, or deferring browser coverage to a separate compatibility pass.
