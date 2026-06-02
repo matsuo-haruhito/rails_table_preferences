@@ -161,6 +161,8 @@ The package verification task reads the packaged `package.json` and confirms eve
 
 This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target check catches drift between `package.json` and the gem contents.
 
+The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification should not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
+
 ## Why this matters
 
 The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, package metadata, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
