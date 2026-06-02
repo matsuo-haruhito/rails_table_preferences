@@ -163,6 +163,39 @@ Override the foreign key only when the column name must differ from the owner mo
 bin/rails generate rails_table_preferences:install --owner-model customers --owner-foreign-key member_id
 ```
 
+## Migrating legacy ColumnAdjustment records
+
+Use the legacy import task only when the host app already has `ColumnAdjustment` records that should become Rails Table Preferences records. It is not part of a normal new installation path.
+
+Start with a dry run:
+
+```bash
+DRY_RUN=true bundle exec rake rails_table_preferences:legacy:import_column_adjustments
+```
+
+If legacy records do not point to the expected owner through `user`, `create_user`, `user_id`, or `create_user_id`, provide a default owner id for records that need it:
+
+```bash
+USER_ID=123 DRY_RUN=true bundle exec rake rails_table_preferences:legacy:import_column_adjustments
+```
+
+After reviewing the counts, run without `DRY_RUN=true` to write the imported preferences:
+
+```bash
+USER_ID=123 bundle exec rake rails_table_preferences:legacy:import_column_adjustments
+```
+
+The task prints:
+
+- `created`: preferences that would be or were newly created
+- `updated`: existing preferences that would be or were updated
+- `skipped`: records that were not imported
+- `imported`: `created + updated`
+
+Skipped records can happen when no owner can be resolved, the legacy `value` cannot be parsed as JSON, the generated preference is invalid, the database statement fails, or the legacy record shape does not expose the expected methods. Investigate skipped records before using the imported settings in production.
+
+The importer maps `table_name` to `table_key`, `setting_name` to the preference name, and the legacy `value` to normalized column settings. It does not create a rollback framework or host-app-specific migration UI.
+
 ## CSS is not applied
 
 Symptoms:
