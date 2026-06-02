@@ -97,6 +97,7 @@ module RailsTablePreferences
 
       def blank?(value)
         return true if value.nil?
+        return false if value == false
         return value.blank? if value.respond_to?(:blank?)
         return value.empty? if value.respond_to?(:empty?)
 
