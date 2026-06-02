@@ -206,6 +206,52 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "shows all columns without resetting display metadata, filters, or sorts" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const calls = []
+        let prevented = false
+
+        controller.busy = false
+        controller.closeFilterPanel = () => calls.push("closeFilterPanel")
+        controller.renderEditor = () => calls.push("renderEditor")
+        controller.apply = () => calls.push("apply")
+        controller.settingsValue = {
+          columns: [
+            { key: "id", visible: false, order: 20, width: 80, truncate: 12, overflow: "clip", pinned: true },
+            { key: "name", visible: true, order: 10, width: 160, truncate: null, overflow: "wrap", pinned: false }
+          ],
+          filters: { name: { operator: "contains", value: "Acme" } },
+          sorts: [{ key: "name", direction: "desc" }]
+        }
+
+        controller.showAllColumns({ preventDefault: () => { prevented = true } })
+
+        const [idColumn, nameColumn] = controller.settingsValue.columns
+        if (!prevented) throw new Error("showAllColumns did not prevent the editor button default action")
+        if (idColumn.visible !== true || nameColumn.visible !== true) throw new Error("showAllColumns did not make every column visible")
+        if (idColumn.order !== 20 || idColumn.width !== 80 || idColumn.truncate !== 12 || idColumn.overflow !== "clip" || idColumn.pinned !== true) {
+          throw new Error("showAllColumns changed non-visibility display metadata")
+        }
+        if (nameColumn.order !== 10 || nameColumn.width !== 160 || nameColumn.overflow !== "wrap" || nameColumn.pinned !== false) {
+          throw new Error("showAllColumns changed visible column metadata")
+        }
+        if (controller.settingsValue.filters.name.value !== "Acme") throw new Error("showAllColumns reset filters")
+        if (controller.settingsValue.sorts[0].direction !== "desc") throw new Error("showAllColumns reset sorts")
+        if (calls.join(",") !== "closeFilterPanel,renderEditor,apply") throw new Error(`showAllColumns did not refresh editor and table state: ${calls}`)
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "preserves host-provided sortable header titles while keeping generated sort hints for untitled headers" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
