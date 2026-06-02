@@ -274,6 +274,8 @@ Included scope:
 
 Remaining before tagging v0.1:
 
+Use the [Release checklist](docs/release_checklist.md) as the detailed release-readiness source of truth; this README list is the short summary before tagging.
+
 - Confirm CI is green on the release commit
 - Do one final sandbox/demo verification pass
 - Inspect package contents with [Package verification](docs/package_verification.md)
