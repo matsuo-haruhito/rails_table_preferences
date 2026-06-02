@@ -36,8 +36,8 @@ RSpec.describe "editor accessibility rendering", type: :helper do
       expect(page.find("##{id}", visible: false)).to be_present
     end
 
-    delete_button = maintenance_group.find("button", text: "削除", visible: false)
-    reset_button = maintenance_group.find("button", text: "テーブル初期設定に戻す", visible: false)
+    delete_button = maintenance_group.find('button[data-action*="rails-table-preferences#deletePreset"]', visible: false)
+    reset_button = maintenance_group.find('button[data-action="rails-table-preferences#resetEditor"]', visible: false)
 
     [delete_button, reset_button].each do |button|
       button["aria-describedby"].split.each do |id|
