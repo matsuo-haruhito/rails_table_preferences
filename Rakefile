@@ -32,6 +32,14 @@ namespace :package do
         end
       end
 
+      unless result[:missing_package_internal_imports].empty?
+        warn "Missing package internal JavaScript imports:"
+        result[:missing_package_internal_imports].each do |missing_import|
+          warn "  - #{missing_import.fetch(:export)} #{missing_import.fetch(:entrypoint)} imports " \
+            "#{missing_import.fetch(:import)} -> #{missing_import.fetch(:target)}"
+        end
+      end
+
       unless result[:package_json_errors].empty?
         warn "Package metadata errors:"
         result[:package_json_errors].each { |error| warn "  - #{error}" }
