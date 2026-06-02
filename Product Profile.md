@@ -72,6 +72,8 @@ Maintainers should expect to combine the gem with:
 
 The README currently positions the gem as active initial development targeting an initial `0.1.x` release line.
 
+Before tagging that release, compare this profile with `README.md` and `CHANGELOG.md` against current `main`. Treat open pull requests and proposal issues as review context, not as released surface, until they are merged.
+
 Current representative pull-request compatibility coverage is Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0, while the development Gemfile tracks Rails 8.0.x. Host applications evaluating newer Rails releases should treat that as additional verification space until the representative compatibility matrix expands.
 
 Repository-level release confidence is expected to come from:
