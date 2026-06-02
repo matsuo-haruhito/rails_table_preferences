@@ -10,6 +10,8 @@ The goal is to catch packaging, generator, documentation, and host-application i
 - [ ] Update the version constant if needed.
 - [ ] Move `CHANGELOG.md` entries from `[Unreleased]` to the target version section.
 - [ ] Confirm `CHANGELOG.md` covers user-facing changes, migration changes, generator changes, JavaScript/CSS changes, and known limitations.
+- [ ] Confirm `CHANGELOG.md`, README current scope, and `Product Profile.md` release posture describe the same current `main` product surface.
+- [ ] Confirm open pull requests and proposal issues are not described as released behavior unless they have already been merged.
 - [ ] Confirm the README and docs describe the released behavior, not planned behavior.
 - [ ] Confirm examples use the current public API names.
 
@@ -210,6 +212,7 @@ Check the main user paths:
 - [ ] README links to JavaScript entrypoints.
 - [ ] `docs/index.md` links to all major docs.
 - [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
+- [ ] README, `CHANGELOG.md`, and `Product Profile.md` stay synchronized on initial release posture, support matrix, current scope, responsibility boundary, and docs entrypoints.
 - [ ] `docs/quick_start_ja.md` remains a low-drift entry point: its links and short summaries follow the current README and focused English docs without becoming a full translation.
 - [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
