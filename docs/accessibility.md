@@ -11,6 +11,7 @@ The bundled editor and Stimulus controller provide:
 - button elements for interactive controls
 - labels for generated editor inputs
 - configurable Japanese default labels
+- a visible editor title rendered as a heading and connected to the editor root with `aria-labelledby` / `role="region"`, using per-editor ids so multiple editors on one page do not collide
 - localized fallback scope labels for preset options when the payload does not provide `scope_label`
 - `aria-label` for drag handles, resize handles, and filter buttons
 - `aria-pressed` and `aria-expanded` for filter buttons
@@ -24,6 +25,7 @@ The bundled editor and Stimulus controller provide:
 - a visible helper message and `aria-describedby` context for the bundled default preset checkbox so users can tell it only takes effect when they save or save as new
 - a live `role="status"` region for bundled save/load/delete feedback
 - a visible helper message plus explanatory `title`, `aria-label`, and `aria-describedby` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings without relying only on hover text
+- visible maintenance helper copy for delete/reset actions, with `aria-describedby` context on the maintenance group and delete/reset buttons
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
@@ -147,6 +149,7 @@ The current bundled helper and status copy is I18n-driven, so host applications 
 Representative locale keys include:
 
 - `rails_table_preferences.editor.action_hint`
+- `rails_table_preferences.editor.maintenance_hint`
 - `rails_table_preferences.editor.read_only_preset_hint`
 - `rails_table_preferences.editor.loading_status`
 - `rails_table_preferences.editor.saved_status`
@@ -157,6 +160,7 @@ Representative locale keys include:
 Those keys feed different bundled accessibility surfaces:
 
 - `action_hint`: the visible helper text and `aria-describedby` context for `適用`, `保存`, and `別名で保存`
+- `maintenance_hint`: the visible helper text and `aria-describedby` context for delete/reset maintenance actions
 - `read_only_preset_hint`: the helper text shown when a shared, role, or organization preset is read-only
 - `*_status`: the live `role="status"` region used for async preset feedback
 - `reset_hint`: the bundled reset button `title` and `aria-label`
@@ -174,6 +178,7 @@ Typical locale-driven surfaces include:
 
 - preset selector and preset name helper text
 - action hint copy for `適用`, `保存`, and `別名で保存`
+- maintenance hint copy for delete/reset action context
 - read-only preset helper text
 - reset visible helper and button wording
 - async status-region progress, success, and failure copy
@@ -230,6 +235,7 @@ ja:
   rails_table_preferences:
     editor:
       action_hint: 適用は現在の表示だけを更新し、保存は現在の設定名へ反映、別名で保存は新しい設定として残します。
+      maintenance_hint: 削除とリセットは保存済み設定や現在の編集内容に影響するため、内容を確認してから実行してください。
       read_only_preset_hint: この設定は直接更新できません。保存すると個人用設定として保存されます。
       loading_status: 設定を読み込み中です...
       saved_status: 設定を保存しました。
@@ -274,12 +280,15 @@ Before releasing a screen, check:
 
 - All editor controls can receive focus.
 - Focus order is understandable.
+- The editor root is announced as a named region using the visible editor heading, and multiple editors on one page do not reuse the same title id.
 - The preset select, preset name, default checkbox, action buttons, and status region are labeled.
 - The bundled action hint or accessible names explain the difference between apply, save, and save as new.
 - The preset selector helper copy or accessible description explains that it loads or switches the saved preset rather than setting the save target name.
 - The preset name helper copy or accessible description explains that save and save as new use that field as the edited preset name.
 - The default checkbox helper text or accessible description explains that it only takes effect when the user saves or save as new.
 - The reset visible helper, hover text, and accessible name explain that current edits are discarded and defaults are restored.
+- The maintenance action group and delete/reset buttons keep visible helper text or accessible descriptions that explain the impact of those actions.
+- At 36rem and 26rem-equivalent widths or narrow containers, the action row wraps without clipping, the delete/reset maintenance group stays visually separated from save actions, and helper text does not overlap buttons or editor controls.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
 - Active filter buttons expose a short summary through `title` or `aria-label`.
