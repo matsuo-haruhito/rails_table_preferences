@@ -55,7 +55,7 @@ The format is based on a lightweight Keep a Changelog style, and this project cu
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
 - The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
-- The package and JavaScript verification path now smoke-loads the documented package root and controller entrypoints in a minimal Node sandbox.
+- The package verification path now resolves documented package root and controller export targets, then checks their packaged JavaScript relative import/export references.
 - Documentation now states the bundled sort UI single-sort boundary and leaves multi-sort composition to host apps.
 
 ### Fixed

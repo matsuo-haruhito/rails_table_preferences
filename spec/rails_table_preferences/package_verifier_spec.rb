@@ -73,7 +73,82 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     end
   end
 
+  describe "#call" do
+    it "accepts packaged JavaScript entrypoints whose internal relative imports resolve" do
+      result = package_verification_result(
+        packaged_files: package_entrypoint_files,
+        javascript_files: {
+          "app/javascript/rails_table_preferences/index.js" => <<~JS,
+            export { default } from "./controller"
+            export { default as RailsTablePreferencesController } from "./controller"
+          JS
+          "app/javascript/rails_table_preferences/controller.js" => <<~JS
+            import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
+
+            export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {}
+          JS
+        }
+      )
+
+      expect(result[:missing_package_internal_imports]).to eq([])
+      expect(result[:ok]).to be(true)
+    end
+
+    it "reports packaged JavaScript entrypoints whose internal relative imports are missing" do
+      result = package_verification_result(
+        packaged_files: package_entrypoint_files - ["app/javascript/controllers/rails_table_preferences_controller.js"],
+        javascript_files: {
+          "app/javascript/rails_table_preferences/index.js" => "export { default } from \"./controller\"\n",
+          "app/javascript/rails_table_preferences/controller.js" => <<~JS
+            import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
+
+            export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {}
+          JS
+        }
+      )
+
+      expect(result[:missing_package_internal_imports]).to contain_exactly(
+        {
+          export: "./controller",
+          entrypoint: "app/javascript/rails_table_preferences/controller.js",
+          import: "../controllers/rails_table_preferences_controller",
+          target: "app/javascript/controllers/rails_table_preferences_controller"
+        }
+      )
+      expect(result[:ok]).to be(false)
+    end
+  end
+
   def repository_root
     Pathname.new(File.expand_path("../..", __dir__))
+  end
+
+  def package_entrypoint_files
+    [
+      "package.json",
+      "app/javascript/controllers/rails_table_preferences_controller.js",
+      "app/javascript/rails_table_preferences/controller.js",
+      "app/javascript/rails_table_preferences/index.js"
+    ]
+  end
+
+  def package_verification_result(packaged_files:, javascript_files:)
+    verifier = described_class.new(gem_path: "pkg/rails_table_preferences-test.gem", required_paths: packaged_files)
+
+    allow(verifier).to receive(:packaged_files).and_return(packaged_files.sort)
+    allow(verifier).to receive(:packaged_file_contents) do |path|
+      if path == "package.json"
+        JSON.generate(
+          "exports" => {
+            "." => "./app/javascript/rails_table_preferences/index.js",
+            "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+          }
+        )
+      else
+        javascript_files.fetch(path)
+      end
+    end
+
+    verifier.call
   end
 end

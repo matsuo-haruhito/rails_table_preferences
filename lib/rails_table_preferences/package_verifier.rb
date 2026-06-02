@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "pathname"
 require "rubygems/package"
 require "zlib"
 
@@ -87,6 +88,8 @@ module RailsTablePreferences
       "docs/javascript_controller.md"
     ].freeze
 
+    JAVASCRIPT_RELATIVE_IMPORT_PATTERN = /(?:^|\n)\s*(?:import\s+(?:[^"'\n]+?\s+from\s+)?|export\s+[^"'\n]+?\s+from\s+)["'](?<specifier>\.[^"']+)["']/.freeze
+
     attr_reader :gem_path, :required_paths
 
     def self.call(gem_path:, required_paths: REQUIRED_PATHS)
@@ -103,14 +106,19 @@ module RailsTablePreferences
       missing_package_export_targets = package_export_targets.reject do |export_target|
         packaged_files.include?(export_target.fetch(:target))
       end
+      missing_package_internal_imports = self.missing_package_internal_imports
 
       {
         gem_path: gem_path,
         packaged_files: packaged_files,
         missing: missing,
         missing_package_export_targets: missing_package_export_targets,
+        missing_package_internal_imports: missing_package_internal_imports,
         package_json_errors: package_json_errors,
-        ok: missing.empty? && missing_package_export_targets.empty? && package_json_errors.empty?
+        ok: missing.empty? &&
+          missing_package_export_targets.empty? &&
+          missing_package_internal_imports.empty? &&
+          package_json_errors.empty?
       }
     end
 
@@ -127,6 +135,44 @@ module RailsTablePreferences
         exports = package_json.fetch("exports", {})
         export_targets_for(exports).sort_by { |target| [target.fetch(:export), target.fetch(:target)] }
       end
+    end
+
+    def missing_package_internal_imports
+      @missing_package_internal_imports ||= package_export_targets.flat_map do |export_target|
+        entrypoint = export_target.fetch(:target)
+        next [] unless entrypoint.end_with?(".js") && packaged_files.include?(entrypoint)
+
+        javascript_relative_imports_for(entrypoint).filter_map do |specifier|
+          resolved_target = resolve_javascript_relative_import(entrypoint, specifier)
+          next if resolved_target
+
+          {
+            export: export_target.fetch(:export),
+            entrypoint: entrypoint,
+            import: specifier,
+            target: unresolved_javascript_relative_import_target(entrypoint, specifier)
+          }
+        end
+      end.sort_by { |missing_import| [missing_import.fetch(:entrypoint), missing_import.fetch(:import)] }
+    end
+
+    def javascript_relative_imports_for(entrypoint)
+      packaged_file_contents(entrypoint).scan(JAVASCRIPT_RELATIVE_IMPORT_PATTERN).flatten.uniq.sort
+    end
+
+    def resolve_javascript_relative_import(entrypoint, specifier)
+      candidate = unresolved_javascript_relative_import_target(entrypoint, specifier)
+      candidates = [candidate]
+      if File.extname(candidate).empty?
+        candidates << "#{candidate}.js"
+        candidates << File.join(candidate, "index.js")
+      end
+
+      candidates.find { |path| packaged_files.include?(path) }
+    end
+
+    def unresolved_javascript_relative_import_target(entrypoint, specifier)
+      Pathname.new(File.dirname(entrypoint)).join(specifier).cleanpath.to_s
     end
 
     def package_json
