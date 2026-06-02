@@ -15,6 +15,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Resource table formatter contract](resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal operating patterns.
+- [Scoped preset selector](scoped_preset_selector.md): same-name scoped preset selection, explicit scope load params, and name-only backward compatibility.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, horizontal scroll-container baseline, and `group:` metadata.
 - [Column overflow metadata](column_overflow.md): canonical `overflow:` / `default_overflow:` values, compatibility aliases, and the boundary with `default_truncate:`.
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
@@ -63,17 +64,18 @@ This directory contains focused documentation for Rails Table Preferences.
 14. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
 15. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
 16. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-17. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-18. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-19. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-20. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-21. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-22. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-23. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-24. Verify the feature in a sandbox Rails app.
-25. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-26. Run the manual QA checklist before asking real users to try the feature.
-27. Before release, run the release checklist and package verification guide.
+17. Review [Scoped preset selector](scoped_preset_selector.md) if the host app intentionally reuses the same preset name across scopes.
+18. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+19. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+20. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+21. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+22. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+23. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+24. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+25. Verify the feature in a sandbox Rails app.
+26. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+27. Run the manual QA checklist before asking real users to try the feature.
+28. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
