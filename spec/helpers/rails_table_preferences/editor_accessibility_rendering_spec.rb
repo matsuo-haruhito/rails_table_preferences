@@ -33,7 +33,7 @@ RSpec.describe "editor accessibility rendering", type: :helper do
 
     expect(described_ids).not_to be_empty
     described_ids.each do |id|
-      expect(page).to have_css("##{id}", visible: false)
+      expect(page.find("##{id}", visible: false)).to be_present
     end
 
     delete_button = maintenance_group.find("button", text: "削除", visible: false)
@@ -41,7 +41,7 @@ RSpec.describe "editor accessibility rendering", type: :helper do
 
     [delete_button, reset_button].each do |button|
       button["aria-describedby"].split.each do |id|
-        expect(page).to have_css("##{id}", visible: false)
+        expect(page.find("##{id}", visible: false)).to be_present
       end
     end
   end
