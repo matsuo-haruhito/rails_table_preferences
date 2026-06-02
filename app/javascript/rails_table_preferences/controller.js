@@ -38,6 +38,36 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return result
   }
 
+  async deletePreset(event) {
+    if (event) event.preventDefault()
+    if (!this.currentPreferenceEditable) return
+    if (!this.confirmDeletePreset()) return
+
+    await this.withBusyStatus(async () => {
+      const response = await fetch(this.preferenceUrl(this.currentPresetName), {
+        method: "DELETE",
+        headers: { "Accept": "application/json", "X-CSRF-Token": this.csrfToken }
+      })
+      if (!response.ok && response.status !== 204) throw new Error(`Failed to delete table preference preset: ${response.status}`)
+      this.nameValue = "default"
+      this.urlValue = this.preferenceUrl("default")
+      this.currentPreferenceEditable = true
+      this.setPresetNameInput("default")
+      this.setDefaultPresetInput(false)
+      this.settingsValue = this.defaultSettings
+      this.closeFilterPanel()
+      this.renderEditor()
+      this.apply()
+      this.syncPresetEditingState()
+      this.markEditorClean()
+      await this.refreshPresetOptions()
+    }, {
+      busyLabel: this.deletingStatusLabelValue,
+      successLabel: this.deletedStatusLabelValue,
+      errorLabel: this.deletingFailedStatusLabelValue
+    })
+  }
+
   async save(event) {
     const result = await super.save(event)
     this.updateDirtyStateFromEditor()
