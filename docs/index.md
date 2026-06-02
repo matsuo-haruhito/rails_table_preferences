@@ -27,7 +27,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Demo screen generator](demo.md): `--with-demo` and `--with-demo-route` generator options for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
-- [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
+- [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, legacy import, and customization issues.
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar select options, and host-app query ownership when select filters do not affect results.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Release checklist](release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
