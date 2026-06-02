@@ -146,6 +146,28 @@ RSpec.describe RailsTablePreferences::SettingsNormalizer do
       )
     end
 
+    it "drops filters without a key" do
+      settings = {
+        filters: {
+          "" => { operator: :equals, value: "ignored" },
+          "   " => { operator: :equals, value: "also ignored" },
+          customer_name: { operator: :contains, value: "山田" },
+          status: { operator: :matches_anything, value: "出荷済" }
+        }
+      }
+
+      expect(described_class.call(settings)["filters"]).to eq(
+        "customer_name" => {
+          "operator" => "contains",
+          "value" => "山田"
+        },
+        "status" => {
+          "operator" => "matches_anything",
+          "value" => "出荷済"
+        }
+      )
+    end
+
     it "drops filters without an operator" do
       settings = {
         filters: {
