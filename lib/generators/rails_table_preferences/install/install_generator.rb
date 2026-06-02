@@ -10,6 +10,7 @@ module RailsTablePreferences
       include ActiveRecord::Generators::Migration
 
       source_root File.expand_path("templates", __dir__)
+      ENGINE_ROUTE = 'mount RailsTablePreferences::Engine, at: "/rails_table_preferences"'
       DEMO_ROUTE = 'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
 
       class_option :owner_model,
@@ -42,6 +43,11 @@ module RailsTablePreferences
                    default: false,
                    desc: "Also add the demo route to config/routes.rb. Implies --with-demo."
 
+      class_option :with_engine_route,
+                   type: :boolean,
+                   default: false,
+                   desc: "Also mount the Rails Table Preferences engine in config/routes.rb."
+
       desc "Copies Rails Table Preferences migrations, initializer, JavaScript, and stylesheets into the host application."
 
       def copy_initializer
@@ -71,15 +77,16 @@ module RailsTablePreferences
         copy_file "demo/index.html.erb", "app/views/rails_table_preferences_demo/orders/index.html.erb"
       end
 
+      def add_engine_route
+        return unless options[:with_engine_route]
+
+        add_route_once ENGINE_ROUTE
+      end
+
       def add_demo_route
         return unless options[:with_demo_route]
 
-        routes_path = File.join(destination_root, "config/routes.rb")
-        if File.exist?(routes_path) && File.read(routes_path).include?(DEMO_ROUTE)
-          say_status :identical, "config/routes.rb"
-        else
-          route DEMO_ROUTE
-        end
+        add_route_once DEMO_ROUTE
       end
 
       def show_post_install_message
@@ -120,8 +127,9 @@ module RailsTablePreferences
         steps = [
           ["Run: bin/rails db:migrate"],
           [
-            "Mount the engine in config/routes.rb:",
-            "       mount RailsTablePreferences::Engine, at: \"/rails_table_preferences\""
+            engine_route_step_heading,
+            "       #{ENGINE_ROUTE}",
+            "     Keep config.mount_path aligned if you later mount the engine at a custom path."
           ]
         ]
 
@@ -159,6 +167,23 @@ module RailsTablePreferences
         end
 
         steps
+      end
+
+      def add_route_once(route_statement)
+        routes_path = File.join(destination_root, "config/routes.rb")
+        if File.exist?(routes_path) && File.read(routes_path).include?(route_statement)
+          say_status :identical, "config/routes.rb"
+        else
+          route route_statement
+        end
+      end
+
+      def engine_route_step_heading
+        if options[:with_engine_route]
+          "Engine route added to config/routes.rb:"
+        else
+          "Mount the engine in config/routes.rb, or rerun with --with-engine-route:"
+        end
       end
 
       def demo_route_step_heading
