@@ -70,6 +70,14 @@ Before asking real users to try the screen, verify this path in the real host ap
 
 See [Manual QA checklist](manual_qa.md), [Troubleshooting](troubleshooting.md), and [Support matrix](support_matrix.md) for the broader verification path.
 
+## 7. Separate upstream evidence from downstream adoption smoke
+
+Use this checklist as upstream Rails Table Preferences evidence: packaged helpers, JavaScript entrypoints, generator output, mounted API contract, demo coverage, manual QA coverage, package verification, and focused docs are all signals that the gem surface is ready to evaluate in a host app.
+
+A downstream host app still needs its own adoption evidence for each real table surface. Record the stable table key and column keys, filter and sort parameter mapping, preset save/load/delete behavior, mounted engine save path, export boundary when exports are enabled, and the rollback or pinned-gem target the host app will return to if the bump is not accepted.
+
+For example, a downstream admin index such as `admin/document_sets` can be used as a representative smoke surface, but Rails Table Preferences should not make that app-specific route or schema part of its public contract. If the downstream known-good target, rollback target, or human release gate is not decided yet, keep the broad host-app bump paused and capture that as downstream evidence work rather than changing the gem API or this checklist.
+
 ## Boundary reminders
 
 Rails Table Preferences owns the editor UI, saved settings payload, preset API calls, managed-column data attributes, and helper-generated export payloads.
