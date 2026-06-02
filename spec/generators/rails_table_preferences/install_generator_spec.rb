@@ -162,6 +162,23 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(file("config/routes.rb").read.scan(demo_route).size).to eq(1)
   end
 
+  it "does not duplicate an existing demo route written with representative syntax differences" do
+    prepare_routes_file(<<~ROUTES)
+      Rails.application.routes.draw do
+        get(
+          '/rails_table_preferences_demo/orders',
+          to: 'rails_table_preferences_demo/orders#index'
+        )
+      end
+    ROUTES
+
+    run_generator %w[--with-demo-route]
+
+    routes = file("config/routes.rb").read
+    expect(routes).to include("'/rails_table_preferences_demo/orders'")
+    expect(routes).not_to include(demo_route)
+  end
+
   it "prints the default post-install next steps with contiguous numbering" do
     output = run_generator
 
@@ -210,11 +227,11 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     mkdir_p(destination_root)
   end
 
-  def prepare_routes_file
+  def prepare_routes_file(content = nil)
     mkdir_p(File.join(destination_root, "config"))
     File.write(
       File.join(destination_root, "config/routes.rb"),
-      "Rails.application.routes.draw do\nend\n"
+      content || "Rails.application.routes.draw do\nend\n"
     )
   end
 
