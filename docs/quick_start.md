@@ -239,28 +239,33 @@ The `data-rails-table-preferences-column-key` values must match the keys passed 
 
 The current bundled partial already generates unique preset select/name ids per render, so you can place more than one `table_preferences_editor` on the same page without passing an extra helper keyword.
 
+When the host app needs stable generated control ids across repeated renders, drawers, or dialogs, pass `editor_instance_key:`. Keep it stable for the rendered editor instance; the helper combines it with `table_key` and `name` to build the internal label/select/name ids.
+
 ```erb
 <%= table_preferences_editor(
   table_key: :orders,
   name: "default",
   columns: @table_columns,
-  title: "画面内の設定"
+  title: "画面内の設定",
+  editor_instance_key: "orders-page"
 ) %>
 
 <%= table_preferences_editor(
   table_key: :orders,
   name: "default",
   columns: @table_columns,
-  title: "ダイアログ内の設定"
+  title: "ダイアログ内の設定",
+  editor_instance_key: "orders-dialog"
 ) %>
 ```
 
 Use this rule of thumb:
 
 - Keep `table_key` stable per logical screen or table contract.
-- The default bundled partial creates a distinct label/select/name id set for each rendered editor instance automatically.
+- Leave `editor_instance_key:` omitted when per-render unique ids are enough.
+- Pass a stable `editor_instance_key:` when repeated renders, drawers, or dialogs need predictable internal editor control ids.
+- Treat `editor_instance_key:` as an internal id-prefix input for generated editor controls, not as a root element id/class/data/aria placement API.
 - When you copy or customize the partial, preserve the label `for` to preset select/name `id` pairing and keep ids unique per rendered instance.
-- The current `table_preferences_editor(...)` helper does not expose an explicit `editor_instance_key:` keyword, so avoid passing unsupported options from the host app.
 
 If the host app renders only one editor for the page, you can simply keep the default helper call.
 
