@@ -19,7 +19,7 @@ Pull requests run the default package and test job plus representative Rails com
 | CI job | Ruby | Rails / Gemfile | What it represents |
 | --- | --- | --- | --- |
 | RSpec, JavaScript syntax, gem build, and package verification | 3.3 | development `Gemfile` / Rails 8.0.x | Current repository development baseline, package build, and package contents |
-| PR Rails compatibility (7.0) | 3.2 | `gemfiles/rails_7_0.gemfile` | Lower-bound Rails 7.0 regression check |
+| PR Rails compatibility (7.0) | 3.1 | `gemfiles/rails_7_0.gemfile` | Lower-bound Rails 7.0 regression check |
 | PR Rails compatibility (7.1) | 3.2 | `gemfiles/rails_7_1.gemfile` | Representative Rails 7.1 regression check |
 | PR Rails compatibility (7.2) | 3.2 | `gemfiles/rails_7_2.gemfile` | Representative Rails 7.2 regression check |
 | PR Rails compatibility (8.0) | 3.3 | `gemfiles/rails_8_0.gemfile` | Current Rails 8.0 compatibility check |
