@@ -9,6 +9,9 @@ The goal is to catch packaging, generator, documentation, and host-application i
 - [ ] Decide the target version.
 - [ ] Update the version constant if needed.
 - [ ] Move `CHANGELOG.md` entries from `[Unreleased]` to the target version section.
+- [ ] For the v0.1.0 release-prep or tag PR, keep a fresh empty `[Unreleased]` section for post-release work and rename `[0.1.0] - Unreleased` to `[0.1.0] - YYYY-MM-DD` with the actual release date.
+- [ ] Do not describe open pull requests, proposal issues, or unmerged roadmap items as released in `[0.1.0]`; leave them in `[Unreleased]` or out of the release entry until they land.
+- [ ] Confirm the README "Remaining before tagging v0.1" checklist still matches the changelog cutover state before tagging.
 - [ ] Confirm `CHANGELOG.md` covers user-facing changes, migration changes, generator changes, JavaScript/CSS changes, and known limitations.
 - [ ] Confirm `CHANGELOG.md`, README current scope, and `Product Profile.md` release posture describe the same current `main` product surface.
 - [ ] Confirm open pull requests and proposal issues are not described as released behavior unless they have already been merged.
