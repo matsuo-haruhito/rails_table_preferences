@@ -53,7 +53,7 @@ See [Scoped presets](scoped_presets.md).
 
 ## 6. Run the quick host-app smoke
 
-Before asking real users to try the screen, verify this path in the real host app:
+Before asking real users to try the screen, verify this path in the real host app. Keep this as a short gate; use the [Manual QA checklist](manual_qa.md) for the detailed browser and accessibility pass.
 
 1. Load the index screen as a normal signed-in owner.
 2. Change visible columns, order, width, overflow, filter state, and sort state for one table.
@@ -62,7 +62,11 @@ Before asking real users to try the screen, verify this path in the real host ap
 5. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
 6. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
 7. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
-8. Review keyboard focus, resize handles, sticky columns, and narrow viewport behavior on the production layout.
+8. Check the dense table layout in the real production shell:
+   - Move keyboard focus through editor controls, filter buttons, resize handles, sortable headers, sticky/fixed columns, and row actions.
+   - Resize one managed column and confirm the handle remains visible and does not collide with header text, filter buttons, or sort indicators.
+   - Horizontally scroll a table with sticky/fixed columns and confirm focused links, buttons, and inputs are not covered.
+   - Use a narrow viewport or container with long labels/values and confirm editor controls, filter panels, and fixed columns stay readable and reachable.
 
 See [Manual QA checklist](manual_qa.md), [Troubleshooting](troubleshooting.md), and [Support matrix](support_matrix.md) for the broader verification path.
 
