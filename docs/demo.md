@@ -41,7 +41,7 @@ The sample rows are intentionally a little more practical than a three-row place
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
 
-The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup, and the grouped header follows the current visible columns after save/reload.
+The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup. Apply and table-header drag update the leaf headers and body cells live; the demo-only grouped header row is server-rendered and should be verified after save/reload, when it follows the current visible columns again.
 
 The generated screen also includes a `Demo state reset` button. Use it to delete owner-scoped presets for the current owner and demo table, then reload into the seeded shared / role / organization baseline before repeating scoped precedence checks.
 
@@ -160,7 +160,7 @@ The generated demo screen includes:
 - double-click auto-fit on header resize handles
 - wrap / nowrap / ellipsis overflow examples on the same screen
 - fixed/pinned column metadata inside a horizontal scroll wrapper
-- grouped header markup that mirrors column group metadata
+- grouped header markup that mirrors column group metadata after save/reload
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
@@ -188,6 +188,7 @@ On the demo screen, confirm:
 - [ ] Apply hides and shows columns.
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
+- [ ] After editor apply or table header drag, the visible leaf headers and body cells update live while the grouped header row remains a save/reload boundary.
 - [ ] Header resize changes column width.
 - [ ] Double-clicking the resize handle on `配送メモ` or `配送コード` expands the column to fit its content more closely.
 - [ ] `配送メモ` wraps, `配送コード` stays on one line, and `備考` uses ellipsis so the overflow mode differences are visible.
