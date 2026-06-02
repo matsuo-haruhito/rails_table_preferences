@@ -11,6 +11,9 @@ module RailsTablePreferences
 
       source_root File.expand_path("templates", __dir__)
       DEMO_ROUTE = 'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
+      DEMO_ROUTE_PATH = "/rails_table_preferences_demo/orders"
+      DEMO_ROUTE_TO = "rails_table_preferences_demo/orders#index"
+      DEMO_ROUTE_PATTERN = /get\s*(?:\(\s*)?["']#{Regexp.escape(DEMO_ROUTE_PATH)}["']\s*,\s*to:\s*["']#{Regexp.escape(DEMO_ROUTE_TO)}["']/.freeze
 
       class_option :owner_model,
                    type: :string,
@@ -75,7 +78,7 @@ module RailsTablePreferences
         return unless options[:with_demo_route]
 
         routes_path = File.join(destination_root, "config/routes.rb")
-        if File.exist?(routes_path) && File.read(routes_path).include?(DEMO_ROUTE)
+        if File.exist?(routes_path) && demo_route_present?(File.read(routes_path))
           say_status :identical, "config/routes.rb"
         else
           route DEMO_ROUTE
@@ -171,6 +174,10 @@ module RailsTablePreferences
 
       def demo_requested?
         options[:with_demo] || options[:with_demo_route]
+      end
+
+      def demo_route_present?(routes_source)
+        routes_source.match?(DEMO_ROUTE_PATTERN)
       end
     end
   end
