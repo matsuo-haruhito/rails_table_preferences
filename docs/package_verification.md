@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json` and verifies that documented `exports` targets point at files that are present in the same built gem.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, and checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files.
 
 A successful run prints a message like:
 
@@ -26,7 +26,7 @@ A successful run prints a message like:
 Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 ```
 
-If required files or package export targets are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
+If required files, package export targets, or package-internal JavaScript imports are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
 
 ## Manual inspection
 
@@ -141,7 +141,7 @@ Add a file to `REQUIRED_PATHS` when its absence would make the packaged gem unus
 Use these criteria when adding or reviewing required paths:
 
 - Runtime entrypoints that host apps call directly, such as public helpers, controllers, adapters, registry files, resource table partials, rake tasks, and copied generator templates.
-- JavaScript package entrypoints and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata.
+- JavaScript package entrypoints and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript files.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
 - Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor root options, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
@@ -159,7 +159,9 @@ The package verification task reads the packaged `package.json` and confirms eve
 ./controller -> app/javascript/rails_table_preferences/controller.js
 ```
 
-This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target check catches drift between `package.json` and the gem contents.
+After confirming those export target files exist, the verifier scans their static relative `import ... from`, side-effect `import`, and `export ... from` references. Extensionless references such as `./controller` and `../controllers/rails_table_preferences_controller` must resolve to packaged JavaScript files, so package verification catches drift where an exported entrypoint ships but one of its internal package files does not.
+
+This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the manual host-app Vite check in `docs/release_checklist.md`.
 
 The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification should not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
 
@@ -182,6 +184,6 @@ bundle exec rake package:verify
 
 The JavaScript syntax step checks the copied controller, the package controller entrypoint, and the package root entrypoint. Keep this snippet synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
-The RSpec suite includes a JavaScript entrypoint smoke spec that loads the documented package root and controller entrypoints inside a minimal Node sandbox. It also verifies Node package resolution for `rails_table_preferences` and `rails_table_preferences/controller`, keeps package-only controller values out of the copied controller contract, and guards representative package-entrypoint behavior such as filter operator labels and sort-title preservation. That complements the syntax check and package file verification by guarding the export wiring and runtime entrypoint shape itself.
+The package verification task also follows the documented package root and controller export targets and checks their packaged internal relative JavaScript references. That complements the syntax check by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior to the release checklist's manual Vite integration check.
 
 Manual package inspection is still recommended before tagging a release.

@@ -26,17 +26,19 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
       allow(verifier).to receive(:packaged_files).and_return(
         %w[
+          app/javascript/controllers/rails_table_preferences_controller.js
           app/javascript/rails_table_preferences/controller.js
           app/javascript/rails_table_preferences/index.js
           package.json
         ]
       )
-      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return(package_json)
+      stub_packaged_file_contents(verifier)
 
       result = verifier.call
 
       expect(result[:ok]).to eq(true)
       expect(result[:missing_package_export_targets]).to eq([])
+      expect(result[:missing_package_internal_imports]).to eq([])
       expect(result[:package_json_errors]).to eq([])
     end
 
@@ -48,7 +50,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
           package.json
         ]
       )
-      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return(package_json)
+      stub_packaged_file_contents(verifier)
 
       result = verifier.call
 
@@ -111,6 +113,21 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       ]
 
       expect(described_class::REQUIRED_PATHS).to include(*expected_docs)
+    end
+  end
+
+  def stub_packaged_file_contents(verifier)
+    allow(verifier).to receive(:packaged_file_contents) do |path|
+      case path
+      when "package.json"
+        package_json
+      when "app/javascript/rails_table_preferences/index.js"
+        "export { default } from \"./controller\"\n"
+      when "app/javascript/rails_table_preferences/controller.js"
+        "import RailsTablePreferencesBaseController from \"../controllers/rails_table_preferences_controller\"\n"
+      else
+        raise KeyError, path
+      end
     end
   end
 
