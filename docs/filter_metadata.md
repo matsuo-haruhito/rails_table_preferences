@@ -200,12 +200,13 @@ Saved filter conditions use a neutral format:
 `SettingsNormalizer` normalizes:
 
 - symbol keys to string keys
+- filter entries with blank keys are ignored before condition normalization
 - `predicate` to `operator`
 - scalar `values` to arrays
 - sort aliases `column`/`dir` to `key`/`direction`
 - sort direction casing to `asc` or `desc`
 
-Invalid filters without an operator are dropped. Invalid sorts without a key, without a direction, or with a direction other than `asc` or `desc` are dropped.
+Invalid filters with blank keys or without an operator are dropped. Invalid sorts without a key, without a direction, or with a direction other than `asc` or `desc` are dropped.
 
 ## Ignored columns
 
