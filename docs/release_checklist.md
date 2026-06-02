@@ -216,7 +216,7 @@ Check the main user paths:
 - [ ] `docs/index.md` links to all major docs.
 - [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
 - [ ] README, `CHANGELOG.md`, and `Product Profile.md` stay synchronized on initial release posture, support matrix, current scope, responsibility boundary, and docs entrypoints.
-- [ ] `docs/quick_start_ja.md` remains a low-drift entry point: its links and short summaries follow the current README and focused English docs without becoming a full translation.
+- [ ] `docs/quick_start_ja.md` remains a low-drift entry point: its links and short summaries follow the current README and focused English docs for install/package entrypoints, production integration/support matrix, filter/sort/scoped preset/export/resource table surfaces, and demo/sandbox/manual QA/release/package verification without becoming a full translation.
 - [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.

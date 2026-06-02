@@ -102,3 +102,11 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 ## Drift を避けるための読み方
 
 この日本語 quick start は、詳細を重複させず、正本 docs への入口として維持します。挙動や API が変わった場合は、まず英語の focused docs を更新し、このページは必要なリンクや要約だけを追従させます。
+
+release/docs 変更時は、少なくとも次の入口が README、[docs index](index.md)、英語 focused docs と大きくズレていないか確認します。
+
+- install path、package entrypoint、production integration、support matrix の first-run guidance。
+- filter/sort、scoped presets、export payload、resource table helper の主要 surface。
+- demo、sandbox、manual QA、release checklist、package verification への確認導線。
+
+新しい public surface を追加するときも、このページでは短い症状別入口かリンクの追加に留め、詳細手順は英語 docs を正本にします。
