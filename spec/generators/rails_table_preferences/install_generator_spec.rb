@@ -162,22 +162,43 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(file("config/routes.rb").read.scan(demo_route).size).to eq(1)
   end
 
-  it "provides post-install next steps in the generator source" do
-    source = File.read(File.expand_path("../../../lib/generators/rails_table_preferences/install/install_generator.rb", __dir__))
+  it "prints the default post-install next steps with contiguous numbering" do
+    output = run_generator
 
-    expect(source).to include("Rails Table Preferences installed.")
-    expect(source).to include("bin/rails db:migrate")
-    expect(source).to include("mount RailsTablePreferences::Engine")
-    expect(source).to include("rails_table_preferences.css")
-    expect(source).to include("Stimulus controller")
-    expect(source).to include("Skip copying the Stimulus controller. Use with the package entrypoint or a host-owned controller.")
-    expect(source).to include("Register either a host-owned controller or the package entrypoint")
-    expect(source).to include("rerun with --skip-javascript and register rails_table_preferences/controller manually")
-    expect(source).to include("docs/javascript_entrypoints.md")
-    expect(source).to include("rails_table_preferences/controller")
-    expect(source).to include("with_demo")
-    expect(source).to include("with_demo_route")
-    expect(source).to include("rails_table_preferences_demo/orders#index")
+    expect(output).to include("Rails Table Preferences installed.", "Next steps:")
+    expect(next_step_headings(output)).to eq([
+      "Run: bin/rails db:migrate",
+      "Mount the engine in config/routes.rb:",
+      "Ensure app/assets/stylesheets/rails_table_preferences.css is loaded by your application stylesheet.",
+      "Ensure the copied Stimulus controller is registered."
+    ])
+    expect(output).to include("rails_table_preferences.css", "Stimulus controller", "docs/javascript_entrypoints.md")
+  end
+
+  it "keeps post-install next step numbering contiguous when optional steps are skipped" do
+    output = run_generator %w[--skip-stylesheets --skip-javascript]
+
+    expect(next_step_headings(output)).to eq([
+      "Run: bin/rails db:migrate",
+      "Mount the engine in config/routes.rb:",
+      "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name."
+    ])
+    expect(output).to include("rails_table_preferences/controller")
+    expect(output).not_to include("  4.")
+  end
+
+  it "continues post-install next step numbering through demo route guidance" do
+    prepare_routes_file
+
+    output = run_generator %w[--skip-stylesheets --skip-javascript --with-demo-route]
+
+    expect(next_step_headings(output)).to eq([
+      "Run: bin/rails db:migrate",
+      "Mount the engine in config/routes.rb:",
+      "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name.",
+      "Demo route added to config/routes.rb:"
+    ])
+    expect(output).to include("rails_table_preferences_demo/orders#index")
   end
 
   def destination_root
@@ -205,10 +226,16 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
   def with_captured_stdout
     original_stdout = $stdout
-    $stdout = StringIO.new
+    stdout = StringIO.new
+    $stdout = stdout
     yield
+    stdout.string
   ensure
     $stdout = original_stdout
+  end
+
+  def next_step_headings(output)
+    output.lines.grep(/^\s+\d+\. /).map { |line| line.sub(/^\s+\d+\. /, "").strip }
   end
 
   def generated_migration
