@@ -44,6 +44,12 @@ import { RailsTablePreferencesController } from "rails_table_preferences"
 
 Use the package entrypoint when the host app should not depend on a copied controller path under `app/javascript/controllers` from an `app/frontend` entrypoint.
 
+### Package metadata boundary
+
+The import specifiers above are backed by the `package.json` file that is packaged inside the Ruby gem. That file currently uses `private: true` and `version: "0.0.0"` because it is resolver metadata for gem-packaged JavaScript entrypoints, not a promise that Rails Table Preferences is published as a separate npm package.
+
+Host apps should rely on the documented `exports` specifiers, `rails_table_preferences` and `rails_table_preferences/controller`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
+
 ### Package-only controller boundary
 
 The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`.
