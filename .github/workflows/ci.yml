@@ -34,6 +34,8 @@ jobs:
           node --check app/javascript/controllers/rails_table_preferences_controller.js
           node --check app/javascript/rails_table_preferences/controller.js
           node --check app/javascript/rails_table_preferences/index.js
+          node --check scripts/check_scoped_preset_selector_contract.mjs
+          node scripts/check_scoped_preset_selector_contract.mjs
 
       - name: Build gem package
         run: bundle exec rake build
