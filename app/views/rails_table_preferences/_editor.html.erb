@@ -26,6 +26,7 @@
 <% save_action_group_label = t("rails_table_preferences.editor.save_action_group", default: "設定を保存する操作") %>
 <% maintenance_action_group_label = t("rails_table_preferences.editor.maintenance_action_group", default: "保存済み設定の削除や初期設定に戻す操作") %>
 <% status_region_label = t("rails_table_preferences.editor.status_region", default: "保存状態") %>
+<% filter_operator_labels = t("rails_table_preferences.editor.filter_operator_labels", default: {}) %>
 
 <div data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
@@ -43,6 +44,7 @@
      data-rails-table-preferences-filter-apply-label-value="<%= t("rails_table_preferences.editor.apply", default: "適用") %>"
      data-rails-table-preferences-filter-clear-label-value="<%= t("rails_table_preferences.editor.filter_clear", default: "クリア") %>"
      data-rails-table-preferences-filter-operator-label-value="<%= t("rails_table_preferences.editor.filter_operator", default: "条件") %>"
+     data-rails-table-preferences-filter-operator-labels-value="<%= filter_operator_labels.to_json %>"
      data-rails-table-preferences-filter-value-label-value="<%= t("rails_table_preferences.editor.filter_value", default: "値") %>"
      data-rails-table-preferences-filter-from-label-value="<%= t("rails_table_preferences.editor.filter_from", default: "開始") %>"
      data-rails-table-preferences-filter-to-label-value="<%= t("rails_table_preferences.editor.filter_to", default: "終了") %>"

@@ -59,6 +59,7 @@ The bundled editor passes these values to the controller root so the Stimulus co
 - `rails_table_preferences.editor.apply`
 - `rails_table_preferences.editor.filter_clear`
 - `rails_table_preferences.editor.filter_operator`
+- `rails_table_preferences.editor.filter_operator_labels.*`
 - `rails_table_preferences.editor.filter_value`
 - `rails_table_preferences.editor.filter_from`
 - `rails_table_preferences.editor.filter_to`
@@ -68,7 +69,18 @@ The bundled editor passes these values to the controller root so the Stimulus co
 
 Host apps can also override the generated controller-root attributes for a single mounted table, such as `data-rails-table-preferences-filter-label-value` or `data-rails-table-preferences-sort-asc-label-value`, when one screen needs wording that differs from the global locale.
 
-Filter operator option text such as `contains`, `equals`, or range-specific summaries is controller vocabulary. When a host app uses the packaged `rails_table_preferences/controller` entrypoint, it can override that vocabulary per controller root with `data-rails-table-preferences-filter-operator-labels-value`:
+Filter operator option text such as `contains`, `equals`, or range-specific summaries is controller vocabulary. The bundled editor now emits `rails_table_preferences.editor.filter_operator_labels` as `data-rails-table-preferences-filter-operator-labels-value`, so packaged-controller tables can change operator wording through locale overrides without copying the controller:
+
+```yaml
+ja:
+  rails_table_preferences:
+    editor:
+      filter_operator_labels:
+        contains: 含める
+        equals: 完全一致
+```
+
+The same value can still be overridden per controller root when a single mounted table needs different wording:
 
 ```erb
 data-rails-table-preferences-filter-operator-labels-value='<%= { contains: "含める", equals: "完全一致" }.to_json %>'
@@ -122,6 +134,9 @@ ja:
       save_as_new: 新しい設定として保存
       action_hint: 画面に反映は現在の表示だけを更新し、保存は選択中の設定へ反映します。
       filter: 条件で絞り込む
+      filter_operator_labels:
+        contains: 含める
+        equals: 完全一致
       sort_asc: 昇順で並び替え
       sort_desc: 降順で並び替え
       saved_status: 表示設定を保存しました。

@@ -45,6 +45,24 @@ ja:
       resize_column: 列幅を変更
       filter: 絞り込み
       filter_operator: 条件
+      filter_operator_labels:
+        contains: 含む
+        not_contains: 含まない
+        equals: 一致
+        not_equals: 不一致
+        starts_with: で始まる
+        ends_with: で終わる
+        in: いずれか
+        not_in: 以外
+        gt: より大きい
+        gteq: 以上
+        lt: より小さい
+        lteq: 以下
+        between: 範囲
+        blank: 空白
+        present: 空白以外
+        "true": はい
+        "false": いいえ
       filter_value: 値
       filter_from: 開始
       filter_to: 終了
