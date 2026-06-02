@@ -152,6 +152,22 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         if (!Object.hasOwn(PackageController.values, "filterOperatorLabels")) {
           throw new Error("package entrypoint no longer exposes filterOperatorLabels as a package-only value")
         }
+
+        if (Object.hasOwn(BaseController.values, "dirtyStateLabel")) {
+          throw new Error("package-only dirtyStateLabel value leaked into the copied controller")
+        }
+
+        if (!Object.hasOwn(PackageController.values, "dirtyStateLabel")) {
+          throw new Error("package entrypoint no longer exposes dirtyStateLabel as a package-only value")
+        }
+
+        if (BaseController.targets.includes("dirtyState")) {
+          throw new Error("package-only dirtyState target leaked into the copied controller")
+        }
+
+        if (!PackageController.targets.includes("dirtyState")) {
+          throw new Error("package entrypoint no longer exposes dirtyState as a package-only target")
+        }
       JS
 
       run_node_entrypoint_check(base_controller_path, package_controller_path, script:)
@@ -199,6 +215,75 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
         if (controller.filterOperatorText("starts_with") !== "で始まる") {
           throw new Error("missing override did not fall back to the bundled starts_with label")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
+  it "tracks package entrypoint dirty state without using the async status region" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const dirtyElements = []
+        const statusTarget = { parentNode: { insertBefore(element) { dirtyElements.push(element) } } }
+        const editorRowsTarget = {
+          addEventListener() {},
+          removeEventListener() {},
+          querySelectorAll() { return [] }
+        }
+        const controller = new ControllerClass()
+        let currentSettings = { columns: [{ key: "name", visible: true, order: 10 }], filters: {}, sorts: [] }
+
+        controller.element = { appendChild(element) { dirtyElements.push(element) } }
+        controller.dirtyStateLabelValue = "Unsaved changes"
+        Object.defineProperty(controller, "hasDirtyStateTarget", { get() { return dirtyElements.length > 0 } })
+        Object.defineProperty(controller, "dirtyStateTarget", { get() { return dirtyElements[0] } })
+        Object.defineProperty(controller, "hasStatusTarget", { get() { return true } })
+        Object.defineProperty(controller, "statusTarget", { get() { return statusTarget } })
+        Object.defineProperty(controller, "hasEditorRowsTarget", { get() { return true } })
+        Object.defineProperty(controller, "editorRowsTarget", { get() { return editorRowsTarget } })
+        controller.settingsFromEditor = () => JSON.parse(JSON.stringify(currentSettings))
+
+        controller.installDirtyStateTracking()
+        controller.markEditorClean()
+
+        if (dirtyElements.length !== 1) {
+          throw new Error("dirty-state helper was not inserted next to the status region")
+        }
+
+        if (!controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "") {
+          throw new Error("dirty-state helper should start hidden after snapshot capture")
+        }
+
+        currentSettings = { columns: [{ key: "name", visible: false, order: 10 }], filters: {}, sorts: [] }
+        controller.applyFromEditor()
+
+        if (controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "Unsaved changes") {
+          throw new Error("dirty-state helper did not show after editor settings changed")
+        }
+
+        if (statusTarget.textContent) {
+          throw new Error("dirty-state helper should not write to the async status target")
+        }
+
+        currentSettings = { columns: [{ key: "name", visible: false, order: 10 }], filters: { name: { operator: "contains", value: "A" } }, sorts: [] }
+        controller.updateDirtyStateFromEditor()
+
+        if (controller.dirtyStateTarget.hidden) {
+          throw new Error("dirty-state helper should stay visible after unsaved filter changes")
+        }
+
+        controller.markEditorClean()
+
+        if (!controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "") {
+          throw new Error("dirty-state helper should clear after save or load snapshot refresh")
         }
       JS
 
