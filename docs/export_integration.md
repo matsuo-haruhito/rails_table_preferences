@@ -45,7 +45,7 @@ class OrdersController < ApplicationController
   def table_columns
     [
       table_preferences_column(:order_no, label: "受注番号"),
-      table_preferences_column(:customer_name, label: "得意先名"),
+      table_preferences_column(:customer_name, label: "得意先名", export_key: :customer_display_name),
       table_preferences_column(:amount, label: "金額")
     ]
   end
@@ -183,7 +183,19 @@ Before exporting hidden or sensitive columns, keep this decision in the host app
 
 ## Export keys
 
-Use `export_key` in a hash column definition when the display key differs from the export method or attribute:
+Use `export_key` when the display/preference key differs from the export method or attribute. Helper-defined columns can declare it directly:
+
+```ruby
+columns = [
+  table_preferences_column(
+    :customer_name,
+    label: "得意先名",
+    export_key: :customer_display_name
+  )
+]
+```
+
+Hash column definitions can use the same metadata key:
 
 ```ruby
 columns = [
@@ -198,8 +210,11 @@ columns = [
 Then export code can read the ordered value-extraction keys directly:
 
 ```ruby
+export_payload["column_keys"]
+# => ["customer_name"]
+
 export_payload["export_keys"]
-# => [:customer_display_name]
+# => ["customer_display_name"]
 ```
 
 For integrations that need labels, groups, visibility, or other per-column metadata, use the equivalent value on each column entry:

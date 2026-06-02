@@ -17,6 +17,7 @@ module RailsTablePreferences
     }.freeze
 
     attr_reader :key,
+                :export_key,
                 :label,
                 :default_visible,
                 :default_order,
@@ -33,8 +34,9 @@ module RailsTablePreferences
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       @key = key.to_s
+      @export_key = export_key&.to_s.presence
       @model = model
       @model_name = model_name
       @i18n_key = i18n_key
@@ -55,6 +57,7 @@ module RailsTablePreferences
     def to_h
       {
         "key" => key,
+        "export_key" => export_key,
         "label" => label,
         "visible" => default_visible,
         "order" => default_order,

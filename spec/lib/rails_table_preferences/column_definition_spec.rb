@@ -22,6 +22,21 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
     expect(column.to_h["pinned"]).to eq(false)
   end
 
+  it "normalizes export key metadata" do
+    column = described_class.new(key: :customer_id, export_key: :customer_name, label: "得意先")
+
+    expect(column.to_h).to include(
+      "key" => "customer_id",
+      "export_key" => "customer_name"
+    )
+  end
+
+  it "omits blank export key metadata" do
+    column = described_class.new(key: :customer_id, export_key: "", label: "得意先")
+
+    expect(column.to_h).not_to have_key("export_key")
+  end
+
   it "normalizes hash group metadata" do
     column = described_class.new(
       key: :customer_name,
