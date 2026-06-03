@@ -19,6 +19,7 @@ See [Quick start](quick_start.md), [Install path options](install_paths.md), and
 ## 2. Choose the table rendering path
 
 - For convention-first Active Record lists, start with `resource_table_for` and use profile overrides only where the inferred columns need adjustment.
+- When a resource table profile formatter reads associations, such as `order.customer`, preload those associations in the host-app relation before rendering; Rails Table Preferences does not infer `includes`, joins, or authorization scopes from formatter code.
 - For tree-shaped records, use `tree_resource_table_for` only when the host app already has a stable parent id method.
 - For existing shared table partials, keep the host-app table markup and add the Rails Table Preferences data attributes to managed `th` / `td` cells.
 - Keep action links, badges, sensitive columns, and business-specific markup host-app-owned unless they are intentionally part of the managed column set.
@@ -63,10 +64,11 @@ Before asking real users to try the screen, verify this path in the real host ap
 3. Save the preset, reload the page, and confirm the same table state returns.
 4. Submit the existing search form and confirm saved filter/sort state still round-trips.
 5. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
-6. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
-7. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
-8. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
-9. Check the dense table layout in the real production shell:
+6. If resource table profile formatters read associations, render representative rows while watching the host app's query log or existing N+1 guard and confirm the relation preloads those associations explicitly.
+7. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
+8. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
+9. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
+10. Check the dense table layout in the real production shell:
    - Move keyboard focus through editor controls, filter buttons, resize handles, sortable headers, sticky/fixed columns, and row actions.
    - Resize one managed column and confirm the handle remains visible and does not collide with header text, filter buttons, or sort indicators.
    - Horizontally scroll a table with sticky/fixed columns and confirm focused links, buttons, and inputs are not covered.
