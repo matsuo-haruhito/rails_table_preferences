@@ -2,6 +2,7 @@
 <% editor_id_key = [table_key, name, editor_instance_key].compact.map { |value| value.to_s.parameterize(separator: "-") }.reject(&:blank?).join("-") %>
 <% editor_id_key = "editor" if editor_id_key.blank? %>
 <% editor_id_prefix = "rails-table-preferences-#{editor_id_key}" %>
+<% editor_title_id = "#{editor_id_prefix}-title" %>
 <% preset_select_id = "#{editor_id_prefix}-preset-select" %>
 <% preset_name_id = "#{editor_id_prefix}-preset-name" %>
 <% preset_select_hint_id = "#{editor_id_prefix}-preset-select-hint" %>
@@ -9,11 +10,13 @@
 <% default_preset_hint_id = "#{editor_id_prefix}-default-preset-hint" %>
 <% action_hint_id = "#{editor_id_prefix}-action-hint" %>
 <% reset_hint_id = "#{editor_id_prefix}-reset-hint" %>
+<% maintenance_hint_id = "#{editor_id_prefix}-maintenance-hint" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
 <% reset_label = t("rails_table_preferences.editor.reset", default: "テーブル初期設定に戻す") %>
 <% reset_hint = t("rails_table_preferences.editor.reset_hint", default: "保存前の表示設定の変更を破棄し、読み込んだ保存済み設定ではなくテーブルの初期表示設定に戻します。") %>
 <% reset_visible_hint = t("rails_table_preferences.editor.reset_visible_hint", default: "テーブル初期設定に戻すと、保存前の変更は破棄されます。読み込んだ保存済み設定へ戻す操作ではありません。") %>
+<% maintenance_hint = t("rails_table_preferences.editor.maintenance_hint", default: "削除とリセットは保存済み設定や現在の編集内容に強く影響する操作です。内容を確認してから実行してください。") %>
 <% preset_select_hint = t("rails_table_preferences.editor.preset_select_hint", default: "読み込む保存済み設定を選びます。") %>
 <% preset_name_hint = t("rails_table_preferences.editor.preset_name_hint", default: "保存または別名保存で使う設定名を入力します。") %>
 <% default_preset_hint = t("rails_table_preferences.editor.default_preset_hint", default: "保存または別名保存すると、この設定を標準設定として登録します。") %>
@@ -28,7 +31,9 @@
 <% status_region_label = t("rails_table_preferences.editor.status_region", default: "保存状態") %>
 <% filter_operator_labels = t("rails_table_preferences.editor.filter_operator_labels", default: {}) %>
 
-<div data-controller="rails-table-preferences"
+<div role="region"
+     aria-labelledby="<%= editor_title_id %>"
+     data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
      data-rails-table-preferences-name-value="<%= name %>"
      data-rails-table-preferences-url-value="<%= preference_url %>"
@@ -71,7 +76,7 @@
      data-rails-table-preferences-deleting-failed-status-label-value="<%= t("rails_table_preferences.editor.deleting_failed_status", default: "設定の削除を完了できませんでした。") %>"
      data-rails-table-preferences-operation-failed-status-label-value="<%= t("rails_table_preferences.editor.operation_failed_status", default: "設定の操作を完了できませんでした。") %>"
      class="rails-table-preferences-editor">
-  <div class="rails-table-preferences-editor__title"><%= title %></div>
+  <h2 id="<%= editor_title_id %>" class="rails-table-preferences-editor__title"><%= title %></h2>
 
   <div class="rails-table-preferences-editor__preset">
     <label for="<%= preset_select_id %>"><%= t("rails_table_preferences.editor.preset_select", default: "保存済み設定") %></label>
@@ -115,6 +120,7 @@
        aria-label="<%= status_region_label %>"></div>
 
   <p id="<%= action_hint_id %>" class="rails-table-preferences-editor__hint"><%= action_hint %></p>
+  <p id="<%= maintenance_hint_id %>" class="rails-table-preferences-editor__hint rails-table-preferences-editor__hint--maintenance"><%= maintenance_hint %></p>
   <p id="<%= reset_hint_id %>" class="rails-table-preferences-editor__hint"><%= reset_visible_hint %></p>
 
   <div class="rails-table-preferences-editor__actions">
@@ -145,11 +151,13 @@
 
     <div class="rails-table-preferences-editor__action-group rails-table-preferences-editor__action-group--maintenance"
          role="group"
-         aria-label="<%= maintenance_action_group_label %>">
+         aria-label="<%= maintenance_action_group_label %>"
+         aria-describedby="<%= maintenance_hint_id %> <%= reset_hint_id %>">
       <button type="button"
               data-action="mouseover->rails-table-preferences#syncDeletePresetButtonContext focus->rails-table-preferences#syncDeletePresetButtonContext rails-table-preferences#deletePreset"
               title="<%= delete_confirm_label %>"
-              aria-label="<%= "#{delete_label}: #{delete_confirm_label}" %>"><%= delete_label %></button>
+              aria-label="<%= "#{delete_label}: #{delete_confirm_label}" %>"
+              aria-describedby="<%= maintenance_hint_id %>"><%= delete_label %></button>
       <button type="button"
               data-action="rails-table-preferences#resetEditor"
               title="<%= reset_hint %>"
