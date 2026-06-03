@@ -36,4 +36,10 @@ end
 
 If a formatter returns `nil`, Rails Table Preferences treats that `nil` as the presentation result. Formatter exceptions are not rescued by the value resolver; keep host-app formatting code small and make any fallback behavior explicit in the formatter itself.
 
-When no formatter is configured, `table_preferences_value(record, column)` falls back to the default value resolver for attributes, enum labels, boolean labels, and time-like values.
+```ruby
+display :customer_name do |order|
+  order.customer&.name || "Unassigned"
+end
+```
+
+When no formatter is configured, `table_preferences_value(record, column)` falls back to the default value resolver for attributes, enum labels, boolean labels, and time-like values. That default fallback is separate from formatter result handling.
