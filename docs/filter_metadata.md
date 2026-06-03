@@ -53,6 +53,18 @@ The metadata is serialized into `columns_json` so the front-end can decide which
 
 For bundled `select` filters, `options:` is currently a scalar list. Each option is used as both the HTML `<option value>` and the visible option text, and saved filter summaries display the saved scalar values. If a host app needs separate machine values and human labels, keep that mapping in host-app code, provide a copied/custom controller or filter UI, or wait for a dedicated value/label pair feature rather than documenting `{ value:, label: }` as supported by the bundled controller today.
 
+## Richer widget rendering
+
+The bundled filter panel intentionally renders simple browser controls from neutral metadata. If a screen needs a date picker, autocomplete, Select2-style select, Rails Fields Kit helper, or another form-helper widget, keep that widget as host-app-owned HTML instead of treating the bundled filter panel as the widget dependency owner.
+
+A useful split is:
+
+- Rails Table Preferences owns the column key, filter metadata, saved filter state, and adapter params.
+- A custom partial or renderer registry mapping owns the concrete widget HTML.
+- The host app or external helper owns widget initialization, validation display, remote option loading, accepted query params, and authorization.
+
+For a copyable renderer registry path, see [Resource table adapters](resource_tables.md#renderer-registries). The Rails Fields Kit example there shows how Rails Table Preferences can carry metadata while the host app registers the concrete `rfk_*` rendering behavior. Do not add a widget JavaScript package or form-helper gem dependency to Rails Table Preferences just to render one screen's richer filter input.
+
 ## Bundled default filter operators
 
 When `operators:` is omitted, the bundled controller chooses a default operator list from the filter type. `filter: true` and `filter: { type: :text }` both use the default text row.

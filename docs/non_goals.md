@@ -20,6 +20,20 @@ The gem may store filter/sort UI state and convert that state into adapter param
 
 If stronger query integration is needed later, prefer adapter examples or small adapter helpers rather than a full query builder.
 
+### Bundled richer filter widget dependencies
+
+Rails Table Preferences should not bundle date pickers, autocomplete libraries, Select2-style widgets, or form-helper gem dependencies as part of the default filter UI.
+
+The gem can carry neutral filter/editor metadata, saved state, and renderer registry lookup. The host application owns richer widget HTML and behavior, including:
+
+- JavaScript package choice and initialization
+- widget-specific validation and visible error feedback
+- request timing, remote option loading, and selected-option preload behavior
+- field-level authorization and accepted query params
+- design-system-specific layout, labels, hints, and responsive polish
+
+When a richer control is needed, use a host-owned partial or a renderer registry mapping to a form helper such as Rails Fields Kit. Keep Rails Table Preferences independent from the concrete widget dependency unless repeated production usage proves that a small, stable adapter is worth adding.
+
 ### CSV or Excel generation
 
 Rails Table Preferences should not generate CSV, Excel, or report files by itself.
