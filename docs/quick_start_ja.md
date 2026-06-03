@@ -79,7 +79,7 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 
 本番画面へ入れる前に、軽い順に確認します。
 
-- [Demo screen generator](demo.md): `--with-demo` で editor surface、scoped preset cues、export payload preview を見る。
+- [Demo screen generator](demo.md): `--with-demo` または `--with-demo-route` で editor surface、scoped preset cues、export payload preview を見る。
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app で install、engine mount、JavaScript/CSS、preference wiring を確認する。
 - [Production integration checklist](production_integration_checklist.md): demo / quick start で動いた構成を、実際の host-app index screen へ移す前に owner、engine route、query params、authorization、layout、export 境界を確認する。
 - [Manual QA checklist](manual_qa.md): 実際の host app で認証、認可、layout、accessibility、既存 search/export integration を確認する。
@@ -97,7 +97,7 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 - CSS、dense table layout、fixed / pinned columns、resize handles、accessibility state cues が崩れる: [Troubleshooting](troubleshooting.md)、[Resize and auto-fit guidance](resize_auto_fit.md)、[Fixed columns and column groups](fixed_columns_and_groups.md)、[Accessibility baseline](accessibility.md) を確認します。
 - どの helper や adapter を使うか迷う: [Decision guide](decision_guide.md) を確認します。
 - 対応 Ruby / Rails と CI coverage: [Support matrix](support_matrix.md) を確認します。
-- release 前の確認: [Release checklist](release_checklist.md) と [Package verification](package_verification.md) を確認します。
+- release 前の確認: [Release checklist](release_checklist.md) と [Package verification](package_verification.md) を確認します。package verification が失敗した場合は、required files、package export targets、package-internal JavaScript imports、package metadata errors の要約行を最初に見ます。
 
 ## Drift を避けるための読み方
 
@@ -107,6 +107,6 @@ release/docs 変更時は、少なくとも次の入口が README、[docs index]
 
 - install path、package entrypoint、production integration、support matrix の first-run guidance。
 - filter/sort、scoped presets、export payload、resource table helper の主要 surface。
-- demo、sandbox、manual QA、release checklist、package verification への確認導線。
+- demo、sandbox、manual QA、release checklist、package verification と failure summary への確認導線。
 
 新しい public surface を追加するときも、このページでは短い症状別入口かリンクの追加に留め、詳細手順は英語 docs を正本にします。
