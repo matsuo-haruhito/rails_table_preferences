@@ -24,7 +24,7 @@ ja:
       status_region: 保存状態
       loading_status: 設定を読み込み中です...
       loaded_status: 設定を読み込みました。
-      loading_failed_status: 設定の読み込みを完了できませんでした。
+      loading_failed_status: 設定の読み込みを完了できませんでした。通信状態を確認してページを再読み込みしてください。
       saving_status: 設定を保存中です...
       saved_status: 設定を保存しました。
       saving_failed_status: 設定の保存を完了できませんでした。
