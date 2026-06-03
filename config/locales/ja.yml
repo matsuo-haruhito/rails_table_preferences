@@ -5,6 +5,7 @@ ja:
       all_columns_hidden: すべての列が非表示です
     editor:
       preset_select: 保存済み設定
+      preset_select_hint: 読み込む保存済み設定を選びます。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。
       preset: 設定名
       default_preset: 標準設定にする
       apply: 適用
