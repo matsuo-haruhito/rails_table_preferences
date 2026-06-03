@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-class RailsTablePreferencesSharedPresetSmokeOrdersController < ActionController::Base
+class RailsTablePreferencesSharedPresetSmokeOrdersController < ApplicationController
   helper RailsTablePreferences::TablePreferencesHelper
 
   Order = Struct.new(:order_no, :customer_name, :amount, keyword_init: true)
@@ -86,18 +86,14 @@ class RailsTablePreferencesSharedPresetSmokeOrdersController < ActionController:
   end
 end
 
+Rails.application.routes.disable_clear_and_finalize = true
+Rails.application.routes.append do
+  get "/rails_table_preferences_shared_preset_smoke/orders",
+      to: "rails_table_preferences_shared_preset_smoke_orders#index"
+end
+Rails.application.reload_routes!
+
 RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :system, js: true do
-  before(:context) do
-    Rails.application.routes.draw do
-      get "/rails_table_preferences_shared_preset_smoke/orders",
-          to: "rails_table_preferences_shared_preset_smoke_orders#index"
-    end
-  end
-
-  after(:context) do
-    Rails.application.reload_routes!
-  end
-
   before do
     driven_by(:selenium_chrome_headless)
   end
