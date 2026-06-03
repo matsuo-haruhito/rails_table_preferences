@@ -5,6 +5,7 @@ en:
       all_columns_hidden: All columns are hidden
     editor:
       preset_select: Saved presets
+      preset_select_hint: Choose which saved settings to load. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
       preset: Preset
       default_preset: Use as default
       apply: Apply
