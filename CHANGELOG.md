@@ -28,7 +28,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Ransack params adapter.
 - Hidden fields helper for submitting saved filter/sort params through existing search forms.
 - Export payload helper for host app CSV, Excel, or report generation.
-- Column definition helper with labels, locale lookup, visibility, order, width, truncation, filters, sorting, fixed/pinned metadata, groups, and ignored columns.
+- Column definition helper with labels, locale lookup, visibility, order, width, truncation, filters, sorting, fixed/pinned metadata, groups, ignored columns, and optional `export_key` value-extraction metadata.
 - Resource table helpers for convention-first Active Record column inference, table profile overrides, optional tree table rendering, and additive table semantics.
 - Resource table helpers can pass table HTML options such as `id`, `class`, `data`, and `aria` through to the rendered table while preserving gem-owned controller data attributes.
 - Resource table helpers support opt-in captions through `caption:` and keep the caption contract separate from table HTML options.
@@ -44,8 +44,8 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Generated demo verification includes owner, role, organization, export payload, existing search form hidden fields preview, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
-- Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
-- Maintainer-facing `Product Profile.md` and repository `AGENTS.md` guides.
+- Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, manual QA PR smoke matrix, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
+- Pull request template guidance for automated verification, manual QA, UI/visual evidence, representative surfaces, focused viewport/state checks, and browser-capture handoff.
 - GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and Rails 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 
@@ -55,10 +55,14 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - README roadmap and current scope were updated to reflect the expanded v0.1 scope.
 - Generated migrations use nullable owner references and `scope_type` / `scope_key` to support owner, shared, role, and organization presets.
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
+- Preset list loading failure copy now explains the current-name-only fallback and asks users to check the connection and reload before retrying the editor flow.
 - The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
 - The package verification path now resolves documented package root and controller export targets, then checks their packaged JavaScript relative import/export references.
 - Documentation now states the bundled sort UI single-sort boundary and leaves multi-sort composition to host apps.
+- Documentation now keeps richer filter widgets, date pickers, autocomplete, and external helper widgets as host-app-owned renderer or custom-partial responsibilities instead of bundled filter UI dependencies.
+- Production integration guidance now calls out association preloading when resource table formatters read related records, including quick host-app smoke checks for query logs or existing N+1 guards.
+- Resource table formatter docs and specs now make formatter exceptions a host-app formatter responsibility and keep that separate from the default no-formatter fallback.
 
 ### Fixed
 
@@ -69,6 +73,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Saved filter/sort state survives editor apply operations.
 - Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
 - Ignored columns are filtered out of editor payloads and saved settings.
+- Boolean `false` filter values are preserved through hidden-field and controller-params round trips while `nil`, empty strings, and blank array items remain omitted.
 
 ## [0.1.0] - Unreleased
 
