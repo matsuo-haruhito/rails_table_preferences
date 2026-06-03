@@ -88,12 +88,43 @@ module RailsTablePreferences
       "docs/javascript_controller.md"
     ].freeze
 
+    SUMMARY_CATEGORIES = [
+      [:missing, "required files"],
+      [:missing_package_export_targets, "package export targets"],
+      [:missing_package_internal_imports, "package internal JavaScript imports"],
+      [:package_json_errors, "package metadata errors"]
+    ].freeze
+
     JAVASCRIPT_RELATIVE_IMPORT_PATTERN = /(?:^|\n)\s*(?:import\s+(?:[^"'\n]+?\s+from\s+)?|export\s+[^"'\n]+?\s+from\s+)["'](?<specifier>\.[^"']+)["']/.freeze
 
     attr_reader :gem_path, :required_paths
 
     def self.call(gem_path:, required_paths: REQUIRED_PATHS)
       new(gem_path: gem_path, required_paths: required_paths).call
+    end
+
+    def self.summary(result)
+      counts = SUMMARY_CATEGORIES.to_h do |key, _label|
+        [key, Array(result.fetch(key, [])).size]
+      end
+
+      {
+        ok: result.fetch(:ok, false),
+        total: counts.values.sum,
+        counts: counts
+      }
+    end
+
+    def self.summary_lines(result)
+      summary = summary(result)
+      return ["Package verification summary: ok"] if summary.fetch(:ok)
+
+      counts = summary.fetch(:counts)
+      details = SUMMARY_CATEGORIES.map do |key, label|
+        "#{label}: #{counts.fetch(key)}"
+      end.join(", ")
+
+      ["Package verification summary: #{summary.fetch(:total)} issue(s) (#{details})"]
     end
 
     def initialize(gem_path:, required_paths: REQUIRED_PATHS)
