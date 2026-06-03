@@ -98,6 +98,10 @@ Confirm:
 - [ ] `--skip-javascript` skips JavaScript copying.
 - [ ] `--skip-stylesheets` skips stylesheet copying.
 - [ ] `--with-demo` copies the demo controller and view.
+- [ ] Default install does not add the engine mount or demo route unless the matching route option is passed.
+- [ ] `--with-demo-route` implies the demo files, adds the demo route once, and keeps the post-install message accurate.
+- [ ] `--with-engine-route` adds the default engine mount once and keeps `config.mount_path` / custom mount path responsibility clear in the post-install message.
+- [ ] `--with-engine-route --with-demo-route` adds both route statements without duplicating either statement when rerun.
 - [ ] Post-install messages are accurate for both `stimulus-rails` and Vite / `app/frontend` setups.
 
 ## 6. JavaScript entrypoint checks
