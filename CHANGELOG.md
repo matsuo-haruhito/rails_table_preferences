@@ -63,6 +63,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Documentation now keeps richer filter widgets, date pickers, autocomplete, and external helper widgets as host-app-owned renderer or custom-partial responsibilities instead of bundled filter UI dependencies.
 - Production integration guidance now calls out association preloading when resource table formatters read related records, including quick host-app smoke checks for query logs or existing N+1 guards.
 - Resource table formatter docs and specs now make formatter exceptions a host-app formatter responsibility and keep that separate from the default no-formatter fallback.
+- Pull request template guidance now has a single canonical `.github/pull_request_template.md` source that keeps manual QA, UI/visual evidence, compatibility, and risk sections together.
 
 ### Fixed
 
