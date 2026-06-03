@@ -10,12 +10,15 @@
 <% default_preset_hint_id = "#{editor_id_prefix}-default-preset-hint" %>
 <% action_hint_id = "#{editor_id_prefix}-action-hint" %>
 <% reset_hint_id = "#{editor_id_prefix}-reset-hint" %>
+<% show_all_hint_id = "#{editor_id_prefix}-show-all-hint" %>
 <% maintenance_hint_id = "#{editor_id_prefix}-maintenance-hint" %>
 <% delete_label = t("rails_table_preferences.editor.delete", default: "削除") %>
 <% delete_confirm_label = t("rails_table_preferences.editor.delete_confirm", default: "この保存済み設定を削除します。よろしいですか？") %>
 <% reset_label = t("rails_table_preferences.editor.reset", default: "テーブル初期設定に戻す") %>
 <% reset_hint = t("rails_table_preferences.editor.reset_hint", default: "保存前の表示設定の変更を破棄し、読み込んだ保存済み設定ではなくテーブルの初期表示設定に戻します。") %>
 <% reset_visible_hint = t("rails_table_preferences.editor.reset_visible_hint", default: "テーブル初期設定に戻すと、保存前の変更は破棄されます。読み込んだ保存済み設定へ戻す操作ではありません。") %>
+<% show_all_label = t("rails_table_preferences.editor.show_all_columns", default: "すべて表示") %>
+<% show_all_hint = t("rails_table_preferences.editor.show_all_columns_hint", default: "列の並び、幅、絞り込み、並び替えは維持したまま、非表示の列だけを再表示します。保存は別操作です。") %>
 <% maintenance_hint = t("rails_table_preferences.editor.maintenance_hint", default: "削除とリセットは保存済み設定や現在の編集内容に強く影響する操作です。内容を確認してから実行してください。") %>
 <% preset_select_hint = t("rails_table_preferences.editor.preset_select_hint", default: "読み込む保存済み設定を選びます。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。") %>
 <% preset_name_hint = t("rails_table_preferences.editor.preset_name_hint", default: "保存または別名保存で使う設定名を入力します。") %>
@@ -120,6 +123,7 @@
        aria-label="<%= status_region_label %>"></div>
 
   <p id="<%= action_hint_id %>" class="rails-table-preferences-editor__hint"><%= action_hint %></p>
+  <p id="<%= show_all_hint_id %>" class="rails-table-preferences-editor__hint"><%= show_all_hint %></p>
   <p id="<%= maintenance_hint_id %>" class="rails-table-preferences-editor__hint rails-table-preferences-editor__hint--maintenance"><%= maintenance_hint %></p>
   <p id="<%= reset_hint_id %>" class="rails-table-preferences-editor__hint"><%= reset_visible_hint %></p>
 
@@ -158,6 +162,11 @@
               title="<%= delete_confirm_label %>"
               aria-label="<%= "#{delete_label}: #{delete_confirm_label}" %>"
               aria-describedby="<%= maintenance_hint_id %>"><%= delete_label %></button>
+      <button type="button"
+              data-action="rails-table-preferences#showAllColumns"
+              title="<%= show_all_hint %>"
+              aria-label="<%= "#{show_all_label}: #{show_all_hint}" %>"
+              aria-describedby="<%= show_all_hint_id %>"><%= show_all_label %></button>
       <button type="button"
               data-action="rails-table-preferences#resetEditor"
               title="<%= reset_hint %>"
