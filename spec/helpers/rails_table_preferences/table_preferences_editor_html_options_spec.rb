@@ -51,5 +51,26 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include('data-controller="rails-table-preferences"')
       expect(html).to include('data-action="rails-table-preferences#applyFromEditor"')
     end
+
+    it "keeps compact helper text reachable from bundled editor controls" do
+      html = helper.table_preferences_editor(table_key: :orders, columns: [:customer_code])
+      hint_ids = html.scan(/id="([^"]+-hint)"/).flatten
+      describedby_ids = html.scan(/aria-describedby="([^"]+)"/).flatten.flat_map(&:split)
+
+      expected_hint_suffixes = %w[
+        preset-select-hint
+        preset-name-hint
+        default-preset-hint
+        action-hint
+        reset-hint
+      ]
+
+      expected_hint_suffixes.each do |suffix|
+        hint_id = hint_ids.find { |id| id.end_with?(suffix) }
+
+        expect(hint_id).to be_present
+        expect(describedby_ids).to include(hint_id)
+      end
+    end
   end
 end
