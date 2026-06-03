@@ -18,7 +18,7 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
     expect(page).to have_button("削除", disabled: true)
     expect(find_button("保存")["data-rails-table-preferences-non-editable-fallback"]).to eq("true")
 
-    within('[data-rtp-editor-row-key="customer_name"]') do
+    within('[data-rails-table-preferences-column-key="customer_name"]') do
       uncheck "Visible"
     end
 
