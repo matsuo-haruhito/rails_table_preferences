@@ -152,6 +152,22 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         if (!Object.hasOwn(PackageController.values, "filterOperatorLabels")) {
           throw new Error("package entrypoint no longer exposes filterOperatorLabels as a package-only value")
         }
+
+        if (Object.hasOwn(BaseController.values, "dirtyStateLabel")) {
+          throw new Error("package-only dirtyStateLabel value leaked into the copied controller")
+        }
+
+        if (!Object.hasOwn(PackageController.values, "dirtyStateLabel")) {
+          throw new Error("package entrypoint no longer exposes dirtyStateLabel as a package-only value")
+        }
+
+        if (BaseController.targets.includes("dirtyState")) {
+          throw new Error("package-only dirtyState target leaked into the copied controller")
+        }
+
+        if (!PackageController.targets.includes("dirtyState")) {
+          throw new Error("package entrypoint no longer exposes dirtyState as a package-only target")
+        }
       JS
 
       run_node_entrypoint_check(base_controller_path, package_controller_path, script:)
@@ -177,29 +193,12 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
           present: undefined
         }
 
-        if (controller.filterOperatorText("contains") !== "Includes") {
-          throw new Error("filterOperatorLabelsValue override was not used for contains")
-        }
-
-        if (controller.filterOperatorText("between") !== "42") {
-          throw new Error("filterOperatorLabelsValue override was not stringified")
-        }
-
-        if (controller.filterOperatorText("equals") !== "一致") {
-          throw new Error("blank override did not fall back to the bundled equals label")
-        }
-
-        if (controller.filterOperatorText("blank") !== "空白") {
-          throw new Error("null override did not fall back to the bundled blank label")
-        }
-
-        if (controller.filterOperatorText("present") !== "空白以外") {
-          throw new Error("undefined override did not fall back to the bundled present label")
-        }
-
-        if (controller.filterOperatorText("starts_with") !== "で始まる") {
-          throw new Error("missing override did not fall back to the bundled starts_with label")
-        }
+        if (controller.filterOperatorText("contains") !== "Includes") throw new Error("filterOperatorLabelsValue override was not used for contains")
+        if (controller.filterOperatorText("between") !== "42") throw new Error("filterOperatorLabelsValue override was not stringified")
+        if (controller.filterOperatorText("equals") !== "一致") throw new Error("blank override did not fall back to the bundled equals label")
+        if (controller.filterOperatorText("blank") !== "空白") throw new Error("null override did not fall back to the bundled blank label")
+        if (controller.filterOperatorText("present") !== "空白以外") throw new Error("undefined override did not fall back to the bundled present label")
+        if (controller.filterOperatorText("starts_with") !== "で始まる") throw new Error("missing override did not fall back to the bundled starts_with label")
       JS
 
       run_node_entrypoint_check(controller_entrypoint_path, script:)
@@ -223,6 +222,8 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         controller.nameValue = "default"
         controller.settingsValue = { columns: [{ key: "total", visible: true }], filters: {}, sorts: [] }
         controller.hasPresetNameTarget = false
+        controller.hasDirtyStateTarget = false
+        controller.hasEditorRowsTarget = false
         controller.settingsFromEditor = () => ({ columns: [{ key: "total", visible: false }], filters: { total: { operator: "gt", value: "100" } }, sorts: [] })
         controller.apply = () => {}
 
@@ -243,9 +244,70 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         if (!failure) throw new Error("error event was not dispatched")
         if (failure.detail.action !== "save") throw new Error("error event missing stable action")
         if (failure.detail.message !== "Save failed") throw new Error("error event missing stable message")
-        if (Object.prototype.hasOwnProperty.call(failure.detail, "error")) {
-          throw new Error("error event leaked the Error object")
+        if (Object.prototype.hasOwnProperty.call(failure.detail, "error")) throw new Error("error event leaked the Error object")
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
+  it "tracks package entrypoint dirty state without using the async status region" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const dirtyElements = []
+        const statusTarget = { parentNode: { insertBefore(element) { dirtyElements.push(element) } } }
+        const editorRowsTarget = { addEventListener() {}, removeEventListener() {}, querySelectorAll() { return [] } }
+        const controller = new ControllerClass()
+        let currentSettings = { columns: [{ key: "name", visible: true, order: 10 }], filters: {}, sorts: [] }
+
+        globalThis.document = {
+          createElement() {
+            return {
+              className: "",
+              dataset: {},
+              attributes: {},
+              hidden: false,
+              textContent: "",
+              setAttribute(name, value) { this.attributes[name] = value }
+            }
+          }
         }
+        controller.element = { appendChild(element) { dirtyElements.push(element) } }
+        controller.dirtyStateLabelValue = "Unsaved changes"
+        Object.defineProperty(controller, "hasDirtyStateTarget", { get() { return dirtyElements.length > 0 } })
+        Object.defineProperty(controller, "dirtyStateTarget", { get() { return dirtyElements[0] } })
+        Object.defineProperty(controller, "hasStatusTarget", { get() { return true } })
+        Object.defineProperty(controller, "statusTarget", { get() { return statusTarget } })
+        Object.defineProperty(controller, "hasEditorRowsTarget", { get() { return true } })
+        Object.defineProperty(controller, "editorRowsTarget", { get() { return editorRowsTarget } })
+        controller.settingsFromEditor = () => JSON.parse(JSON.stringify(currentSettings))
+        controller.apply = () => {}
+        controller.dispatchPreferenceEvent = () => {}
+
+        controller.installDirtyStateTracking()
+        controller.markEditorClean()
+
+        if (dirtyElements.length !== 1) throw new Error("dirty-state helper was not inserted next to the status region")
+        if (!controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "") throw new Error("dirty-state helper should start hidden after snapshot capture")
+
+        currentSettings = { columns: [{ key: "name", visible: false, order: 10 }], filters: {}, sorts: [] }
+        controller.applyFromEditor()
+
+        if (controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "Unsaved changes") throw new Error("dirty-state helper did not show after editor settings changed")
+        if (statusTarget.textContent) throw new Error("dirty-state helper should not write to the async status target")
+
+        currentSettings = { columns: [{ key: "name", visible: false, order: 10 }], filters: { name: { operator: "contains", value: "A" } }, sorts: [] }
+        controller.updateDirtyStateFromEditor()
+        if (controller.dirtyStateTarget.hidden) throw new Error("dirty-state helper should stay visible after unsaved filter changes")
+
+        controller.markEditorClean()
+        if (!controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "") throw new Error("dirty-state helper should clear after save or load snapshot refresh")
       JS
 
       run_node_entrypoint_check(controller_entrypoint_path, script:)
@@ -273,9 +335,7 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
             classList: { add() {}, toggle() {} },
             addEventListener() {},
             appendChild(node) { this.sortIndicator = node },
-            querySelector(selector) {
-              return selector === "[data-rails-table-preferences-sort-indicator]" ? this.sortIndicator : null
-            },
+            querySelector(selector) { return selector === "[data-rails-table-preferences-sort-indicator]" ? this.sortIndicator : null },
             setAttribute(name, value) { this.attributes[name] = value }
           }
         }
@@ -294,28 +354,15 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
         controller.installSortControls()
 
-        if (hostTitleCell.title !== "Business owner help") {
-          throw new Error("host title was overwritten during sort control install")
-        }
-
-        if (generatedHintCell.title !== "Sort ascending") {
-          throw new Error("generated sort hint was not applied to an untitled sortable header")
-        }
+        if (hostTitleCell.title !== "Business owner help") throw new Error("host title was overwritten during sort control install")
+        if (generatedHintCell.title !== "Sort ascending") throw new Error("generated sort hint was not applied to an untitled sortable header")
 
         activeSort = { key: "account", direction: "desc" }
         controller.syncSortStates()
 
-        if (hostTitleCell.title !== "Business owner help") {
-          throw new Error("host title was overwritten during sort state sync")
-        }
-
-        if (hostTitleCell.attributes["aria-sort"] !== "descending") {
-          throw new Error("aria-sort no longer tracks the active descending sort")
-        }
-
-        if (hostTitleCell.sortIndicator.textContent !== "▼") {
-          throw new Error("sort indicator no longer tracks the active descending sort")
-        }
+        if (hostTitleCell.title !== "Business owner help") throw new Error("host title was overwritten during sort state sync")
+        if (hostTitleCell.attributes["aria-sort"] !== "descending") throw new Error("aria-sort no longer tracks the active descending sort")
+        if (hostTitleCell.sortIndicator.textContent !== "▼") throw new Error("sort indicator no longer tracks the active descending sort")
       JS
 
       run_node_entrypoint_check(controller_entrypoint_path, script:)
