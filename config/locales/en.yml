@@ -20,7 +20,7 @@ en:
       status_region: Save status
       loading_status: Loading saved settings...
       loaded_status: Saved settings loaded.
-      loading_failed_status: Could not finish loading saved settings.
+      loading_failed_status: Could not finish loading saved settings. Check the connection and reload the page.
       saving_status: Saving settings...
       saved_status: Settings saved.
       saving_failed_status: Could not finish saving settings.
