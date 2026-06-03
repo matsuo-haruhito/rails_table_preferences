@@ -202,7 +202,8 @@
     the export payload preview below.
   </p>
 
-  <pre class="rails-table-preferences-demo-hidden-fields-preview"><code><%= h(demo_hidden_fields_html.presence || "No saved filter or sort hidden fields are currently generated.") %></code></pre>
+  <% demo_hidden_fields_preview = demo_hidden_fields_html.present? ? String.new(demo_hidden_fields_html.to_s) : "No saved filter or sort hidden fields are currently generated." %>
+  <pre class="rails-table-preferences-demo-hidden-fields-preview"><code><%= h(demo_hidden_fields_preview) %></code></pre>
 
   <p>
     Save a filter or sort, reload, and compare this markup with the search
