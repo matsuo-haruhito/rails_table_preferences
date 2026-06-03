@@ -28,6 +28,15 @@ Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 
 If required files, package export targets, or package-internal JavaScript imports are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
 
+Failure output starts with a compact summary line before the detailed lists:
+
+```text
+Package verification failed: rails_table_preferences-0.1.0.alpha.gem
+Package verification summary: 3 issue(s) (required files: 1, package export targets: 1, package internal JavaScript imports: 1, package metadata errors: 0)
+```
+
+Use the summary line in PR bodies, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, or package metadata error. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
+
 ## Manual inspection
 
 The automated task is the normal gate. Manual inspection is still useful before tagging a release.
