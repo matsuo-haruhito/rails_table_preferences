@@ -58,7 +58,9 @@ RSpec.describe "rails_table_preferences scoped preset selector" do
           value: "",
           label: "",
           appendChild(child) { this.children.push(child); return child },
-          querySelectorAll() { return [] }
+          querySelectorAll() { return [] },
+          get innerHTML() { return this._innerHTML || "" },
+          set innerHTML(value) { this._innerHTML = value; this.children = [] }
         })
 
         globalThis.document = { createElement }
@@ -67,7 +69,7 @@ RSpec.describe "rails_table_preferences scoped preset selector" do
         const select = createElement("select")
         select.innerHTML = "stale"
         controller.presetSelectTarget = select
-        controller.currentPresetName = "mine"
+        Object.defineProperty(controller, "currentPresetName", { value: "mine" })
         controller.scopeOwnerLabelValue = "個人"
         controller.scopeRoleLabelValue = "ロール"
         controller.scopeOrganizationLabelValue = "組織"
