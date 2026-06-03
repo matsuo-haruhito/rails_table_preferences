@@ -19,6 +19,7 @@ namespace :package do
       puts "Package verification passed: #{File.basename(gem_path)}"
     else
       warn "Package verification failed: #{File.basename(gem_path)}"
+      RailsTablePreferences::PackageVerifier.summary_lines(result).each { |line| warn line }
 
       unless result[:missing].empty?
         warn "Missing files:"

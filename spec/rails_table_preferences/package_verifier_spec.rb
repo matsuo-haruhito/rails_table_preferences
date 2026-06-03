@@ -119,6 +119,61 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     end
   end
 
+  describe ".summary" do
+    it "counts each package verification failure category separately" do
+      result = {
+        ok: false,
+        missing: ["docs/package_verification.md", "README.md"],
+        missing_package_export_targets: [
+          { export: ".", target: "app/javascript/rails_table_preferences/index.js" }
+        ],
+        missing_package_internal_imports: [
+          { export: "./controller", entrypoint: "app/javascript/rails_table_preferences/controller.js", import: "../controllers/rails_table_preferences_controller", target: "app/javascript/controllers/rails_table_preferences_controller" }
+        ],
+        package_json_errors: ["package.json could not be parsed"]
+      }
+
+      expect(described_class.summary(result)).to eq(
+        ok: false,
+        total: 5,
+        counts: {
+          missing: 2,
+          missing_package_export_targets: 1,
+          missing_package_internal_imports: 1,
+          package_json_errors: 1
+        }
+      )
+    end
+
+    it "formats a compact failure summary for release evidence" do
+      result = {
+        ok: false,
+        missing: ["docs/package_verification.md"],
+        missing_package_export_targets: [],
+        missing_package_internal_imports: [
+          { export: "./controller", entrypoint: "app/javascript/rails_table_preferences/controller.js", import: "../controllers/rails_table_preferences_controller", target: "app/javascript/controllers/rails_table_preferences_controller" }
+        ],
+        package_json_errors: []
+      }
+
+      expect(described_class.summary_lines(result)).to eq([
+        "Package verification summary: 2 issue(s) (required files: 1, package export targets: 0, package internal JavaScript imports: 1, package metadata errors: 0)"
+      ])
+    end
+
+    it "formats a compact passing summary without changing the call result shape" do
+      result = {
+        ok: true,
+        missing: [],
+        missing_package_export_targets: [],
+        missing_package_internal_imports: [],
+        package_json_errors: []
+      }
+
+      expect(described_class.summary_lines(result)).to eq(["Package verification summary: ok"])
+    end
+  end
+
   def repository_root
     Pathname.new(File.expand_path("../..", __dir__))
   end

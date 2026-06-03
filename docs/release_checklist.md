@@ -75,7 +75,9 @@ Then optionally inspect the built gem or unpack it locally:
 gem contents pkg/rails_table_preferences-*.gem --all
 ```
 
-See [Package verification](package_verification.md) for the required file list and manual inspection commands.
+See [Package verification](package_verification.md) for the required file list, failure summary format, and manual inspection commands.
+
+If `package:verify` fails, copy the compact summary line into the release-prep PR or checklist note before listing details. It separates required file gaps, missing package export targets, unresolved package-internal JavaScript imports, and packaged `package.json` metadata errors so the next reviewer can see which category broke first.
 
 Pay special attention to generator templates, copied assets, `package.json`, and package JavaScript entrypoints. Missing templates or entrypoints usually appear only when a host app runs a generator or imports the gem through a JS bundler.
 
