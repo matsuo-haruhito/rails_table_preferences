@@ -18,6 +18,8 @@ These keys label the saved preset selector, preset name input, and default prese
 
 Use locale overrides when the host app wants different wording for the same controls. Copy the ERB partial only when the host app needs different fields, helper-text placement, or preset-control markup.
 
+When the selected preset is read-only, the bundled save action does not overwrite that scoped preset. It creates or updates an owner preset instead, using the current preset name input as the owner preset name. The selected read-only preset name is loaded into that input first, so users can keep the same visible name or change the input before saving a personal copy. If an owner preset with that name already exists, the bundled editor keeps the existing API failure path; host apps that need detailed duplicate-name guidance should customize the failure copy or controller behavior separately.
+
 ## Actions and reset copy
 
 These keys drive the bundled action buttons, button context, delete confirmation, and reset helper copy:
