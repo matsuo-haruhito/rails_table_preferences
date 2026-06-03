@@ -18,6 +18,44 @@ RSpec.describe "resource table rendering", type: :helper do
     expect(html).to include("No records to display")
   end
 
+  it "keeps the default resource table markup unwrapped" do
+    html = helper.resource_table_for(
+      User.none,
+      model: User,
+      table_key: :users,
+      only: %i[name],
+      class: "orders-table",
+      render_editor: false
+    )
+
+    expect(html).to include('class="rails-table-preferences-resource-table orders-table"')
+    expect(html).not_to include("rails-table-preferences-resource-table-scroll")
+  end
+
+  it "renders an optional scroll wrapper without moving table options" do
+    html = helper.resource_table_for(
+      User.none,
+      model: User,
+      table_key: :users,
+      only: %i[name],
+      class: "orders-table",
+      data: { turbo_frame: "orders-frame" },
+      scroll_wrapper: true,
+      wrapper_options: {
+        class: "orders-scroll",
+        data: { role: "resource-scroll" },
+        aria: { label: "Scrollable orders" }
+      },
+      render_editor: false
+    )
+
+    expect(html).to include('class="rails-table-preferences-resource-table-scroll orders-scroll"')
+    expect(html).to include('data-role="resource-scroll"')
+    expect(html).to include('aria-label="Scrollable orders"')
+    expect(html).to include('class="rails-table-preferences-resource-table orders-table"')
+    expect(html).to include('data-turbo-frame="orders-frame"')
+  end
+
   it "uses the localized empty copy" do
     I18n.with_locale(:ja) do
       html = helper.resource_table_for(User.none, model: User, table_key: :users, only: %i[name])
