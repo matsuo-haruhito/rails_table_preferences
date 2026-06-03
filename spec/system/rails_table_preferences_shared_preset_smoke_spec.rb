@@ -19,7 +19,7 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
     expect(find_button("保存")["data-rails-table-preferences-non-editable-fallback"]).to eq("true")
 
     within('[data-rails-table-preferences-column-key="customer_name"]') do
-      uncheck "Visible"
+      expect(page).to have_css('input[type="checkbox"][disabled]')
     end
 
     click_button "保存"
@@ -30,7 +30,7 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
     expect(mutations.map { |mutation| mutation.fetch("method") }).to eq(["POST"])
     expect(mutations.first.fetch("name")).to eq("共有ビュー")
     expect(mutations.first.fetch("settings").fetch("columns")).to include(
-      hash_including("key" => "customer_name", "visible" => false)
+      hash_including("key" => "amount", "visible" => false)
     )
   end
 
