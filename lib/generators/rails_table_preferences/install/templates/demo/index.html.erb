@@ -111,6 +111,15 @@
     margin-bottom: 0;
   }
 
+  .rails-table-preferences-demo-hidden-fields-preview {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    white-space: pre-wrap;
+  }
+
   .rails-table-preferences-demo-owner-note,
   .rails-table-preferences-demo-scope-note {
     margin-bottom: 0.75rem;
@@ -171,16 +180,37 @@
   title: "デモ受注一覧の表示設定"
 ) %>
 
+<% demo_hidden_fields_html = table_preferences_hidden_fields(
+  settings: @table_preference_settings,
+  columns: @table_columns
+) %>
+
 <%= form_with url: request.path, method: :get do %>
   <%= text_field_tag :search_word, params[:search_word], placeholder: "得意先名" %>
 
-  <%= table_preferences_hidden_fields(
-    settings: @table_preference_settings,
-    columns: @table_columns
-  ) %>
+  <%= demo_hidden_fields_html %>
 
   <%= submit_tag "検索" %>
 <% end %>
+
+<section class="rails-table-preferences-demo-summary">
+  <h2>Search form hidden fields preview</h2>
+
+  <p>
+    This preview shows the hidden inputs that the existing search form above
+    submits from the current saved filter and sort state. It is separate from
+    the export payload preview below.
+  </p>
+
+  <pre class="rails-table-preferences-demo-hidden-fields-preview"><code><%= h(demo_hidden_fields_html.presence || "No saved filter or sort hidden fields are currently generated.") %></code></pre>
+
+  <p>
+    Save a filter or sort, reload, and compare this markup with the search
+    results above. Array params keep their <code>[]</code> names, blank values are
+    omitted, and saved boolean false values remain visible when they are part of
+    the saved preference state.
+  </p>
+</section>
 
 <div class="rails-table-preferences-demo-scroll">
   <%= table_preferences_table_tag(
