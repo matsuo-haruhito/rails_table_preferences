@@ -215,6 +215,18 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
         const datasetKey = (name) => name.replace(/^data-/, "").replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
 
+        const attributeSelector = (selector) => {
+          if (!selector.startsWith("[") || !selector.endsWith("]")) return null
+          const body = selector.slice(1, -1)
+          const separator = body.indexOf("=")
+          if (separator < 0) return { name: body.trim(), expected: undefined }
+          const name = body.slice(0, separator).trim()
+          let expected = body.slice(separator + 1).trim()
+          const quoted = (expected.startsWith('"') && expected.endsWith('"')) || (expected.startsWith("'") && expected.endsWith("'"))
+          if (quoted) expected = expected.slice(1, -1)
+          return { name, expected }
+        }
+
         class FakeElement {
           constructor(tagName = "div") {
             this.tagName = tagName.toUpperCase()
@@ -279,9 +291,9 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
           matches(selector) {
             if (selector.startsWith(".")) return this.className.split(/\s+/).includes(selector.slice(1))
-            const attribute = selector.match(/^\[([^=\]]+)(?:=["']?([^"'\]]+)["']?)?\]$/)
+            const attribute = attributeSelector(selector)
             if (!attribute) return false
-            const [, name, expected] = attribute
+            const { name, expected } = attribute
             const actual = name.startsWith("data-") ? this.dataset[datasetKey(name)] : this.attributes[name]
             if (expected === undefined) return actual !== undefined
             return actual === expected
