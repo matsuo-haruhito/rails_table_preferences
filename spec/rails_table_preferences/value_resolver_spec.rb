@@ -34,6 +34,14 @@ RSpec.describe RailsTablePreferences::ValueResolver do
         .to be_nil
     end
 
+    it "does not rescue formatter exceptions into fallback values" do
+      formatter = lambda { |_row| raise ArgumentError, "host formatter failed" }
+
+      expect {
+        described_class.call(record, { key: :customer_name, formatter: formatter }, view_context: view_context)
+      }.to raise_error(ArgumentError, "host formatter failed")
+    end
+
     it "keeps the attribute fallback when no formatter is configured" do
       expect(described_class.call(record, { key: :customer_name }, view_context: view_context))
         .to eq("Acme")
