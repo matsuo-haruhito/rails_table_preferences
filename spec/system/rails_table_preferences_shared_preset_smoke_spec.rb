@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rails_helper"
+require "spec_helper"
 
 class RailsTablePreferencesSharedPresetSmokeOrdersController < ActionController::Base
   helper RailsTablePreferences::TablePreferencesHelper
@@ -323,7 +323,6 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
       const transformed = source
         .replace(/import[^\n]+\n/g, "")
         .replace("export default class", "class RailsTablePreferencesController");
-      Function("Controller", `${transformed}; return RailsTablePreferencesController;`)(Controller);
       const RailsTablePreferencesController = Function("Controller", `${transformed}; return RailsTablePreferencesController;`)(Controller);
 
       installTargetAccessors(RailsTablePreferencesController);
