@@ -102,7 +102,7 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
 
   it "does not render the resource table empty message when records are present" do
     render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
-      records: [double("record", name: "Alice")],
+      records: [User.new(name: "Alice")],
       options: {
         render_editor: false,
         empty_message: "No users match this search"
