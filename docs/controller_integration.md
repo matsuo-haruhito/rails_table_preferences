@@ -138,6 +138,8 @@ This renders ordinary hidden fields:
 <input type="hidden" name="sort" value="-delivery_date">
 ```
 
+Saved boolean values are preserved as values. For example, a saved filter value of `false` renders as a hidden field value of `false`, including when it appears inside an array value. `nil`, empty strings, and blank array items are still omitted so a saved preference does not submit empty search params.
+
 Use `namespace:` for nested params such as Ransack's `q`:
 
 ```erb
