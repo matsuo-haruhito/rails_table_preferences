@@ -7,7 +7,7 @@ RSpec.describe "editor package entrypoint affordances" do
   let(:controller_source) { File.read(File.join(repo_root, "app/javascript/rails_table_preferences/controller.js")) }
   let(:partial_source) { File.read(File.join(repo_root, "app/views/rails_table_preferences/_editor.html.erb")) }
   let(:stylesheet_source) { File.read(File.join(repo_root, "app/assets/stylesheets/rails_table_preferences.css")) }
-  let(:manual_qa_source) { File.read(File.join(repo_root, "docs/manual_qa.md")) }
+  let(:docs_source) { File.read(File.join(repo_root, "docs/editor_entrypoint_affordances.md")) }
 
   it "keeps package entrypoint search and move affordances wired without changing the base controller" do
     expect(controller_source).to include("editorSearchLabel")
@@ -33,7 +33,8 @@ RSpec.describe "editor package entrypoint affordances" do
   end
 
   it "documents the browser checks for searching and moving editor rows" do
-    expect(manual_qa_source).to include("Use the bundled column search field")
-    expect(manual_qa_source).to include("Use the row up/down buttons")
+    expect(docs_source).to include("Use the bundled column search field")
+    expect(docs_source).to include("Use the row up/down buttons")
+    expect(docs_source).to include("package entrypoint")
   end
 end
