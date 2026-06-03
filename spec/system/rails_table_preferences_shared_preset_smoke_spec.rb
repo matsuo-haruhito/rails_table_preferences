@@ -130,6 +130,8 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
   end
 
   def install_shared_preset_smoke_harness
+    expect(page).to have_css("#smoke-root")
+
     controller_source = File.read(
       Rails.root.join("app/javascript/controllers/rails_table_preferences_controller.js")
     )
