@@ -18,6 +18,34 @@ RSpec.describe "editor package entrypoint affordances" do
     expect(controller_source).to include("editorRowsForMovement")
   end
 
+  it "keeps filtered editor rows in the DOM so editor settings are not dropped" do
+    expect(controller_source).to include("this.editorRows.forEach((row) =>")
+    expect(controller_source).to include("row.hidden = hidden")
+    expect(controller_source).to include("if (!hidden) visibleCount += 1")
+    expect(controller_source).to include("this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0")
+    expect(controller_source).not_to include("row.remove()")
+    expect(controller_source).not_to include("removeChild(row)")
+  end
+
+  it "limits move actions to visible rows while preserving an all-row fallback" do
+    expect(controller_source).to include("const visibleRows = this.editorRows.filter((row) => !row.hidden)")
+    expect(controller_source).to include("return visibleRows.length > 0 ? visibleRows : this.editorRows")
+    expect(controller_source).to include("const rows = this.editorRowsForMovement")
+    expect(controller_source).to include("const target = rows[index + direction]")
+  end
+
+  it "updates order inputs after row moves before refreshing move-button state" do
+    expect(controller_source).to match(/insertBefore\(row, target\).*insertBefore\(row, target\.nextSibling\).*refreshEditorOrderInputs\(\).*syncEditorMoveButtons\(\)/m)
+  end
+
+  it "disables generated move controls for busy, hidden, first, and last row states" do
+    expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 ||")
+    expect(controller_source).to include("direction === \"up\" ? index === 0 : index === rows.length - 1")
+    expect(controller_source).to include("setEditorRowsBusyState(busy)")
+    expect(controller_source).to include("super.setEditorRowsBusyState(busy)")
+    expect(controller_source).to include("this.syncEditorMoveButtons()")
+  end
+
   it "passes localized copy values from the bundled editor partial" do
     expect(partial_source).to include("data-rails-table-preferences-editor-search-label-value")
     expect(partial_source).to include("rails_table_preferences.editor.search_columns")
@@ -32,9 +60,11 @@ RSpec.describe "editor package entrypoint affordances" do
     expect(stylesheet_source).to include("@media (max-width: 26rem)")
   end
 
-  it "documents the browser checks for searching and moving editor rows" do
+  it "documents browser checks and the existing QA checklist routing" do
     expect(docs_source).to include("Use the bundled column search field")
     expect(docs_source).to include("Use the row up/down buttons")
+    expect(docs_source).to include("docs/manual_qa.md")
+    expect(docs_source).to include("docs/accessibility.md")
     expect(docs_source).to include("package entrypoint")
   end
 end
