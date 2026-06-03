@@ -2,104 +2,13 @@
 
 require "spec_helper"
 
-class RailsTablePreferencesSharedPresetSmokeOrdersController < ApplicationController
-  helper RailsTablePreferences::TablePreferencesHelper
-
-  Order = Struct.new(:order_no, :customer_name, :amount, keyword_init: true)
-
-  def index
-    @orders = [
-      Order.new(order_no: "A-100", customer_name: "Kobayashi", amount: "12,000"),
-      Order.new(order_no: "A-101", customer_name: "Sato", amount: "18,500")
-    ]
-
-    @columns = [
-      { key: "order_no", label: "Order No", visible: true, order: 1 },
-      { key: "customer_name", label: "Customer", visible: true, order: 2 },
-      { key: "amount", label: "Amount", visible: true, order: 3 }
-    ]
-
-    @table_preference_settings = {
-      columns: @columns,
-      sort: [],
-      filters: {},
-      density: "comfortable"
-    }
-
-    @smoke_data_attributes = table_preferences_data_attributes(
-      table_key: "shared_preset_smoke_orders",
-      columns: @columns,
-      settings: @table_preference_settings,
-      preferences_url: "/rails_table_preferences_shared_preset_smoke/preferences",
-      preference_url: "/rails_table_preferences_shared_preset_smoke/preferences/:name"
-    )
-
-    render inline: <<~ERB
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Shared preset smoke</title>
-          <%= javascript_importmap_tags %>
-        </head>
-        <body>
-          <section id="smoke-root" <%= tag.attributes(@smoke_data_attributes) %>>
-            <label for="preset-select">Preset</label>
-            <select id="preset-select" data-rails-table-preferences-target="presetSelect" data-action="rails-table-preferences#selectPreset"></select>
-
-            <label for="preset-name">Name</label>
-            <input id="preset-name" data-rails-table-preferences-target="presetName" />
-
-            <label for="preset-default">
-              <input id="preset-default" type="checkbox" data-rails-table-preferences-target="defaultPreset" />
-              Default
-            </label>
-
-            <p data-rails-table-preferences-target="readOnlyHint" hidden>Shared preset is read-only.</p>
-            <div data-rails-table-preferences-target="editorRows"></div>
-            <p data-rails-table-preferences-target="status"></p>
-
-            <button type="button" data-rails-table-preferences-target="savePresetButton" data-action="rails-table-preferences#saveFromEditor">保存</button>
-            <button type="button" data-rails-table-preferences-target="deletePresetButton" data-action="rails-table-preferences#deletePreset">削除</button>
-
-            <table>
-              <thead>
-                <tr>
-                  <% @columns.each do |column| %>
-                    <th data-column-key="<%= column[:key] %>"><%= column[:label] %></th>
-                  <% end %>
-                </tr>
-              </thead>
-              <tbody>
-                <% @orders.each do |order| %>
-                  <tr>
-                    <% @columns.each do |column| %>
-                      <td data-column-key="<%= column[:key] %>"><%= order.public_send(column[:key]) %></td>
-                    <% end %>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
-          </section>
-        </body>
-      </html>
-    ERB
-  end
-end
-
-Rails.application.routes.disable_clear_and_finalize = true
-Rails.application.routes.append do
-  get "/rails_table_preferences_shared_preset_smoke/orders",
-      to: "rails_table_preferences_shared_preset_smoke_orders#index"
-end
-Rails.application.reload_routes!
-
 RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :system, js: true do
   before do
     driven_by(:selenium_chrome_headless)
   end
 
   it "loads a shared preset as read-only and saves edits through owner fallback" do
-    visit "/rails_table_preferences_shared_preset_smoke/orders"
+    visit "about:blank"
     install_shared_preset_smoke_harness
 
     select "共有ビュー [shared]", from: "preset-select"
@@ -126,14 +35,70 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
   end
 
   def install_shared_preset_smoke_harness
-    expect(page).to have_css("#smoke-root")
-
     controller_source = File.read(
       Rails.root.join("app/javascript/controllers/rails_table_preferences_controller.js")
     )
 
     page.execute_script(<<~JS, controller_source)
       const source = arguments[0];
+
+      document.body.innerHTML = `
+        <section id="smoke-root">
+          <label for="preset-select">Preset</label>
+          <select id="preset-select" data-rails-table-preferences-target="presetSelect" data-action="rails-table-preferences#selectPreset"></select>
+
+          <label for="preset-name">Name</label>
+          <input id="preset-name" data-rails-table-preferences-target="presetName" />
+
+          <label for="preset-default">
+            <input id="preset-default" type="checkbox" data-rails-table-preferences-target="defaultPreset" />
+            Default
+          </label>
+
+          <p data-rails-table-preferences-target="readOnlyHint" hidden>Shared preset is read-only.</p>
+          <div data-rails-table-preferences-target="editorRows"></div>
+          <p data-rails-table-preferences-target="status"></p>
+
+          <button type="button" data-rails-table-preferences-target="savePresetButton" data-action="rails-table-preferences#saveFromEditor">保存</button>
+          <button type="button" data-rails-table-preferences-target="deletePresetButton" data-action="rails-table-preferences#deletePreset">削除</button>
+
+          <table>
+            <thead>
+              <tr>
+                <th data-column-key="order_no">Order No</th>
+                <th data-column-key="customer_name">Customer</th>
+                <th data-column-key="amount">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-column-key="order_no">A-100</td>
+                <td data-column-key="customer_name">Kobayashi</td>
+                <td data-column-key="amount">12,000</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      `;
+
+      const root = document.getElementById("smoke-root");
+      const initialColumns = [
+        { key: "order_no", label: "Order No", visible: true, order: 1 },
+        { key: "customer_name", label: "Customer", visible: true, order: 2 },
+        { key: "amount", label: "Amount", visible: true, order: 3 }
+      ];
+      const initialSettings = {
+        columns: initialColumns,
+        sort: [],
+        filters: {},
+        density: "comfortable"
+      };
+
+      root.dataset.railsTablePreferencesTableKeyValue = "shared_preset_smoke_orders";
+      root.dataset.railsTablePreferencesColumnsValue = JSON.stringify(initialColumns);
+      root.dataset.railsTablePreferencesSettingsValue = JSON.stringify(initialSettings);
+      root.dataset.railsTablePreferencesPreferencesUrlValue = "/rails_table_preferences_shared_preset_smoke/preferences";
+      root.dataset.railsTablePreferencesPreferenceUrlValue = "/rails_table_preferences_shared_preset_smoke/preferences/:name";
 
       window.__rtpSharedPresetSmoke = { mutations: [] };
 
@@ -329,7 +294,6 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
       installValueAccessors(RailsTablePreferencesController);
       installFetchStub();
 
-      const root = document.getElementById("smoke-root");
       const controller = new RailsTablePreferencesController(root);
       window.__rtpSharedPresetSmoke.controller = controller;
       bindActions(root, controller);
