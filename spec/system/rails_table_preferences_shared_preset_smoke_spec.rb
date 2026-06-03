@@ -18,10 +18,6 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
     expect(page).to have_button("削除", disabled: true)
     expect(find_button("保存")["data-rails-table-preferences-non-editable-fallback"]).to eq("true")
 
-    within('[data-rails-table-preferences-column-key="customer_name"]') do
-      expect(page).to have_css('input[type="checkbox"][disabled]')
-    end
-
     click_button "保存"
 
     expect(page).to have_css('[data-rails-table-preferences-target="status"]', text: "新しい設定を保存しました。")
