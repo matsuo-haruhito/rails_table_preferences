@@ -11,7 +11,7 @@ The goal is to catch packaging, generator, documentation, and host-application i
 - [ ] Move `CHANGELOG.md` entries from `[Unreleased]` to the target version section.
 - [ ] For the v0.1.0 release-prep or tag PR, keep a fresh empty `[Unreleased]` section for post-release work and rename `[0.1.0] - Unreleased` to `[0.1.0] - YYYY-MM-DD` with the actual release date.
 - [ ] Do not describe open pull requests, proposal issues, or unmerged roadmap items as released in `[0.1.0]`; leave them in `[Unreleased]` or out of the release entry until they land.
-- [ ] Confirm the README "Remaining before tagging v0.1" checklist still matches the changelog cutover state before tagging.
+- [ ] Confirm the README release-readiness summary still matches the changelog cutover state before tagging.
 - [ ] Confirm `CHANGELOG.md` covers user-facing changes, migration changes, generator changes, JavaScript/CSS changes, and known limitations.
 - [ ] Confirm `CHANGELOG.md`, README current scope, and `Product Profile.md` release posture describe the same current `main` product surface.
 - [ ] Confirm open pull requests and proposal issues are not described as released behavior unless they have already been merged.
@@ -103,6 +103,9 @@ Confirm:
 - [ ] `--skip-javascript` skips JavaScript copying.
 - [ ] `--skip-stylesheets` skips stylesheet copying.
 - [ ] `--with-demo` copies the demo controller and view.
+- [ ] `--with-demo-route` copies the demo controller and view and adds `get "/rails_table_preferences_demo/orders"` once.
+- [ ] Re-running `--with-demo-route` does not duplicate an existing representative demo route.
+- [ ] Demo route post-install guidance is accurate both when the route is added and when it must be added manually.
 - [ ] Post-install messages are accurate for both `stimulus-rails` and Vite / `app/frontend` setups.
 
 ## 6. JavaScript entrypoint checks
@@ -121,11 +124,11 @@ For frontend integration, confirm:
 Run through the demo or sandbox flow:
 
 ```bash
-bin/rails generate rails_table_preferences:install --with-demo
+bin/rails generate rails_table_preferences:install --with-demo-route
 bin/rails db:migrate
 ```
 
-Add the required routes:
+Mount the engine for the bundled JSON API. If you run `--with-demo` instead of `--with-demo-route`, also add the demo route manually:
 
 ```ruby
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
@@ -222,7 +225,7 @@ Check the main user paths:
 - [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
-- [ ] Demo docs clearly say the demo route must be added manually.
+- [ ] Demo docs explain both the `--with-demo-route` option and the manual demo route fallback when using `--with-demo`.
 - [ ] `docs/production_integration_checklist.md` stays discoverable as the bridge from quick start or demo verification to a real host-app index screen.
 - [ ] `docs/demo.md`, `docs/manual_qa.md`, and `docs/release_checklist.md` stay aligned on the current demo verification surface, including owner/scope summaries, scoped preset precedence, export payload preview, grouped-header consistency, and async preset recovery.
 - [ ] Troubleshooting covers Stimulus, Vite entrypoints, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
