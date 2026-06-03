@@ -51,6 +51,30 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "keeps the default flat resource table empty copy" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(options: { render_editor: false })
+
+    expect(rendered).to include("No records to display")
+  end
+
+  it "renders a custom flat resource table empty message" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: { render_editor: false, empty_message: "Change the search filters" }
+    )
+
+    expect(rendered).to include("Change the search filters")
+    expect(rendered).not_to include("empty_message=")
+  end
+
+  it "escapes flat resource table empty messages as plain text" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: { render_editor: false, empty_message: "<strong>No users</strong>" }
+    )
+
+    expect(rendered).to include("&lt;strong&gt;No users&lt;/strong&gt;")
+    expect(rendered).not_to include("<strong>No users</strong>")
+  end
+
   it "renders a valid empty row colspan when no flat resource table columns are visible" do
     all_hidden_columns = [
       {
@@ -111,6 +135,19 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).to include("rails-table-preferences-tree-resource-table")
     expect(rendered).to include("data-rails-table-preferences-table-key-value=\"users\"")
     expect(rendered).not_to include("render_editor")
+  end
+
+  it "renders a custom tree resource table empty message" do
+    stub_tree_view_for_partial
+    view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
+
+    render partial: "rails_table_preferences/tree_resource_table", locals: base_locals.merge(
+      parent_id_method: :parent_id,
+      options: { render_editor: false, empty_message: "No matching tree nodes" }
+    )
+
+    expect(rendered).to include("No matching tree nodes")
+    expect(rendered).not_to include("empty_message=")
   end
 
   def stub_tree_view_for_partial
