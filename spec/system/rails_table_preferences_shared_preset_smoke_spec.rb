@@ -321,7 +321,9 @@ RSpec.describe "Rails Table Preferences shared preset fallback smoke", type: :sy
       }
 
       const transformed = source
-        .replace(/import[^\n]+\n/g, "")
+        .split("\\n")
+        .filter((line) => !line.startsWith("import "))
+        .join("\\n")
         .replace("export default class", "class RailsTablePreferencesController");
       const RailsTablePreferencesController = Function("Controller", `${transformed}; return RailsTablePreferencesController;`)(Controller);
 
