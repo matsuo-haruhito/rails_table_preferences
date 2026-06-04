@@ -50,6 +50,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Confirm the editor is visible.
 - [ ] Confirm the target table is visible.
 - [ ] If using `resource_table_for` or `tree_resource_table_for` with `caption:`, confirm the rendered caption is a short semantic table name and does not duplicate the page heading or surrounding instructions.
+- [ ] If a resource table profile formatter reads associations, confirm the host app relation preloads those associations and that a query log or existing N+1 guard stays clean for representative rows.
 - [ ] Confirm every target header and cell has the matching `data-rails-table-preferences-column-key`.
 - [ ] Confirm Japanese column labels are shown when host app locale entries are present.
 - [ ] Confirm explicit `label:` values override locale lookup.
@@ -111,6 +112,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] If you use the generated demo example, use `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` to switch the scope context without editing `ApplicationController` between requests.
 - [ ] If you use the generated demo example, confirm the `Current scope context` summary follows the active scope link before reading the preset selector.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
+- [ ] Confirm owner, role, organization, and shared presets are grouped in the selector when multiple scope buckets are returned, while single-scope owner presets remain easy to scan.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, use `Owner-only baseline` to clear representative role/organization context and compare the shared baseline again.
