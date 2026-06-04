@@ -50,6 +50,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Confirm the editor is visible.
 - [ ] Confirm the target table is visible.
 - [ ] If using `resource_table_for` or `tree_resource_table_for` with `caption:`, confirm the rendered caption is a short semantic table name and does not duplicate the page heading or surrounding instructions.
+- [ ] If a resource table profile formatter reads associations, confirm the host app relation preloads those associations and that a query log or existing N+1 guard stays clean for representative rows.
 - [ ] Confirm every target header and cell has the matching `data-rails-table-preferences-column-key`.
 - [ ] Confirm Japanese column labels are shown when host app locale entries are present.
 - [ ] Confirm explicit `label:` values override locale lookup.
