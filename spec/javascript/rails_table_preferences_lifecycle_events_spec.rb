@@ -61,7 +61,7 @@ RSpec.describe "rails_table_preferences lifecycle event payloads" do
 
         controller.dispatch = (name, options = {}) => events.push({ name, detail: options.detail })
         controller.tableKeyValue = "orders"
-        controller.currentPresetName = "default"
+        Object.defineProperty(controller, "currentPresetName", { value: "default" })
         controller.settingsValue = { columns: [{ key: "total", visible: true }], filters: {}, sorts: [] }
 
         controller.dispatchPreferenceEvent("saved", { action: "save" })
@@ -96,7 +96,7 @@ RSpec.describe "rails_table_preferences lifecycle event payloads" do
 
         controller.dispatch = (name, options = {}) => events.push({ name, detail: options.detail })
         controller.tableKeyValue = "orders"
-        controller.currentPresetName = "default"
+        Object.defineProperty(controller, "currentPresetName", { value: "default" })
         controller.settingsValue = { columns: [{ key: "total", visible: true }], filters: {}, sorts: [] }
         controller.operationFailedStatusLabelValue = "Operation failed"
         controller.currentPreferenceAction = "load"
