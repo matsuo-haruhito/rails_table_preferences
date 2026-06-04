@@ -76,7 +76,17 @@ This matters for both the normal editor flow and the copied demo screen. `--with
 
 ### Vite / app/frontend entrypoint registration
 
-When your app uses `app/frontend/entrypoints/application.js` instead of the default `stimulus-rails` controller manifest, register the controller explicitly from the gem entrypoint:
+When your app uses `app/frontend/entrypoints/application.js` instead of the default `stimulus-rails` controller manifest, register the controller explicitly from the gem entrypoint.
+
+If the host app already starts Stimulus, reuse that existing `application` and only add this registration:
+
+```js
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+
+application.register("rails-table-preferences", RailsTablePreferencesController)
+```
+
+Only start a new Stimulus application in a minimal entrypoint that does not already start one:
 
 ```js
 import { Application } from "@hotwired/stimulus"
@@ -85,6 +95,8 @@ import RailsTablePreferencesController from "rails_table_preferences/controller"
 const application = Application.start()
 application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
+
+Do not call `Application.start()` a second time from the same host app.
 
 The `rails_table_preferences` package also exports the controller as a named export:
 

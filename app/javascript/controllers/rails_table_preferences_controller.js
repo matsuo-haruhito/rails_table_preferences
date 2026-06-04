@@ -208,9 +208,43 @@ export default class extends Controller {
     if (!this.hasPresetSelectTarget) return
     this.presetSelectTarget.innerHTML = ""
     const presets = this.presets.length ? this.presets : [{ name: this.currentPresetName, default: false, editable: true }]
-    presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset)))
+    const groups = this.groupPresetsForSelect(presets)
+    if (groups.length <= 1) {
+      presets.forEach((preset) => this.presetSelectTarget.appendChild(this.buildPresetOption(preset)))
+    } else {
+      groups.forEach((group) => {
+        const optgroup = document.createElement("optgroup")
+        optgroup.label = group.label
+        group.presets.forEach((preset) => optgroup.appendChild(this.buildPresetOption(preset)))
+        this.presetSelectTarget.appendChild(optgroup)
+      })
+    }
     this.presetSelectTarget.value = this.currentPresetName
     this.syncDeletePresetButtonContext()
+  }
+
+  groupPresetsForSelect(presets) {
+    const scopeOrder = new Map([["owner", 0], ["role", 1], ["organization", 2], ["shared", 3]])
+    const groups = new Map()
+    presets.forEach((preset, index) => {
+      const scopeType = preset.scope_type || "owner"
+      const groupKey = scopeOrder.has(scopeType) ? scopeType : `unknown:${scopeType}`
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          key: groupKey,
+          scopeType,
+          order: scopeOrder.has(scopeType) ? scopeOrder.get(scopeType) : 100 + index,
+          label: this.scopeGroupLabel(scopeType),
+          presets: []
+        })
+      }
+      groups.get(groupKey).presets.push(preset)
+    })
+    return Array.from(groups.values()).sort((left, right) => left.order - right.order)
+  }
+
+  scopeGroupLabel(scopeType) {
+    return this.scopeFallbackLabel(scopeType || "owner")
   }
 
   buildPresetOption(preset) {
