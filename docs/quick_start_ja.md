@@ -22,6 +22,8 @@ bin/rails db:migrate
 
 Vite / `app/frontend` など package entrypoint を使う場合は、copied controller ではなく `rails_table_preferences/controller` の import と bundler alias を確認します。詳細は [JavaScript entrypoints](javascript_entrypoints.md) を参照してください。
 
+既存の `app/frontend/entrypoints/application.js` などで Stimulus application をすでに start している host app では、その `application` に `application.register(...)` だけを追加します。`Application.start()` を含む例は新規 minimal entrypoint 用です。同じ host app で `Application.start()` を二重に呼ばないでください。
+
 `User` / `current_user` 以外の owner model を使う場合は、demo や JSON API を開く前に initializer で `owner_model` と `current_user_method` を設定し、その method が persisted owner record を返すことを確認します。
 
 ## 2. 最小の table preference UI を表示する
