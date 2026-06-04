@@ -33,6 +33,8 @@ For docs-only or spec-only changes, it is fine to write `not applicable` when th
 
 Use this section only when the PR changes visible UI, layout, copy that affects a control, or a visual reference. Docs-only API wording and non-visual code changes can mark this as not applicable.
 
+For static visual docs or docs image changes, use the `Static visual docs or docs image` category in `docs/manual_qa_pr_smoke_matrix.md` to record whether source diff, rendered visual confirmation, or a browser-capable handoff was used. This does not replace browser evidence for runtime UI, layout, or control-copy changes.
+
 - Screenshot or visual evidence attached, or not applicable because:
 - Representative surface checked:
   - Editor / preset actions
