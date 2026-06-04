@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, and checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, and keeps the resolver metadata pinned to `private: true` with `version: "0.0.0"`.
 
 A successful run prints a message like:
 
@@ -26,7 +26,7 @@ A successful run prints a message like:
 Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 ```
 
-If required files, package export targets, or package-internal JavaScript imports are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
+If required files, package export targets, package-internal JavaScript imports, or package metadata boundaries are missing or drift, the task prints the affected paths or metadata errors and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
 
 Failure output starts with a compact summary line before the detailed lists:
 
@@ -172,7 +172,7 @@ After confirming those export target files exist, the verifier scans their stati
 
 This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the manual host-app Vite check in `docs/release_checklist.md`.
 
-The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification should not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
+The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification now reports drift from those values as a package metadata error. The verifier keeps that boundary separate from JavaScript `exports` and internal import resolution; it does not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
 
 ## Why this matters
 
