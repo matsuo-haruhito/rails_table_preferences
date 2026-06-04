@@ -51,6 +51,25 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "keeps host app data attributes while adding the Rails Table Preferences controller once" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: {
+        render_editor: false,
+        data: {
+          controller: "orders-table rails-table-preferences",
+          tracking_id: "users-index"
+        }
+      }
+    )
+
+    data_controller = rendered[/data-controller=\"([^\"]+)\"/, 1]
+
+    expect(data_controller.split).to contain_exactly("orders-table", "rails-table-preferences")
+    expect(data_controller.split.count("rails-table-preferences")).to eq(1)
+    expect(rendered).to include("data-tracking-id=\"users-index\"")
+    expect(rendered).to include("data-rails-table-preferences-table-key-value=\"users\"")
+  end
+
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
     view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
