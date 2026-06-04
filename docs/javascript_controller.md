@@ -63,6 +63,23 @@ Each event detail includes the stable `tableKey`, `name`, and current `settings`
 
 Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
 
+Host apps can keep adoption code small by choosing one surrounding concern and reading only the existing detail fields. For example, an analytics integration can record successful preset saves without coupling to controller internals or changing the payload contract:
+
+```js
+document.addEventListener("rails-table-preferences:saved", (event) => {
+  const { tableKey, name, action, settings } = event.detail
+
+  window.appAnalytics?.track("table_preference_saved", {
+    table_key: tableKey,
+    preset_name: name,
+    action,
+    visible_column_count: settings.columns.filter((column) => column.visible !== false).length
+  })
+})
+```
+
+The analytics provider, event naming, export preview refresh, and any surrounding toolbar state remain host-app responsibilities. Rails Table Preferences only provides the lifecycle event and current settings snapshot after the preference operation succeeds.
+
 ## Bundled sort boundary
 
 The bundled header click UI manages one active sort at a time. A sortable header click cycles the clicked column through ascending, descending, and clear, then replaces `settingsValue.sorts` with a one-item array or an empty array.

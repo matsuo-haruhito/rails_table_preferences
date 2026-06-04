@@ -43,7 +43,7 @@ The same screen now includes a lightweight hidden fields preview for the generat
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
 
-The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup, and the grouped header follows the current visible columns after save/reload.
+The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup. Apply and table-header drag update the leaf headers and body cells live; the demo-only grouped header row is server-rendered and should be verified after save/reload, when it follows the current visible columns again.
 
 The generated screen also includes a `Demo state reset` button. Use it to delete owner-scoped presets for the current owner and demo table, then reload into the seeded shared / role / organization baseline before repeating scoped precedence checks.
 
@@ -162,7 +162,7 @@ The generated demo screen includes:
 - double-click auto-fit on header resize handles
 - wrap / nowrap / ellipsis overflow examples on the same screen
 - fixed/pinned column metadata inside a horizontal scroll wrapper
-- grouped header markup that mirrors column group metadata
+- grouped header markup that mirrors column group metadata after save/reload
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
@@ -191,6 +191,7 @@ On the demo screen, confirm:
 - [ ] Apply hides and shows columns.
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
+- [ ] After editor apply or table header drag, the visible leaf headers and body cells update live while the grouped header row remains a save/reload boundary.
 - [ ] Header resize changes column width.
 - [ ] Double-clicking the resize handle on `配送メモ` or `配送コード` expands the column to fit its content more closely.
 - [ ] `配送メモ` wraps, `配送コード` stays on one line, and `備考` uses ellipsis so the overflow mode differences are visible.
@@ -262,9 +263,11 @@ If you need to test a custom host-app wrapper outside the generated demo, browse
 
 The generated demo is a development verification surface. To keep the copied files self-contained, the demo view includes inline style and inline script for the sample screen, the demo state reset helper, and the one-shot async failure helper.
 
-If the host application runs a strict Content Security Policy in development, those inline blocks may be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
+When Rails exposes `content_security_policy_nonce`, the generated demo adds the current request nonce to those inline `<style>` and `<script>` blocks. In host applications whose development CSP allows Rails nonces for `style-src` and `script-src`, the demo-only styling, reset helper, and async failure helper can run without adding a separate demo asset pipeline or generator option.
 
-When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, either allow the copied demo route under a development-only policy or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
+If the host application runs a strict Content Security Policy in development but does not allow those nonces, the inline blocks may still be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
+
+When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, allow Rails nonces for the copied demo route under a development-only policy, allow the copied demo route under another development-only policy, or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
 
 ## Production note
 
