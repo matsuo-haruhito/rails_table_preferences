@@ -44,7 +44,7 @@ The sort handler also ignores active drag and resize operations.
 
 The packaged controller entrypoint dispatches a small set of bubbling Stimulus events from the controller root after user-facing preference operations finish:
 
-- `rails-table-preferences:applied` after editor settings are applied to the current table without saving
+- `rails-table-preferences:applied` after editor settings are applied to the current table without saving, including both apply and reset actions
 - `rails-table-preferences:saved` after an existing preset save or save-as-new request succeeds
 - `rails-table-preferences:loaded` after a selected preset is loaded and applied
 - `rails-table-preferences:deleted` after an editable preset is deleted and the controller returns to the default preset
@@ -59,7 +59,9 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
-Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `reset`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+
+Apply and reset both use `rails-table-preferences:applied`; distinguish them through `event.detail.action` (`apply` vs `reset`). Reset events carry the default settings snapshot after the controller has restored and applied those settings.
 
 Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
 
