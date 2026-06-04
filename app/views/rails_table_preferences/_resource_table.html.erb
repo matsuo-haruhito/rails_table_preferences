@@ -10,54 +10,65 @@
 
 <% caption = local_assigns.fetch(:caption, nil) %>
 <% empty_message = options[:empty_message] %>
+<% scroll_wrapper = local_assigns.fetch(:scroll_wrapper, false) %>
+<% wrapper_options = (local_assigns.fetch(:wrapper_options, {}) || {}).dup %>
 <% table_options = options.except(:class, :render_editor, :empty_message).merge(
   class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
 ) %>
 <% visible_columns = table_state.fetch("visible_columns") %>
 <% fallback_colspan = [visible_columns.size, 1].max %>
 
-<%= table_preferences_table_tag(
-  table_key: table_key,
-  name: name,
-  settings: settings,
-  columns: columns,
-  **table_options
-) do %>
-  <% if caption.present? %>
-    <caption><%= caption %></caption>
-  <% end %>
-  <thead>
-    <tr>
-      <% visible_columns.each do |column| %>
-        <th data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
-          <%= column["label"] || column.fetch("key") %>
-        </th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-    <% if records.empty? %>
-      <tr class="rails-table-preferences-resource-table__empty-row">
-        <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= fallback_colspan %>">
-          <%= empty_message.presence || I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
-        </td>
-      </tr>
-    <% elsif visible_columns.empty? %>
-      <tr class="rails-table-preferences-resource-table__hidden-columns-row">
-        <td class="rails-table-preferences-resource-table__hidden-columns-cell" colspan="<%= fallback_colspan %>">
-          <%= I18n.t("rails_table_preferences.resource_table.all_columns_hidden", default: "All columns are hidden") %>
-        </td>
-      </tr>
-    <% else %>
-      <% records.each do |record| %>
-        <tr>
-          <% visible_columns.each do |column| %>
-            <%= tag.td(data: table_preferences_column_data_attributes(column)) do %>
-              <%= table_preferences_value(record, column) %>
-            <% end %>
-          <% end %>
-        </tr>
-      <% end %>
+<% resource_table_html = capture do %>
+  <%= table_preferences_table_tag(
+    table_key: table_key,
+    name: name,
+    settings: settings,
+    columns: columns,
+    **table_options
+  ) do %>
+    <% if caption.present? %>
+      <caption><%= caption %></caption>
     <% end %>
-  </tbody>
+    <thead>
+      <tr>
+        <% visible_columns.each do |column| %>
+          <th data-rails-table-preferences-column-key="<%= column.fetch("key") %>">
+            <%= column["label"] || column.fetch("key") %>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% if records.empty? %>
+        <tr class="rails-table-preferences-resource-table__empty-row">
+          <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= fallback_colspan %>">
+            <%= empty_message.presence || I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
+          </td>
+        </tr>
+      <% elsif visible_columns.empty? %>
+        <tr class="rails-table-preferences-resource-table__hidden-columns-row">
+          <td class="rails-table-preferences-resource-table__hidden-columns-cell" colspan="<%= fallback_colspan %>">
+            <%= I18n.t("rails_table_preferences.resource_table.all_columns_hidden", default: "All columns are hidden") %>
+          </td>
+        </tr>
+      <% else %>
+        <% records.each do |record| %>
+          <tr>
+            <% visible_columns.each do |column| %>
+              <%= tag.td(data: table_preferences_column_data_attributes(column)) do %>
+                <%= table_preferences_value(record, column) %>
+              <% end %>
+            <% end %>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  <% end %>
+<% end %>
+
+<% if scroll_wrapper %>
+  <% wrapper_class = ["rails-table-preferences-resource-table-scroll", wrapper_options.delete(:class), wrapper_options.delete("class")].compact.join(" ") %>
+  <%= tag.div(resource_table_html, **wrapper_options.merge(class: wrapper_class)) %>
+<% else %>
+  <%= resource_table_html %>
 <% end %>
