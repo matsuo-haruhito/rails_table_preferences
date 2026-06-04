@@ -6,7 +6,8 @@ Use this guide when the host app has more than one reasonable installation path 
 
 | Goal | Generator command | Follow-up docs |
 | --- | --- | --- |
-| Default Rails app using `stimulus-rails` controller manifests | `bin/rails generate rails_table_preferences:install` | Continue with [Quick start](quick_start.md) and mount the engine. |
+| Default Rails app using `stimulus-rails` controller manifests | `bin/rails generate rails_table_preferences:install` | Continue with [Quick start](quick_start.md) and mount the engine manually, or add `--with-engine-route` when the default API path is acceptable. |
+| Default install with the JSON API engine route added by the generator | `bin/rails generate rails_table_preferences:install --with-engine-route` | Run the migration, then verify the mounted API path in [Mounted JSON API](json_api.md). |
 | Host app uses another owner model, such as `Customer` | `bin/rails generate rails_table_preferences:install --owner-model customers` | Set `config.owner_model` and `config.current_user_method` before opening the editor, API, or demo. |
 | Vite, `app/frontend`, or another bundler should import the package entrypoint | `bin/rails generate rails_table_preferences:install --skip-javascript` | Register `rails_table_preferences/controller` from the host app entrypoint and add the resolver from [JavaScript entrypoints](javascript_entrypoints.md). |
 | Host app wants to provide its own controller implementation | `bin/rails generate rails_table_preferences:install --skip-javascript` | Register a host-owned controller with the `rails-table-preferences` Stimulus name. |
@@ -46,6 +47,20 @@ end
 ```
 
 `current_user_method` and `scope_context_method` are called on that inherited controller, including private methods. After mounting the engine, verify the API routes through the real host-app authentication and callback boundary in [Production integration checklist](production_integration_checklist.md). For the route and payload shape, see [Mounted JSON API](json_api.md).
+
+## Engine route option boundary
+
+`--with-engine-route` adds this default mount line to `config/routes.rb` when an equivalent line is not already present:
+
+```ruby
+mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
+```
+
+The option is explicit opt-in. The default install path still leaves route ownership with the host app, and `--with-engine-route` does not change the initializer or infer a custom `config.mount_path`.
+
+If the host app mounts the engine somewhere else, edit both the route and `config.mount_path` yourself so the helper-generated JSON API URLs point at the same path.
+
+`--with-engine-route` is independent from `--with-demo-route`; use both options when a sandbox install should receive both the JSON API mount and the copied demo route in one generator run.
 
 ## Package entrypoint versus copied controller
 
