@@ -206,6 +206,120 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "preserves current column metadata after package editor rows are applied" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const input = (value, checked = true) => ({ value, checked })
+        const row = (key, fields) => ({
+          dataset: { railsTablePreferencesColumnKey: key },
+          querySelector(selector) { return fields[selector] || null }
+        })
+
+        controller.defaultSettings = {
+          columns: [
+            { key: "name", label: "Current name", visible: true, order: 10, width: 120, truncate: 20, overflow: "wrap", pinned: true, filter: { type: "text" }, sortable: true },
+            { key: "status", label: "Current status", visible: true, order: 20, overflow: "clip", pinned: false, filter: { type: "select", options: ["open"] }, sortable: false }
+          ],
+          filters: {},
+          sorts: []
+        }
+        controller.settingsValue = {
+          columns: [
+            { key: "name", label: "Stale name", visible: false, order: 99, width: 44, truncate: 5, overflow: "ellipsis", pinned: false, filter: { type: "number" }, sortable: false },
+            { key: "status", label: "Stale status", visible: true, order: 77, width: 50, overflow: "nowrap", pinned: true, filter: { type: "boolean" }, sortable: true }
+          ],
+          filters: { name: { operator: "contains", value: "Acme" } },
+          sorts: [{ key: "name", direction: "desc" }]
+        }
+        Object.defineProperty(controller, "hasEditorRowsTarget", { value: true })
+        Object.defineProperty(controller, "editorRows", { value: [
+          row("name", {
+            '[data-field="visible"]': input("", true),
+            '[data-field="order"]': input("30"),
+            '[data-field="width"]': input(""),
+            '[data-field="truncate"]': input("12")
+          }),
+          row("status", {
+            '[data-field="visible"]': input("", false),
+            '[data-field="order"]': input("40"),
+            '[data-field="width"]': input("88"),
+            '[data-field="truncate"]': input("")
+          })
+        ]})
+
+        const nextSettings = controller.settingsFromEditor()
+        const [nameColumn, statusColumn] = nextSettings.columns
+
+        if (nameColumn.label !== "Current name" || nameColumn.overflow !== "wrap" || nameColumn.filter.type !== "text" || nameColumn.sortable !== true || nameColumn.pinned !== true) {
+          throw new Error("current name column metadata was not preserved after editor apply")
+        }
+
+        if (nameColumn.visible !== true || nameColumn.order !== 30 || nameColumn.width !== null || nameColumn.truncate !== 12) {
+          throw new Error("editable name column fields were not preserved after editor apply")
+        }
+
+        if (statusColumn.label !== "Current status" || statusColumn.overflow !== "clip" || statusColumn.filter.type !== "select" || statusColumn.sortable !== false || statusColumn.pinned !== false) {
+          throw new Error("current status column metadata was not preserved after editor apply")
+        }
+
+        if (statusColumn.visible !== false || statusColumn.order !== 40 || statusColumn.width !== 88 || statusColumn.truncate !== null) {
+          throw new Error("editable status column fields were not preserved after editor apply")
+        }
+
+        if (nextSettings.filters.name.value !== "Acme" || nextSettings.sorts[0].direction !== "desc") {
+          throw new Error("filter or sort state was not preserved after editor apply")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
+  it "uses the editor instance prefix in package filter panel ids when present" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const first = new ControllerClass()
+        const second = new ControllerClass()
+        first.tableKeyValue = "orders"
+        second.tableKeyValue = "orders"
+        first.editorIdPrefixValue = "rails-table-preferences-orders-default-first"
+        second.editorIdPrefixValue = "rails-table-preferences-orders-default-second"
+
+        const firstId = first.filterPanelId("status")
+        const secondId = second.filterPanelId("status")
+
+        if (firstId === secondId) {
+          throw new Error("same table and column produced duplicate filter panel ids")
+        }
+
+        if (!firstId.endsWith("first-status") || !secondId.endsWith("second-status")) {
+          throw new Error("filter panel ids did not include the editor instance prefix")
+        }
+
+        const fallback = new ControllerClass()
+        fallback.tableKeyValue = "orders"
+        if (fallback.filterPanelId("status") !== "rails-table-preferences-filter-panel-orders-status") {
+          throw new Error("filter panel id no longer falls back to table key")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "dispatches public controller lifecycle events with stable detail payloads" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
