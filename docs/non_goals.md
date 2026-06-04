@@ -52,6 +52,10 @@ Rails Table Preferences should not become RailsAdmin or a general administration
 
 The gem supports shared, role, and organization scoped presets at the model/API level, but the host application should own any complex admin UI for managing those presets.
 
+Use [Scoped presets](scoped_presets.md#minimal-operating-patterns) for the lightweight operating patterns Rails Table Preferences does document: seed data, host-app admin forms, service objects, and maintenance scripts that write the same normalized settings shape the resolver understands.
+
+Those patterns are guidance for host-owned administration, not a bundled admin product. The host app still owns authorization, tenant rules, audit logging, bulk editing, and the final workflow for who may create or change non-owner presets.
+
 A future lightweight example or documentation page may be useful, but the gem should avoid shipping a full preset administration product unless demand is very strong.
 
 ### Full Playwright test suite by default

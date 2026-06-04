@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, and checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, and keeps the resolver metadata pinned to `private: true` with `version: "0.0.0"`.
 
 A successful run prints a message like:
 
@@ -26,7 +26,7 @@ A successful run prints a message like:
 Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 ```
 
-If required files, package export targets, or package-internal JavaScript imports are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
+If required files, package export targets, package-internal JavaScript imports, or package metadata boundaries are missing or drift, the task prints the affected paths or metadata errors and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
 
 Failure output starts with a compact summary line before the detailed lists:
 
@@ -143,6 +143,8 @@ docs/javascript_controller.md
 
 Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
+A focused specs guard also checks repository-local Markdown and image links from `README.md`, `docs/index.md`, and Markdown files listed in `REQUIRED_PATHS`. That drift guard verifies file targets only; external URLs and in-page anchors remain release-review or authoring concerns. Keeping it in specs separates docs navigation drift from package-content selection.
+
 ## Required path selection criteria
 
 Add a file to `REQUIRED_PATHS` when its absence would make the packaged gem unusable or make a documented public entry point fail after installation. The list is intentionally representative: it protects the most important install, runtime, customization, and documentation surfaces without turning package verification into a full inventory of the repository.
@@ -153,9 +155,10 @@ Use these criteria when adding or reviewing required paths:
 - JavaScript package entrypoints and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript files.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
 - Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor root options, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
+- Maintainer-operation docs that are linked for repository orientation are not automatically package-required docs. `CHANGELOG.md` remains required because it is release-facing package metadata, but `Product Profile.md` and `AGENTS.md` stay outside `REQUIRED_PATHS` unless they are intentionally promoted to user-facing package entry points; host-app package usability does not depend on those maintainer workflow files.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
 
-Do not add every repository file just because it exists. In particular, avoid requiring all docs, all examples, temporary/generated intermediate files, test files, mockups, or future proposal notes unless they are promoted to a packaged public entry point. A docs page that is only linked from a nearby guide can stay outside `REQUIRED_PATHS` when the package remains usable without treating that page as a primary entrance. For a new docs guide, first decide whether README or `docs/index.md` should make it a primary package entrance; if not, leave the fixed list unchanged and document the narrower link from the nearby guide instead.
+Do not add every repository file just because it exists. In particular, avoid requiring all docs, all examples, temporary/generated intermediate files, test files, mockups, maintainer-operation docs, or future proposal notes unless they are promoted to a packaged public entry point. A docs page that is only linked from a nearby guide can stay outside `REQUIRED_PATHS` when the package remains usable without treating that page as a primary entrance. For a new docs guide, first decide whether README or `docs/index.md` should make it a primary package entrance; if not, leave the fixed list unchanged and document the narrower link from the nearby guide instead.
 
 When a new public helper, partial, package export, README-linked guide, docs-index primary guide, or required visual asset is added, update `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`, the package verifier spec, and this guide together. If the choice is unclear, leave the fixed list unchanged and document the follow-up question in the relevant Issue or PR instead of broadening the guardrail by default.
 
@@ -172,7 +175,7 @@ After confirming those export target files exist, the verifier scans their stati
 
 This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files, while the export target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the manual host-app Vite check in `docs/release_checklist.md`.
 
-The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification should not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
+The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification now reports drift from those values as a package metadata error. The verifier keeps that boundary separate from JavaScript `exports` and internal import resolution; it does not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
 
 ## Why this matters
 
