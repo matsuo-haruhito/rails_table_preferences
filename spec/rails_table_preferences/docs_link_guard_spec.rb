@@ -54,7 +54,11 @@ RSpec.describe "Required documentation local links" do
     return nil if normalized_target.start_with?("#")
     return nil if normalized_target.match?(/\A(?:[a-z][a-z0-9+.-]*:|\/\/)/i)
 
-    file_target
+    decode_percent_escapes(file_target)
+  end
+
+  def decode_percent_escapes(target)
+    target.gsub(/%[0-9A-Fa-f]{2}/) { |escape| escape[1, 2].to_i(16).chr }
   end
 
   def resolve_link_target(source_path, target)
