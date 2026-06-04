@@ -18,6 +18,7 @@ Verify that the gem works end-to-end in a minimal Rails app:
 - filter UI
 - sort UI
 - basic controller params integration
+- existing search form hidden-field roundtrip
 
 ## Recommended directory layout
 
@@ -387,6 +388,10 @@ Update `app/views/orders/index.html.erb`:
 <% end %>
 ```
 
+The search form is intentionally small: the visible `search_word` field remains user-entered host-app search state, while `table_preferences_hidden_fields(...)` submits saved Rails Table Preferences filter and sort state as ordinary GET params. The controller still owns the merge order and query execution through `rails_table_preference_params`, `Order.search`, and `Order.order_by`; this sandbox step only confirms that saved preference state can roundtrip through an existing form without turning the guide into a full search UI tutorial.
+
+For the generated demo version of the same hidden-field idea, see [Demo screen generator](demo.md). For the broader host-app checklist, see [Manual QA checklist](manual_qa.md#13-existing-search-form-integration). For adapter-specific params such as Ransack, see [Controller integration](controller_integration.md#hidden-fields-for-existing-search-forms) and [Filter adapters](filter_adapters.md).
+
 ## 8. Start the server
 
 ```bash
@@ -420,6 +425,9 @@ Confirm the following:
 - [ ] Header click cycles sort state on sortable columns.
 - [ ] Filter button click does not accidentally sort.
 - [ ] Resize/drag does not accidentally sort.
+- [ ] Save a filter or sort preference, reload, and confirm the search form includes hidden fields for that saved state.
+- [ ] Submit the search form with a visible `search_word` value and confirm the URL keeps that user-entered value together with the hidden saved preference params.
+- [ ] Confirm saved filter/sort params are applied through `Order.search` / `Order.order_by`, while the sandbox does not add a new query builder or full host-app search workflow.
 
 ## 10. Network checks
 
