@@ -48,7 +48,7 @@ Confirm:
 - [ ] JavaScript syntax checks pass for the copied controller and package entrypoints.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
-- [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
+- [ ] Representative Rails 7.0 / Rails 7.1 / Rails 7.2 / Rails 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
 ## 3. CI checks
@@ -203,22 +203,12 @@ Confirm controller integration behavior:
 
 Check the main user paths:
 
-- [ ] README links to Quick start.
-- [ ] README links to Japanese quick start.
-- [ ] README links to Production integration checklist.
-- [ ] README links to Decision guide.
-- [ ] README links to Scoped presets.
-- [ ] README links to Fixed columns and column groups.
-- [ ] README links to Export integration.
-- [ ] README links to Accessibility baseline.
-- [ ] README links to Demo screen generator.
-- [ ] README links to Sandbox verification.
-- [ ] README links to Troubleshooting.
-- [ ] README links to Manual QA.
-- [ ] README links to Release checklist.
-- [ ] README links to Package verification.
-- [ ] README links to JavaScript entrypoints.
-- [ ] `docs/index.md` links to all major docs.
+- [ ] README remains a short newcomer-facing entry point and links to the full docs index.
+- [ ] README links directly to the primary start-here paths: Quick start, Japanese quick start, Production integration checklist, Install path options, Support matrix, Decision guide, Demo screen generator, and Troubleshooting.
+- [ ] README links to Product Profile, AGENTS.md, and CHANGELOG.md for maintainer orientation.
+- [ ] `docs/index.md` remains the detailed hub for focused guides that do not need a direct README link.
+- [ ] `docs/index.md` links to the current start-here guides, core topic guides, manual QA, release checklist, package verification, JavaScript entrypoints, mounted JSON API, controller integration, filter docs, and maintainer entry docs.
+- [ ] Focused docs that README mentions only through the docs index, such as Scoped presets, Fixed columns and column groups, Export integration, Accessibility baseline, Sandbox verification, Manual QA, Release checklist, Package verification, and JavaScript entrypoints, remain reachable from `docs/index.md`.
 - [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
 - [ ] README, `CHANGELOG.md`, and `Product Profile.md` stay synchronized on initial release posture, support matrix, current scope, responsibility boundary, and docs entrypoints.
 - [ ] `docs/quick_start_ja.md` remains a low-drift entry point: its links and short summaries follow the current README and focused English docs for install/package entrypoints, production integration/support matrix, filter/sort/scoped preset/export/resource table surfaces, and demo/sandbox/manual QA/release/package verification without becoming a full translation.
