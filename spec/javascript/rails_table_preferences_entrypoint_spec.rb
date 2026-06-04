@@ -222,8 +222,11 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         controller.tableKeyValue = "orders"
         controller.nameValue = "default"
         controller.settingsValue = { columns: [{ key: "total", visible: true }], filters: {}, sorts: [] }
+        controller.defaultSettings = { columns: [{ key: "total", visible: true }, { key: "tax", visible: true }], filters: {}, sorts: [] }
         controller.hasPresetNameTarget = false
         controller.settingsFromEditor = () => ({ columns: [{ key: "total", visible: false }], filters: { total: { operator: "gt", value: "100" } }, sorts: [] })
+        controller.closeFilterPanel = () => {}
+        controller.renderEditor = () => {}
         controller.apply = () => {}
 
         controller.applyFromEditor({ preventDefault() {} })
@@ -234,6 +237,26 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         if (applied.detail.name !== "default") throw new Error("applied event missing preset name")
         if (applied.detail.action !== "apply") throw new Error("applied event missing action")
         if (applied.detail.settings.filters.total.value !== "100") throw new Error("applied event missing settings snapshot")
+
+        events.length = 0
+        controller.settingsValue = { columns: [{ key: "total", visible: false }], filters: { total: { operator: "gt", value: "100" } }, sorts: [] }
+        controller.resetEditor({ preventDefault() {} })
+
+        const reset = events.find((event) => event.name === "applied")
+        if (!reset) throw new Error("reset applied event was not dispatched")
+        if (reset.detail.action !== "reset") throw new Error("reset applied event missing reset action")
+        if (reset.detail.tableKey !== "orders") throw new Error("reset applied event missing tableKey")
+        if (reset.detail.name !== "default") throw new Error("reset applied event missing preset name")
+        if (reset.detail.settings.columns.length !== 2) throw new Error("reset applied event did not use default settings snapshot")
+        if (reset.detail.settings.columns[1].key !== "tax") throw new Error("reset applied event settings snapshot is stale")
+
+        events.length = 0
+        controller.busy = true
+        controller.resetEditor({ preventDefault() {} })
+        if (events.some((event) => event.name === "applied")) {
+          throw new Error("busy reset dispatched an applied event")
+        }
+        controller.busy = false
 
         await controller.withPreferenceAction("save", async () => {
           controller.handleOperationError(new Error("boom"), "Save failed")
