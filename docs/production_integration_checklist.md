@@ -84,6 +84,32 @@ A downstream host app still needs its own adoption evidence for each real table 
 
 For example, a downstream admin index such as `admin/document_sets` can be used as a representative smoke surface, but Rails Table Preferences should not make that app-specific route or schema part of its public contract. If the downstream known-good target, rollback target, or human release gate is not decided yet, keep the broad host-app bump paused and capture that as downstream evidence work rather than changing the gem API or this checklist.
 
+### Downstream adoption evidence template
+
+Use this short template in a downstream host-app bump PR, release note, or issue comment. Replace app-specific values with the real host-app evidence; do not copy private routes, schema details, or release gates into Rails Table Preferences docs as public contract.
+
+```markdown
+### Rails Table Preferences downstream adoption smoke
+
+- Host app / surface:
+- Gem version, branch, or SHA under evaluation:
+- Stable table key:
+- Stable managed column keys:
+- Filter / sort parameter mapping checked:
+- Preset path checked:
+  - save:
+  - reload/load:
+  - delete, if applicable:
+- Mounted engine save path and auth boundary checked:
+- Export boundary checked, if exports are enabled:
+- Layout / accessibility smoke checked:
+- Known-good rollback target or pinned gem target:
+- Human release gate / owner:
+- Follow-up needed:
+```
+
+Keep the note short. The goal is to prove that the real host-app table can adopt this gem revision without mixing host-app-specific routes, schemas, or release policy into the gem's upstream release checklist.
+
 ## Boundary reminders
 
 Rails Table Preferences owns the editor UI, saved settings payload, preset API calls, managed-column data attributes, and helper-generated export payloads.
