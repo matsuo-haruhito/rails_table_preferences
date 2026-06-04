@@ -53,9 +53,9 @@ module RailsTablePreferences
       {
         "key" => key.to_s,
         "visible" => boolean_value(attributes.fetch("visible", attributes.fetch("display_flag", true))),
-        "order" => integer_value(attributes.fetch("order", attributes.fetch("display_order", nil))),
-        "width" => integer_value(attributes["width"]),
-        "truncate" => integer_value(attributes["truncate"]),
+        "order" => positive_integer_value(attributes.fetch("order", attributes.fetch("display_order", nil))),
+        "width" => positive_integer_value(attributes["width"]),
+        "truncate" => positive_integer_value(attributes["truncate"]),
         "pinned" => boolean_value(attributes.fetch("pinned", false))
       }.compact
     end
@@ -121,6 +121,13 @@ module RailsTablePreferences
 
     def boolean_value(value)
       ActiveModel::Type::Boolean.new.cast(value)
+    end
+
+    def positive_integer_value(value)
+      integer = integer_value(value)
+      return if integer.nil? || integer <= 0
+
+      integer
     end
 
     def integer_value(value)

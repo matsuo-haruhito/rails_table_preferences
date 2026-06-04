@@ -59,10 +59,11 @@ Current package-only behavior is intentionally small:
 - `filterOperatorLabelsValue` allows package-entrypoint users to override bundled filter operator labels without editing a copied controller.
 - Sortable header handling preserves host-provided `title` attributes while still generating sort hints for untitled headers.
 - Resize handles also listen for `Enter`, Space, and legacy `Spacebar` key presses and route them to the packaged keyboard auto-fit behavior after the base controller installs the handles.
+- Lifecycle events such as `rails-table-preferences:applied`, `rails-table-preferences:saved`, `rails-table-preferences:loaded`, `rails-table-preferences:deleted`, and `rails-table-preferences:error` are dispatched by the package entrypoint. Host apps that register the copied controller directly should not assume the same event surface unless they port that behavior into their copied or replacement controller.
 
-Do not assume those package-only values, overrides, or keyboard affordances exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
+Do not assume those package-only values, overrides, events, or keyboard affordances exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
 
-When future package-entrypoint behavior is added, update this list and re-run the entrypoint-specific manual checks for sortable header titles, filter operator label overrides, and resize handle keyboard auto-fit. The copied controller path should still be checked separately when a host app registers the generated `app/javascript/controllers/rails_table_preferences_controller.js` file.
+When future package-entrypoint behavior is added, update this list and re-run the entrypoint-specific manual checks for lifecycle events, sortable header titles, filter operator label overrides, and resize handle keyboard auto-fit. The copied controller path should still be checked separately when a host app registers the generated `app/javascript/controllers/rails_table_preferences_controller.js` file.
 
 ### Resolve the gem entrypoint explicitly
 
@@ -137,8 +138,9 @@ When an existing host app moves from the copied controller to `rails_table_prefe
 - Markup changes remain in copied ERB, not in the package entrypoint import.
 - Behavior changes that are not represented by packaged root values stay in a host-owned controller or copied JavaScript path.
 - Screens that rely on packaged-only root values, such as `data-rails-table-preferences-filter-operator-labels-value`, are registered through the package entrypoint.
+- Host-app listeners that depend on Rails Table Preferences lifecycle events have been checked against the package entrypoint, not only a copied controller registration.
 
-After switching registration, re-run the manual checks for editor load, preset save/load/delete, filter panels, sort controls, resize handles, Turbo reconnects, and any screen-specific label overrides.
+After switching registration, re-run the manual checks for editor load, preset save/load/delete, lifecycle event listeners, filter panels, sort controls, resize handles, Turbo reconnects, and any screen-specific label overrides.
 
 ## Turbo Drive and Turbo Frame checks
 
