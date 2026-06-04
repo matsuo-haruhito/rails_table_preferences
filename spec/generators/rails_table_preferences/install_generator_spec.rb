@@ -152,6 +152,38 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("配送情報")
   end
 
+  it "does not add the engine mount route by default" do
+    prepare_routes_file
+
+    run_generator
+
+    expect(file("config/routes.rb").read).not_to include(engine_route)
+  end
+
+  it "can add the optional engine mount route without duplicating it" do
+    prepare_routes_file
+
+    run_generator %w[--with-engine-route]
+    run_generator %w[--with-engine-route]
+
+    expect(file("config/routes.rb").read.scan(engine_route).size).to eq(1)
+  end
+
+  it "does not duplicate an existing engine route written with representative syntax differences" do
+    prepare_routes_file(<<~ROUTES)
+      Rails.application.routes.draw do
+        mount RailsTablePreferences::Engine,
+          at: '/rails_table_preferences'
+      end
+    ROUTES
+
+    run_generator %w[--with-engine-route]
+
+    routes = file("config/routes.rb").read
+    expect(routes).to include("'/rails_table_preferences'")
+    expect(routes).not_to include(engine_route)
+  end
+
   it "does not add the demo route when only demo files are requested" do
     prepare_routes_file
 
@@ -188,13 +220,23 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(routes).not_to include(demo_route)
   end
 
+  it "can add engine and demo routes independently" do
+    prepare_routes_file
+
+    run_generator %w[--with-engine-route --with-demo-route]
+
+    routes = file("config/routes.rb").read
+    expect(routes.scan(engine_route).size).to eq(1)
+    expect(routes.scan(demo_route).size).to eq(1)
+  end
+
   it "prints the default post-install next steps with contiguous numbering" do
     output = run_generator
 
     expect(output).to include("Rails Table Preferences installed.", "Next steps:")
     expect(next_step_headings(output)).to eq([
       "Run: bin/rails db:migrate",
-      "Mount the engine in config/routes.rb:",
+      "Mount the engine in config/routes.rb, or rerun with --with-engine-route:",
       "Ensure app/assets/stylesheets/rails_table_preferences.css is loaded by your application stylesheet.",
       "Ensure the copied Stimulus controller is registered."
     ])
@@ -206,11 +248,25 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
     expect(next_step_headings(output)).to eq([
       "Run: bin/rails db:migrate",
-      "Mount the engine in config/routes.rb:",
+      "Mount the engine in config/routes.rb, or rerun with --with-engine-route:",
       "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name."
     ])
     expect(output).to include("rails_table_preferences/controller")
     expect(output).not_to include("  4.")
+  end
+
+  it "prints added engine route guidance when the engine route option is used" do
+    prepare_routes_file
+
+    output = run_generator %w[--skip-stylesheets --skip-javascript --with-engine-route]
+
+    expect(next_step_headings(output)).to eq([
+      "Run: bin/rails db:migrate",
+      "Engine route added to config/routes.rb:",
+      "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name."
+    ])
+    expect(output).to include(engine_route)
+    expect(output).to include("Keep config.mount_path aligned")
   end
 
   it "continues post-install next step numbering through demo route guidance" do
@@ -220,7 +276,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
     expect(next_step_headings(output)).to eq([
       "Run: bin/rails db:migrate",
-      "Mount the engine in config/routes.rb:",
+      "Mount the engine in config/routes.rb, or rerun with --with-engine-route:",
       "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name.",
       "Demo route added to config/routes.rb:"
     ])
@@ -266,6 +322,10 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
   def generated_migration
     Pathname.new(Dir[File.join(destination_root, "db/migrate/*_create_table_preferences.rb")].first.to_s)
+  end
+
+  def engine_route
+    'mount RailsTablePreferences::Engine, at: "/rails_table_preferences"'
   end
 
   def demo_route
