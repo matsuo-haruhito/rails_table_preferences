@@ -40,6 +40,46 @@ The controller keeps these separate through `shouldIgnoreHeaderAction(target)`. 
 
 The sort handler also ignores active drag and resize operations.
 
+## Host app lifecycle events
+
+The packaged controller entrypoint dispatches a small set of bubbling Stimulus events from the controller root after user-facing preference operations finish:
+
+- `rails-table-preferences:applied` after editor settings are applied to the current table without saving
+- `rails-table-preferences:saved` after an existing preset save or save-as-new request succeeds
+- `rails-table-preferences:loaded` after a selected preset is loaded and applied
+- `rails-table-preferences:deleted` after an editable preset is deleted and the controller returns to the default preset
+- `rails-table-preferences:error` after load, save, create, delete, or initial preset-list loading fails
+
+Representative listener:
+
+```js
+document.addEventListener("rails-table-preferences:saved", (event) => {
+  const { tableKey, name, action, settings } = event.detail
+  // Update host-app analytics, export previews, or surrounding UI here.
+})
+```
+
+Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+
+Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
+
+Host apps can keep adoption code small by choosing one surrounding concern and reading only the existing detail fields. For example, an analytics integration can record successful preset saves without coupling to controller internals or changing the payload contract:
+
+```js
+document.addEventListener("rails-table-preferences:saved", (event) => {
+  const { tableKey, name, action, settings } = event.detail
+
+  window.appAnalytics?.track("table_preference_saved", {
+    table_key: tableKey,
+    preset_name: name,
+    action,
+    visible_column_count: settings.columns.filter((column) => column.visible !== false).length
+  })
+})
+```
+
+The analytics provider, event naming, export preview refresh, and any surrounding toolbar state remain host-app responsibilities. Rails Table Preferences only provides the lifecycle event and current settings snapshot after the preference operation succeeds.
+
 ## Bundled sort boundary
 
 The bundled header click UI manages one active sort at a time. A sortable header click cycles the clicked column through ascending, descending, and clear, then replaces `settingsValue.sorts` with a one-item array or an empty array.
@@ -248,6 +288,7 @@ Important invariants include:
 - table cell effects are table-scoped
 - filters and sorts are preserved by editor actions
 - filter operator label overrides fall back to bundled defaults
+- lifecycle events expose stable event names and detail payloads without leaking raw `Error` objects
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
 - document listeners and detached filter panels are cleaned up

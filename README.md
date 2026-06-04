@@ -144,7 +144,13 @@ For a lightweight local browser verification screen, add `--with-demo`:
 bin/rails generate rails_table_preferences:install --with-demo
 ```
 
-Then add a route for the copied demo screen:
+Use `--with-demo-route` instead when you want the generator to copy the demo files and add the representative demo route to `config/routes.rb` in one step:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-demo-route
+```
+
+If you used `--with-demo`, add the route manually. If you used `--with-demo-route`, the route is already added unless an equivalent route was already present:
 
 ```ruby
 # config/routes.rb

@@ -104,6 +104,29 @@ The default resource table partials pass basic table HTML options through to `ta
 
 `tree_resource_table_for` follows the same pass-through rule and keeps its default `tree-view-table` and `rails-table-preferences-tree-resource-table` classes.
 
+### Horizontal scroll wrapper
+
+`resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
+
+```erb
+<%= resource_table_for(
+  @orders,
+  scroll_wrapper: true,
+  wrapper_options: {
+    class: "orders-table-scroll",
+    data: { role: "resource-table-scroll" },
+    aria: { label: "Scrollable orders table" }
+  },
+  class: "orders-table"
+) %>
+```
+
+`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>`. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
+
+Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
+
+`tree_resource_table_for` does not receive this option yet. If a tree table needs a wrapper, keep it in host markup or a custom partial until the tree path is planned separately.
+
 ### Captions
 
 Pass `caption:` when the default resource table partial should render a semantic table caption without copying the partial:
@@ -465,6 +488,6 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-Custom partials receive `records`, `model`, `table_key`, `name`, `settings`, `columns`, `table_state`, `profile`, `caption`, and `options`.
+Custom partials receive `records`, `model`, `table_key`, `name`, `settings`, `columns`, `table_state`, `profile`, `caption`, `options`, `scroll_wrapper`, and `wrapper_options`.
 
 Use `table_preferences_value(record, column)` when the default value resolver is enough, or provide a profile override with `display`.
