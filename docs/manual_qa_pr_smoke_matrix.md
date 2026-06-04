@@ -27,12 +27,24 @@ When browser capture is not available, use the strongest available substitute: f
 | Scoped presets | Confirm owner, shared, role, or organization options remain distinguishable and that read-only presets do not expose destructive actions as editable. | Selector option labels/scope notes, owner/context used, and any read-only hint checked. | The PR changes default resolution, write scope, authorization expectations, or selector grouping behavior. |
 | Downstream host-app bump or adoption smoke | For a downstream app PR, pick one representative real table surface and use the [downstream adoption evidence template](production_integration_checklist.md#downstream-adoption-evidence-template) as the source of truth. Keep the upstream gem PR evidence separate from host-app-specific routes, schemas, release gates, and rollback targets. | Host app/surface name, gem version or SHA, stable table and column keys, filter/sort mapping, preset save/load path, mounted engine auth boundary, export boundary if used, layout/accessibility smoke, rollback target, and human release owner. | The downstream known-good target, rollback target, or release owner is undecided; the host-app bump needs route/schema changes; or the PR is trying to turn host-app-specific behavior into upstream Rails Table Preferences contract. |
 
+## Review-state handoff checks
+
+Use this section when the PR is blocked by review state rather than by another browser smoke item.
+
+| Review state | What to check | Evidence to record | Escalate when |
+| --- | --- | --- | --- |
+| Public contract review | Confirm whether the PR changes a user-facing helper option, package entrypoint, event payload, release sign-off wording, or package verification boundary. Keep browser evidence separate from the maintainer decision about whether the contract should exist. | Source-of-truth issue or PR, current code/spec/docs checked, why human review remains, and any behavior that is intentionally not being claimed yet. | The PR needs a new public API decision, verifier required-path decision, release policy decision, or compatibility promise that docs cannot decide alone. |
+| Stacked dependency | Confirm the PR base branch, parent PR, and whether the text should use `Refs` instead of `Closes` until the parent behavior reaches `main`. Do not document unmerged parent behavior as current `main` behavior. | Base branch, parent PR, dependency status, `Refs` / `Closes` choice, and what should be rechecked after the parent merges. | The parent PR is unmerged, mergeability is uncertain, or the docs would need to move to `main` before the behavior exists there. |
+| Mergeability refresh | Check `behind_by`, `mergeable`, changed files, and whether the branch can be refreshed or should be replaced from current `main`. CI success alone is not enough when GitHub reports `mergeable:false` or the compare is diverged. | Compare state, head SHA, CI result, changed files, and whether the next action is branch refresh, clean replacement, or human handoff. | Refreshing would pull unrelated scope into the PR, conflict resolution is needed, or deciding which side wins requires implementation or product judgment. |
+| Browser evidence handoff | Confirm whether the acceptance criteria require rendered UI proof, screenshot review, forced-colors/high-contrast mode, or a real host-app screen. Source inspection may support the handoff, but it is not rendered evidence. | Required viewport/state, environment that could not be checked, strongest substitute used, and the exact browser-capable check left for review. | The PR claims visual/accessibility results without rendered evidence, or the remaining check needs a real app, real data, or browser access unavailable to the current agent. |
+
 ## PR comment template
 
 ```markdown
 ### Focused manual QA
 
 - PR category:
+- Review state or handoff reason:
 - Screen or artifact checked:
 - Viewports or states checked:
 - Evidence:
