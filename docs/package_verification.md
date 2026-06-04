@@ -143,6 +143,8 @@ docs/javascript_controller.md
 
 Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
+A focused specs guard also checks repository-local Markdown and image links from `README.md`, `docs/index.md`, and Markdown files listed in `REQUIRED_PATHS`. That drift guard verifies file targets only; external URLs and in-page anchors remain release-review or authoring concerns. Keeping it in specs separates docs navigation drift from package-content selection.
+
 ## Required path selection criteria
 
 Add a file to `REQUIRED_PATHS` when its absence would make the packaged gem unusable or make a documented public entry point fail after installation. The list is intentionally representative: it protects the most important install, runtime, customization, and documentation surfaces without turning package verification into a full inventory of the repository.
