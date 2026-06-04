@@ -23,7 +23,15 @@ Check:
 
    Files under `app/javascript/controllers` are usually registered automatically.
 
-   With Vite / `app/frontend/entrypoints/application.js`, register the packaged controller explicitly:
+   With Vite / `app/frontend/entrypoints/application.js`, register the packaged controller explicitly. If the host app already starts Stimulus, reuse the existing `application` and only add the registration:
+
+   ```js
+   import RailsTablePreferencesController from "rails_table_preferences/controller"
+
+   application.register("rails-table-preferences", RailsTablePreferencesController)
+   ```
+
+   Only start a new Stimulus application in a minimal entrypoint that does not already start one:
 
    ```js
    import { Application } from "@hotwired/stimulus"
@@ -32,6 +40,8 @@ Check:
    const application = Application.start()
    application.register("rails-table-preferences", RailsTablePreferencesController)
    ```
+
+   Do not call `Application.start()` a second time from the same host app.
 
    If that import fails with a `module not found` or `Failed to resolve import` error, the bundler still cannot see the gem's packaged `app/javascript/rails_table_preferences/*` files. Add an alias or equivalent resolver for `rails_table_preferences` and `rails_table_preferences/controller`, then compare it with the minimal `vite.config.ts` example in [JavaScript entrypoints](javascript_entrypoints.md).
 

@@ -133,6 +133,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
   def package_json
     {
+      "private" => true,
+      "version" => "0.0.0",
       "exports" => {
         "." => "./app/javascript/rails_table_preferences/index.js",
         "./controller" => "./app/javascript/rails_table_preferences/controller.js"
