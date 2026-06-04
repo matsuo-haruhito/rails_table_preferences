@@ -13,6 +13,13 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return result
   }
 
+  resetEditor(event) {
+    const wasBusy = this.busy
+    const result = super.resetEditor(event)
+    if (!wasBusy) this.dispatchPreferenceEvent("applied", { action: "reset" })
+    return result
+  }
+
   async save(event) {
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor(event)
 
