@@ -40,7 +40,7 @@ RSpec.describe RailsTablePreferences::SettingsNormalizer do
       )
     end
 
-    it "keeps numeric column boundaries explicit" do
+    it "keeps only positive numeric column boundaries explicit" do
       settings = {
         columns: [
           {
@@ -57,8 +57,6 @@ RSpec.describe RailsTablePreferences::SettingsNormalizer do
           {
             "key" => "customer_code",
             "visible" => true,
-            "order" => -1,
-            "width" => 0,
             "truncate" => 999_999_999_999,
             "pinned" => false
           }

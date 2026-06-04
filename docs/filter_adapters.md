@@ -45,12 +45,18 @@ Saved settings should remain gem-neutral:
     {
       "key": "delivery_date",
       "direction": "desc"
+    },
+    {
+      "key": "customer_code",
+      "direction": "asc"
     }
   ]
 }
 ```
 
 The saved format should not use Ransack predicates, Datagrid filter names, Filterrific scope names, or application-specific SQL concepts directly.
+
+The `sorts` array is ordered neutral state. A host app custom or copied controller may write multiple entries into that array, and adapters should either preserve the order when the target search layer accepts multi-sort input or clearly reduce it to the target layer's supported shape. The bundled table-header click UI remains single-sort; it does not create the second entry shown above.
 
 ## Ransack adapter
 
@@ -64,7 +70,8 @@ filters = {
 }
 
 sorts = [
-  { key: :delivery_date, direction: :desc }
+  { key: :delivery_date, direction: :desc },
+  { key: :customer_code, direction: :asc }
 ]
 
 ransack_params = RailsTablePreferences::Adapters::Ransack.to_params(
@@ -77,12 +84,14 @@ ransack_params = RailsTablePreferences::Adapters::Ransack.to_params(
 #   "status_in" => ["未出荷", "出荷済"],
 #   "delivery_date_gteq" => "2026-01-01",
 #   "delivery_date_lteq" => "2026-01-31",
-#   "s" => ["delivery_date desc"]
+#   "s" => ["delivery_date desc", "customer_code asc"]
 # }
 
 @q = Order.ransack(ransack_params)
 @orders = @q.result
 ```
+
+Ransack accepts `s` as an ordered array, so this adapter keeps the neutral `sorts` order after dropping invalid entries and applying any `sort_param:` metadata. Rails Table Preferences still does not decide whether those fields are allowed, joined, or indexed; that belongs in the host application's Ransack allowlist, scopes, and authorization policy.
 
 `between` maps to lower and upper Ransack predicates instead of a single predicate. A `from` value becomes `<field>_gteq`, a `to` value becomes `<field>_lteq`, and blank bounds are omitted. The adapter does not parse dates, apply time zones, or execute the query.
 
@@ -162,6 +171,8 @@ sorts = settings.fetch("sorts", [])
 grid = OrdersGrid.new(OrderDatagridParams.call(filters: filters, sorts: sorts))
 ```
 
+This example preserves the neutral sort order because the host-owned Datagrid mapping chooses to pass an ordered list. If the target object only supports a single sort field, reduce the array deliberately and document that project-local choice next to the adapter.
+
 For Filterrific, keep the same boundary: map only the neutral UI state into existing allowed params or scopes, then let the host app apply its normal authorization and query rules.
 
 ```ruby
@@ -183,6 +194,8 @@ filterrific = initialize_filterrific(
   persistence_id: false
 )
 ```
+
+The Filterrific example intentionally consumes only `sorts.first` because many Filterrific setups expose one `sorted_by` scope at a time. If a host app has a multi-sort Filterrific convention, keep that translation in the host-owned adapter and leave the saved Rails Table Preferences shape neutral.
 
 Keep the adapter intentionally boring:
 
