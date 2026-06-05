@@ -42,7 +42,7 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       key: :memo,
       label: "備考",
       min_width: "80",
-      max_width: :320
+      max_width: "320"
     )
 
     expect(column.to_h).to include(
