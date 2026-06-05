@@ -64,11 +64,13 @@ RSpec.describe "rails_table_preferences package dirty-state behavior" do
         const packageUrl = pathToFileURL(process.argv[2]).href
         const { default: BaseController } = await import(baseUrl)
         const { default: PackageController } = await import(packageUrl)
+        const baseTargets = BaseController.targets || []
+        const packageTargets = PackageController.targets || []
 
         if (Object.hasOwn(BaseController.values, "dirtyStateLabel")) throw new Error("dirtyStateLabel leaked into copied controller")
         if (!Object.hasOwn(PackageController.values, "dirtyStateLabel")) throw new Error("dirtyStateLabel missing from package controller")
-        if (BaseController.targets.includes("dirtyState")) throw new Error("dirtyState target leaked into copied controller")
-        if (!PackageController.targets.includes("dirtyState")) throw new Error("dirtyState target missing from package controller")
+        if (baseTargets.includes("dirtyState")) throw new Error("dirtyState target leaked into copied controller")
+        if (!packageTargets.includes("dirtyState")) throw new Error("dirtyState target missing from package controller")
       JS
 
       run_node_entrypoint_check(base_controller_path, package_controller_path, script:)
