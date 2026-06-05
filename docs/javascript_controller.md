@@ -44,6 +44,8 @@ The sort handler also ignores active drag and resize operations.
 
 The packaged controller entrypoint dispatches a small set of bubbling Stimulus events from the controller root after user-facing preference operations finish:
 
+These lifecycle events are a package-entrypoint surface. Host applications that register the generated copied controller directly from `app/javascript/controllers/rails_table_preferences_controller.js` should not assume these events are present unless they port the same behavior into the copied or replacement controller. Use [Package-only controller boundary](javascript_entrypoints.md#package-only-controller-boundary) when deciding which registration path owns event listener QA.
+
 - `rails-table-preferences:applied` after editor settings are applied to the current table without saving
 - `rails-table-preferences:saved` after an existing preset save or save-as-new request succeeds
 - `rails-table-preferences:loaded` after a selected preset is loaded and applied
@@ -119,6 +121,8 @@ When a host app keeps its own `<table>` markup, the bundled controller still wor
 - Managed headers and cells must expose matching `data-rails-table-preferences-column-key` values.
 - Sort, filter, resize, reorder, and pinned-column behavior only apply to managed headers/cells inside that target table.
 - Columns without `data-rails-table-preferences-column-key` stay under normal host-app control.
+
+Managed column keys must be unique within the same logical table screen. Rails Table Preferences uses each column key as the shared identity for display settings, filters, sorts, export payload metadata, and DOM hooks. If two managed columns use the same key, saved column state is merged by that key and the controller cannot safely treat the two columns as separate identities by label, position, or cell content. When migrating helper-free tables, resource-table partials, or copied markup, check that each managed header/cell pair uses a distinct `data-rails-table-preferences-column-key` in that target table.
 
 This is the supported path for server-rendered tables that come from an existing partial, Markdown/HTML rewrite, or another renderer that cannot directly use `table_preferences_table_tag(...)`.
 
@@ -288,7 +292,7 @@ Important invariants include:
 - table cell effects are table-scoped
 - filters and sorts are preserved by editor actions
 - filter operator label overrides fall back to bundled defaults
-- lifecycle events expose stable event names and detail payloads without leaking raw `Error` objects
+- package-entrypoint lifecycle events expose stable event names and detail payloads without leaking raw `Error` objects
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
 - document listeners and detached filter panels are cleaned up
