@@ -84,7 +84,9 @@ Resize handles are generated as buttons and receive an `aria-label`:
 
 The bundled controller prefers the configured column label for that accessible name, falls back to the visible header text when needed, and only uses the raw column key when neither user-facing label is available.
 
-The default behavior is pointer-oriented. Host applications that need full keyboard resizing should provide a custom controller or additional keyboard shortcuts.
+The default behavior is pointer-oriented. The package entrypoint also treats `Enter`, Space, and legacy `Spacebar` on a focused resize handle as an auto-fit shortcut, matching the visible-content auto-fit behavior triggered by double-clicking the handle.
+
+That shortcut is not full keyboard width adjustment. Host applications that register the copied base controller directly should not assume the package-entrypoint shortcut is present unless they port it or provide their own controller. Host applications that need arrow-key resizing, stepwise width changes, or full keyboard resizing should provide a custom controller or additional keyboard shortcuts.
 
 ## Resource table captions
 
@@ -303,6 +305,8 @@ Before releasing a screen, check:
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
 - Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
 - Resize handles announce the user-facing column label rather than only an internal column key.
+- Resize handles show a visible focus indicator when reached by keyboard.
+- If the screen uses the package entrypoint, `Enter` or Space on the focused resize handle auto-fits the column like double-click; if the screen uses the copied controller, record whether that package-only shortcut was ported or intentionally unavailable.
 - Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.
 - Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
 - The table remains understandable when columns are hidden.
