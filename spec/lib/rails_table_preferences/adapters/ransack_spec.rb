@@ -80,6 +80,19 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       ).to eq("status_in" => %w[未出荷 出荷済])
     end
 
+    it "drops blank inclusion values while preserving false and zero" do
+      expect(
+        described_class.filter_params(
+          status: { operator: :in, values: ["未出荷", "", nil, false, 0, "出荷済"] },
+          archived: { operator: :not_in, values: ["", nil] },
+          code: { operator: :in, value: 0 }
+        )
+      ).to eq(
+        "status_in" => ["未出荷", false, 0, "出荷済"],
+        "code_in" => [0]
+      )
+    end
+
     it "converts blank and present filters without requiring a user value" do
       expect(
         described_class.filter_params(
