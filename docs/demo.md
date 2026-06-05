@@ -43,9 +43,9 @@ The same screen now includes a lightweight hidden fields preview for the generat
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
 
-The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup, and the grouped header follows the current visible columns after save/reload.
+The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup. Apply and table-header drag update the leaf headers and body cells live; the demo-only grouped header row is server-rendered and should be verified after save/reload, when it follows the current visible columns again.
 
-The generated screen also includes a `Demo state reset` button. Use it to delete owner-scoped presets for the current owner and demo table, then reload into the seeded shared / role / organization baseline before repeating scoped precedence checks.
+The generated screen also includes a `Demo state reset` section with a `Reset demo verification state` button. Use it to delete owner-scoped presets for the current owner and demo table, then reload into the seeded shared / role / organization baseline before repeating scoped precedence checks.
 
 The generated screen also includes an `Async failure check` button. Use it when you want the next preset save, load, or delete request to fail exactly once, then retry the same action to confirm the bundled status region and controls recover without browser request blocking.
 
@@ -147,7 +147,7 @@ With both demo presets seeded, those links make it easier to compare the selecto
 - `Role preset lane` makes the selector include `担当ビュー [role:operations]` and, with no owner default, reloading still resolves it before the shared preset.
 - `Organization preset lane` makes the selector include `東京組織ビュー [organization:tokyo-hq]` and, with no owner or matching role default, reloading still resolves it before the shared preset.
 
-If you already created owner-scoped presets while testing Save or Save as new, click `Reset demo verification state` before checking role/organization precedence again. The demo reset deletes editable owner presets for the current owner and demo table through the normal mounted preset API, then reloads so the seeded shared / role / organization examples are still present. This is a demo-only cleanup helper; it is not a production preset-management or authorization surface.
+If you already created owner-scoped presets while testing Save or Save as new, use the `Demo state reset` section and click `Reset demo verification state` before checking role/organization precedence again. The demo reset deletes editable owner presets for the current owner and demo table through the normal mounted preset API, then reloads so the seeded shared / role / organization examples are still present. This is a demo-only cleanup helper; it is not a production preset-management or authorization surface.
 
 ## What the demo covers
 
@@ -162,7 +162,7 @@ The generated demo screen includes:
 - double-click auto-fit on header resize handles
 - wrap / nowrap / ellipsis overflow examples on the same screen
 - fixed/pinned column metadata inside a horizontal scroll wrapper
-- grouped header markup that mirrors column group metadata
+- grouped header markup that mirrors column group metadata after save/reload
 - truncation metadata
 - preset save/load/delete UI
 - one shared preset example with read-only fallback behavior
@@ -191,6 +191,7 @@ On the demo screen, confirm:
 - [ ] Apply hides and shows columns.
 - [ ] Editor row drag changes column order.
 - [ ] Table header drag changes column order.
+- [ ] After editor apply or table header drag, the visible leaf headers and body cells update live while the grouped header row remains a save/reload boundary.
 - [ ] Header resize changes column width.
 - [ ] Double-clicking the resize handle on `配送メモ` or `配送コード` expands the column to fit its content more closely.
 - [ ] `配送メモ` wraps, `配送コード` stays on one line, and `備考` uses ellipsis so the overflow mode differences are visible.
@@ -215,7 +216,7 @@ On the demo screen, confirm:
 - [ ] After switching owners, the `Current owner` summary follows the active owner link.
 - [ ] Saving under `Demo owner A`, then switching to `Demo owner B`, makes it easy to confirm those presets do not leak across owners.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
-- [ ] `Reset demo verification state` removes owner-scoped presets for the current owner and table, then reloads with `共有ビュー`, `担当ビュー`, and `東京組織ビュー` still available.
+- [ ] The `Demo state reset` section's `Reset demo verification state` button removes owner-scoped presets for the current owner and table, then reloads with `共有ビュー`, `担当ビュー`, and `東京組織ビュー` still available.
 - [ ] After enabling `scope_context_method = :table_preference_scope_context`, the `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` links switch the current scope without editing application code.
 - [ ] The `Current scope context` summary matches whichever scope link is active.
 - [ ] `Owner-only baseline` returns the summary to `owner-only` and makes it easy to compare the shared baseline again.
@@ -232,12 +233,12 @@ On the demo screen, confirm:
 - [ ] The export payload preview excludes hidden columns by default.
 - [ ] After saving a new visible-column order, the export payload preview shows the same header order and column key order.
 
-## Reset demo state before scoped checks
+## Use Demo state reset before scoped checks
 
 Use the generated `Demo state reset` section when previous save testing left owner-scoped presets behind and you want to repeat role / organization default resolution from a clean owner baseline.
 
 1. Open the demo screen with the owner you want to clean up.
-2. Click `Reset demo verification state`.
+2. Click `Reset demo verification state` in the `Demo state reset` section.
 3. Wait for the success message and reload.
 4. Confirm owner-scoped presets for the current table are gone while `共有ビュー [shared]`, `担当ビュー [role:operations]`, and `東京組織ビュー [organization:tokyo-hq]` remain available when their scopes match.
 5. Use `Owner-only baseline`, `Role preset lane`, or `Organization preset lane` to repeat the scoped precedence checks without manually unchecking `標準設定にする` or deleting temporary owner presets one by one.
@@ -262,9 +263,11 @@ If you need to test a custom host-app wrapper outside the generated demo, browse
 
 The generated demo is a development verification surface. To keep the copied files self-contained, the demo view includes inline style and inline script for the sample screen, the demo state reset helper, and the one-shot async failure helper.
 
-If the host application runs a strict Content Security Policy in development, those inline blocks may be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
+When Rails exposes `content_security_policy_nonce`, the generated demo adds the current request nonce to those inline `<style>` and `<script>` blocks. In host applications whose development CSP allows Rails nonces for `style-src` and `script-src`, the demo-only styling, reset helper, and async failure helper can run without adding a separate demo asset pipeline or generator option.
 
-When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, either allow the copied demo route under a development-only policy or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
+If the host application runs a strict Content Security Policy in development but does not allow those nonces, the inline blocks may still be blocked. Symptoms can include missing demo-only styling, owner/scope switch helpers not behaving as expected, the `Reset demo verification state` button not deleting owner-scoped presets, or the `Async failure check` button not triggering the next request failure.
+
+When that happens, check the browser console and any CSP report endpoint for blocked inline `style-src` or `script-src` entries. For local verification, allow Rails nonces for the copied demo route under a development-only policy, allow the copied demo route under another development-only policy, or manually delete owner-scoped demo presets through the normal preset UI before scoped checks. Do not treat the generated demo as the production admin surface; the production path is still to remove the demo files and route when they are not needed.
 
 ## Production note
 
@@ -291,6 +294,7 @@ Current automated browser/system smoke covers:
 
 - editor and table render
 - hide column and apply
+- shared preset read-only load, delete-disabled state, and owner-fallback save through the demo-shaped preset selector
 - active filter button summary through `title` / `aria-label`
 - bundled filter panel `Escape` close with focus return to the trigger button
 - bundled filter panel close on viewport resize
@@ -303,7 +307,6 @@ Current automated browser/system smoke covers:
 
 Good next automated checks are:
 
-- shared preset read-only load and owner-fallback save
 - save and reload restore settings
 - sortable header click changes sort state directly
 - bundled filter panel close on container scroll

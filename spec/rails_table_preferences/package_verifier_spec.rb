@@ -91,6 +91,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       )
 
       expect(result[:missing_package_internal_imports]).to eq([])
+      expect(result[:package_json_errors]).to eq([])
       expect(result[:ok]).to be(true)
     end
 
@@ -114,6 +115,31 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
           import: "../controllers/rails_table_preferences_controller",
           target: "app/javascript/controllers/rails_table_preferences_controller"
         }
+      )
+      expect(result[:ok]).to be(false)
+    end
+
+    it "reports package metadata that drifts toward npm distribution semantics" do
+      result = package_verification_result(
+        packaged_files: package_entrypoint_files,
+        package_json: package_json_metadata.merge("private" => false, "version" => "1.2.3"),
+        javascript_files: {
+          "app/javascript/rails_table_preferences/index.js" => "export { default } from \"./controller\"\n",
+          "app/javascript/rails_table_preferences/controller.js" => <<~JS
+            import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
+
+            export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {}
+          JS
+        }
+      )
+
+      expect(result[:package_json_errors]).to contain_exactly(
+        "package.json \"private\" must be true (found false)",
+        "package.json \"version\" must be \"0.0.0\" (found \"1.2.3\")"
+      )
+      expect(described_class.summary(result)).to include(
+        total: 2,
+        counts: hash_including(package_json_errors: 2)
       )
       expect(result[:ok]).to be(false)
     end
@@ -187,18 +213,24 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     ]
   end
 
-  def package_verification_result(packaged_files:, javascript_files:)
+  def package_json_metadata
+    {
+      "private" => true,
+      "version" => "0.0.0",
+      "exports" => {
+        "." => "./app/javascript/rails_table_preferences/index.js",
+        "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+      }
+    }
+  end
+
+  def package_verification_result(packaged_files:, javascript_files:, package_json: package_json_metadata)
     verifier = described_class.new(gem_path: "pkg/rails_table_preferences-test.gem", required_paths: packaged_files)
 
     allow(verifier).to receive(:packaged_files).and_return(packaged_files.sort)
     allow(verifier).to receive(:packaged_file_contents) do |path|
       if path == "package.json"
-        JSON.generate(
-          "exports" => {
-            "." => "./app/javascript/rails_table_preferences/index.js",
-            "./controller" => "./app/javascript/rails_table_preferences/controller.js"
-          }
-        )
+        JSON.generate(package_json)
       else
         javascript_files.fetch(path)
       end

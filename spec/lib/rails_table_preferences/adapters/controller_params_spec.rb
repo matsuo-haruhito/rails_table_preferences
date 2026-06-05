@@ -257,5 +257,23 @@ RSpec.describe RailsTablePreferences::Adapters::ControllerParams do
         "sort" => "-delivery_on"
       )
     end
+
+    it "keeps plain controller params compatible by emitting only the first valid ordered sort" do
+      columns = [
+        { key: :delivery_date, sort_param: :delivery_on },
+        { key: :customer_code, sort_param: :customer_code }
+      ]
+
+      expect(
+        described_class.to_params(
+          filters: {},
+          sorts: [
+            { key: :delivery_date, direction: :desc },
+            { key: :customer_code, direction: :asc }
+          ],
+          columns: columns
+        )
+      ).to eq("sort" => "-delivery_on")
+    end
   end
 end

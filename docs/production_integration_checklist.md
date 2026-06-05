@@ -62,13 +62,14 @@ Before asking real users to try the screen, verify this path in the real host ap
 1. Load the index screen as a normal signed-in owner.
 2. Change visible columns, order, width, overflow, filter state, and sort state for one table.
 3. Save the preset, reload the page, and confirm the same table state returns.
-4. Submit the existing search form and confirm saved filter/sort state still round-trips.
-5. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
-6. If resource table profile formatters read associations, render representative rows while watching the host app's query log or existing N+1 guard and confirm the relation preloads those associations explicitly.
-7. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
-8. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
-9. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
-10. Check the dense table layout in the real production shell:
+4. Trigger one Turbo Drive or Turbo Frame replacement that re-renders the editor and target table, then confirm both reconnect with the same `table_key`, `name`, `columns`, `settings`, collection/member URL values, and managed column keys so saved visibility/order/filter/sort state does not drift between the editor and table.
+5. Submit the existing search form and confirm saved filter/sort state still round-trips.
+6. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
+7. If resource table profile formatters read associations, render representative rows while watching the host app's query log or existing N+1 guard and confirm the relation preloads those associations explicitly.
+8. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
+9. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
+10. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
+11. Check the dense table layout in the real production shell:
    - Move keyboard focus through editor controls, filter buttons, resize handles, sortable headers, sticky/fixed columns, and row actions.
    - Resize one managed column and confirm the handle remains visible and does not collide with header text, filter buttons, or sort indicators.
    - Horizontally scroll a table with sticky/fixed columns and confirm focused links, buttons, and inputs are not covered.
@@ -83,6 +84,32 @@ Use this checklist as upstream Rails Table Preferences evidence: packaged helper
 A downstream host app still needs its own adoption evidence for each real table surface. Record the stable table key and column keys, filter and sort parameter mapping, preset save/load/delete behavior, mounted engine save path, export boundary when exports are enabled, and the rollback or pinned-gem target the host app will return to if the bump is not accepted.
 
 For example, a downstream admin index such as `admin/document_sets` can be used as a representative smoke surface, but Rails Table Preferences should not make that app-specific route or schema part of its public contract. If the downstream known-good target, rollback target, or human release gate is not decided yet, keep the broad host-app bump paused and capture that as downstream evidence work rather than changing the gem API or this checklist.
+
+### Downstream adoption evidence template
+
+Use this short template in a downstream host-app bump PR, release note, or issue comment. Replace app-specific values with the real host-app evidence; do not copy private routes, schema details, or release gates into Rails Table Preferences docs as public contract.
+
+```markdown
+### Rails Table Preferences downstream adoption smoke
+
+- Host app / surface:
+- Gem version, branch, or SHA under evaluation:
+- Stable table key:
+- Stable managed column keys:
+- Filter / sort parameter mapping checked:
+- Preset path checked:
+  - save:
+  - reload/load:
+  - delete, if applicable:
+- Mounted engine save path and auth boundary checked:
+- Export boundary checked, if exports are enabled:
+- Layout / accessibility smoke checked:
+- Known-good rollback target or pinned gem target:
+- Human release gate / owner:
+- Follow-up needed:
+```
+
+Keep the note short. The goal is to prove that the real host-app table can adopt this gem revision without mixing host-app-specific routes, schemas, or release policy into the gem's upstream release checklist.
 
 ## Boundary reminders
 
