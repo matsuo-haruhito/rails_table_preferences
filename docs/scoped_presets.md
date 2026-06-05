@@ -176,6 +176,8 @@ ja:
 
 If the host app copies the bundled editor partial, it can also replace the `data-rails-table-preferences-scope-*-label-value` attributes directly. The locale keys are the shortest path when the bundled partial is still in use.
 
+Custom or unknown `scope_type` values do not have locale-backed fallback labels in the bundled editor. If a host app returns a custom scope bucket from its own endpoint or payload transformer, include a user-facing `scope_label` in each preset payload. Without that value, the selector can only fall back to the raw `scope_type` key, which is useful for debugging but usually too internal for a production selector.
+
 If the host app also provides its own preset endpoint, admin UI, or payload transformer that sets `scope_label`, keep that value aligned with the same wording. That prevents the preset selector from showing one label while nearby bundled fallback copy uses another.
 
 ## Preset selector grouping
@@ -183,6 +185,8 @@ If the host app also provides its own preset endpoint, admin UI, or payload tran
 When the preset collection includes more than one scope bucket, the bundled editor groups the native `<select>` options with `<optgroup>` in this order: owner, role, organization, shared, then any unknown scope types returned by a custom payload.
 
 Within each group, options keep the API response order. Option text still keeps the existing `name [scopeLabel] *` pattern, and the option data attributes for default state, editability, scope type, and scope key are preserved. This makes the selector easier to scan without changing JSON response shape, resolver priority, save/delete behavior, or same-name preset resolution.
+
+Unknown scope buckets keep that same display-only grouping behavior and are appended after the standard buckets. For those buckets, `scope_label` is the host-app-owned readable label; Rails Table Preferences does not infer final wording, add a fallback label map, or change resolver priority for custom scopes.
 
 If only one scope bucket is present, the selector stays flat. That keeps the simple owner-only editor compact while still giving multi-scope screens a clearer grouping cue.
 
