@@ -140,6 +140,23 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
+## Save, Load, or Delete uses the wrong controller boundary
+
+Symptoms:
+
+- Save/Load/Delete works on the page sometimes, but the mounted JSON request misses login, tenant, locale, or account setup.
+- Requests return 401/403, redirect to login, or fail CSRF checks even though the surrounding host-app page loaded correctly.
+- Scoped presets or owner lookup fail only through the mounted engine request.
+
+The mounted JSON API inherits the controller named by `RailsTablePreferences.config.parent_controller_class_name`. Use the [Production integration checklist](production_integration_checklist.md#1-confirm-the-owner-and-engine-contract) as the source of truth, then check:
+
+1. `parent_controller_class_name` points to the host controller that should own the mounted API boundary, such as `ApplicationController` or an authenticated base controller.
+2. That parent controller runs the authentication, CSRF handling, tenant or locale setup, and other `before_action` callbacks the preference API needs.
+3. `current_user_method` and, when scoped presets are enabled, `scope_context_method` are reachable from that same controller stack.
+4. `config.mount_path` still matches the engine route, so the editor is not sending requests to a stale or unauthenticated endpoint.
+
+Do not fix these symptoms by moving host-app authentication, authorization, or tenant policy into Rails Table Preferences. The gem owns the mounted preference API and editor payloads; the host app owns the controller stack and request-wide security boundary.
+
 ## current_user is nil
 
 Symptoms:
