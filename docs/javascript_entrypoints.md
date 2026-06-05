@@ -63,6 +63,19 @@ Current package-only behavior is intentionally small:
 
 Do not assume those package-only values, overrides, events, or keyboard affordances exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
 
+The current contract boundary is:
+
+| Surface | Copied controller path | Package entrypoint path | Host-app guidance |
+| --- | --- | --- | --- |
+| Source ownership | Host app owns the generated `app/javascript/controllers/rails_table_preferences_controller.js` copy after install. | Gem owns `app/javascript/rails_table_preferences/controller.js`, which subclasses the copied-controller source shipped in the gem. | Use the copied path when local patches are expected. Use the package entrypoint when the app wants packaged behavior updates through the gem. |
+| Filter operator labels | Uses the base controller defaults. A copied or replacement controller is needed for controller-side operator vocabulary changes not exposed by base values. | Adds `filterOperatorLabelsValue` so packaged-controller tables can override operator text through a root JSON value. | Use locale/root values for wording-only operator labels on the package path; use copied JavaScript for copied-controller or behavior changes. |
+| Sortable header `title` attributes | Base sort setup may replace generated title text while it manages sort hints. | Preserves host-provided nonblank `title` values and restores them after sort state sync. | Prefer the package entrypoint when host-rendered header titles must survive packaged sort controls. Validate copied-controller screens separately. |
+| Resize handle keyboard auto-fit | Base resize handles are generated and pointer-oriented. | Adds keyboard auto-fit on resize handles for `Enter`, Space, and legacy `Spacebar`. | Treat this as package-entrypoint-only unless a future issue deliberately moves the keyboard affordance into the base controller. |
+| Lifecycle events | Copied-controller registrations do not receive the package-entrypoint lifecycle event surface unless the host app ports that behavior into its copied or replacement controller. | Dispatches package-entrypoint lifecycle events such as `applied`, `saved`, `loaded`, `deleted`, and `error` with stable detail payloads. | Check host-app event listeners against the registration path that actually owns the screen. |
+| Future additive behavior | Should only receive behavior that must work for generated copied-controller users too. | May receive package-import adapter behavior, but each addition must be documented here. | If a difference becomes important for both paths, open a focused follow-up rather than silently expanding one path in place. |
+
+If this table reveals a behavior that should be shared by both paths, keep this Issue as documentation only and split the implementation into a follow-up with its own compatibility and test plan. That follow-up should name whether it is a feature change, a quality/spec guard, or another docs-only clarification.
+
 When future package-entrypoint behavior is added, update this list and re-run the entrypoint-specific manual checks for lifecycle events, sortable header titles, filter operator label overrides, and resize handle keyboard auto-fit. The copied controller path should still be checked separately when a host app registers the generated `app/javascript/controllers/rails_table_preferences_controller.js` file.
 
 ### Resolve the gem entrypoint explicitly
@@ -98,28 +111,20 @@ Any equivalent resolver is fine. The important part is that the host app's bundl
 
 ### TypeScript module declarations
 
-The gem currently ships JavaScript entrypoints, not packaged `.d.ts` files. In a TypeScript host app, the Vite resolver above can make the imports work at runtime while TypeScript may still report that it cannot find declarations for `rails_table_preferences` or `rails_table_preferences/controller`.
-
-When that happens, add a local declaration file in the host app, for example `app/frontend/types/rails_table_preferences.d.ts` or another directory included by the app's `tsconfig.json`:
+The package entrypoints include minimal `.d.ts` files for `rails_table_preferences` and `rails_table_preferences/controller`. They describe the import shape enough for a TypeScript host app to register the bundled Stimulus controller without adding local declarations only for these package imports:
 
 ```ts
-declare module "rails_table_preferences/controller" {
-  import { Controller } from "@hotwired/stimulus"
-
-  const RailsTablePreferencesController: typeof Controller
-  export default RailsTablePreferencesController
-}
-
-declare module "rails_table_preferences" {
-  export { default, default as RailsTablePreferencesController } from "rails_table_preferences/controller"
-}
+import RailsTablePreferencesController from "rails_table_preferences/controller"
+import { RailsTablePreferencesController as NamedRailsTablePreferencesController } from "rails_table_preferences"
 ```
 
-This local declaration only describes the current package entrypoints enough for `application.register("rails-table-preferences", RailsTablePreferencesController)` and the package-root named export. It does not mean Rails Table Preferences ships official TypeScript types yet. If the host app replaces the controller or relies on custom controller methods, keep those richer declarations in the host app until the gem deliberately adds packaged type definitions.
+These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.
+
+If the host app uses an older gem version without packaged declarations, or if it replaces the controller and wants richer local typing for custom methods, keep a local declaration file in the host app. For example, `app/frontend/types/rails_table_preferences.d.ts` can still refine the app-specific contract as long as the directory is included by the app's `tsconfig.json`.
 
 ## Choosing between copied assets and the package entrypoint
 
-Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, or already depends on copied JavaScript for behavior changes that are not exposed through controller-root values.
+Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, already depends on copied JavaScript for behavior changes that are not exposed through controller-root values, or needs the generated controller and package entrypoint to have exactly the same behavior until a parity follow-up is implemented.
 
 Prefer the package entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. Use `--skip-javascript` for this path so the generator still creates the migration and initializer while leaving controller registration to the host app entrypoint.
 
@@ -139,6 +144,7 @@ When an existing host app moves from the copied controller to `rails_table_prefe
 - Behavior changes that are not represented by packaged root values stay in a host-owned controller or copied JavaScript path.
 - Screens that rely on packaged-only root values, such as `data-rails-table-preferences-filter-operator-labels-value`, are registered through the package entrypoint.
 - Host-app listeners that depend on Rails Table Preferences lifecycle events have been checked against the package entrypoint, not only a copied controller registration.
+- Screens that rely on package-only sortable-title preservation or resize-handle keyboard auto-fit have manual checks covering those behaviors after the registration switch.
 
 After switching registration, re-run the manual checks for editor load, preset save/load/delete, lifecycle event listeners, filter panels, sort controls, resize handles, Turbo reconnects, and any screen-specific label overrides.
 

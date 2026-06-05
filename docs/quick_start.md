@@ -139,6 +139,8 @@ If you want a convention-first path instead of hand-writing every column, start 
 <%= tree_resource_table_for @projects, parent_id_method: :parent_project_id %>
 ```
 
+When the generated resource table needs a short semantic table name, pass `caption:` on the helper call, for example `resource_table_for @orders, caption: "Orders"`. Treat that caption as the native table name, not as a replacement for the page heading, rich table summary, or business-specific instructions around the table. See [Accessibility baseline](accessibility.md#resource-table-captions) for the caption boundary and [Manual QA checklist](manual_qa.md#3-basic-rendering) for the browser check.
+
 Use manual `table_preferences_column(...)` definitions for screens that need explicit labels, custom display blocks, or column-by-column metadata from the start. The rest of this quick start follows that manual path.
 
 Define the table columns in the controller, helper, or another view-friendly place.

@@ -67,6 +67,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] At 320px, 375px, and 390px-equivalent widths or narrow containers, confirm long Japanese and long unbroken editor row labels wrap without covering the drag handle, visible checkbox, or order/width/truncate inputs.
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
+- [ ] If the screen uses the package entrypoint, focus a header resize handle, press Enter or Space, and confirm it auto-fits like double-click; if the screen uses the copied controller, record whether that package-only shortcut was ported or intentionally unavailable.
 - [ ] Confirm the resize hit area is easy enough to grab.
 - [ ] Hover the resize handle and confirm a visible resize affordance appears without shifting header text, filter buttons, or sort indicators.
 - [ ] Move keyboard focus to the resize handle and confirm the focus-visible affordance remains visible with long labels and nearby header controls.
@@ -260,6 +261,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
 - [ ] Confirm resize handles show a visible focus indicator when reached by keyboard.
+- [ ] If using the package entrypoint, confirm Enter or Space on the focused resize handle triggers auto-fit without implying arrow-key resizing is available.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm keyboard-only reordering can be completed with the numeric order input and `適用`, without using editor-row drag or table-header drag.
 - [ ] Confirm touch or narrow-viewport users can use editor order inputs as the fallback when direct table-header drag is not comfortable.
