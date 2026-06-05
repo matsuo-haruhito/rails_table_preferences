@@ -432,4 +432,39 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
       run_node_entrypoint_check(controller_entrypoint_path, script:)
     end
   end
+
+  it "maps datetime and time filters to date-style operators and native input types" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const dateOperators = ["equals", "gteq", "lteq", "between", "blank", "present"]
+
+        const assertEqual = (actual, expected, message) => {
+          if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+            throw new Error(`${message}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`)
+          }
+        }
+
+        assertEqual(controller.filterOperatorsFor({ type: "datetime" }), dateOperators, "datetime operators")
+        assertEqual(controller.filterOperatorsFor({ type: "datetime-local" }), dateOperators, "datetime-local operators")
+        assertEqual(controller.filterOperatorsFor({ type: "time" }), dateOperators, "time operators")
+        assertEqual(controller.filterOperatorsFor({ type: "time", operators: ["equals"] }), ["equals"], "explicit operators")
+
+        assertEqual(controller.filterInputType({ type: "datetime" }), "datetime-local", "datetime input type")
+        assertEqual(controller.filterInputType({ type: "datetime-local" }), "datetime-local", "datetime-local input type")
+        assertEqual(controller.filterInputType({ type: "time" }), "time", "time input type")
+        assertEqual(controller.filterInputType({ type: "date" }), "date", "date input type")
+        assertEqual(controller.filterInputType({ type: "number" }), "number", "number input type")
+        assertEqual(controller.filterInputType({ type: "text" }), "text", "text input type")
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
 end
