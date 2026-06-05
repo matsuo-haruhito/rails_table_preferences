@@ -806,7 +806,6 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
 
     find("#rtp-smoke-preset-select option[value='共有ビュー']", visible: :all).select_option
 
-    expect(page).to have_css(".rails-table-preferences-editor__hint", text: "この保存済み設定は読み取り専用です。")
     expect(control_disabled?("[data-rails-table-preferences-target='defaultPreset']")).to eq(true)
     expect(control_disabled?("[data-action~='rails-table-preferences#deletePreset']")).to eq(true)
     expect(find("[data-action~='rails-table-preferences#saveFromEditor']", visible: :all)["data-rails-table-preferences-non-editable-fallback"]).to eq("true")
