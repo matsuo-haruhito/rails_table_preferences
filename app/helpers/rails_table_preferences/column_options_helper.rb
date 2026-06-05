@@ -2,7 +2,7 @@
 
 module RailsTablePreferences
   module ColumnOptionsHelper
-    def table_preferences_column(key, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def table_preferences_column(key, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil, draggable: nil)
       ColumnDefinition.new(
         key: key,
         export_key: export_key,
@@ -23,7 +23,8 @@ module RailsTablePreferences
         ignore: ignore,
         filter: filter,
         sortable: sortable,
-        sort_param: sort_param
+        sort_param: sort_param,
+        draggable: draggable
       ).to_h
     end
 
