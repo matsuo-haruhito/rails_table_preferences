@@ -10,6 +10,9 @@ module RailsTablePreferences
       include ActiveRecord::Generators::Migration
 
       source_root File.expand_path("templates", __dir__)
+      ENGINE_ROUTE = 'mount RailsTablePreferences::Engine, at: "/rails_table_preferences"'
+      ENGINE_ROUTE_PATH = "/rails_table_preferences"
+      ENGINE_ROUTE_PATTERN = /mount\s*(?:\(\s*)?RailsTablePreferences::Engine\s*,\s*at:\s*["']#{Regexp.escape(ENGINE_ROUTE_PATH)}["']/.freeze
       DEMO_ROUTE = 'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
       DEMO_ROUTE_PATH = "/rails_table_preferences_demo/orders"
       DEMO_ROUTE_TO = "rails_table_preferences_demo/orders#index"
@@ -34,6 +37,11 @@ module RailsTablePreferences
                    type: :boolean,
                    default: false,
                    desc: "Skip copying the default stylesheet into app/assets/stylesheets."
+
+      class_option :with_engine_route,
+                   type: :boolean,
+                   default: false,
+                   desc: "Also mount the Rails Table Preferences JSON API engine in config/routes.rb."
 
       class_option :with_demo,
                    type: :boolean,
@@ -72,6 +80,17 @@ module RailsTablePreferences
 
         copy_file "demo/orders_controller.rb", "app/controllers/rails_table_preferences_demo/orders_controller.rb"
         copy_file "demo/index.html.erb", "app/views/rails_table_preferences_demo/orders/index.html.erb"
+      end
+
+      def add_engine_route
+        return unless options[:with_engine_route]
+
+        routes_path = File.join(destination_root, "config/routes.rb")
+        if File.exist?(routes_path) && engine_route_present?(File.read(routes_path))
+          say_status :identical, "config/routes.rb"
+        else
+          route ENGINE_ROUTE
+        end
       end
 
       def add_demo_route
@@ -123,8 +142,9 @@ module RailsTablePreferences
         steps = [
           ["Run: bin/rails db:migrate"],
           [
-            "Mount the engine in config/routes.rb:",
-            "       mount RailsTablePreferences::Engine, at: \"/rails_table_preferences\""
+            engine_route_step_heading,
+            "       #{ENGINE_ROUTE}",
+            "     If you use a custom initializer mount_path, update the route path manually to match it."
           ]
         ]
 
@@ -164,6 +184,14 @@ module RailsTablePreferences
         steps
       end
 
+      def engine_route_step_heading
+        if options[:with_engine_route]
+          "Engine route configured in config/routes.rb:"
+        else
+          "Mount the engine in config/routes.rb, or rerun with --with-engine-route:"
+        end
+      end
+
       def demo_route_step_heading
         if options[:with_demo_route]
           "Demo route configured in config/routes.rb:"
@@ -174,6 +202,10 @@ module RailsTablePreferences
 
       def demo_requested?
         options[:with_demo] || options[:with_demo_route]
+      end
+
+      def engine_route_present?(routes_source)
+        routes_source.match?(ENGINE_ROUTE_PATTERN)
       end
 
       def demo_route_present?(routes_source)
