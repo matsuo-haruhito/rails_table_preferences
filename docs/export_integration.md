@@ -239,6 +239,33 @@ table_preferences_column(
 
 This is useful for Excel exports with grouped headers. Rails Table Preferences only passes the metadata through; the host application decides how to render grouped export headers.
 
+For a one-line CSV header, `export_payload["headers"]` is usually enough. For an Excel or report export that needs grouped headers, read `export_payload["columns"]` so the host app can combine `group` metadata with the value-extraction key for each column:
+
+```ruby
+grouped_columns = export_payload["columns"].map do |column|
+  group = column["group"] || {}
+
+  {
+    group_key: group["key"],
+    group_label: group["label"],
+    header: column["label"],
+    value_key: column["export_key"] || column["key"]
+  }
+end
+
+# Example shape for a host-app Excel/report builder:
+# [
+#   {
+#     group_key: "customer",
+#     group_label: "得意先情報",
+#     header: "得意先名",
+#     value_key: "customer_display_name"
+#   }
+# ]
+```
+
+The example above is only metadata preparation. The host application still owns the spreadsheet or report library, cell merging, blank group handling, value extraction, and policy-aware export allowlist.
+
 ## Responsibility boundary
 
 Rails Table Preferences owns:

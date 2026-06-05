@@ -17,6 +17,15 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(documented_paths).to eq(described_class::REQUIRED_PATHS)
     end
 
+    it "guards JavaScript entrypoints and their packaged declarations" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "app/javascript/rails_table_preferences/controller.js",
+        "app/javascript/rails_table_preferences/controller.d.ts",
+        "app/javascript/rails_table_preferences/index.js",
+        "app/javascript/rails_table_preferences/index.d.ts"
+      )
+    end
+
     it "guards resource table default partials used by public helpers" do
       expect(described_class::REQUIRED_PATHS).to include(
         "app/views/rails_table_preferences/_resource_table.html.erb",
@@ -183,7 +192,9 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       "package.json",
       "app/javascript/controllers/rails_table_preferences_controller.js",
       "app/javascript/rails_table_preferences/controller.js",
-      "app/javascript/rails_table_preferences/index.js"
+      "app/javascript/rails_table_preferences/controller.d.ts",
+      "app/javascript/rails_table_preferences/index.js",
+      "app/javascript/rails_table_preferences/index.d.ts"
     ]
   end
 
@@ -195,8 +206,14 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       if path == "package.json"
         JSON.generate(
           "exports" => {
-            "." => "./app/javascript/rails_table_preferences/index.js",
-            "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+            "." => {
+              "types" => "./app/javascript/rails_table_preferences/index.d.ts",
+              "default" => "./app/javascript/rails_table_preferences/index.js"
+            },
+            "./controller" => {
+              "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
+              "default" => "./app/javascript/rails_table_preferences/controller.js"
+            }
           }
         )
       else

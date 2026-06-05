@@ -22,6 +22,8 @@ bin/rails db:migrate
 
 Vite / `app/frontend` など package entrypoint を使う場合は、copied controller ではなく `rails_table_preferences/controller` の import と bundler alias を確認します。詳細は [JavaScript entrypoints](javascript_entrypoints.md) を参照してください。
 
+既存の `app/frontend/entrypoints/application.js` などで Stimulus application をすでに start している host app では、その `application` に `application.register(...)` だけを追加します。`Application.start()` を含む例は新規 minimal entrypoint 用です。同じ host app で `Application.start()` を二重に呼ばないでください。
+
 `User` / `current_user` 以外の owner model を使う場合は、demo や JSON API を開く前に initializer で `owner_model` と `current_user_method` を設定し、その method が persisted owner record を返すことを確認します。
 
 ## 2. 最小の table preference UI を表示する
@@ -67,6 +69,8 @@ Rails Table Preferences が担当するのは table display preference と prese
 3. [Filter adapters](filter_adapters.md): Ransack、Datagrid、Filterrific、host application search object との境界。
 4. [Select filter troubleshooting](select_filter_troubleshooting.md): select filter が query に効かないときの確認点。
 
+既存の GET 検索フォームで user-entered params と保存済み filter/sort を一緒に送る場合は、[Controller integration の hidden fields section](controller_integration.md#hidden-fields-for-existing-search-forms) を確認します。`table_preferences_hidden_fields(...)` は通常の hidden field を描画するだけで、検索実行や params の最終適用は host app 側が所有します。
+
 ## 5. export は payload を使って host app で生成する
 
 CSV / Excel / report file の生成は Rails Table Preferences の責務ではありません。host app の export code から `rails_table_preference_export_payload` を使い、保存済みの column visibility、order、labels、metadata を再利用します。
@@ -79,10 +83,12 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 
 本番画面へ入れる前に、軽い順に確認します。
 
-- [Demo screen generator](demo.md): `--with-demo` または `--with-demo-route` で editor surface、scoped preset cues、export payload preview を見る。
+- [Demo screen generator](demo.md): `--with-demo` または `--with-demo-route` で editor surface、scoped preset cues、existing search form hidden fields preview、export payload preview を見る。
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app で install、engine mount、JavaScript/CSS、preference wiring を確認する。
 - [Production integration checklist](production_integration_checklist.md): demo / quick start で動いた構成を、実際の host-app index screen へ移す前に owner、engine route、query params、authorization、layout、export 境界を確認する。
 - [Manual QA checklist](manual_qa.md): 実際の host app で認証、認可、layout、accessibility、既存 search/export integration を確認する。
+
+特に既存 search form を残したまま保存済み filter/sort を roundtrip させる画面では、[Demo screen generator](demo.md) の hidden fields preview と [Manual QA checklist](manual_qa.md#13-existing-search-form-integration) の existing search form integration を合わせて確認してください。
 
 特に dense table、horizontal scroll、fixed/pinned columns、custom CSS がある画面では、[Resize and auto-fit guidance](resize_auto_fit.md)、[Fixed columns and column groups](fixed_columns_and_groups.md)、[Accessibility baseline](accessibility.md) も合わせて確認してください。
 
@@ -92,6 +98,7 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 
 - controller が動かない、Save が 404 / 401 になる、`current_user` や configured owner が nil になる: [Troubleshooting](troubleshooting.md) の install / Stimulus / engine mount / current owner sections を確認します。
 - filter や sort の UI は変わるが検索結果に反映されない: [Troubleshooting](troubleshooting.md#filter-or-sort-ui-changes-do-not-change-database-results)、[Controller integration](controller_integration.md)、[Filter adapters](filter_adapters.md) を確認します。Rails Table Preferences は UI state と adapter params を扱い、database query は host app 側が適用します。
+- 既存の検索フォームに保存済み filter/sort を渡したい、または hidden fields が期待どおり roundtrip しない: [Controller integration の hidden fields section](controller_integration.md#hidden-fields-for-existing-search-forms)、[Demo screen generator](demo.md)、[Manual QA checklist](manual_qa.md#13-existing-search-form-integration) を確認します。hidden field の描画、blank value omission、array params、host-app search execution を分けて見ます。
 - select filter が表示されるが値が効かない、複数選択の保存値が想定と違う: [Select filter troubleshooting](select_filter_troubleshooting.md) を確認します。一般的な filter/sort params ではなく、`values_param`、scalar `options:`、host-app query ownership を切り分けます。
 - shared / role / organization preset が selector に出ない: [Troubleshooting](troubleshooting.md#scoped-preset-exists-but-does-not-appear-in-the-selector) と [Scoped presets](scoped_presets.md) を確認します。`scope_context_method` が返す runtime value と保存済み `scope_key` が同じ stable identifier かを見ます。
 - CSS、dense table layout、fixed / pinned columns、resize handles、accessibility state cues が崩れる: [Troubleshooting](troubleshooting.md)、[Resize and auto-fit guidance](resize_auto_fit.md)、[Fixed columns and column groups](fixed_columns_and_groups.md)、[Accessibility baseline](accessibility.md) を確認します。

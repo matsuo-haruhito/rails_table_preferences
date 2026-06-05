@@ -3,8 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "types": "./app/javascript/rails_table_preferences/index.d.ts",
   "exports": {
-    ".": "./app/javascript/rails_table_preferences/index.js",
-    "./controller": "./app/javascript/rails_table_preferences/controller.js"
+    ".": {
+      "types": "./app/javascript/rails_table_preferences/index.d.ts",
+      "default": "./app/javascript/rails_table_preferences/index.js"
+    },
+    "./controller": {
+      "types": "./app/javascript/rails_table_preferences/controller.d.ts",
+      "default": "./app/javascript/rails_table_preferences/controller.js"
+    }
   }
 }

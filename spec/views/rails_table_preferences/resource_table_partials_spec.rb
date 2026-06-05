@@ -67,6 +67,52 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "renders a table-specific empty message for empty resource table records" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: {
+        render_editor: false,
+        empty_message: "No users match this search"
+      }
+    )
+
+    expect(rendered).to include("No users match this search")
+    expect(rendered).not_to include("No records to display")
+    expect(rendered).not_to include("empty-message")
+  end
+
+  it "keeps the existing empty message fallback when no resource table empty message is provided" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("No records to display")
+  end
+
+  it "escapes resource table empty messages as plain text" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: {
+        render_editor: false,
+        empty_message: "<strong>No users</strong>"
+      }
+    )
+
+    expect(rendered).to include("&lt;strong&gt;No users&lt;/strong&gt;")
+    expect(rendered).not_to include("<strong>No users</strong>")
+  end
+
+  it "does not render the resource table empty message when records are present" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      records: [User.new(name: "Alice")],
+      options: {
+        render_editor: false,
+        empty_message: "No users match this search"
+      }
+    )
+
+    expect(rendered).to include("Alice")
+    expect(rendered).not_to include("No users match this search")
+  end
+
   it "keeps resource table empty row colspan valid when every column is hidden" do
     hidden_columns = columns.map { |column| column.merge("visible" => false) }
 

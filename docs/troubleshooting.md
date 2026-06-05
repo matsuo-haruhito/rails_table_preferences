@@ -23,7 +23,15 @@ Check:
 
    Files under `app/javascript/controllers` are usually registered automatically.
 
-   With Vite / `app/frontend/entrypoints/application.js`, register the packaged controller explicitly:
+   With Vite / `app/frontend/entrypoints/application.js`, register the packaged controller explicitly. If the host app already starts Stimulus, reuse the existing `application` and only add the registration:
+
+   ```js
+   import RailsTablePreferencesController from "rails_table_preferences/controller"
+
+   application.register("rails-table-preferences", RailsTablePreferencesController)
+   ```
+
+   Only start a new Stimulus application in a minimal entrypoint that does not already start one:
 
    ```js
    import { Application } from "@hotwired/stimulus"
@@ -32,6 +40,8 @@ Check:
    const application = Application.start()
    application.register("rails-table-preferences", RailsTablePreferencesController)
    ```
+
+   Do not call `Application.start()` a second time from the same host app.
 
    If that import fails with a `module not found` or `Failed to resolve import` error, the bundler still cannot see the gem's packaged `app/javascript/rails_table_preferences/*` files. Add an alias or equivalent resolver for `rails_table_preferences` and `rails_table_preferences/controller`, then compare it with the minimal `vite.config.ts` example in [JavaScript entrypoints](javascript_entrypoints.md).
 
@@ -81,6 +91,33 @@ end
 ```
 
 The `mount_path` must match the route mount path because the helper builds the JSON API URLs from this value.
+
+## Helper-free table root is missing required data values
+
+Symptoms:
+
+- The host app keeps its own table partial and mounts `data-controller="rails-table-preferences"` manually.
+- Apply changes the editor state, but the rendered table does not update.
+- Save uses an empty or unexpected URL, or writes to the wrong mounted path.
+- Filter, sort, width, or visibility state resets because the controller starts with empty columns or settings.
+
+Check the manually rendered controller root before changing runtime behavior:
+
+1. Confirm the root has the same core values emitted by the bundled helper:
+
+   - `data-rails-table-preferences-table-key-value`
+   - `data-rails-table-preferences-collection-url-value`
+   - `data-rails-table-preferences-url-value`
+   - `data-rails-table-preferences-columns-value`
+   - `data-rails-table-preferences-settings-value`
+
+2. If the page also renders the bundled editor or preset select, confirm `data-rails-table-preferences-name-value` matches the current preset name.
+
+3. Confirm the URL values use the actual mounted engine path. If the host app mounts the engine away from `/rails_table_preferences`, both manual URL values must use that custom path.
+
+4. Confirm managed table headers and body cells still expose matching `data-rails-table-preferences-column-key` values. Missing root values and column-key mismatches can look similar, but the fixes are different.
+
+For the full manual root example and the supported helper-free DOM contract, use [JavaScript controller notes](javascript_controller.md#manual-root-values-when-bypassing-the-table-helper) as the source of truth. Troubleshooting should identify the missing value; the controller should not be redesigned or given host-app-specific validation just to cover an incomplete manual root.
 
 ## Save returns 401 or redirects to login
 

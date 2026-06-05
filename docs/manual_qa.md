@@ -50,6 +50,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Confirm the editor is visible.
 - [ ] Confirm the target table is visible.
 - [ ] If using `resource_table_for` or `tree_resource_table_for` with `caption:`, confirm the rendered caption is a short semantic table name and does not duplicate the page heading or surrounding instructions.
+- [ ] If a resource table profile formatter reads associations, confirm the host app relation preloads those associations and that a query log or existing N+1 guard stays clean for representative rows.
 - [ ] Confirm every target header and cell has the matching `data-rails-table-preferences-column-key`.
 - [ ] Confirm Japanese column labels are shown when host app locale entries are present.
 - [ ] Confirm explicit `label:` values override locale lookup.
@@ -66,6 +67,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] At 320px, 375px, and 390px-equivalent widths or narrow containers, confirm long Japanese and long unbroken editor row labels wrap without covering the drag handle, visible checkbox, or order/width/truncate inputs.
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
+- [ ] If the screen uses the package entrypoint, focus a header resize handle, press Enter or Space, and confirm it auto-fits like double-click; if the screen uses the copied controller, record whether that package-only shortcut was ported or intentionally unavailable.
 - [ ] Confirm the resize hit area is easy enough to grab.
 - [ ] Hover the resize handle and confirm a visible resize affordance appears without shifting header text, filter buttons, or sort indicators.
 - [ ] Move keyboard focus to the resize handle and confirm the focus-visible affordance remains visible with long labels and nearby header controls.
@@ -111,6 +113,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] If you use the generated demo example, use `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` to switch the scope context without editing `ApplicationController` between requests.
 - [ ] If you use the generated demo example, confirm the `Current scope context` summary follows the active scope link before reading the preset selector.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
+- [ ] Confirm owner, role, organization, and shared presets are grouped in the selector when multiple scope buckets are returned, while single-scope owner presets remain easy to scan.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, use `Owner-only baseline` to clear representative role/organization context and compare the shared baseline again.
@@ -258,6 +261,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm sortable headers update `aria-sort`.
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
 - [ ] Confirm resize handles show a visible focus indicator when reached by keyboard.
+- [ ] If using the package entrypoint, confirm Enter or Space on the focused resize handle triggers auto-fit without implying arrow-key resizing is available.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] Confirm keyboard-only reordering can be completed with the numeric order input and `適用`, without using editor-row drag or table-header drag.
 - [ ] Confirm touch or narrow-viewport users can use editor order inputs as the fallback when direct table-header drag is not comfortable.

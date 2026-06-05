@@ -37,6 +37,12 @@ Keep aliases when maintaining older copied column definitions, but write new doc
 
 Use both only when the screen needs both pieces of metadata. For most new column definitions, prefer `overflow:` for the display mode and add `default_truncate:` only when the host app still needs a default truncation length.
 
+## Saved settings numeric boundary
+
+Saved column settings keep only positive integers for `width`, `truncate`, and `order`. Numeric strings such as `"120"` are normalized to integers, while `0`, negative values, blanks, and malformed values are treated as missing and fall back to the column definition or default ordering behavior.
+
+This defensive normalization applies to settings saved through the bundled editor and to compatible payloads written by host-app scripts or custom preference UIs. It prevents stale or hand-written settings from applying invalid widths or truncation hints while preserving existing positive values.
+
 ## Bundled editor boundary
 
 The bundled editor currently lets users change visibility, order, width, and the numeric truncate hint. It does not render an overflow mode selector and does not expand the saved settings payload with a user-editable overflow field.

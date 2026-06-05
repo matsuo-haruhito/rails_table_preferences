@@ -10,17 +10,24 @@ RSpec.describe "rails_table_preferences package metadata" do
     File.expand_path("../package.json", __dir__)
   end
 
-  it "publishes the documented package name and module type" do
+  it "publishes the documented package name, module type, and root declaration" do
     expect(package_metadata).to include(
       "name" => "rails_table_preferences",
-      "type" => "module"
+      "type" => "module",
+      "types" => "./app/javascript/rails_table_preferences/index.d.ts"
     )
   end
 
-  it "publishes stable JavaScript entrypoints for bundlers" do
+  it "publishes stable JavaScript entrypoints and declarations for bundlers" do
     expect(package_metadata.fetch("exports")).to eq(
-      "." => "./app/javascript/rails_table_preferences/index.js",
-      "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+      "." => {
+        "types" => "./app/javascript/rails_table_preferences/index.d.ts",
+        "default" => "./app/javascript/rails_table_preferences/index.js"
+      },
+      "./controller" => {
+        "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
+        "default" => "./app/javascript/rails_table_preferences/controller.js"
+      }
     )
   end
 end
