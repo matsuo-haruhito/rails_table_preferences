@@ -63,6 +63,8 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 
 Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
 
+The `rails-table-preferences:error` `action` values are stable operation labels for package-entrypoint diagnostics and UI sync. Current values are `load-presets` for initial preset-list loading, `load` for selected preset loading, `save` for updating an editable preset, `create` for save-as-new or owner fallback creation, `delete` for editable preset deletion, and fallback `operation` when an error is reported outside a named preference operation. When a future package-entrypoint operation adds another public error action, update this list and the source-level lifecycle event specs with that action.
+
 Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
 
 Host apps can keep adoption code small by choosing one surrounding concern and reading only the existing detail fields. For example, an analytics integration can record successful preset saves without coupling to controller internals or changing the payload contract:
