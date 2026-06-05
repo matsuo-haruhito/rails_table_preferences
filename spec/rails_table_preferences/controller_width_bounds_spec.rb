@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "pathname"
 require "spec_helper"
 
 RSpec.describe "packaged Rails Table Preferences controller width bounds" do
