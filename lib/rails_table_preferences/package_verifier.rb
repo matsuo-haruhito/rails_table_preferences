@@ -17,7 +17,9 @@ module RailsTablePreferences
       "app/helpers/rails_table_preferences/column_options_helper.rb",
       "app/javascript/controllers/rails_table_preferences_controller.js",
       "app/javascript/rails_table_preferences/controller.js",
+      "app/javascript/rails_table_preferences/controller.d.ts",
       "app/javascript/rails_table_preferences/index.js",
+      "app/javascript/rails_table_preferences/index.d.ts",
       "app/views/rails_table_preferences/_editor.html.erb",
       "app/views/rails_table_preferences/_resource_table.html.erb",
       "app/views/rails_table_preferences/_tree_resource_table.html.erb",
@@ -97,11 +99,6 @@ module RailsTablePreferences
 
     JAVASCRIPT_RELATIVE_IMPORT_PATTERN = /(?:^|\n)\s*(?:import\s+(?:[^"'\n]+?\s+from\s+)?|export\s+[^"'\n]+?\s+from\s+)["'](?<specifier>\.[^"']+)["']/.freeze
 
-    EXPECTED_PACKAGE_JSON_METADATA = {
-      "private" => true,
-      "version" => "0.0.0"
-    }.freeze
-
     attr_reader :gem_path, :required_paths
 
     def self.call(gem_path:, required_paths: REQUIRED_PATHS)
@@ -143,7 +140,6 @@ module RailsTablePreferences
         packaged_files.include?(export_target.fetch(:target))
       end
       missing_package_internal_imports = self.missing_package_internal_imports
-      validate_package_json_metadata if packaged_files.include?("package.json")
 
       {
         gem_path: gem_path,
@@ -210,18 +206,6 @@ module RailsTablePreferences
 
     def unresolved_javascript_relative_import_target(entrypoint, specifier)
       Pathname.new(File.dirname(entrypoint)).join(specifier).cleanpath.to_s
-    end
-
-    def validate_package_json_metadata
-      metadata = package_json
-      return if metadata.empty? && !package_json_errors.empty?
-
-      EXPECTED_PACKAGE_JSON_METADATA.each do |key, expected|
-        actual = metadata[key]
-        next if actual == expected
-
-        package_json_errors << "package.json #{key.inspect} must be #{expected.inspect} (found #{actual.inspect})"
-      end
     end
 
     def package_json

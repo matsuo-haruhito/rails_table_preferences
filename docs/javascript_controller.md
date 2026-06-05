@@ -122,6 +122,8 @@ When a host app keeps its own `<table>` markup, the bundled controller still wor
 - Sort, filter, resize, reorder, and pinned-column behavior only apply to managed headers/cells inside that target table.
 - Columns without `data-rails-table-preferences-column-key` stay under normal host-app control.
 
+Managed column keys must be unique within the same logical table screen. Rails Table Preferences uses each column key as the shared identity for display settings, filters, sorts, export payload metadata, and DOM hooks. If two managed columns use the same key, saved column state is merged by that key and the controller cannot safely treat the two columns as separate identities by label, position, or cell content. When migrating helper-free tables, resource-table partials, or copied markup, check that each managed header/cell pair uses a distinct `data-rails-table-preferences-column-key` in that target table.
+
 This is the supported path for server-rendered tables that come from an existing partial, Markdown/HTML rewrite, or another renderer that cannot directly use `table_preferences_table_tag(...)`.
 
 ## Coexisting table controllers
