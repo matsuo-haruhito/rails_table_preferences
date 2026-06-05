@@ -1,7 +1,7 @@
 import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
 
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
-  static targets = [...RailsTablePreferencesBaseController.targets, "dirtyState"]
+  static targets = [...(RailsTablePreferencesBaseController.targets || []), "dirtyState"]
 
   static values = {
     ...RailsTablePreferencesBaseController.values,
