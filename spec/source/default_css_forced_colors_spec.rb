@@ -10,10 +10,13 @@ RSpec.describe "default CSS forced-colors friendly signals" do
   let(:css) { File.read(css_path) }
 
   def rule_body(selector)
-    match = css.match(/#{Regexp.escape(selector)}\s*\{(?<body>.*?)\n\}/m)
-    expect(match).not_to be_nil
+    rules = css.scan(/(?<selectors>[^{}]+)\{(?<body>[^{}]*)\}/m)
+    match = rules.find do |selectors, _body|
+      selectors.split(",").map(&:strip).include?(selector)
+    end
 
-    match[:body]
+    expect(match).not_to be_nil
+    match.last
   end
 
   it "keeps filter panel colors tied to system color keywords" do
