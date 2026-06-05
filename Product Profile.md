@@ -117,6 +117,7 @@ Start with these files when orienting yourself. This is a representative maintai
 - `docs/demo.md`: generated demo screen paths and current-owner preparation for lightweight browser verification.
 - `docs/sandbox.md`: minimal Rails app verification before real app integration.
 - `docs/manual_qa.md`: browser and host application checks before handing the feature to real users.
+- `docs/manual_qa_pr_smoke_matrix.md`: PR-scoped focused smoke, review-state handoff, and browser evidence handoff for changes that do not need the full manual QA checklist.
 - `docs/release_checklist.md`: release readiness checks across packaging, generators, CI, docs, and sandbox verification.
 - `docs/package_verification.md`: build and inspect the gem package before tagging or publishing a release.
 - `docs/troubleshooting.md`: common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
