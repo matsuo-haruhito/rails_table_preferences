@@ -206,6 +206,52 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "dispatches public controller lifecycle events with stable detail payloads" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const events = []
+
+        controller.dispatch = (name, options = {}) => events.push({ name, detail: options.detail })
+        controller.tableKeyValue = "orders"
+        controller.nameValue = "default"
+        controller.settingsValue = { columns: [{ key: "total", visible: true }], filters: {}, sorts: [] }
+        controller.hasPresetNameTarget = false
+        controller.settingsFromEditor = () => ({ columns: [{ key: "total", visible: false }], filters: { total: { operator: "gt", value: "100" } }, sorts: [] })
+        controller.apply = () => {}
+
+        controller.applyFromEditor({ preventDefault() {} })
+
+        const applied = events.find((event) => event.name === "applied")
+        if (!applied) throw new Error("applied event was not dispatched")
+        if (applied.detail.tableKey !== "orders") throw new Error("applied event missing tableKey")
+        if (applied.detail.name !== "default") throw new Error("applied event missing preset name")
+        if (applied.detail.action !== "apply") throw new Error("applied event missing action")
+        if (applied.detail.settings.filters.total.value !== "100") throw new Error("applied event missing settings snapshot")
+
+        await controller.withPreferenceAction("save", async () => {
+          controller.handleOperationError(new Error("boom"), "Save failed")
+        })
+
+        const failure = events.find((event) => event.name === "error")
+        if (!failure) throw new Error("error event was not dispatched")
+        if (failure.detail.action !== "save") throw new Error("error event missing stable action")
+        if (failure.detail.message !== "Save failed") throw new Error("error event missing stable message")
+        if (Object.prototype.hasOwnProperty.call(failure.detail, "error")) {
+          throw new Error("error event leaked the Error object")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "preserves host-provided sortable header titles while keeping generated sort hints for untitled headers" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
@@ -269,6 +315,117 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
         if (hostTitleCell.sortIndicator.textContent !== "▼") {
           throw new Error("sort indicator no longer tracks the active descending sort")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
+  it "includes the selected preset display name in delete confirmation and button context" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const selectedOption = {
+          value: "operations",
+          textContent: "operations [ロール:運用] *"
+        }
+        const deleteButton = {
+          textContent: "削除",
+          title: "",
+          attributes: {},
+          setAttribute(name, value) { this.attributes[name] = value }
+        }
+
+        controller.deleteConfirmLabelValue = "この保存済み設定を削除します。よろしいですか？"
+        Object.defineProperty(controller, "hasPresetSelectTarget", { value: true })
+        Object.defineProperty(controller, "presetSelectTarget", {
+          value: { selectedOptions: [selectedOption] }
+        })
+        Object.defineProperty(controller, "hasPresetNameTarget", { value: true })
+        Object.defineProperty(controller, "presetNameTarget", { value: { value: "operations" } })
+
+        const message = controller.deletePresetConfirmationMessage()
+
+        if (!message.includes("この保存済み設定を削除します。よろしいですか？")) {
+          throw new Error("delete confirmation lost the locale-backed confirmation copy")
+        }
+
+        if (!message.includes("operations [ロール:運用]")) {
+          throw new Error("delete confirmation no longer includes the selected scoped preset display name")
+        }
+
+        if (message.includes("*")) {
+          throw new Error("delete confirmation should not include the default preset marker")
+        }
+
+        controller.updateDeletePresetButtonContext(deleteButton)
+
+        if (deleteButton.title !== message) {
+          throw new Error("delete button title no longer matches the delete confirmation message")
+        }
+
+        if (deleteButton.attributes["aria-label"] !== `削除: ${message}`) {
+          throw new Error("delete button aria-label no longer exposes the same delete target context")
+        }
+
+        controller.deleteConfirmLabelValue = ""
+
+        if (controller.deletePresetConfirmationMessage() !== "operations [ロール:運用]") {
+          throw new Error("empty delete confirmation override should keep the preset display name")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
+  it "keeps read-only presets from exposing a delete action" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const deleteButton = {
+          disabled: false,
+          textContent: "削除",
+          title: "",
+          attributes: {},
+          setAttribute(name, value) { this.attributes[name] = value }
+        }
+
+        controller.currentPreferenceEditable = false
+        controller.deleteConfirmLabelValue = "この保存済み設定を削除します。よろしいですか？"
+        Object.defineProperty(controller, "element", {
+          value: {
+            querySelectorAll(selector) {
+              if (selector === "[data-action~='rails-table-preferences#saveFromEditor']") return []
+              if (selector === "[data-action~='rails-table-preferences#deletePreset']") return [deleteButton]
+              return []
+            }
+          }
+        })
+        Object.defineProperty(controller, "hasDefaultPresetTarget", { value: false })
+        Object.defineProperty(controller, "hasReadOnlyHintTarget", { value: false })
+
+        controller.syncPresetEditingState()
+
+        if (deleteButton.disabled !== true) {
+          throw new Error("read-only preset delete action is no longer disabled")
+        }
+
+        if (!deleteButton.attributes["aria-label"]?.includes("この保存済み設定を削除します。よろしいですか？")) {
+          throw new Error("disabled delete action lost its explanatory context")
         }
       JS
 
