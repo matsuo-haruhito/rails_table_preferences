@@ -60,6 +60,7 @@ Current package-only behavior is intentionally small:
 - Sortable header handling preserves host-provided `title` attributes while still generating sort hints for untitled headers.
 - Resize handles also listen for `Enter`, Space, and legacy `Spacebar` key presses and route them to the packaged keyboard auto-fit behavior after the base controller installs the handles.
 - Lifecycle events such as `rails-table-preferences:applied`, `rails-table-preferences:saved`, `rails-table-preferences:loaded`, `rails-table-preferences:deleted`, and `rails-table-preferences:error` are dispatched by the package entrypoint. Host apps that register the copied controller directly should not assume the same event surface unless they port that behavior into their copied or replacement controller.
+- `rails-table-preferences:error` exposes stable operation labels in `event.detail.action`; use [JavaScript controller notes](javascript_controller.md#host-app-lifecycle-events) for the current action list and fallback meaning.
 
 Do not assume those package-only values, overrides, events, or keyboard affordances exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
 
