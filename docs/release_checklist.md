@@ -81,6 +81,21 @@ If `package:verify` fails, copy the compact summary line into the release-prep P
 
 Pay special attention to generator templates, copied assets, `package.json`, and package JavaScript entrypoints. Missing templates or entrypoints usually appear only when a host app runs a generator or imports the gem through a JS bundler.
 
+### RubyGems publish boundary checks
+
+Package verification confirms the built gem contents. It does not decide RubyGems account policy, trusted publishing, MFA, checksum/provenance handling, or which release artifact a human should publish.
+
+Before publishing, the release owner should confirm:
+
+- [ ] `rails_table_preferences.gemspec` metadata URLs still resolve to the intended homepage, source, changelog, and documentation pages.
+- [ ] The RubyGems account or organization that will publish the gem has the expected MFA or account-security posture.
+- [ ] The release owner has decided whether this release uses manual `gem push`, trusted publishing, or another approved publishing path; this checklist does not choose the policy.
+- [ ] The exact `.gem` artifact selected for publish is the same build output that passed `bundle exec rake package:verify`, or the release note records why a fresh artifact was built and re-verified.
+- [ ] A checksum, provenance note, or artifact identifier is recorded in the release-prep PR, tag note, or release note when the release process requires one.
+- [ ] A human release owner, not an automated docs agent, reviews the final publish command, account, artifact path, and release gate before any publish action runs.
+
+Keep these checks as release-time evidence. Do not add repository secrets, change RubyGems settings, create a tag, or publish the gem from a docs-only release-readiness task.
+
 ## 5. Install generator checks
 
 In a clean or disposable Rails app, run:
