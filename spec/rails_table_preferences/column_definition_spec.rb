@@ -222,6 +222,7 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       definition = described_class.new(key: :delivery_due_date)
 
       expect(definition.to_h["label"]).to eq("delivery_due_date")
+      expect(definition.to_h["ignored"]).to eq(false)
     end
   end
 end
