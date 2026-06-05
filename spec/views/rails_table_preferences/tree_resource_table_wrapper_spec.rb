@@ -11,7 +11,9 @@ RSpec.describe "rails_table_preferences/_tree_resource_table", type: :view do
     stub_const("TreeView::RenderState", render_state_class)
 
     allow(view).to receive(:table_preferences_editor).and_return(%(<section id="table-preferences-editor"></section>).html_safe)
-    allow(view).to receive(:tree_view_rows).and_return(%(<tr data-tree-row="true"><td>Name</td></tr>).html_safe)
+    view.define_singleton_method(:tree_view_rows) do |_render_state|
+      %(<tr data-tree-row="true"><td>Name</td></tr>).html_safe
+    end
   end
 
   it "wraps only the tree table when scroll_wrapper is enabled" do
