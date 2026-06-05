@@ -22,6 +22,8 @@ module RailsTablePreferences
                 :default_visible,
                 :default_order,
                 :default_width,
+                :default_min_width,
+                :default_max_width,
                 :default_truncate,
                 :default_overflow,
                 :pinned,
@@ -34,7 +36,7 @@ module RailsTablePreferences
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, min_width: nil, max_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
       @key = key.to_s
       @export_key = export_key&.to_s.presence
       @model = model
@@ -44,6 +46,8 @@ module RailsTablePreferences
       @default_visible = ActiveModel::Type::Boolean.new.cast(default_visible)
       @default_order = integer_or_nil(default_order)
       @default_width = integer_or_nil(default_width)
+      @default_min_width = positive_integer_or_nil(min_width)
+      @default_max_width = positive_integer_or_nil(max_width)
       @default_truncate = integer_or_nil(default_truncate)
       @default_overflow = normalize_overflow(overflow.nil? ? default_overflow : overflow)
       @pinned = ActiveModel::Type::Boolean.new.cast(fixed.nil? ? pinned : fixed)
@@ -62,6 +66,8 @@ module RailsTablePreferences
         "visible" => default_visible,
         "order" => default_order,
         "width" => default_width,
+        "min_width" => default_min_width,
+        "max_width" => default_max_width,
         "truncate" => default_truncate,
         "overflow" => default_overflow,
         "pinned" => pinned,
@@ -228,6 +234,11 @@ module RailsTablePreferences
       Integer(value)
     rescue ArgumentError, TypeError
       nil
+    end
+
+    def positive_integer_or_nil(value)
+      integer = integer_or_nil(value)
+      integer if integer&.positive?
     end
   end
 end
