@@ -318,8 +318,17 @@ th:hover > .rails-table-preferences-resize-handle,
   font: inherit;
 }
 
+.rails-table-preferences-filter-panel__option-search,
+.rails-table-preferences-filter-panel__field select[multiple] {
+  width: 100%;
+}
+
 .rails-table-preferences-filter-panel__field select[multiple] {
   min-height: 6rem;
+}
+
+.rails-table-preferences-filter-panel__field option[hidden] {
+  display: none;
 }
 
 .rails-table-preferences-filter-panel__actions {
