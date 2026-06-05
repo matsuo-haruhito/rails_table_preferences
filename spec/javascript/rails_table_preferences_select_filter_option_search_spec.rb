@@ -61,6 +61,11 @@ RSpec.describe "rails_table_preferences select filter option search" do
         const { default: ControllerClass } = await import(controllerUrl)
         const controller = new ControllerClass()
         controller.filterValueLabelValue = "値"
+        controller.escapeHtml = (value) => String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
 
         const longOptions = [
           { value: "pending", label: "未出荷" },
