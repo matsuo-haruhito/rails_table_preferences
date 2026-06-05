@@ -129,7 +129,18 @@ The current sort state is saved in the neutral `sorts` array:
 
 The bundled header click UI is intentionally single-sort. Each header click replaces `sorts` with either one sort entry for the clicked column or an empty array when the cycle clears the sort. The array shape is still neutral so adapters, imports, exports, and host-app customizations can read the same saved settings shape; it is not a promise that the bundled controller provides multi-column sort interactions.
 
-Host applications that need multi-sort UI should provide that interaction in their own controller or copied controller and write the resulting ordered sort entries into `settings["sorts"]`. Rails Table Preferences can still carry and adapt the neutral array, but the default header click behavior only manages one active sort at a time.
+Host applications that need multi-sort UI should provide that interaction in their own controller or copied controller and write the resulting ordered sort entries into `settings["sorts"]`:
+
+```json
+{
+  "sorts": [
+    { "key": "delivery_date", "direction": "desc" },
+    { "key": "customer_code", "direction": "asc" }
+  ]
+}
+```
+
+Rails Table Preferences can carry and adapt the ordered neutral array, but the default header click behavior only manages one active sort at a time. Use [Filter adapters](filter_adapters.md) to check whether a target adapter preserves every sort entry, such as Ransack, or deliberately reduces the array to a single sort for existing controller compatibility.
 
 The header also receives `aria-sort` and a minimal visual indicator:
 
@@ -201,6 +212,8 @@ Supported plain-param metadata:
 
 If an existing `search(params)` implementation expects an operator name for every condition, normalize that expectation in host-app code or provide metadata/UI conventions that match the adapter output. Rails Table Preferences keeps this adapter as a params-shaping helper; it does not execute the query or infer a host application's predicate semantics.
 
+The plain ControllerParams adapter emits one top-level sort value for compatibility with common `order_by(params[:sort])` style controllers. If `settings["sorts"]` contains multiple entries, it uses the first valid entry after metadata mapping and ignores the rest. Use the Ransack adapter or a host-owned adapter when the target search layer accepts ordered multi-sort input.
+
 ## Saved filter settings
 
 Saved filter conditions use a neutral format:
@@ -235,10 +248,16 @@ Saved filter conditions use a neutral format:
     {
       "key": "delivery_date",
       "direction": "desc"
+    },
+    {
+      "key": "customer_code",
+      "direction": "asc"
     }
   ]
 }
 ```
+
+The saved `sorts` array keeps the order written by the bundled controller, an import, or a host-app custom/copied controller. The bundled controller writes at most one entry, while custom controllers can write multiple entries when the host app owns the multi-sort interaction.
 
 `datetime` / `datetime-local` and `time` filters do not change the saved condition shape. The values above are strings from the browser input and are passed through adapters without timezone normalization. Convert them to the host application's timezone-aware query representation before executing database searches.
 
@@ -296,7 +315,7 @@ Example output:
 }
 ```
 
-Descending sorts are prefixed with `-` by default. Ascending sorts use the key as-is. Use `sort_param:` to change the top-level sort param name:
+Descending sorts are prefixed with `-` by default. Ascending sorts use the key as-is. If multiple neutral sort entries are present, this adapter emits only the first valid mapped sort because the plain controller shape has a single sort slot. Use `sort_param:` to change the top-level sort param name:
 
 ```ruby
 RailsTablePreferences::Adapters::ControllerParams.to_params(
@@ -321,4 +340,4 @@ ransack_params = RailsTablePreferences::Adapters::Ransack.to_params(
 @orders = @q.result
 ```
 
-Rails Table Preferences does not execute the query itself. Host applications remain responsible for authorization, joins, allowed searchable fields, and business-specific filtering.
+The Ransack adapter emits `"s"` as an ordered array, so multiple valid neutral sort entries are preserved in the order stored in `settings["sorts"]`. Rails Table Preferences does not execute the query itself. Host applications remain responsible for authorization, joins, allowed searchable fields, and business-specific filtering.
