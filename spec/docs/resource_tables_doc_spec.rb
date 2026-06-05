@@ -13,7 +13,7 @@ RSpec.describe "resource table docs" do
       "`records.klass`",
       "Plain arrays can still work when they contain at least one record",
       "When records do not expose `klass` and may be empty, pass the model explicitly or put the model on the profile",
-      "`resource_table_for [], model: Order`",
+      "resource_table_for [], model: Order",
       "class OrdersTableProfile < RailsTablePreferences::TableProfile",
       "model Order",
       "model: is required when records do not expose klass and are empty"
