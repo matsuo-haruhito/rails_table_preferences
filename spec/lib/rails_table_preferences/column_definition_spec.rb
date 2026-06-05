@@ -70,4 +70,20 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       "label" => "customer"
     )
   end
+
+  it "normalizes select filter label/value option metadata" do
+    column = described_class.new(
+      key: :status,
+      label: "状態",
+      filter: { type: :select, options: [{ value: :pending, label: "未出荷" }, "出荷済"] }
+    )
+
+    expect(column.to_h["filter"]).to eq(
+      "type" => "select",
+      "options" => [
+        { "value" => "pending", "label" => "未出荷" },
+        "出荷済"
+      ]
+    )
+  end
 end
