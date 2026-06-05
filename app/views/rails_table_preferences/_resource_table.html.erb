@@ -53,7 +53,7 @@
         </tr>
       <% else %>
         <% records.each do |record| %>
-          <tr>
+          <tr data-rails-table-preferences-resource-row="true">
             <% visible_columns.each do |column| %>
               <%= tag.td(data: table_preferences_column_data_attributes(column)) do %>
                 <%= table_preferences_value(record, column) %>
