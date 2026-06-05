@@ -277,6 +277,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
   }
 
+  clearFiltersAndSorts(event) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
+    this.closeFilterPanel()
+    this.apply()
+  }
+
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
     super.openFilterPanel(headerCell, column, button)
     if (!this.filterPanel) return

@@ -432,4 +432,53 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
       run_node_entrypoint_check(controller_entrypoint_path, script:)
     end
   end
+
+  it "clears filters and sorts without replacing display column settings" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const columns = [
+          { key: "status", visible: false, order: 20, width: 180, overflow: "wrap" },
+          { key: "created_at", visible: true, order: 10, width: 120 }
+        ]
+        let closedPanel = false
+        let applied = false
+
+        controller.busy = false
+        controller.settingsValue = {
+          columns,
+          filters: { status: { operator: "equals", value: "pending" } },
+          sorts: [{ key: "created_at", direction: "desc" }]
+        }
+        controller.closeFilterPanel = () => { closedPanel = true }
+        controller.apply = () => { applied = true }
+
+        controller.clearFiltersAndSorts({ preventDefault() {} })
+
+        if (controller.settingsValue.columns !== columns) {
+          throw new Error("display column settings were replaced")
+        }
+
+        if (Object.keys(controller.settingsValue.filters).length !== 0) {
+          throw new Error("filters were not cleared")
+        }
+
+        if (controller.settingsValue.sorts.length !== 0) {
+          throw new Error("sorts were not cleared")
+        }
+
+        if (!closedPanel || !applied) {
+          throw new Error("clear action did not close the filter panel and re-apply table state")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
 end
