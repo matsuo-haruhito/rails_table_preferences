@@ -11,7 +11,7 @@ The goal is to catch packaging, generator, documentation, and host-application i
 - [ ] Move `CHANGELOG.md` entries from `[Unreleased]` to the target version section.
 - [ ] For the v0.1.0 release-prep or tag PR, keep a fresh empty `[Unreleased]` section for post-release work and rename `[0.1.0] - Unreleased` to `[0.1.0] - YYYY-MM-DD` with the actual release date.
 - [ ] Do not describe open pull requests, proposal issues, or unmerged roadmap items as released in `[0.1.0]`; leave them in `[Unreleased]` or out of the release entry until they land.
-- [ ] Confirm the README "Remaining before tagging v0.1" checklist still matches the changelog cutover state before tagging.
+- [ ] Confirm the README release-readiness summary still matches the changelog cutover state before tagging.
 - [ ] Confirm `CHANGELOG.md` covers user-facing changes, migration changes, generator changes, JavaScript/CSS changes, and known limitations.
 - [ ] Confirm `CHANGELOG.md`, README current scope, and `Product Profile.md` release posture describe the same current `main` product surface.
 - [ ] Confirm open pull requests and proposal issues are not described as released behavior unless they have already been merged.
@@ -81,6 +81,21 @@ If `package:verify` fails, copy the compact summary line into the release-prep P
 
 Pay special attention to generator templates, copied assets, `package.json`, and package JavaScript entrypoints. Missing templates or entrypoints usually appear only when a host app runs a generator or imports the gem through a JS bundler.
 
+### RubyGems publish boundary checks
+
+Package verification confirms the built gem contents. It does not decide RubyGems account policy, trusted publishing, MFA, checksum/provenance handling, or which release artifact a human should publish.
+
+Before publishing, the release owner should confirm:
+
+- [ ] `rails_table_preferences.gemspec` metadata URLs still resolve to the intended homepage, source, changelog, and documentation pages.
+- [ ] The RubyGems account or organization that will publish the gem has the expected MFA or account-security posture.
+- [ ] The release owner has decided whether this release uses manual `gem push`, trusted publishing, or another approved publishing path; this checklist does not choose the policy.
+- [ ] The exact `.gem` artifact selected for publish is the same build output that passed `bundle exec rake package:verify`, or the release note records why a fresh artifact was built and re-verified.
+- [ ] A checksum, provenance note, or artifact identifier is recorded in the release-prep PR, tag note, or release note when the release process requires one.
+- [ ] A human release owner, not an automated docs agent, reviews the final publish command, account, artifact path, and release gate before any publish action runs.
+
+Keep these checks as release-time evidence. Do not add repository secrets, change RubyGems settings, create a tag, or publish the gem from a docs-only release-readiness task.
+
 ## 5. Install generator checks
 
 In a clean or disposable Rails app, run:
@@ -103,6 +118,9 @@ Confirm:
 - [ ] `--skip-javascript` skips JavaScript copying.
 - [ ] `--skip-stylesheets` skips stylesheet copying.
 - [ ] `--with-demo` copies the demo controller and view.
+- [ ] `--with-demo-route` copies the demo controller and view and adds `get "/rails_table_preferences_demo/orders"` once.
+- [ ] Re-running `--with-demo-route` does not duplicate an existing representative demo route.
+- [ ] Demo route post-install guidance is accurate both when the route is added and when it must be added manually.
 - [ ] Post-install messages are accurate for both `stimulus-rails` and Vite / `app/frontend` setups.
 
 ## 6. JavaScript entrypoint checks
@@ -121,11 +139,11 @@ For frontend integration, confirm:
 Run through the demo or sandbox flow:
 
 ```bash
-bin/rails generate rails_table_preferences:install --with-demo
+bin/rails generate rails_table_preferences:install --with-demo-route
 bin/rails db:migrate
 ```
 
-Add the required routes:
+Mount the engine for the bundled JSON API. If you run `--with-demo` instead of `--with-demo-route`, also add the demo route manually:
 
 ```ruby
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
@@ -200,29 +218,18 @@ Confirm controller integration behavior:
 
 Check the main user paths:
 
-- [ ] README links to Quick start.
-- [ ] README links to Japanese quick start.
-- [ ] README links to Production integration checklist.
-- [ ] README links to Decision guide.
-- [ ] README links to Scoped presets.
-- [ ] README links to Fixed columns and column groups.
-- [ ] README links to Export integration.
-- [ ] README links to Accessibility baseline.
-- [ ] README links to Demo screen generator.
-- [ ] README links to Sandbox verification.
-- [ ] README links to Troubleshooting.
-- [ ] README links to Manual QA.
-- [ ] README links to Release checklist.
-- [ ] README links to Package verification.
-- [ ] README links to JavaScript entrypoints.
-- [ ] `docs/index.md` links to all major docs.
-- [ ] README remains a short newcomer-facing entry point, while `docs/index.md` remains the detailed hub for current focused guides.
+- [ ] README remains a short newcomer-facing entry point and links to the full docs index.
+- [ ] README links directly to the primary start-here paths: Quick start, Japanese quick start, Production integration checklist, Install path options, Support matrix, Decision guide, Demo screen generator, and Troubleshooting.
+- [ ] README links to Product Profile, AGENTS.md, and CHANGELOG.md for maintainer orientation.
+- [ ] `docs/index.md` remains the detailed hub for focused guides that do not need a direct README link.
+- [ ] `docs/index.md` links to the current start-here guides, core topic guides, manual QA, release checklist, package verification, JavaScript entrypoints, mounted JSON API, controller integration, filter docs, and maintainer entry docs.
+- [ ] Focused docs that README mentions only through the docs index, such as Scoped presets, Fixed columns and column groups, Export integration, Accessibility baseline, Sandbox verification, Manual QA, Release checklist, Package verification, and JavaScript entrypoints, remain reachable from `docs/index.md`.
 - [ ] README, `CHANGELOG.md`, and `Product Profile.md` stay synchronized on initial release posture, support matrix, current scope, responsibility boundary, and docs entrypoints.
 - [ ] `docs/quick_start_ja.md` remains a low-drift entry point: its links and short summaries follow the current README and focused English docs for install/package entrypoints, production integration/support matrix, filter/sort/scoped preset/export/resource table surfaces, and demo/sandbox/manual QA/release/package verification without becoming a full translation.
 - [ ] `Product Profile.md` is synchronized with the released product surface, responsibility boundary, and release posture without copying focused guide details.
 - [ ] Installation docs mention engine mount.
 - [ ] Installation docs mention Vite / `app/frontend` controller registration.
-- [ ] Demo docs clearly say the demo route must be added manually.
+- [ ] Demo docs explain both the `--with-demo-route` option and the manual demo route fallback when using `--with-demo`.
 - [ ] `docs/production_integration_checklist.md` stays discoverable as the bridge from quick start or demo verification to a real host-app index screen.
 - [ ] `docs/demo.md`, `docs/manual_qa.md`, and `docs/release_checklist.md` stay aligned on the current demo verification surface, including owner/scope summaries, scoped preset precedence, export payload preview, grouped-header consistency, and async preset recovery.
 - [ ] Troubleshooting covers Stimulus, Vite entrypoints, CSS, CSRF, auth, current user, scoped presets, filter/sort, and ignored columns.
@@ -250,6 +257,41 @@ Before publishing, summarize:
 - [ ] JavaScript/CSS integration changes.
 - [ ] Known limitations.
 - [ ] Upgrade notes for existing users.
+
+Use `CHANGELOG.md` as the detailed release history. Use the release note as a short adoption-facing summary that a host-app maintainer can scan before trying the gem. Do not copy open pull requests, proposal issues, or unmerged behavior into the release note as released support.
+
+For the first public `0.1.0` release, start from this compact template in the release-prep PR body or GitHub release draft:
+
+```markdown
+## Summary
+
+- Rails Table Preferences provides owner-aware table display preferences for Rails index screens, including columns, filters, sorts, scoped presets, and export payload metadata.
+- The gem is intended to layer onto existing host-app queries, authorization, search forms, and CSV/Excel/report generation rather than replacing them.
+
+## Upgrade notes
+
+- Run the install generator and migration before using the bundled JSON API or helpers.
+- Mount the engine when using bundled preset save/load/delete endpoints.
+- Register either the copied Stimulus controller or the package entrypoint; do not register both for the same screen.
+- Treat existing `ColumnAdjustment` import, owner model configuration, and scoped preset setup as host-app integration work.
+
+## Known limitations
+
+- Host apps own database search, joins, authorization, pagination, and export file generation.
+- Host apps own complex sticky layout polish, grouped header markup, and final dense-table CSS verification.
+- Shared, role, and organization presets are supported as data scopes, but a full administrative UI for managing them is outside this release.
+- Newer Rails releases outside the documented representative CI matrix need additional host-app verification before production adoption.
+
+## Checks and evidence
+
+- CI on the release commit:
+- `bundle exec rake package:verify` result:
+- Demo or sandbox verification:
+- Manual QA / host-app smoke:
+- Known-good rollback target:
+```
+
+Keep the template current with the landed `main` product surface. If a line depends on an open pull request, proposal issue, publish policy, or dated changelog cutover, leave it out until the relevant decision lands.
 
 ## 12. Publish or tag
 

@@ -4,6 +4,8 @@ Rails Table Preferences exposes a small JSON API from the mounted engine. The bu
 
 Use this guide when a host app copies the bundled UI, writes integration tests around the mounted engine, or needs to understand the owner preset payload shape. The host app still owns authentication, authorization, routing around the mounted engine, and any business-specific query behavior.
 
+For non-owner scoped preset management, use this page to understand the request and response shape, then follow [Scoped presets](scoped_presets.md#minimal-operating-patterns) for the host-app-owned seed, admin form, service object, or maintenance path. The regular editor route remains the owner-preset path for normal users; shared, role, and organization write policy belongs to the host application.
+
 ## Route shape
 
 Mount the engine in the host application:
@@ -58,6 +60,8 @@ Response:
 ```
 
 The list includes preferences available to the current owner and scope context. See [Scoped presets](scoped_presets.md) for the owner/shared/role/organization resolution rules.
+
+If the list includes shared, role, or organization presets, treat those records as readable choices for the editor. Creating or updating those records should happen through a host-app admin path, seed task, service object, or maintenance script that enforces the application's authorization and tenant rules.
 
 ## Load one preset
 
@@ -193,6 +197,8 @@ Deleting a missing preset is still a no-content response from the mounted contro
 | `scope_key` | create/update/show/delete query or body params | Scope identifier for role or organization presets. Empty for owner and shared presets. |
 
 For owner presets, do not send `scope_type` or send `"owner"`. The controller writes the preference against the configured current owner.
+
+The `scope_type` and `scope_key` fields are the storage and resolver contract for non-owner presets, but they are not an authorization policy. When a host app uses them for shared, role, or organization presets, keep the write path outside the normal editor flow and protect it with app-specific admin authorization. Use the same parameter shape in seeds, internal forms, service objects, or maintenance scripts so admin-created records stay compatible with the resolver and list response.
 
 ## Response fields
 
