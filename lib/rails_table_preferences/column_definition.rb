@@ -194,6 +194,23 @@ module RailsTablePreferences
     def normalize_filter_hash(value)
       value.deep_stringify_keys.compact.tap do |attributes|
         attributes["type"] = attributes["type"].to_s if attributes["type"].present?
+        attributes["options"] = normalize_filter_options(attributes["options"]) if attributes.key?("options")
+      end
+    end
+
+    def normalize_filter_options(options)
+      return options unless options.is_a?(Array)
+
+      options.map do |option|
+        case option
+        when Hash
+          option.deep_stringify_keys.compact.tap do |attributes|
+            attributes["value"] = attributes["value"].to_s if attributes.key?("value")
+            attributes["label"] = attributes["label"].to_s if attributes.key?("label")
+          end
+        else
+          option
+        end
       end
     end
 
