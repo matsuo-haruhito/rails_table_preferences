@@ -816,7 +816,7 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
 
     mutations = page.evaluate_script("window.__rtpTestApi.mutations")
     expect(mutations.map { |mutation| mutation.fetch("method") }).to eq(["POST"])
-    expect(mutations.first.fetch("url")).to end_with("/rails_table_preferences/preferences")
+    expect(mutations.first.fetch("url")).to end_with("/rails_table_preferences/preferences/rails_table_preferences_system_smoke_orders")
     expect(mutations.first.fetch("name")).to eq("共有ビュー")
     expect(mutations.first.fetch("settings").fetch("columns")).to include(
       hash_including("key" => "amount", "visible" => false)
