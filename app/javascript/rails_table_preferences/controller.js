@@ -6,11 +6,114 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     filterOperatorLabels: { type: Object, default: {} }
   }
 
+  connect() {
+    this.statusState = "idle"
+    super.connect()
+  }
+
   applyFromEditor(event) {
     const wasBusy = this.busy
     const result = super.applyFromEditor(event)
-    if (!wasBusy) this.dispatchPreferenceEvent("applied", { action: "apply" })
+    if (!wasBusy) {
+      this.clearSuccessfulStatus()
+      this.dispatchPreferenceEvent("applied", { action: "apply" })
+    }
     return result
+  }
+
+  resetEditor(event) {
+    const wasBusy = this.busy
+    const result = super.resetEditor(event)
+    if (!wasBusy) this.clearSuccessfulStatus()
+    return result
+  }
+
+  buildEditorRow(column) {
+    const row = super.buildEditorRow(column)
+    row.addEventListener("input", () => this.clearSuccessfulStatus())
+    row.addEventListener("change", () => this.clearSuccessfulStatus())
+    return row
+  }
+
+  dragEditorRowOver(event) {
+    super.dragEditorRowOver(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dropEditorRow(event) {
+    super.dropEditorRow(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dragEditorRowEnd(event) {
+    super.dragEditorRowEnd(event)
+    this.clearSuccessfulStatus()
+  }
+
+  resizeColumn(event) {
+    super.resizeColumn(event)
+    this.clearSuccessfulStatus()
+  }
+
+  autoFitColumnFromHandle(event) {
+    super.autoFitColumnFromHandle(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dragTableColumnOver(event) {
+    super.dragTableColumnOver(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dropTableColumn(event) {
+    super.dropTableColumn(event)
+    this.clearSuccessfulStatus()
+  }
+
+  endTableColumnDrag(event) {
+    super.endTableColumnDrag(event)
+    this.clearSuccessfulStatus()
+  }
+
+  toggleSortFromHeader(event, cell, column) {
+    super.toggleSortFromHeader(event, cell, column)
+    this.clearSuccessfulStatus()
+  }
+
+  applyFilterPanel(key, panel) {
+    super.applyFilterPanel(key, panel)
+    this.clearSuccessfulStatus()
+  }
+
+  clearFilter(key) {
+    super.clearFilter(key)
+    this.clearSuccessfulStatus()
+  }
+
+  setStatus(message, state = "idle") {
+    this.statusState = message ? state : "idle"
+    super.setStatus(message)
+  }
+
+  clearSuccessfulStatus() {
+    if (this.statusState === "success") this.setStatus("")
+  }
+
+  async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
+    if (this.busy) return null
+    this.setBusyState(true)
+    if (busyLabel) this.setStatus(busyLabel, "busy")
+
+    try {
+      const result = await callback()
+      if (successLabel) this.setStatus(successLabel, "success")
+      return result
+    } catch (error) {
+      this.handleOperationError(error, errorLabel)
+      return null
+    } finally {
+      this.setBusyState(false)
+    }
   }
 
   async save(event) {
@@ -73,6 +176,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   handleOperationError(error, message = this.operationFailedStatusLabelValue) {
     super.handleOperationError(error, message)
+    this.statusState = "error"
     this.dispatchPreferenceEvent("error", {
       action: this.currentPreferenceAction || "operation",
       message: message || this.operationFailedStatusLabelValue
