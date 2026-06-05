@@ -265,6 +265,9 @@ th:hover > .rails-table-preferences-resize-handle,
 .rails-table-preferences-filter-button--active {
   font-weight: 700;
   text-decoration: underline;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
+  box-shadow: inset 0 0 0 2px currentColor;
 }
 
 .rails-table-preferences-filter-panel {
