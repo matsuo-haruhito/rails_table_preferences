@@ -177,6 +177,14 @@ merged_params = rails_table_preference_merged_params(
 
 Saved preference params override existing params when keys overlap.
 
+## Pagination and page params
+
+Rails Table Preferences does not decide when a paginated list should reset to the first page. If a saved filter or sort changes the effective result set while the request still carries an old `page` param, the host application's paginator can legitimately render an empty page even though matching records exist on earlier pages.
+
+Keep that decision in the host app's search flow. Common patterns are to clear `page` when the user submits a new search form, to clear it when `table_preference_name` changes, or to clamp an out-of-range page in the controller after the query runs. Do not rely on `rails_table_preference_params(...)`, `rails_table_preference_merged_params(...)`, or `table_preferences_hidden_fields(...)` to rewrite pagination params for every application.
+
+When the form should keep the current page, submit `page` explicitly as part of the normal host-app form. When applying a saved preset should restart the result list, omit or clear `page` before calling the host application's search and pagination code.
+
 ## Ransack controllers
 
 Use `adapter: :ransack` when the host application already uses Ransack:
@@ -281,5 +289,6 @@ The host application remains responsible for:
 - joins and associations
 - validating searchable fields
 - business-specific search behavior
+- deciding whether saved filter/sort changes should clear or clamp pagination params
 - CSV, Excel, or report file generation
 - admin UI and permission checks for shared, role, or organization presets
