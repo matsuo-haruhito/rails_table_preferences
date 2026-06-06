@@ -34,6 +34,7 @@ See [Resource table adapters](resource_tables.md), [Table data attribute merge b
 - Map `filter:` metadata to the host app's existing query params before changing controller search code.
 - Use `rails_table_preference_params(...)` or `rails_table_preference_merged_params(...)` when the controller should merge saved filter/sort state into existing search params.
 - Use `table_preferences_hidden_fields(...)` when a GET search form should carry saved filter/sort state without rewriting the form flow.
+- Decide in the host app whether a saved filter/sort change should clear, keep, or clamp the existing `page` param; Rails Table Preferences does not own pagination reset behavior.
 - For Ransack, Datagrid, Filterrific, or custom search objects, keep adapter logic in the host app and verify the generated params before saving a preset.
 
 See [Controller integration](controller_integration.md), [Filter metadata](filter_metadata.md), [Filter adapters](filter_adapters.md), and [Production troubleshooting notes](production_troubleshooting.md#saved-presets-do-not-come-back-on-the-same-screen).
@@ -65,7 +66,7 @@ Before asking real users to try the screen, verify this path in the real host ap
 2. Change visible columns, order, width, overflow, filter state, and sort state for one table.
 3. Save the preset, reload the page, and confirm the same table state returns.
 4. Trigger one Turbo Drive or Turbo Frame replacement that re-renders the editor and target table, then confirm both reconnect with the same `table_key`, `name`, `columns`, `settings`, collection/member URL values, and managed column keys so saved visibility/order/filter/sort state does not drift between the editor and table. When pagination or filtering paths are also used, repeat the reload through those paths and confirm the same stable `table_key` still resolves the preset.
-5. Submit the existing search form and confirm saved filter/sort state still round-trips.
+5. Submit the existing search form and confirm saved filter/sort state still round-trips. If the screen can keep an old `page` param, repeat the same check from a later page and confirm the host app either clears, clamps, or intentionally preserves that page after saved filters/sorts change the result set.
 6. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
 7. If resource table profile formatters read associations, render representative rows while watching the host app's query log or existing N+1 guard and confirm the relation preloads those associations explicitly.
 8. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.

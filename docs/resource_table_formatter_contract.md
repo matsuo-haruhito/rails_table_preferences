@@ -42,6 +42,24 @@ display :customer_name do |order|
 end
 ```
 
+## HTML safety and escaping
+
+Formatter return values are presentation results that flow into Rails view rendering. A plain `String` should be treated as text content, not as an instruction to render raw HTML. If a cell needs a badge, link, icon wrapper, or other HTML output, return a value from Rails view helpers such as `view.tag.*` or `view.link_to` so the host app is making the HTML-safe boundary explicit through the normal Rails view contract.
+
+```ruby
+cell :status do |order, _column, view|
+  view.tag.span(order.status_label, class: "status-badge status-badge--#{order.status}")
+end
+```
+
+```ruby
+display :customer do |order, view|
+  view.link_to order.customer.name, view.customer_path(order.customer)
+end
+```
+
+Do not use formatter blocks as an authorization, redaction, or route-policy shortcut. When a formatter returns a link or component-like fragment, the host app still owns the target route, permission check, sensitive-field redaction, CSS classes, and any design-system conventions behind that output.
+
 ## Association and query boundaries
 
 Formatters may read associations or call helpers, but they do not move eager loading ownership into Rails Table Preferences. When a formatter reads `order.customer.name` or similar association data, preload that association in the host app relation and keep the formatter focused on presentation.
