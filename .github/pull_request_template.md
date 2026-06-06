@@ -4,7 +4,11 @@
 
 ## Related Issues
 
-Closes #
+Choose the relationship intentionally and remove unused lines.
+
+- Closes #... when this PR fully completes the issue on merge.
+- Refs #... when this PR is partial, stacked, exploratory, or needs human review before the issue should close.
+- Supersedes #... when this PR replaces an older PR or proposal; name the replaced PR in Notes or the focused QA section.
 
 ## Changes
 
