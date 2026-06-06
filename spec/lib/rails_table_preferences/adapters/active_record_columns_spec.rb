@@ -6,8 +6,8 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
   end
 
   let(:customer_reflection) do
-    instance_double(
-      "ActiveRecord::Reflection::BelongsToReflection",
+    double(
+      "customer reflection",
       name: :customer,
       foreign_key: "customer_id",
       class_name: "Customer"
@@ -15,7 +15,7 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
   end
 
   let(:model) do
-    class_double(
+    double(
       "Order",
       attribute_names: %w[id order_no customer_id status created_at],
       defined_enums: {},
