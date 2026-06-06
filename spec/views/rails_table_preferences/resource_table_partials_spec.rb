@@ -67,6 +67,21 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "renders tree resource table captions as semantic table captions" do
+    stub_tree_view_for_partial
+    view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
+
+    render partial: "rails_table_preferences/tree_resource_table", locals: base_locals.merge(
+      caption: "Project hierarchy",
+      parent_id_method: :parent_id,
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("<caption>Project hierarchy</caption>")
+    expect(rendered.index("<caption>Project hierarchy</caption>")).to be < rendered.index("<thead>")
+    expect(rendered).not_to include("caption=\"Project hierarchy\"")
+  end
+
   it "renders a table-specific empty message for empty resource table records" do
     render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
       options: {
