@@ -6,21 +6,19 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
   end
 
   let(:customer_reflection) do
-    double(
-      "customer reflection",
-      name: :customer,
-      foreign_key: "customer_id",
-      class_name: "Customer"
-    )
+    Struct.new(:name, :foreign_key, :class_name).new(:customer, "customer_id", "Customer")
   end
 
   let(:model) do
-    double(
-      "Order",
-      attribute_names: %w[id order_no customer_id status created_at],
-      defined_enums: {},
-      reflect_on_all_associations: [customer_reflection]
-    )
+    reflection = customer_reflection
+
+    Object.new.tap do |model|
+      model.define_singleton_method(:attribute_names) { %w[id order_no customer_id status created_at] }
+      model.define_singleton_method(:defined_enums) { {} }
+      model.define_singleton_method(:reflect_on_all_associations) do |type|
+        type == :belongs_to ? [reflection] : []
+      end
+    end
   end
 
   def column_keys(columns)
