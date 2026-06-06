@@ -142,22 +142,27 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   async save(event) {
+    if (this.busy) return null
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor(event)
 
     const result = await this.withPreferenceAction("save", () => super.save(event))
-    if (result !== null) this.dispatchPreferenceEvent("saved", { action: "save" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "save" })
     return result
   }
 
   async createPresetFromEditor(event) {
+    if (this.busy) return null
+
     const result = await this.withPreferenceAction("create", () => super.createPresetFromEditor(event))
-    if (result !== null) this.dispatchPreferenceEvent("saved", { action: "create" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "create" })
     return result
   }
 
   async selectPreset(event) {
+    if (this.busy) return null
+
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
-    if (result !== null) this.dispatchPreferenceEvent("loaded", { action: "load" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("loaded", { action: "load" })
     return result
   }
 
@@ -191,7 +196,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         errorLabel: this.deletingFailedStatusLabelValue
       })
     })
-    if (result !== null) this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })
     return result
   }
 
