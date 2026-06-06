@@ -51,6 +51,15 @@ For static visual docs or docs image changes, use the `Static visual docs or doc
   - Default desktop or host-app list width
   - One narrow width or narrow container when layout can wrap
   - One long-label, long-value, or empty/loading/error state when relevant
+  - One forced-colors or high contrast state when color, focus, filter, sort, resize, panel, or pinned/fixed column cues are touched
+- Narrow editor-row evidence, when editor layout or dense labels are touched:
+  - 320px / 375px / 390px-equivalent width, or narrow container used:
+  - Long Japanese or unbroken label checked:
+  - Drag handle, visible checkbox, order/width/truncate inputs remained reachable, or human handoff because:
+- Forced-colors / high contrast evidence, when relevant:
+  - Mode or environment used:
+  - States checked: active filter / sorted header / focused resize handle / open filter panel / pinned or fixed column / other:
+  - States skipped and why:
 - If browser capture was unavailable, substitute evidence is listed in the PR body or comment, such as focused specs, source-level DOM assertions, static visual reference review, or human reviewer handoff.
 
 ## Existing Behavior / Compatibility
