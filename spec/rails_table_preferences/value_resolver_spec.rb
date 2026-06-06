@@ -103,7 +103,7 @@ RSpec.describe RailsTablePreferences::ValueResolver do
       end
 
       it "uses view localization for time-like values" do
-        value = Time.zone.local(2026, 6, 6, 12, 0, 0)
+        value = Time.utc(2026, 6, 6, 12, 0, 0)
         localizing_view = double("view_context", l: "June 6, 2026 12:00")
         record = fallback_record_class.new(published_at: value)
 
@@ -112,7 +112,7 @@ RSpec.describe RailsTablePreferences::ValueResolver do
       end
 
       it "returns the original time-like value when localization cannot handle it" do
-        value = Time.zone.local(2026, 6, 6, 12, 0, 0)
+        value = Time.utc(2026, 6, 6, 12, 0, 0)
         failing_view = double("view_context")
         allow(failing_view).to receive(:l).with(value).and_raise(I18n::ArgumentError, "unsupported")
         record = fallback_record_class.new(published_at: value)
