@@ -42,8 +42,9 @@ If a host app uses a newer release, such as Rails 8.1, treat that as additional 
 A compact verification path is:
 
 1. Generate the demo screen with [Demo screen generator](demo.md) and confirm the bundled editor surface, scoped preset examples, current scope context summary, and export payload preview.
-2. Use [Sandbox Rails app verification](sandbox.md) to confirm install, engine mount, copied/package JavaScript and CSS, and end-to-end preference wiring in a minimal app.
-3. Run [Manual QA checklist](manual_qa.md) in the real host app to verify authentication, authorization, layout, accessibility, and existing search/export integration.
+2. Use [Production integration checklist](production_integration_checklist.md) to bridge the working demo or quick start into a real host-app index screen, including owner, route, query params, authorization, layout, and export boundaries.
+3. Use [Sandbox Rails app verification](sandbox.md) to confirm install, engine mount, copied/package JavaScript and CSS, and end-to-end preference wiring in a minimal app.
+4. Run [Manual QA checklist](manual_qa.md) in the real host app to verify authentication, authorization, layout, accessibility, and existing search/export integration.
 
 ## What the matrix does not cover
 

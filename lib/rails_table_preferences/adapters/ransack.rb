@@ -85,7 +85,7 @@ module RailsTablePreferences
 
         case operator
         when "in", "not_in"
-          condition["values"] || condition["value"] || []
+          array_value(condition["values"] || condition["value"])
         when "blank", "present", "true", "false"
           true
         else
@@ -105,6 +105,17 @@ module RailsTablePreferences
         return false if %w[blank present true false].include?(predicate)
 
         blank?(value)
+      end
+
+      def array_value(value)
+        case value
+        when Array
+          value.reject { |item| blank?(item) }
+        when nil
+          []
+        else
+          [value]
+        end
       end
 
       def columns_by_key(columns)

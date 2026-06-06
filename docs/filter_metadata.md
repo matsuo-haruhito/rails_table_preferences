@@ -51,7 +51,54 @@ table_preferences_column(:internal_note, label: "内部メモ", filter: false, o
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
 
-For bundled `select` filters, `options:` is currently a scalar list. Each option is used as both the HTML `<option value>` and the visible option text, and saved filter summaries display the saved scalar values. If a host app needs separate machine values and human labels, keep that mapping in host-app code, provide a copied/custom controller or filter UI, or wait for a dedicated value/label pair feature rather than documenting `{ value:, label: }` as supported by the bundled controller today.
+For bundled `select` filters, `options:` accepts scalar values or label/value hashes. Scalar options keep the historical behavior: the same value is used for the HTML `<option value>`, visible option text, saved filter value, and adapter params.
+
+Use `{ value:, label: }` when the saved/search value should be stable machine data and the UI should show a human label:
+
+```ruby
+table_preferences_column(
+  :status,
+  label: "状態",
+  filter: {
+    type: :select,
+    values_param: :statuses,
+    options: [
+      { value: "pending", label: "未出荷" },
+      { value: "shipped", label: "出荷済" },
+      { value: "hold", label: "保留" }
+    ]
+  }
+)
+```
+
+The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
+
+For bundled single-value `text`, `number`, and `date` filters, `placeholder:` is rendered as the browser `placeholder` attribute on the generated value input:
+
+```ruby
+table_preferences_column(
+  :order_number,
+  label: "注文番号",
+  filter: { type: :text, placeholder: "例: ORD-1001" }
+)
+```
+
+For the `between` operator, use separate `from_placeholder:` and `to_placeholder:` metadata so the lower and upper bound inputs can show different examples:
+
+```ruby
+table_preferences_column(
+  :delivery_date,
+  label: "納品日",
+  filter: {
+    type: :date,
+    operators: %i[between],
+    from_placeholder: "2026-01-01",
+    to_placeholder: "2026-01-31"
+  }
+)
+```
+
+Placeholder values are escaped before they are written to the generated input attributes. They are only browser affordances; they do not change saved filter settings, controller params adapter output, validation, query execution, or filter summaries. Select filter prompts, visible hint text, and validation messages remain outside the bundled controller contract for this slice.
 
 ## Richer widget rendering
 
@@ -113,7 +160,18 @@ The current sort state is saved in the neutral `sorts` array:
 
 The bundled header click UI is intentionally single-sort. Each header click replaces `sorts` with either one sort entry for the clicked column or an empty array when the cycle clears the sort. The array shape is still neutral so adapters, imports, exports, and host-app customizations can read the same saved settings shape; it is not a promise that the bundled controller provides multi-column sort interactions.
 
-Host applications that need multi-sort UI should provide that interaction in their own controller or copied controller and write the resulting ordered sort entries into `settings["sorts"]`. Rails Table Preferences can still carry and adapt the neutral array, but the default header click behavior only manages one active sort at a time.
+Host applications that need multi-sort UI should provide that interaction in their own controller or copied controller and write the resulting ordered sort entries into `settings["sorts"]`:
+
+```json
+{
+  "sorts": [
+    { "key": "delivery_date", "direction": "desc" },
+    { "key": "customer_code", "direction": "asc" }
+  ]
+}
+```
+
+Rails Table Preferences can carry and adapt the ordered neutral array, but the default header click behavior only manages one active sort at a time. Use [Filter adapters](filter_adapters.md) to check whether a target adapter preserves every sort entry, such as Ransack, or deliberately reduces the array to a single sort for existing controller compatibility.
 
 The header also receives `aria-sort` and a minimal visual indicator:
 
@@ -146,7 +204,10 @@ columns = [
   table_preferences_column(
     :status,
     label: "状態",
-    filter: { type: :select, values_param: :statuses, options: ["未出荷", "出荷済"] }
+    filter: { type: :select, values_param: :statuses, options: [
+      { value: "pending", label: "未出荷" },
+      { value: "shipped", label: "出荷済" }
+    ] }
   ),
   table_preferences_column(
     :delivery_date,
@@ -179,6 +240,8 @@ Supported plain-param metadata:
 
 If an existing `search(params)` implementation expects an operator name for every condition, normalize that expectation in host-app code or provide metadata/UI conventions that match the adapter output. Rails Table Preferences keeps this adapter as a params-shaping helper; it does not execute the query or infer a host application's predicate semantics.
 
+The plain ControllerParams adapter emits one top-level sort value for compatibility with common `order_by(params[:sort])` style controllers. If `settings["sorts"]` contains multiple entries, it uses the first valid entry after metadata mapping and ignores the rest. Use the Ransack adapter or a host-owned adapter when the target search layer accepts ordered multi-sort input.
+
 ## Saved filter settings
 
 Saved filter conditions use a neutral format:
@@ -192,7 +255,7 @@ Saved filter conditions use a neutral format:
     },
     "status": {
       "operator": "in",
-      "values": ["未出荷", "出荷済"]
+      "values": ["pending", "shipped"]
     },
     "delivery_date": {
       "operator": "between",
@@ -204,10 +267,16 @@ Saved filter conditions use a neutral format:
     {
       "key": "delivery_date",
       "direction": "desc"
+    },
+    {
+      "key": "customer_code",
+      "direction": "asc"
     }
   ]
 }
 ```
+
+The saved `sorts` array keeps the order written by the bundled controller, an import, or a host-app custom/copied controller. The bundled controller writes at most one entry, while custom controllers can write multiple entries when the host app owns the multi-sort interaction.
 
 `SettingsNormalizer` normalizes:
 
@@ -256,14 +325,14 @@ Example output:
 ```ruby
 {
   "search_word" => "山田",
-  "statuses" => ["未出荷", "出荷済"],
+  "statuses" => ["pending", "shipped"],
   "from_date" => "2026-01-01",
   "to_date" => "2026-01-31",
   "sort" => "-delivery_date"
 }
 ```
 
-Descending sorts are prefixed with `-` by default. Ascending sorts use the key as-is. Use `sort_param:` to change the top-level sort param name:
+Descending sorts are prefixed with `-` by default. Ascending sorts use the key as-is. If multiple neutral sort entries are present, this adapter emits only the first valid mapped sort because the plain controller shape has a single sort slot. Use `sort_param:` to change the top-level sort param name:
 
 ```ruby
 RailsTablePreferences::Adapters::ControllerParams.to_params(
@@ -288,4 +357,4 @@ ransack_params = RailsTablePreferences::Adapters::Ransack.to_params(
 @orders = @q.result
 ```
 
-Rails Table Preferences does not execute the query itself. Host applications remain responsible for authorization, joins, allowed searchable fields, and business-specific filtering.
+The Ransack adapter emits `"s"` as an ordered array, so multiple valid neutral sort entries are preserved in the order stored in `settings["sorts"]`. Rails Table Preferences does not execute the query itself. Host applications remain responsible for authorization, joins, allowed searchable fields, and business-specific filtering.

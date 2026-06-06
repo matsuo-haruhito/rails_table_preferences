@@ -176,7 +176,21 @@ ja:
 
 If the host app copies the bundled editor partial, it can also replace the `data-rails-table-preferences-scope-*-label-value` attributes directly. The locale keys are the shortest path when the bundled partial is still in use.
 
+Custom or unknown `scope_type` values do not have locale-backed fallback labels in the bundled editor. If a host app returns a custom scope bucket from its own endpoint or payload transformer, include a user-facing `scope_label` in each preset payload. Without that value, the selector can only fall back to the raw `scope_type` key, which is useful for debugging but usually too internal for a production selector.
+
 If the host app also provides its own preset endpoint, admin UI, or payload transformer that sets `scope_label`, keep that value aligned with the same wording. That prevents the preset selector from showing one label while nearby bundled fallback copy uses another.
+
+## Preset selector grouping
+
+When the preset collection includes more than one scope bucket, the bundled editor groups the native `<select>` options with `<optgroup>` in this order: owner, role, organization, shared, then any unknown scope types returned by a custom payload.
+
+Within each group, options keep the API response order. Option text still keeps the existing `name [scopeLabel] *` pattern, and the option data attributes for default state, editability, scope type, and scope key are preserved. This makes the selector easier to scan without changing JSON response shape, resolver priority, save/delete behavior, or same-name preset resolution.
+
+Unknown scope buckets keep that same display-only grouping behavior and are appended after the standard buckets. For those buckets, `scope_label` is the host-app-owned readable label; Rails Table Preferences does not infer final wording, add a fallback label map, or change resolver priority for custom scopes.
+
+If only one scope bucket is present, the selector stays flat. That keeps the simple owner-only editor compact while still giving multi-scope screens a clearer grouping cue.
+
+The grouping is a display aid, not a duplicate-name disambiguation feature. If a host app intentionally stores the same preset name in several scopes, the resolver still chooses one record by scope priority when that name is requested. Prefer clear preset names when users need to compare several presets in the selector.
 
 ## Recommended UI behavior
 
@@ -190,6 +204,13 @@ For user-facing screens:
 ## Minimal operating patterns
 
 Use this section as the first-preset recipe for shared, role, and organization presets. The goal is to show how a host app can create and maintain scoped records while Rails Table Preferences continues to own only the storage, normalization, and resolver behavior.
+
+Before choosing a pattern, decide four host-app-owned details:
+
+- which table gets the first non-owner preset and which stable `table_key` identifies it
+- which scope bucket owns the preset: `shared`, one or more `role` keys, or one `organization` key
+- which protected path writes the preset: seed data, an internal admin form, a service object, or a maintenance script
+- how that path proves authorization, tenant ownership, and audit needs outside the regular bundled editor
 
 The following patterns keep the bundled editor simple while still giving the host application a clear place to manage non-owner presets.
 
@@ -305,7 +326,7 @@ Why this shape works:
 - `RailsTablePreferences::SettingsNormalizer.call(...)` keeps admin-created payloads aligned with the same normalized `columns` / `filters` / `sorts` shape used by the bundled JSON API.
 - `default_flag` clearing stays per table + scope so only one default wins inside the same scope bucket.
 
-If your host app prefers to manage presets through the mounted JSON API instead of direct model writes, use the same parameter shape shown above. The important part is to keep the stored `scope_type`, `scope_key`, and normalized `settings` consistent.
+If your host app deliberately builds a protected admin endpoint that uses the mounted JSON API request shape instead of direct model writes, keep that endpoint outside the normal user-facing editor flow and use the same parameter shape shown above. The important part is to keep the stored `scope_type`, `scope_key`, and normalized `settings` consistent while the host app owns authorization and tenant policy.
 
 ### 3. Split the regular editor and the admin flow on purpose
 

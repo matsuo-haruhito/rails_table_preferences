@@ -99,6 +99,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
             name: "default",
             default: false,
             editable: true,
+            scope_type: "owner",
             settings: {
               columns: [
                 { key: "customer_name", visible: true, order: 10, width: 240, truncate: 24 },
@@ -123,6 +124,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
             name: "compact",
             default: false,
             editable: true,
+            scope_type: "owner",
             settings: {
               columns: [
                 { key: "order_no", visible: true, order: 10, width: 120 },
@@ -140,9 +142,32 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
                 { key: "order_no", direction: "asc" }
               ]
             }
+          },
+          "共有ビュー": {
+            name: "共有ビュー",
+            default: false,
+            editable: false,
+            scope_type: "shared",
+            scope_label: "shared",
+            settings: {
+              columns: [
+                { key: "customer_name", visible: true, order: 10, width: 240, truncate: 24 },
+                { key: "amount", visible: false, order: 20, width: 120 },
+                { key: "status", visible: true, order: 30, width: 120 },
+                { key: "order_no", visible: true, order: 40, width: 120 },
+                { key: "delivery_date", visible: true, order: 50, width: 140 },
+                { key: "confirmed", visible: true, order: 60, width: 100 },
+                { key: "shipping_code", visible: true, order: 70, width: 140, overflow: "nowrap" },
+                { key: "shipping_notes", visible: true, order: 80, width: 160, overflow: "wrap" },
+                { key: "memo", visible: false, order: 90, width: 180, truncate: 24 }
+              ],
+              filters: {},
+              sorts: []
+            }
           }
         }
         const fetchOverrides = []
+        const mutations = []
 
         function wait(delay) {
           return new Promise(function(resolve) { window.setTimeout(resolve, delay) })
@@ -163,7 +188,10 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
               return {
                 name: payload.name,
                 default: payload.default === true,
-                editable: payload.editable !== false
+                editable: payload.editable !== false,
+                scope_type: payload.scope_type,
+                scope_label: payload.scope_label,
+                scope_key: payload.scope_key
               }
             })
           }
@@ -190,6 +218,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
         }
 
         window.__rtpTestApi = {
+          mutations,
           queueFetchOverride: function(override) {
             fetchOverrides.push({
               method: override.method,
@@ -207,7 +236,7 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
           const method = String(options.method || "GET").toUpperCase()
           const normalizedUrl = String(url)
           const pathTail = decodeURIComponent(normalizedUrl.split("/").pop() || "")
-          const isPreferenceGet = method === "GET" && (pathTail === "default" || pathTail === "compact")
+          const isPreferenceGet = method === "GET" && Object.prototype.hasOwnProperty.call(preferencePayloads, pathTail)
           const kind = isPreferenceGet ? "preference" : (method === "GET" ? "collection" : "mutation")
           const name = isPreferenceGet ? pathTail : null
           const override = consumeFetchOverride(method, kind, name)
@@ -230,8 +259,16 @@ class RailsTablePreferencesSystemSmokeOrdersController < ApplicationController
             )
           }
 
+          const body = options.body ? JSON.parse(options.body) : {}
+          mutations.push({
+            method,
+            url: normalizedUrl,
+            name: body.name,
+            settings: deepCopy(body.settings)
+          })
+
           return buildResponse(
-            { name: "default", default: false, editable: true, settings: deepCopy(window.__rtpController.settingsValue) },
+            { name: body.name || "default", default: body.default === true, editable: true, settings: deepCopy(body.settings || window.__rtpController.settingsValue) },
             overrideValue(override, "ok", true),
             overrideValue(override, "status", 200)
           )
@@ -759,6 +796,31 @@ RSpec.describe "rails_table_preferences demo browser smoke", type: :system, js: 
     expect(find("#rtp-smoke-preset-name", visible: :all)["aria-describedby"]).to eq("rtp-smoke-preset-name-hint")
     expect(page).to have_css("#rtp-smoke-preset-select-hint", text: "読み込む保存済み設定を選びます。")
     expect(page).to have_css("#rtp-smoke-preset-name-hint", text: "保存または別名保存で使う設定名を入力します。")
+  end
+
+  it "loads a shared preset as read-only and saves edits through owner fallback" do
+    visit_demo_smoke
+    ensure_smoke_controller_mounted
+
+    expect(page).to have_css("#rtp-smoke-preset-select option[value='共有ビュー']", visible: :all)
+
+    find("#rtp-smoke-preset-select option[value='共有ビュー']", visible: :all).select_option
+
+    expect(control_disabled?("[data-rails-table-preferences-target='defaultPreset']")).to eq(true)
+    expect(control_disabled?("[data-action~='rails-table-preferences#deletePreset']")).to eq(true)
+    expect(find("[data-action~='rails-table-preferences#saveFromEditor']", visible: :all)["data-rails-table-preferences-non-editable-fallback"]).to eq("true")
+
+    find("[data-action~='rails-table-preferences#saveFromEditor']", visible: :all).click
+
+    expect(page).to have_css(".rails-table-preferences-editor__status", text: "新しい設定を保存しました。")
+
+    mutations = page.evaluate_script("window.__rtpTestApi.mutations")
+    expect(mutations.map { |mutation| mutation.fetch("method") }).to eq(["POST"])
+    expect(mutations.first.fetch("url")).to end_with("/rails_table_preferences/preferences/rails_table_preferences_system_smoke_orders")
+    expect(mutations.first.fetch("name")).to eq("共有ビュー")
+    expect(mutations.first.fetch("settings").fetch("columns")).to include(
+      hash_including("key" => "amount", "visible" => false)
+    )
   end
 
   it "shows export payload preview without hidden columns and in saved order" do
