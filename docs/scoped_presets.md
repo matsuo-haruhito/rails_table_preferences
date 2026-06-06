@@ -205,6 +205,13 @@ For user-facing screens:
 
 Use this section as the first-preset recipe for shared, role, and organization presets. The goal is to show how a host app can create and maintain scoped records while Rails Table Preferences continues to own only the storage, normalization, and resolver behavior.
 
+Before choosing a pattern, decide four host-app-owned details:
+
+- which table gets the first non-owner preset and which stable `table_key` identifies it
+- which scope bucket owns the preset: `shared`, one or more `role` keys, or one `organization` key
+- which protected path writes the preset: seed data, an internal admin form, a service object, or a maintenance script
+- how that path proves authorization, tenant ownership, and audit needs outside the regular bundled editor
+
 The following patterns keep the bundled editor simple while still giving the host application a clear place to manage non-owner presets.
 
 ### 1. Seed a shared baseline
@@ -319,7 +326,7 @@ Why this shape works:
 - `RailsTablePreferences::SettingsNormalizer.call(...)` keeps admin-created payloads aligned with the same normalized `columns` / `filters` / `sorts` shape used by the bundled JSON API.
 - `default_flag` clearing stays per table + scope so only one default wins inside the same scope bucket.
 
-If your host app prefers to manage presets through the mounted JSON API instead of direct model writes, use the same parameter shape shown above. The important part is to keep the stored `scope_type`, `scope_key`, and normalized `settings` consistent.
+If your host app deliberately builds a protected admin endpoint that uses the mounted JSON API request shape instead of direct model writes, keep that endpoint outside the normal user-facing editor flow and use the same parameter shape shown above. The important part is to keep the stored `scope_type`, `scope_key`, and normalized `settings` consistent while the host app owns authorization and tenant policy.
 
 ### 3. Split the regular editor and the admin flow on purpose
 
