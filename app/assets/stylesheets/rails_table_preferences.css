@@ -372,7 +372,8 @@ th:hover > .rails-table-preferences-resize-handle,
 
 .rails-table-preferences-filter-panel__field option[hidden] {
   display: none;
-}\n
+}
+
 .rails-table-preferences-filter-panel__actions {
   display: flex;
   flex-wrap: wrap;
