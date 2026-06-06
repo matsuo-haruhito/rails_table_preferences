@@ -15,6 +15,7 @@ The bundled editor and Stimulus controller provide:
 - localized fallback scope labels for preset options when the payload does not provide `scope_label`
 - `aria-label` for drag handles, resize handles, and filter buttons
 - `aria-pressed` and `aria-expanded` for filter buttons
+- a visible default active-filter cue on bundled filter buttons, while keeping the condition summary in `aria-label` and `title`
 - `aria-controls` from the open filter button to the current filter panel
 - `aria-sort` for sortable table headers
 - disabled states for controls that should not be used on read-only scoped presets
@@ -68,6 +69,8 @@ Filter buttons receive an `aria-label`, `aria-pressed`, and `aria-expanded`:
 The pressed state reflects whether a filter condition is currently active for that column.
 
 When a bundled filter is active, the button keeps its compact `▾` text but updates `title` and `aria-label` with a short operator/value summary so screen reader users and hover users can tell which condition is attached to that column without opening the panel again.
+
+The default stylesheet also gives active filter buttons a visible cue through weight, underline, and an inset current-color boundary. That visual cue is supplemental; the condition summary remains in `title` and `aria-label`, and host applications can restyle the active class if their table theme needs a different treatment.
 
 When a bundled filter panel opens, the controller moves focus into the panel, supports `Escape` to close it, and returns focus to the triggering filter button for that keyboard dismissal path. To avoid detached floating UI, the bundled panel also closes on scroll or viewport resize instead of trying to stay open at a stale position.
 
@@ -293,7 +296,7 @@ Before releasing a screen, check:
 - The maintenance action group and delete/reset buttons keep visible helper text or accessible descriptions that explain the impact of those actions.
 - At 36rem and 26rem-equivalent widths or narrow containers, the action row wraps without clipping, the delete/reset maintenance group stays visually separated from save actions, and helper text does not overlap buttons or editor controls.
 - Sortable headers expose the current sort state.
-- Active filters expose an active pressed state.
+- Active filters expose an active pressed state and visible cue.
 - Active filter buttons expose a short summary through `title` or `aria-label`.
 - Filter buttons expose expanded state only while their panel is open.
 - Opening a filter panel moves focus into the first bundled field.
