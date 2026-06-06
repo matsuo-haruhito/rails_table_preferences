@@ -13,6 +13,7 @@ Closes #
 ## Verification
 
 - Automated checks, specs, or docs-only review:
+- Release/package evidence or package verification summary:
 - Manual QA applicability:
 - UI / visual evidence:
 
@@ -21,6 +22,7 @@ Closes #
 Use `docs/manual_qa_pr_smoke_matrix.md` when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance.
 
 - PR category:
+- Review state or handoff reason:
 - Screen or artifact checked:
 - Viewports or states checked:
 - Evidence:
