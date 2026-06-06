@@ -142,22 +142,27 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   async save(event) {
+    if (this.busy) return null
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor(event)
 
     const result = await this.withPreferenceAction("save", () => super.save(event))
-    if (result !== null) this.dispatchPreferenceEvent("saved", { action: "save" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "save" })
     return result
   }
 
   async createPresetFromEditor(event) {
+    if (this.busy) return null
+
     const result = await this.withPreferenceAction("create", () => super.createPresetFromEditor(event))
-    if (result !== null) this.dispatchPreferenceEvent("saved", { action: "create" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "create" })
     return result
   }
 
   async selectPreset(event) {
+    if (this.busy) return null
+
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
-    if (result !== null) this.dispatchPreferenceEvent("loaded", { action: "load" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("loaded", { action: "load" })
     return result
   }
 
@@ -191,7 +196,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         errorLabel: this.deletingFailedStatusLabelValue
       })
     })
-    if (result !== null) this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })
     return result
   }
 
@@ -258,120 +263,18 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     })
   }
 
-  installResizeHandles() {
-    super.installResizeHandles()
-    this.element.querySelectorAll("[data-rails-table-preferences-resize-handle]").forEach((handle) => {
-      if (handle.dataset.railsTablePreferencesKeyboardAutoFitInstalled === "true") return
-      handle.dataset.railsTablePreferencesKeyboardAutoFitInstalled = "true"
-      handle.addEventListener("keydown", this.autoFitColumnFromResizeHandleKeyboard.bind(this))
-    })
-  }
-
-  autoFitColumnFromResizeHandleKeyboard(event) {
-    if (!this.isResizeHandleAutoFitKey(event)) return
-    event.preventDefault()
-    this.autoFitColumnFromHandle(event)
-  }
-
-  isResizeHandleAutoFitKey(event) {
-    return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
-  }
-
-  clearFiltersAndSorts(event) {
-    if (this.busy) return
-    if (event) event.preventDefault()
-    this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
-    this.closeFilterPanel()
-    this.apply()
-  }
-
-  openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
-    super.openFilterPanel(headerCell, column, button)
-    if (!this.filterPanel) return
-
-    this.filterPanel.setAttribute("role", "group")
-    this.filterPanel.setAttribute("aria-labelledby", this.filterPanelTitleId(column.key))
-    this.installSelectFilterOptionSearch(this.filterPanel)
-  }
-
-  filterPanelHtml(column) {
-    return super.filterPanelHtml(column).replace(
-      'class="rails-table-preferences-filter-panel__title"',
-      `id="${this.filterPanelTitleId(column.key)}" class="rails-table-preferences-filter-panel__title"`
-    )
-  }
-
-  filterPanelTitleId(key) {
-    return `${this.filterPanelId(key)}-title`
-  }
-
-  renderFilterPanelValueFields(panel, column) {
-    super.renderFilterPanelValueFields(panel, column)
-    this.installSelectFilterOptionSearch(panel)
-  }
-
-  filterValueHtml(filter, condition, selectedOperator) {
-    if (filter.type === "select" && Array.isArray(filter.options) && !["blank", "present", "true", "false"].includes(selectedOperator)) {
-      const values = new Set(Array(condition.values || condition.value || []).map(String))
-      const optionsHtml = filter.options.map((option) => {
-        const value = this.selectFilterOptionValue(option)
-        const label = this.selectFilterOptionLabel(option, value)
-        return `<option value="${this.escapeHtml(value)}" ${values.has(String(value)) ? "selected" : ""}>${this.escapeHtml(label)}</option>`
-      }).join("")
-      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
-    }
-
-    return super.filterValueHtml(filter, condition, selectedOperator)
-  }
-
-  selectFilterOptionSearchHtml(options) {
-    if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
-
-    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
-  }
-
-  installSelectFilterOptionSearch(panel) {
-    const input = panel?.querySelector("[data-field='option-search']")
-    const select = panel?.querySelector("[data-field='values']")
-    if (!input || !select || input.dataset.railsTablePreferencesOptionSearchInstalled === "true") return
-
-    input.dataset.railsTablePreferencesOptionSearchInstalled = "true"
-    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select))
-    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select))
-    this.filterSelectOptionsBySearch(input, select)
-  }
-
-  filterSelectOptionsBySearch(input, select) {
-    const query = String(input?.value || "").trim().toLocaleLowerCase()
-    Array.from(select?.options || []).forEach((option) => {
-      const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
-      option.hidden = Boolean(query) && !option.selected && !searchableText.includes(query)
-    })
-  }
-
   selectFilterOptionValue(option) {
     if (option && typeof option === "object" && !Array.isArray(option)) {
-      return String(option.value ?? option.label ?? "")
+      return option.value ?? option.id ?? option.key ?? option.label ?? option.name ?? ""
     }
-
-    return String(option ?? "")
+    return option
   }
 
-  selectFilterOptionLabel(option, fallbackValue = this.selectFilterOptionValue(option)) {
+  selectFilterOptionLabel(option) {
     if (option && typeof option === "object" && !Array.isArray(option)) {
-      return String(option.label ?? option.value ?? fallbackValue)
+      const label = option.label ?? option.name ?? option.text ?? option.value ?? option.id ?? option.key ?? ""
+      return label
     }
-
-    return String(option ?? "")
-  }
-
-  get selectFilterOptionSearchThreshold() { return 8 }
-
-  filterOperatorText(operator) {
-    const key = String(operator)
-    const override = this.filterOperatorLabelsValue?.[key]
-    if (override !== undefined && override !== null && String(override).trim() !== "") return String(override)
-    return super.filterOperatorText(key)
+    return option
   }
 }
