@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "rails_table_preferences/package_verifier"
+require "rexml/document"
 
 RSpec.describe RailsTablePreferences::PackageVerifier do
   describe "REQUIRED_PATHS" do
@@ -79,6 +80,24 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/javascript_entrypoints.md",
         "docs/javascript_controller.md"
       )
+    end
+
+    it "guards visual overview SVG accessibility metadata" do
+      required_overview_svg_paths.each do |path|
+        document = REXML::Document.new(File.read(repository_root.join(path)))
+        svg = document.root
+        labelledby_ids = svg.attributes.fetch("aria-labelledby").split
+        referenced_elements = labelledby_ids.map do |id|
+          REXML::XPath.first(svg, ".//*[@id='#{id}']")
+        end
+
+        expect(svg.name).to eq("svg")
+        expect(svg.attributes.fetch("role")).to eq("img")
+        expect(labelledby_ids).to include("title", "desc")
+        expect(referenced_elements).to all(be_present)
+        expect(REXML::XPath.first(svg, "./title").text.to_s.strip).not_to be_empty
+        expect(REXML::XPath.first(svg, "./desc").text.to_s.strip).not_to be_empty
+      end
     end
   end
 
@@ -185,6 +204,10 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
   def repository_root
     Pathname.new(File.expand_path("../..", __dir__))
+  end
+
+  def required_overview_svg_paths
+    described_class::REQUIRED_PATHS.grep(%r{\Adocs/images/visual-overview-.*\.svg\z})
   end
 
   def package_entrypoint_files
