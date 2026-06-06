@@ -25,6 +25,17 @@ Use the row up/down buttons during browser QA:
 - confirm the numeric order inputs update after each move
 - confirm async preset actions still disable the generated editor controls while the request is busy
 
+## Reset affordance
+
+The package entrypoint keeps the bundled reset action tied to the existing editor status region. When the current editor draft already matches the table default settings, the reset button is disabled so the control does not look like a meaningful no-op. After a successful local reset, the status region announces the reset result with `rails_table_preferences.editor.reset_status` copy.
+
+Use the reset action during browser QA:
+
+- open an editor in its default state and confirm the reset button is disabled
+- change visibility, order, width, truncate, filter, or sort state and confirm reset becomes available
+- reset the editor and confirm the table returns to default settings, the reset button disables again, and the status region announces the reset result
+- confirm the existing visible reset helper still explains that unsaved editor changes are discarded and defaults are restored
+
 ## Existing checklist routing
 
 Use this note together with the existing checklist entries rather than as a replacement for them:
@@ -35,6 +46,8 @@ Use this note together with the existing checklist entries rather than as a repl
 - `docs/accessibility.md` covers the package-entrypoint-only column search and row move controls, including accessible labels, filtered-row preservation, first/last/hidden/busy disabled states, and narrow-width checks.
 
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
+
+`spec/javascript/rails_table_preferences_reset_feedback_spec.rb` guards the package entrypoint reset feedback surface: the editor root exposes reset result copy, reset completion uses the bundled status region, and the reset affordance is synchronized with the current default-state draft.
 
 When this package entrypoint is changed, record in the PR comment or sign-off note which of those checklist areas were actually run. If browser access is not available, say that explicitly and rely on behavior-level entrypoint specs plus source-level guards until a human or browser-capable environment can complete the visual check.
 
