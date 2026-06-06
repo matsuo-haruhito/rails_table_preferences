@@ -13,11 +13,11 @@ RSpec.describe "rails_table_preferences reset feedback JavaScript contract" do
     expect(editor_partial_source).to include("テーブル初期設定に戻しました。")
   end
 
-  it "announces reset completion and refreshes the reset button state" do
+  it "announces reset completion and refreshes the reset button state without adding a reset lifecycle event" do
     expect(package_controller_source).to include("resetStatusLabel: { type: String, default: \"テーブル初期設定に戻しました。\" }")
     expect(package_controller_source).to include("this.setStatus(this.resetStatusLabelValue, \"success\")")
     expect(package_controller_source).to include("this.syncResetButtonState()")
-    expect(package_controller_source).to include("this.dispatchPreferenceEvent(\"reset\", { action: \"reset\" })")
+    expect(package_controller_source).not_to include("this.dispatchPreferenceEvent(\"reset\", { action: \"reset\" })")
   end
 
   it "keeps the reset affordance disabled when the current editor state already matches defaults" do
