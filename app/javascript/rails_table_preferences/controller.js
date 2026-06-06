@@ -291,6 +291,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     this.filterPanel.setAttribute("role", "group")
     this.filterPanel.setAttribute("aria-labelledby", this.filterPanelTitleId(column.key))
+    this.installSelectFilterOptionSearch(this.filterPanel)
   }
 
   filterPanelHtml(column) {
@@ -304,6 +305,11 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return `${this.filterPanelId(key)}-title`
   }
 
+  renderFilterPanelValueFields(panel, column) {
+    super.renderFilterPanelValueFields(panel, column)
+    this.installSelectFilterOptionSearch(panel)
+  }
+
   filterValueHtml(filter, condition, selectedOperator) {
     if (filter.type === "select" && Array.isArray(filter.options) && !["blank", "present", "true", "false"].includes(selectedOperator)) {
       const values = new Set(Array(condition.values || condition.value || []).map(String))
@@ -312,10 +318,36 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         const label = this.selectFilterOptionLabel(option, value)
         return `<option value="${this.escapeHtml(value)}" ${values.has(String(value)) ? "selected" : ""}>${this.escapeHtml(label)}</option>`
       }).join("")
-      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<select data-field="values" multiple>${optionsHtml}</select></label>`
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
     return super.filterValueHtml(filter, condition, selectedOperator)
+  }
+
+  selectFilterOptionSearchHtml(options) {
+    if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
+
+    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
+  }
+
+  installSelectFilterOptionSearch(panel) {
+    const input = panel?.querySelector("[data-field='option-search']")
+    const select = panel?.querySelector("[data-field='values']")
+    if (!input || !select || input.dataset.railsTablePreferencesOptionSearchInstalled === "true") return
+
+    input.dataset.railsTablePreferencesOptionSearchInstalled = "true"
+    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select))
+    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select))
+    this.filterSelectOptionsBySearch(input, select)
+  }
+
+  filterSelectOptionsBySearch(input, select) {
+    const query = String(input?.value || "").trim().toLocaleLowerCase()
+    Array.from(select?.options || []).forEach((option) => {
+      const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
+      option.hidden = Boolean(query) && !option.selected && !searchableText.includes(query)
+    })
   }
 
   selectFilterOptionValue(option) {
@@ -333,6 +365,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     return String(option ?? "")
   }
+
+  get selectFilterOptionSearchThreshold() { return 8 }
 
   filterOperatorText(operator) {
     const key = String(operator)

@@ -97,7 +97,10 @@ The default filter panel stays intentionally lightweight.
 - Pressing `Escape` closes the panel and returns focus to the triggering filter button.
 - Clicking outside still closes the panel.
 - Scroll and viewport resize also close the panel so the body-mounted panel does not drift away from its header context.
-- The bundled controller does not add a full popover library, focus trap, or modal dialog abstraction.
+- Static `select` filters with many `options:` keep the browser `<select multiple>` control and add a small in-panel search field when the option count reaches the bundled threshold.
+- The select option search only filters rendered static options in the open panel. It does not change saved filter values, adapter params, query execution, remote option loading, or dependent select behavior, and selected options remain visible even when they do not match the current search text.
+- Screens that need autocomplete, async option loading, grouped option UX, virtualized selects, or host-specific authorization/scoping should keep that UI in a copied/custom controller or host-owned widget.
+- The bundled controller does not add a full popover library, focus trap, modal dialog abstraction, remote search endpoint, or richer select dependency.
 
 ## Table-only application rule
 
