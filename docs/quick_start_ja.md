@@ -58,6 +58,13 @@ owner-specific preferences は gem が保存します。shared / role / organiza
 
 Rails Table Preferences が担当するのは table display preference と preset metadata です。誰が preset を作れるか、どの tenant / role に見せるか、業務上どの preset を標準にするかは host app の認可・運用設計に従います。
 
+scoped presets を最初に評価するときは、次の順番で小さく切り分けます。
+
+1. 個人設定だけで足りるか、全員向けの `shared` baseline が必要かを決めます。
+2. role / organization preset を使う場合、host app の `scope_context_method` が返す stable identifier と保存済み `scope_key` を同じ値にそろえます。
+3. shared / role / organization preset は通常の user-facing editor では read-only として扱われ、編集や配布の admin workflow は host app 側で保護します。
+4. demo では [Demo screen generator](demo.md) の role / organization lanes を使い、実画面では [Manual QA checklist](manual_qa.md#6-scoped-preset-behavior) で selector、default resolution、read-only hint、認可境界を確認します。
+
 ## 4. filter / sort は UI state として扱う
 
 `filter:` や `sortable: true` は、検索 UI state と params 連携のための metadata です。実際の database query、join、authorization-aware filtering は host app または search adapter が担当します。
