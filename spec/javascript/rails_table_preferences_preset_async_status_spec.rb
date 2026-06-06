@@ -120,7 +120,8 @@ RSpec.describe "rails_table_preferences preset async status JavaScript contract"
           throw new Error(`failed save used unexpected URL: ${requests[0].url}`)
         }
         if (requests[0].options.method !== "PATCH") throw new Error("failed save did not use PATCH")
-        if (JSON.parse(requests[0].options.body).settings !== draftSettings) {
+        const requestBody = JSON.parse(requests[0].options.body)
+        if (JSON.stringify(requestBody.settings) !== JSON.stringify(draftSettings)) {
           throw new Error("failed save did not send the editor draft settings")
         }
         if (controller.settingsValue !== draftSettings) {
