@@ -13,6 +13,7 @@ Closes #
 ## Verification
 
 - Automated checks, specs, or docs-only review:
+- Release/package evidence or package verification summary:
 - Manual QA applicability:
 - UI / visual evidence:
 
