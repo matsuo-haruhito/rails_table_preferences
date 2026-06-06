@@ -446,6 +446,22 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return `${this.filterPanelId(key)}-title`
   }
 
+  positionFilterPanel(panel, headerCell) {
+    const rect = headerCell.getBoundingClientRect()
+    const viewportMargin = 8
+    const panelWidth = panel.offsetWidth || panel.getBoundingClientRect().width || 0
+    const minLeft = window.scrollX + viewportMargin
+    const maxLeft = window.scrollX + window.innerWidth - panelWidth - viewportMargin
+    const desiredLeft = window.scrollX + rect.left
+    const left = panelWidth > 0 ? Math.max(minLeft, Math.min(desiredLeft, maxLeft)) : desiredLeft
+
+    panel.style.position = "absolute"
+    panel.style.top = `${window.scrollY + rect.bottom + 4}px`
+    panel.style.left = `${left}px`
+    panel.style.maxWidth = `calc(100vw - ${viewportMargin * 2}px)`
+    panel.style.zIndex = "1000"
+  }
+
   renderFilterPanelValueFields(panel, column) {
     super.renderFilterPanelValueFields(panel, column)
     this.installSelectFilterOptionSearch(panel)
