@@ -6,7 +6,7 @@ This directory contains focused documentation for Rails Table Preferences.
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Production integration checklist](production_integration_checklist.md): the short path from a working demo or quick start to a real host-app index screen.
-- [Production troubleshooting notes](production_troubleshooting.md): symptom-driven checks for CSRF 422s, unstable `table_key` values, and saved presets that do not return on real host-app screens.
+- [Production troubleshooting notes](production_troubleshooting.md): symptom-driven checks for CSRF 422s, auth redirects, owner lookup failures, unstable `table_key` values, duplicate preset names, and saved presets that do not return on real host-app screens.
 - [日本語 quick start](quick_start_ja.md): a low-drift Japanese entrypoint for the main installation, editor, preset, filter/sort, export, and QA workflows.
 - [Install path options](install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
