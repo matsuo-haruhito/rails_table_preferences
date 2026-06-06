@@ -3,7 +3,12 @@ import RailsTablePreferencesBaseController from "../controllers/rails_table_pref
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
     ...RailsTablePreferencesBaseController.values,
-    filterOperatorLabels: { type: Object, default: {} }
+    filterOperatorLabels: { type: Object, default: {} },
+    editorSearchLabel: { type: String, default: "列を検索" },
+    editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
+    editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
+    moveUpLabel: { type: String, default: "上へ移動" },
+    moveDownLabel: { type: String, default: "下へ移動" }
   }
 
   filterValueHtml(filter, condition, selectedOperator) {
@@ -53,11 +58,140 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return result
   }
 
+  renderEditor() {
+    super.renderEditor()
+    this.ensureEditorSearchControl()
+    this.syncEditorSearchResults()
+    this.syncEditorMoveButtons()
+  }
+
   buildEditorRow(column) {
     const row = super.buildEditorRow(column)
     row.addEventListener("input", () => this.clearSuccessfulStatus())
     row.addEventListener("change", () => this.clearSuccessfulStatus())
+    row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
+    row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  buildEditorMoveControls() {
+    const controls = document.createElement("div")
+    controls.className = "rails-table-preferences-editor__row-actions"
+    controls.setAttribute("aria-label", this.orderLabelValue)
+
+    const upButton = this.buildEditorMoveButton("up", this.moveUpLabelValue, "↑")
+    const downButton = this.buildEditorMoveButton("down", this.moveDownLabelValue, "↓")
+    controls.append(upButton, downButton)
+    return controls
+  }
+
+  buildEditorMoveButton(direction, label, text) {
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "rails-table-preferences-editor__move-button"
+    button.dataset.railsTablePreferencesMoveDirection = direction
+    button.setAttribute("aria-label", label)
+    button.title = label
+    button.textContent = text
+    button.addEventListener("click", (event) => this.moveEditorRow(event, direction === "up" ? -1 : 1))
+    return button
+  }
+
+  moveEditorRow(event, direction) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    const row = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
+    if (!row) return
+
+    const rows = this.editorRowsForMovement
+    const index = rows.indexOf(row)
+    const target = rows[index + direction]
+    if (index < 0 || !target) return
+
+    if (direction < 0) this.editorRowsTarget.insertBefore(row, target)
+    else this.editorRowsTarget.insertBefore(row, target.nextSibling)
+
+    this.refreshEditorOrderInputs()
+    this.syncEditorMoveButtons()
+    this.clearSuccessfulStatus()
+  }
+
+  ensureEditorSearchControl() {
+    if (!this.hasEditorRowsTarget || this.editorSearchControl) return
+
+    const wrapper = document.createElement("div")
+    wrapper.className = "rails-table-preferences-editor__tools"
+    wrapper.dataset.railsTablePreferencesEditorSearch = "true"
+
+    const label = document.createElement("label")
+    label.className = "rails-table-preferences-editor__search"
+    const labelText = document.createElement("span")
+    labelText.textContent = this.editorSearchLabelValue
+    const input = document.createElement("input")
+    input.type = "search"
+    input.placeholder = this.editorSearchPlaceholderValue
+    input.setAttribute("aria-label", this.editorSearchLabelValue)
+    input.dataset.railsTablePreferencesEditorSearchInput = "true"
+    input.addEventListener("input", () => this.syncEditorSearchResults())
+    label.append(labelText, input)
+
+    const empty = document.createElement("p")
+    empty.className = "rails-table-preferences-editor__search-empty"
+    empty.dataset.railsTablePreferencesEditorSearchEmpty = "true"
+    empty.hidden = true
+    empty.textContent = this.editorNoSearchResultsLabelValue
+
+    wrapper.append(label, empty)
+    this.editorRowsTarget.before(wrapper)
+  }
+
+  syncEditorSearchResults() {
+    if (!this.hasEditorRowsTarget) return
+    const query = this.editorSearchInput?.value.trim().toLowerCase() || ""
+    let visibleCount = 0
+
+    this.editorRows.forEach((row) => {
+      const searchableText = row.dataset.railsTablePreferencesEditorSearchText || row.textContent.toLowerCase()
+      const hidden = Boolean(query) && !searchableText.includes(query)
+      row.hidden = hidden
+      if (!hidden) visibleCount += 1
+    })
+
+    if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0
+    this.syncEditorMoveButtons()
+  }
+
+  syncEditorMoveButtons() {
+    const rows = this.editorRowsForMovement
+    this.editorRows.forEach((row) => {
+      const index = rows.indexOf(row)
+      row.querySelectorAll("[data-rails-table-preferences-move-direction]").forEach((button) => {
+        const direction = button.dataset.railsTablePreferencesMoveDirection
+        button.disabled = this.busy || row.hidden || index < 0 || (direction === "up" ? index === 0 : index === rows.length - 1)
+      })
+    })
+  }
+
+  setEditorRowsBusyState(busy) {
+    super.setEditorRowsBusyState(busy)
+    this.syncEditorMoveButtons()
+  }
+
+  get editorRowsForMovement() {
+    const visibleRows = this.editorRows.filter((row) => !row.hidden)
+    return visibleRows.length > 0 ? visibleRows : this.editorRows
+  }
+
+  get editorSearchControl() {
+    return this.element.querySelector("[data-rails-table-preferences-editor-search]")
+  }
+
+  get editorSearchInput() {
+    return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-input]")
+  }
+
+  get editorSearchEmptyMessage() {
+    return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-empty]")
   }
 
   dragEditorRowOver(event) {
@@ -68,11 +202,13 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   dropEditorRow(event) {
     super.dropEditorRow(event)
     this.clearSuccessfulStatus()
+    this.syncEditorMoveButtons()
   }
 
   dragEditorRowEnd(event) {
     super.dragEditorRowEnd(event)
     this.clearSuccessfulStatus()
+    this.syncEditorMoveButtons()
   }
 
   resizeColumn(event) {
