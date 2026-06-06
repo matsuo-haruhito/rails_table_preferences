@@ -42,6 +42,38 @@ Check:
 
 Do not disable CSRF protection to make the request pass. Fix the host-app layout or shell so Rails can expose the normal token to the browser.
 
+## Saving from a read-only scoped preset fails with a duplicate name
+
+Symptoms:
+
+- A shared, role, or organization preset loads correctly and shows as read-only, but Save fails after the user edits it.
+- The preset name field still contains the scoped preset's visible name.
+- The mounted JSON API uses the existing failure path rather than overwriting the shared, role, or organization preset.
+- Rails logs may mention `ActiveRecord::RecordInvalid` or a uniqueness validation on the preset `name`; current request coverage treats validation failures from `save!` as `500 Internal Server Error`, not as the CSRF-specific `422` path above.
+
+Check:
+
+1. Confirm the selected preset is read-only in the loaded payload.
+
+   Read-only scoped presets are returned with `editable: false`. The bundled editor disables destructive/default controls and shows helper copy explaining that Save writes to the owner preset path instead of modifying the scoped preset directly.
+
+2. Check whether the current owner already has a preset with the same `table_key` and `name`.
+
+   The owner fallback uses the current preset name input as the owner preset name. If that owner preset already exists, the normal editor does not silently rename it or update the shared, role, or organization preset instead.
+
+3. Separate this from neighboring failures:
+
+   - CSRF-token failures usually return `422` with authenticity-token logs.
+   - authentication or authorization filters usually look like `401`, login redirects, or host-app policy failures.
+   - unstable `table_key` problems usually save successfully but do not reload on the same logical screen.
+   - duplicate owner preset names usually fail during the JSON write after the read-only preset loaded successfully.
+
+4. Choose the host-app response deliberately.
+
+   For wording-only guidance, override the bundled status or helper copy described in [Bundled editor i18n keys](editor_i18n.md#preset-controls). If the screen needs a duplicate-name resolution flow, custom retry behavior, or a different owner-preset naming rule, copy or replace the controller/markup for that host app. Do not document the regular editor as an admin path that overwrites shared, role, or organization presets.
+
+For the accessibility-facing responsibility boundary, see [Read-only scoped presets](accessibility.md#read-only-scoped-presets).
+
 ## Saved presets do not come back on the same screen
 
 Symptoms:
