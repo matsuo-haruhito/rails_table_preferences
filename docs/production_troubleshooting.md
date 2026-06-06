@@ -42,6 +42,36 @@ Check:
 
 Do not disable CSRF protection to make the request pass. Fix the host-app layout or shell so Rails can expose the normal token to the browser.
 
+## Save, load, or delete returns 401, redirects, or has no owner
+
+Symptoms:
+
+- Save, Load, or Delete redirects to the login page or returns `401 Unauthorized` / `403 Forbidden` from the mounted JSON API.
+- The host-app page renders, but the JSON request misses authentication, tenant, locale, or CSRF callbacks that the surrounding page depends on.
+- Logs mention `current_user` is nil, no owner can be resolved, or the configured owner method returns the wrong model.
+- These failures can look similar to the CSRF-specific `422` case above, a `404` mount-path mismatch, or a duplicate preset-name validation failure.
+
+Check:
+
+1. Confirm the mounted engine inherits the host controller that should own the request boundary.
+
+   `RailsTablePreferences.config.parent_controller_class_name` should point to `ApplicationController` or an authenticated base controller that runs the authentication, CSRF, tenant, locale, and other callbacks the preference API needs.
+
+2. Confirm the current-owner method is available from that same controller stack.
+
+   If the host app does not use `current_user`, configure `current_user_method` and `owner_model` together so the method returns a persisted instance of the configured owner model.
+
+3. Separate this from neighboring failures:
+
+   - `422` with authenticity-token logs usually points to missing CSRF meta tags or token headers.
+   - `404 Not Found` usually points to the engine route or `config.mount_path`.
+   - duplicate-name failures usually happen after a read-only scoped preset loaded successfully and the owner fallback tries to save an existing preset name.
+   - `401`, login redirects, wrong callbacks, or nil owner logs usually point to the host-app controller boundary or owner lookup setup.
+
+Do not move host-app authentication, authorization, tenant, or locale policy into Rails Table Preferences to make the request pass. Keep those checks in the configured host controller, then verify the mounted API uses that boundary.
+
+For the detailed setup checks, see [Save returns 401 or redirects to login](troubleshooting.md#save-returns-401-or-redirects-to-login), [Save, Load, or Delete uses the wrong controller boundary](troubleshooting.md#save-load-or-delete-uses-the-wrong-controller-boundary), [current_user is nil](troubleshooting.md#current_user-is-nil), and [Confirm the owner and engine contract](production_integration_checklist.md#1-confirm-the-owner-and-engine-contract).
+
 ## Saving from a read-only scoped preset fails with a duplicate name
 
 Symptoms:
