@@ -60,7 +60,6 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (!wasBusy) {
       this.setStatus(this.resetStatusLabelValue, "success")
       this.syncResetButtonState()
-      this.dispatchPreferenceEvent("reset", { action: "reset" })
     }
     return result
   }
