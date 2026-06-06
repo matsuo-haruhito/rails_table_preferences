@@ -4,7 +4,11 @@
 
 ## Related Issues
 
-Closes #
+Choose the relationship intentionally and remove unused lines.
+
+- Closes #... when this PR fully completes the issue on merge.
+- Refs #... when this PR is partial, stacked, exploratory, or needs human review before the issue should close.
+- Supersedes #... when this PR replaces an older PR or proposal; name the replaced PR in Notes or the focused QA section.
 
 ## Changes
 
@@ -13,6 +17,7 @@ Closes #
 ## Verification
 
 - Automated checks, specs, or docs-only review:
+- Release/package evidence or package verification summary:
 - Manual QA applicability:
 - UI / visual evidence:
 
@@ -21,6 +26,7 @@ Closes #
 Use `docs/manual_qa_pr_smoke_matrix.md` when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance.
 
 - PR category:
+- Review state or handoff reason:
 - Screen or artifact checked:
 - Viewports or states checked:
 - Evidence:

@@ -166,7 +166,7 @@ module RailsTablePreferences
 
       def demo_route_step_heading
         if options[:with_demo_route]
-          "Demo route added to config/routes.rb:"
+          "Demo route configured in config/routes.rb:"
         else
           "Add this route if you want to open the copied demo screen, or rerun with --with-demo-route:"
         end

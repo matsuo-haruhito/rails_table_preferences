@@ -22,6 +22,8 @@ bin/rails db:migrate
 
 Vite / `app/frontend` など package entrypoint を使う場合は、copied controller ではなく `rails_table_preferences/controller` の import と bundler alias を確認します。詳細は [JavaScript entrypoints](javascript_entrypoints.md) を参照してください。
 
+既存の `app/frontend/entrypoints/application.js` などで Stimulus application をすでに start している host app では、その `application` に `application.register(...)` だけを追加します。`Application.start()` を含む例は新規 minimal entrypoint 用です。同じ host app で `Application.start()` を二重に呼ばないでください。
+
 `User` / `current_user` 以外の owner model を使う場合は、demo や JSON API を開く前に initializer で `owner_model` と `current_user_method` を設定し、その method が persisted owner record を返すことを確認します。
 
 ## 2. 最小の table preference UI を表示する
@@ -95,6 +97,7 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 このページでは詳細を重複させず、症状から英語正本 docs へ移動する入口だけを置きます。
 
 - controller が動かない、Save が 404 / 401 になる、`current_user` や configured owner が nil になる: [Troubleshooting](troubleshooting.md) の install / Stimulus / engine mount / current owner sections を確認します。
+- Save / Delete / Save as new が 422 になる、または保存した preset が同じ本番画面で戻ってこない: [Production troubleshooting notes](production_troubleshooting.md) の CSRF meta tag と stable `table_key` sections を確認します。詳細手順は英語 docs を正本にします。
 - filter や sort の UI は変わるが検索結果に反映されない: [Troubleshooting](troubleshooting.md#filter-or-sort-ui-changes-do-not-change-database-results)、[Controller integration](controller_integration.md)、[Filter adapters](filter_adapters.md) を確認します。Rails Table Preferences は UI state と adapter params を扱い、database query は host app 側が適用します。
 - 既存の検索フォームに保存済み filter/sort を渡したい、または hidden fields が期待どおり roundtrip しない: [Controller integration の hidden fields section](controller_integration.md#hidden-fields-for-existing-search-forms)、[Demo screen generator](demo.md)、[Manual QA checklist](manual_qa.md#13-existing-search-form-integration) を確認します。hidden field の描画、blank value omission、array params、host-app search execution を分けて見ます。
 - select filter が表示されるが値が効かない、複数選択の保存値が想定と違う: [Select filter troubleshooting](select_filter_troubleshooting.md) を確認します。一般的な filter/sort params ではなく、`values_param`、scalar `options:`、host-app query ownership を切り分けます。

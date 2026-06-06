@@ -3,33 +3,302 @@ import RailsTablePreferencesBaseController from "../controllers/rails_table_pref
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
     ...RailsTablePreferencesBaseController.values,
-    filterOperatorLabels: { type: Object, default: {} }
+    filterOperatorLabels: { type: Object, default: {} },
+    editorSearchLabel: { type: String, default: "列を検索" },
+    editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
+    editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
+    moveUpLabel: { type: String, default: "上へ移動" },
+    moveDownLabel: { type: String, default: "下へ移動" }
+  }
+
+  filterValueHtml(filter, condition, selectedOperator) {
+    if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
+    if (selectedOperator === "between") {
+      const inputType = this.filterInputType(filter)
+      const fromPlaceholder = this.filterPlaceholderAttribute(filter.from_placeholder)
+      const toPlaceholder = this.filterPlaceholderAttribute(filter.to_placeholder)
+      return `
+        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromPlaceholder}></label>
+        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toPlaceholder}></label>
+      `
+    }
+    if (filter.type === "select" && Array.isArray(filter.options)) {
+      const values = new Set(Array(condition.values || condition.value || []).map(String))
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<select data-field="values" multiple>${filter.options.map((option) => `<option value="${this.escapeHtml(option)}" ${values.has(String(option)) ? "selected" : ""}>${this.escapeHtml(option)}</option>`).join("")}</select></label>`
+    }
+    const placeholder = this.filterPlaceholderAttribute(filter.placeholder)
+    return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${placeholder}></label>`
+  }
+
+  filterPlaceholderAttribute(value) {
+    const text = String(value ?? "").trim()
+    if (!text) return ""
+    return ` placeholder="${this.escapeHtml(text)}"`
+  }
+
+  connect() {
+    this.statusState = "idle"
+    super.connect()
   }
 
   applyFromEditor(event) {
     const wasBusy = this.busy
     const result = super.applyFromEditor(event)
-    if (!wasBusy) this.dispatchPreferenceEvent("applied", { action: "apply" })
+    if (!wasBusy) {
+      this.clearSuccessfulStatus()
+      this.dispatchPreferenceEvent("applied", { action: "apply" })
+    }
     return result
   }
 
+  resetEditor(event) {
+    const wasBusy = this.busy
+    const result = super.resetEditor(event)
+    if (!wasBusy) this.clearSuccessfulStatus()
+    return result
+  }
+
+  renderEditor() {
+    super.renderEditor()
+    this.ensureEditorSearchControl()
+    this.syncEditorSearchResults()
+    this.syncEditorMoveButtons()
+  }
+
+  buildEditorRow(column) {
+    const row = super.buildEditorRow(column)
+    row.addEventListener("input", () => this.clearSuccessfulStatus())
+    row.addEventListener("change", () => this.clearSuccessfulStatus())
+    row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
+    row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
+    return row
+  }
+
+  buildEditorMoveControls() {
+    const controls = document.createElement("div")
+    controls.className = "rails-table-preferences-editor__row-actions"
+    controls.setAttribute("aria-label", this.orderLabelValue)
+
+    const upButton = this.buildEditorMoveButton("up", this.moveUpLabelValue, "↑")
+    const downButton = this.buildEditorMoveButton("down", this.moveDownLabelValue, "↓")
+    controls.append(upButton, downButton)
+    return controls
+  }
+
+  buildEditorMoveButton(direction, label, text) {
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "rails-table-preferences-editor__move-button"
+    button.dataset.railsTablePreferencesMoveDirection = direction
+    button.setAttribute("aria-label", label)
+    button.title = label
+    button.textContent = text
+    button.addEventListener("click", (event) => this.moveEditorRow(event, direction === "up" ? -1 : 1))
+    return button
+  }
+
+  moveEditorRow(event, direction) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    const row = event.currentTarget.closest("[data-rails-table-preferences-column-key]")
+    if (!row) return
+
+    const rows = this.editorRowsForMovement
+    const index = rows.indexOf(row)
+    const target = rows[index + direction]
+    if (index < 0 || !target) return
+
+    if (direction < 0) this.editorRowsTarget.insertBefore(row, target)
+    else this.editorRowsTarget.insertBefore(row, target.nextSibling)
+
+    this.refreshEditorOrderInputs()
+    this.syncEditorMoveButtons()
+    this.clearSuccessfulStatus()
+  }
+
+  ensureEditorSearchControl() {
+    if (!this.hasEditorRowsTarget || this.editorSearchControl) return
+
+    const wrapper = document.createElement("div")
+    wrapper.className = "rails-table-preferences-editor__tools"
+    wrapper.dataset.railsTablePreferencesEditorSearch = "true"
+
+    const label = document.createElement("label")
+    label.className = "rails-table-preferences-editor__search"
+    const labelText = document.createElement("span")
+    labelText.textContent = this.editorSearchLabelValue
+    const input = document.createElement("input")
+    input.type = "search"
+    input.placeholder = this.editorSearchPlaceholderValue
+    input.setAttribute("aria-label", this.editorSearchLabelValue)
+    input.dataset.railsTablePreferencesEditorSearchInput = "true"
+    input.addEventListener("input", () => this.syncEditorSearchResults())
+    label.append(labelText, input)
+
+    const empty = document.createElement("p")
+    empty.className = "rails-table-preferences-editor__search-empty"
+    empty.dataset.railsTablePreferencesEditorSearchEmpty = "true"
+    empty.hidden = true
+    empty.textContent = this.editorNoSearchResultsLabelValue
+
+    wrapper.append(label, empty)
+    this.editorRowsTarget.before(wrapper)
+  }
+
+  syncEditorSearchResults() {
+    if (!this.hasEditorRowsTarget) return
+    const query = this.editorSearchInput?.value.trim().toLowerCase() || ""
+    let visibleCount = 0
+
+    this.editorRows.forEach((row) => {
+      const searchableText = row.dataset.railsTablePreferencesEditorSearchText || row.textContent.toLowerCase()
+      const hidden = Boolean(query) && !searchableText.includes(query)
+      row.hidden = hidden
+      if (!hidden) visibleCount += 1
+    })
+
+    if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0
+    this.syncEditorMoveButtons()
+  }
+
+  syncEditorMoveButtons() {
+    const rows = this.editorRowsForMovement
+    this.editorRows.forEach((row) => {
+      const index = rows.indexOf(row)
+      row.querySelectorAll("[data-rails-table-preferences-move-direction]").forEach((button) => {
+        const direction = button.dataset.railsTablePreferencesMoveDirection
+        button.disabled = this.busy || row.hidden || index < 0 || (direction === "up" ? index === 0 : index === rows.length - 1)
+      })
+    })
+  }
+
+  setEditorRowsBusyState(busy) {
+    super.setEditorRowsBusyState(busy)
+    this.syncEditorMoveButtons()
+  }
+
+  get editorRowsForMovement() {
+    const visibleRows = this.editorRows.filter((row) => !row.hidden)
+    return visibleRows.length > 0 ? visibleRows : this.editorRows
+  }
+
+  get editorSearchControl() {
+    return this.element.querySelector("[data-rails-table-preferences-editor-search]")
+  }
+
+  get editorSearchInput() {
+    return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-input]")
+  }
+
+  get editorSearchEmptyMessage() {
+    return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-empty]")
+  }
+
+  dragEditorRowOver(event) {
+    super.dragEditorRowOver(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dropEditorRow(event) {
+    super.dropEditorRow(event)
+    this.clearSuccessfulStatus()
+    this.syncEditorMoveButtons()
+  }
+
+  dragEditorRowEnd(event) {
+    super.dragEditorRowEnd(event)
+    this.clearSuccessfulStatus()
+    this.syncEditorMoveButtons()
+  }
+
+  resizeColumn(event) {
+    super.resizeColumn(event)
+    this.clearSuccessfulStatus()
+  }
+
+  autoFitColumnFromHandle(event) {
+    super.autoFitColumnFromHandle(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dragTableColumnOver(event) {
+    super.dragTableColumnOver(event)
+    this.clearSuccessfulStatus()
+  }
+
+  dropTableColumn(event) {
+    super.dropTableColumn(event)
+    this.clearSuccessfulStatus()
+  }
+
+  endTableColumnDrag(event) {
+    super.endTableColumnDrag(event)
+    this.clearSuccessfulStatus()
+  }
+
+  toggleSortFromHeader(event, cell, column) {
+    super.toggleSortFromHeader(event, cell, column)
+    this.clearSuccessfulStatus()
+  }
+
+  applyFilterPanel(key, panel) {
+    super.applyFilterPanel(key, panel)
+    this.clearSuccessfulStatus()
+  }
+
+  clearFilter(key) {
+    super.clearFilter(key)
+    this.clearSuccessfulStatus()
+  }
+
+  setStatus(message, state = "idle") {
+    this.statusState = message ? state : "idle"
+    super.setStatus(message)
+  }
+
+  clearSuccessfulStatus() {
+    if (this.statusState === "success") this.setStatus("")
+  }
+
+  async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
+    if (this.busy) return null
+    this.setBusyState(true)
+    if (busyLabel) this.setStatus(busyLabel, "busy")
+
+    try {
+      const result = await callback()
+      if (successLabel) this.setStatus(successLabel, "success")
+      return result
+    } catch (error) {
+      this.handleOperationError(error, errorLabel)
+      return null
+    } finally {
+      this.setBusyState(false)
+    }
+  }
+
   async save(event) {
+    if (this.busy) return null
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor(event)
 
     const result = await this.withPreferenceAction("save", () => super.save(event))
-    if (result !== null) this.dispatchPreferenceEvent("saved", { action: "save" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "save" })
     return result
   }
 
   async createPresetFromEditor(event) {
+    if (this.busy) return null
+
     const result = await this.withPreferenceAction("create", () => super.createPresetFromEditor(event))
-    if (result !== null) this.dispatchPreferenceEvent("saved", { action: "create" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "create" })
     return result
   }
 
   async selectPreset(event) {
+    if (this.busy) return null
+
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
-    if (result !== null) this.dispatchPreferenceEvent("loaded", { action: "load" })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("loaded", { action: "load" })
     return result
   }
 
@@ -63,7 +332,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         errorLabel: this.deletingFailedStatusLabelValue
       })
     })
-    if (result !== null) this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })
+    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })
     return result
   }
 
@@ -73,6 +342,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   handleOperationError(error, message = this.operationFailedStatusLabelValue) {
     super.handleOperationError(error, message)
+    this.statusState = "error"
     this.dispatchPreferenceEvent("error", {
       action: this.currentPreferenceAction || "operation",
       message: message || this.operationFailedStatusLabelValue
@@ -148,12 +418,21 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
   }
 
+  clearFiltersAndSorts(event) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
+    this.closeFilterPanel()
+    this.apply()
+  }
+
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
     super.openFilterPanel(headerCell, column, button)
     if (!this.filterPanel) return
 
     this.filterPanel.setAttribute("role", "group")
     this.filterPanel.setAttribute("aria-labelledby", this.filterPanelTitleId(column.key))
+    this.installSelectFilterOptionSearch(this.filterPanel)
   }
 
   filterPanelHtml(column) {
@@ -166,6 +445,69 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   filterPanelTitleId(key) {
     return `${this.filterPanelId(key)}-title`
   }
+
+  renderFilterPanelValueFields(panel, column) {
+    super.renderFilterPanelValueFields(panel, column)
+    this.installSelectFilterOptionSearch(panel)
+  }
+
+  filterValueHtml(filter, condition, selectedOperator) {
+    if (filter.type === "select" && Array.isArray(filter.options) && !["blank", "present", "true", "false"].includes(selectedOperator)) {
+      const values = new Set(Array(condition.values || condition.value || []).map(String))
+      const optionsHtml = filter.options.map((option) => {
+        const value = this.selectFilterOptionValue(option)
+        const label = this.selectFilterOptionLabel(option, value)
+        return `<option value="${this.escapeHtml(value)}" ${values.has(String(value)) ? "selected" : ""}>${this.escapeHtml(label)}</option>`
+      }).join("")
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
+    }
+
+    return super.filterValueHtml(filter, condition, selectedOperator)
+  }
+
+  selectFilterOptionSearchHtml(options) {
+    if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
+
+    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
+  }
+
+  installSelectFilterOptionSearch(panel) {
+    const input = panel?.querySelector("[data-field='option-search']")
+    const select = panel?.querySelector("[data-field='values']")
+    if (!input || !select || input.dataset.railsTablePreferencesOptionSearchInstalled === "true") return
+
+    input.dataset.railsTablePreferencesOptionSearchInstalled = "true"
+    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select))
+    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select))
+    this.filterSelectOptionsBySearch(input, select)
+  }
+
+  filterSelectOptionsBySearch(input, select) {
+    const query = String(input?.value || "").trim().toLocaleLowerCase()
+    Array.from(select?.options || []).forEach((option) => {
+      const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
+      option.hidden = Boolean(query) && !option.selected && !searchableText.includes(query)
+    })
+  }
+
+  selectFilterOptionValue(option) {
+    if (option && typeof option === "object" && !Array.isArray(option)) {
+      return String(option.value ?? option.label ?? "")
+    }
+
+    return String(option ?? "")
+  }
+
+  selectFilterOptionLabel(option, fallbackValue = this.selectFilterOptionValue(option)) {
+    if (option && typeof option === "object" && !Array.isArray(option)) {
+      return String(option.label ?? option.value ?? fallbackValue)
+    }
+
+    return String(option ?? "")
+  }
+
+  get selectFilterOptionSearchThreshold() { return 8 }
 
   filterOperatorText(operator) {
     const key = String(operator)

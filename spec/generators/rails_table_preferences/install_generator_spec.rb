@@ -188,6 +188,16 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(routes).not_to include(demo_route)
   end
 
+  it "describes the demo route as configured when it was already present" do
+    prepare_routes_file("Rails.application.routes.draw do\n  #{demo_route}\nend\n")
+
+    output = run_generator %w[--with-demo-route]
+
+    expect(next_step_headings(output)).to include("Demo route configured in config/routes.rb:")
+    expect(output).not_to include("Demo route added to config/routes.rb:")
+    expect(file("config/routes.rb").read.scan(demo_route).size).to eq(1)
+  end
+
   it "prints the default post-install next steps with contiguous numbering" do
     output = run_generator
 
@@ -222,7 +232,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
       "Run: bin/rails db:migrate",
       "Mount the engine in config/routes.rb:",
       "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name.",
-      "Demo route added to config/routes.rb:"
+      "Demo route configured in config/routes.rb:"
     ])
     expect(output).to include("rails_table_preferences_demo/orders#index")
   end

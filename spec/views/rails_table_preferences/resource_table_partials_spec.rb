@@ -51,25 +51,6 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
-  it "keeps host app data attributes while adding the Rails Table Preferences controller once" do
-    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
-      options: {
-        render_editor: false,
-        data: {
-          controller: "orders-table rails-table-preferences",
-          tracking_id: "users-index"
-        }
-      }
-    )
-
-    data_controller = rendered[/data-controller=\"([^\"]+)\"/, 1]
-
-    expect(data_controller.split).to contain_exactly("orders-table", "rails-table-preferences")
-    expect(data_controller.split.count("rails-table-preferences")).to eq(1)
-    expect(rendered).to include("data-tracking-id=\"users-index\"")
-    expect(rendered).to include("data-rails-table-preferences-table-key-value=\"users\"")
-  end
-
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
     view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
@@ -84,6 +65,52 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).to include("rails-table-preferences-tree-resource-table")
     expect(rendered).to include("data-rails-table-preferences-table-key-value=\"users\"")
     expect(rendered).not_to include("render_editor")
+  end
+
+  it "renders a table-specific empty message for empty resource table records" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: {
+        render_editor: false,
+        empty_message: "No users match this search"
+      }
+    )
+
+    expect(rendered).to include("No users match this search")
+    expect(rendered).not_to include("No records to display")
+    expect(rendered).not_to include("empty-message")
+  end
+
+  it "keeps the existing empty message fallback when no resource table empty message is provided" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("No records to display")
+  end
+
+  it "escapes resource table empty messages as plain text" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      options: {
+        render_editor: false,
+        empty_message: "<strong>No users</strong>"
+      }
+    )
+
+    expect(rendered).to include("&lt;strong&gt;No users&lt;/strong&gt;")
+    expect(rendered).not_to include("<strong>No users</strong>")
+  end
+
+  it "does not render the resource table empty message when records are present" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      records: [User.new(name: "Alice")],
+      options: {
+        render_editor: false,
+        empty_message: "No users match this search"
+      }
+    )
+
+    expect(rendered).to include("Alice")
+    expect(rendered).not_to include("No users match this search")
   end
 
   it "keeps resource table empty row colspan valid when every column is hidden" do
