@@ -42,4 +42,10 @@ display :customer_name do |order|
 end
 ```
 
+## Association and query boundaries
+
+Formatters may read associations or call helpers, but they do not move eager loading ownership into Rails Table Preferences. When a formatter reads `order.customer.name` or similar association data, preload that association in the host app relation and keep the formatter focused on presentation.
+
+For PR or release evidence, record one representative query-log check or existing N+1 guard result for rows that use association-reading formatters. The manual QA guide keeps this as a smoke check so projects can confirm the relation stays preloaded without adding automatic preload behavior to this gem.
+
 When no formatter is configured, `table_preferences_value(record, column)` falls back to the default value resolver for attributes, enum labels, boolean labels, and time-like values. That default fallback is separate from formatter result handling.

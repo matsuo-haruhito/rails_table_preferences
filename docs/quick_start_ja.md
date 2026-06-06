@@ -58,6 +58,13 @@ owner-specific preferences は gem が保存します。shared / role / organiza
 
 Rails Table Preferences が担当するのは table display preference と preset metadata です。誰が preset を作れるか、どの tenant / role に見せるか、業務上どの preset を標準にするかは host app の認可・運用設計に従います。
 
+scoped presets を最初に評価するときは、次の順番で小さく切り分けます。
+
+1. 個人設定だけで足りるか、全員向けの `shared` baseline が必要かを決めます。
+2. role / organization preset を使う場合、host app の `scope_context_method` が返す stable identifier と保存済み `scope_key` を同じ値にそろえます。
+3. shared / role / organization preset は通常の user-facing editor では read-only として扱われ、編集や配布の admin workflow は host app 側で保護します。
+4. demo では [Demo screen generator](demo.md) の role / organization lanes を使い、実画面では [Manual QA checklist](manual_qa.md#6-scoped-preset-behavior) で selector、default resolution、read-only hint、認可境界を確認します。
+
 ## 4. filter / sort は UI state として扱う
 
 `filter:` や `sortable: true` は、検索 UI state と params 連携のための metadata です。実際の database query、join、authorization-aware filtering は host app または search adapter が担当します。
@@ -97,6 +104,7 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 このページでは詳細を重複させず、症状から英語正本 docs へ移動する入口だけを置きます。
 
 - controller が動かない、Save が 404 / 401 になる、`current_user` や configured owner が nil になる: [Troubleshooting](troubleshooting.md) の install / Stimulus / engine mount / current owner sections を確認します。
+- Save / Delete / Save as new が 422 になる、または保存した preset が同じ本番画面で戻ってこない: [Production troubleshooting notes](production_troubleshooting.md) の CSRF meta tag と stable `table_key` sections を確認します。詳細手順は英語 docs を正本にします。
 - filter や sort の UI は変わるが検索結果に反映されない: [Troubleshooting](troubleshooting.md#filter-or-sort-ui-changes-do-not-change-database-results)、[Controller integration](controller_integration.md)、[Filter adapters](filter_adapters.md) を確認します。Rails Table Preferences は UI state と adapter params を扱い、database query は host app 側が適用します。
 - 既存の検索フォームに保存済み filter/sort を渡したい、または hidden fields が期待どおり roundtrip しない: [Controller integration の hidden fields section](controller_integration.md#hidden-fields-for-existing-search-forms)、[Demo screen generator](demo.md)、[Manual QA checklist](manual_qa.md#13-existing-search-form-integration) を確認します。hidden field の描画、blank value omission、array params、host-app search execution を分けて見ます。
 - select filter が表示されるが値が効かない、複数選択の保存値が想定と違う: [Select filter troubleshooting](select_filter_troubleshooting.md) を確認します。一般的な filter/sort params ではなく、`values_param`、scalar `options:`、host-app query ownership を切り分けます。
