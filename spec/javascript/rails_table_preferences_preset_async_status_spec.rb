@@ -98,6 +98,10 @@ RSpec.describe "rails_table_preferences preset async status JavaScript contract"
 
         controller.dispatch = (name, options = {}) => events.push({ name, detail: options.detail })
         controller.collectionUrlValue = "/rails_table_preferences/preferences/orders"
+        Object.defineProperty(controller, "savingStatusLabelValue", { value: "設定を保存中です..." })
+        Object.defineProperty(controller, "savedStatusLabelValue", { value: "設定を保存しました。" })
+        Object.defineProperty(controller, "savingFailedStatusLabelValue", { value: "設定の保存を完了できませんでした。" })
+        Object.defineProperty(controller, "operationFailedStatusLabelValue", { value: "設定の操作を完了できませんでした。" })
         controller.currentPreferenceEditable = true
         controller.settingsValue = { columns: [{ key: "status", visible: true }], filters: {}, sorts: [] }
         controller.settingsFromEditor = () => draftSettings
