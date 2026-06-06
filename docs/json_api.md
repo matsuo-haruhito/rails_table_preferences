@@ -92,6 +92,8 @@ Response:
 
 When `name` is `default` and no explicit `scope_type` or `scope_key` is provided, the controller resolves the effective default preference for the current owner and scope context. For other names, it resolves the available named preference with the normal scope priority.
 
+A missing default without explicit scope still returns `200 OK` with an empty normalized settings payload so a first-time table can open the bundled editor. A missing non-default named preset, or a missing preset requested with explicit `scope_type` / `scope_key`, returns `404 Not Found` with `{ "error": "not_found", "message": "Preference not found" }` so clients do not treat an absent explicit preset as a successful load.
+
 ## Create an owner preset
 
 Request:
