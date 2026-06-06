@@ -50,7 +50,7 @@ RSpec.describe "editor package entrypoint affordances" do
     expect(partial_source).to include("data-rails-table-preferences-editor-search-label-value")
     expect(partial_source).to include("rails_table_preferences.editor.search_columns")
     expect(partial_source).to include("data-rails-table-preferences-move-up-label-value")
-    expect(partial_source).to include("rails_table_preferences.editor.move_column_down")
+    expect(partial_source).to include("rails_table_preferences.editor.move_down")
   end
 
   it "keeps the generated controls styled across narrow editor rows" do
