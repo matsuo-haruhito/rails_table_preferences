@@ -366,6 +366,18 @@ Choose an empty fallback when an unsupported filter/editor should render nothing
 
 A column filter or editor may also be an object that responds to `to_table_filter` or `to_table_cell_editor`.
 
+### Richer filter widget boundary
+
+Use renderer registries when a screen needs richer filter widgets than the bundled filter panel should own. The registry can connect Rails Table Preferences column metadata to host-app HTML from a helper library, but it should not turn Rails Table Preferences into the dependency owner for autocomplete, async option loading, dependent selects, virtualized selects, or authorization-aware option lists.
+
+A safe first slice is a small metadata-to-renderer mapping:
+
+- Rails Table Preferences keeps the column key, filter metadata, saved filter state, and adapter params.
+- The registered renderer or custom partial renders the concrete widget HTML, such as a Rails Fields Kit control or another host-app helper.
+- The host app owns widget initialization, remote endpoints, accepted params, scoping, authorization, and any validation or retry UI.
+
+Keep the bundled select filter contract separate from this path. The default filter panel still renders browser controls from neutral metadata; value/label handling, static option search, and query adapter output follow [Filter metadata](filter_metadata.md) and [Select filter troubleshooting](select_filter_troubleshooting.md). If a screen needs richer behavior, register a renderer or copy/customize the controller instead of adding a new JavaScript package or form-helper dependency to Rails Table Preferences.
+
 ## Rails Fields Kit end-to-end example
 
 When the host app wants Rails Table Preferences to describe filter/editor metadata and Rails Fields Kit to render the actual controls, keep the flow in three steps:
