@@ -80,7 +80,11 @@ Choose the column key by the behavior the host app wants:
 - use the foreign key attribute, such as `customer_id`, when the raw stored id is intentionally part of the operator workflow
 - use `include_associations: false` when the page wants attribute-only inference, avoids association readers for that table, or will add explicit virtual/profile columns instead
 
+When `only:` is present, association names and foreign key attribute names are matched independently. `only: %i[customer]` keeps the inferred `customer` association column. `only: %i[customer_id]` keeps the raw `customer_id` attribute column and does not add the `customer` association column. Include both keys only when the screen intentionally needs both the stored id and the associated-record display surface.
+
 ```erb
+<%= resource_table_for @orders, only: %i[customer] %>
+<%= resource_table_for @orders, only: %i[customer_id] %>
 <%= resource_table_for @orders, include_associations: false %>
 ```
 
