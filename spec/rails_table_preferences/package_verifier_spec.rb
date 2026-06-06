@@ -86,7 +86,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       required_overview_svg_paths.each do |path|
         document = REXML::Document.new(File.read(repository_root.join(path)))
         svg = document.root
-        labelledby_ids = svg.attributes.fetch("aria-labelledby").split
+        labelledby_ids = svg.attributes.fetch("aria-labelledby").to_s.split
         referenced_elements = labelledby_ids.map do |id|
           REXML::XPath.first(svg, ".//*[@id='#{id}']")
         end
