@@ -51,6 +51,16 @@ Treat `overflow:` / `default_overflow:` as column-definition metadata owned by t
 
 This boundary keeps narrow editor rows from gaining another control while preserving the existing precedence: saved column settings can change width and truncate values, and the current column definition still supplies the visual overflow mode.
 
+## Visual evidence and PR smoke boundary
+
+Use the generated demo or a representative host-app table when a PR needs rendered evidence for overflow behavior. The demo is the maintained quick check because it puts `wrap`, `nowrap`, and `ellipsis` columns on the same screen.
+
+For docs-only changes that only describe the existing metadata contract, browser evidence is usually not required. Record the source files checked and point readers back to this guide, the demo manual checks, and the PR smoke matrix.
+
+For UI, CSS, demo, or visual-reference changes that claim an overflow mode looks correct, record rendered evidence or leave an explicit browser-capable handoff. Good evidence names the screen, representative column, viewport or container width, overflow mode checked, and whether the check used the generated demo or a real host-app table.
+
+Keep this evidence separate from editor configurability. The bundled editor still does not expose an overflow selector, and visual evidence for `:ellipsis`, `:clip`, `:wrap`, or `:nowrap` should not imply a new saved setting or user-editable overflow field.
+
 ## Example
 
 ```ruby
