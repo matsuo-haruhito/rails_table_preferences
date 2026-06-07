@@ -62,6 +62,9 @@ RSpec.describe "editor package entrypoint affordances" do
 
   it "documents browser checks and the existing QA checklist routing" do
     expect(docs_source).to include("Use the bundled column search field")
+    expect(docs_source).to include("Search is an editor navigation affordance, not a column visibility filter")
+    expect(docs_source).to include("no-results search")
+    expect(docs_source).to include("saving as new")
     expect(docs_source).to include("Use the row up/down buttons")
     expect(docs_source).to include("docs/manual_qa.md")
     expect(docs_source).to include("docs/accessibility.md")
