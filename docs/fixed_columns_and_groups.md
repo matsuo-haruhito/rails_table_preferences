@@ -51,6 +51,19 @@ Host applications can override:
 }
 ```
 
+## LTR and RTL boundary
+
+The bundled fixed-column surface is currently an LTR, left-pinned surface. The default hook uses the physical `left` property and the `--rails-table-preferences-pinned-left` offset variable. It should not be read as a guarantee that `dir="rtl"` tables, right-to-left business screens, or right-pinned columns work without host-app styling and browser verification.
+
+For an RTL host app, treat pinned-column layout as host-owned polish:
+
+- keep Rails Table Preferences responsible for the `fixed:` / `pinned:` metadata and stable data hooks
+- keep the host app responsible for any RTL-specific CSS override, logical-property experiment, or offset policy
+- record browser-capable evidence for the real RTL table before claiming that focus outlines, horizontal scroll, and sticky offsets are acceptable
+- keep `dir="rtl"` verification separate from right-pinned column support; the current gem surface does not implement right-pinned columns
+
+A docs-only PR can clarify this boundary with source inspection. A PR that claims rendered RTL behavior should include browser evidence or an explicit browser-capable handoff for the representative RTL screen.
+
 ## Minimal horizontal scroll container
 
 When a pinned table can be wider than the viewport, give it a dedicated horizontal scroll wrapper. This keeps sticky cells anchored inside the table scroller instead of the whole page.
@@ -145,12 +158,12 @@ If a host app needs a different layering policy, override the provided CSS hooks
 
 The current fixed-column surface is left-pinned and lightweight. Rails Table Preferences provides `pinned` / `fixed` metadata, left-side CSS hooks, and the default `--rails-table-preferences-pinned-left` offset variable. It does not provide a full sticky layout engine.
 
-Do not describe the current gem surface as supporting right-pinned columns. Right-pinned columns, multiple independent scroll containers, grouped headers combined with sticky columns, and advanced offset math remain host-owned or deferred directions. See [Non-goals and deferred directions](non_goals.md#right-pinned-columns-and-complex-sticky-layouts) for the current boundary.
+Do not describe the current gem surface as supporting right-pinned columns or automatic RTL sticky-column layout. Right-pinned columns, `dir="rtl"` offset policies, multiple independent scroll containers, grouped headers combined with sticky columns, and advanced offset math remain host-owned or deferred directions. See [Non-goals and deferred directions](non_goals.md#right-pinned-columns-and-complex-sticky-layouts) for the current boundary.
 
 When a PR touches fixed-column docs, QA wording, or host-app examples, keep this split visible:
 
 - current gem surface: metadata, left-pinned hooks, simple scroll-wrapper guidance, and review evidence for focus/stacking
-- host-owned or deferred surface: right-pinned columns, complex sticky engines, final shadow/background design, and app-specific offset policy
+- host-owned or deferred surface: right-pinned columns, RTL-specific offset overrides, complex sticky engines, final shadow/background design, and app-specific offset policy
 
 ## Multiple pinned columns
 
@@ -264,7 +277,7 @@ Rails Table Preferences owns:
 Host applications own:
 
 - table scroll container design
-- final sticky offset policy, including right-pinned or multi-scroll-container layouts
+- final sticky offset policy, including RTL-specific overrides, right-pinned, or multi-scroll-container layouts
 - focus outline, z-index, and background checks for the app's real table content
 - grouped table header markup
 - visual styling
