@@ -342,12 +342,20 @@ class WarehouseStocksController < ApplicationController
       .search(export_query_params)
       .order_by(export_query_params["sort"])
 
+    value_extractors = {
+      "warehouse_name" => ->(stock) { stock.warehouse.name },
+      "item_code" => ->(stock) { stock.item.code },
+      "item_name" => ->(stock) { stock.item.name },
+      "stock_quantity" => ->(stock) { stock.quantity },
+      "last_arrival_date" => ->(stock) { stock.last_arrival_date }
+    }
+
     csv_string = CSV.generate do |csv|
       csv << export_payload["headers"]
 
       scoped_stocks.find_each do |stock|
-        csv << export_payload["columns"].map do |column|
-          stock.public_send(column["export_key"] || column["key"])
+        csv << export_payload["export_keys"].map do |key|
+          value_extractors.fetch(key.to_s).call(stock)
         end
       end
     end
@@ -408,7 +416,8 @@ Why this split works:
 - the search form owns user-entered query params plus `table_preferences_hidden_fields(...)`, so saved filter/sort UI state can round-trip through the normal index request
 - the export form owns only the params that the export action actually accepts, which keeps export authorization and query scope explicit in the host app
 - `table_preference_name` still selects the same saved column order, visibility, and labels when `rails_table_preference_export_payload(...)` builds export metadata
-- query execution and file generation remain host app responsibilities even when the export follows the same visible table state
+- the export action maps ordered `export_keys` through a host-app-owned extractor allowlist instead of dispatching arbitrary methods from table preference metadata
+- query execution and file generation remain host app responsibilities even when the export follows the same visible table state; see [Export integration](export_integration.md) for hidden-column and sensitive-column boundaries
 
 ## Example: customer shipment list with Ransack
 
