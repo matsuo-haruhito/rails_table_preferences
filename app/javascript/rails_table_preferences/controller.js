@@ -8,7 +8,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
-    moveDownLabel: { type: String, default: "下へ移動" }
+    moveDownLabel: { type: String, default: "下へ移動" },
+    selectFilterOptionSearchThreshold: { type: Number, default: 8 }
   }
 
   buildPresetOption(preset) {
@@ -534,7 +535,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return String(option ?? "")
   }
 
-  get selectFilterOptionSearchThreshold() { return 8 }
+  get selectFilterOptionSearchThreshold() {
+    const rawValue = this.element?.dataset?.railsTablePreferencesSelectFilterOptionSearchThresholdValue
+    if (rawValue !== undefined && String(rawValue).trim() === "") return 8
+
+    const threshold = Number(this.selectFilterOptionSearchThresholdValue)
+    if (!Number.isFinite(threshold)) return 8
+    return Math.floor(threshold)
+  }
 
   filterOperatorText(operator) {
     const key = String(operator)
