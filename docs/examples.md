@@ -494,7 +494,29 @@ Controller:
 class Admin::DocumentSetsController < ApplicationController
   def index
     @document_set = DocumentSet.new
+    load_document_set_table_state
+  end
+
+  def create
+    @document_set = DocumentSet.new(document_set_params)
+
+    if @document_set.save
+      redirect_to admin_document_sets_path, notice: "作成しました"
+    else
+      load_document_set_table_state
+      render :index, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def load_document_set_table_state
     @table_columns = document_set_table_columns
+    @table_preference_settings = rails_table_preference_settings(
+      table_key: :admin_document_sets,
+      name: params[:table_preference_name],
+      fallback: {}
+    )
 
     preference_params = rails_table_preference_params(
       table_key: :admin_document_sets,
@@ -509,20 +531,6 @@ class Admin::DocumentSetsController < ApplicationController
       .order_by(merged_params["sort"] || params[:sort])
       .page(params[:page])
   end
-
-  def create
-    @document_set = DocumentSet.new(document_set_params)
-
-    if @document_set.save
-      redirect_to admin_document_sets_path, notice: "作成しました"
-    else
-      @table_columns = document_set_table_columns
-      @document_sets = DocumentSet.search(params).page(params[:page])
-      render :index, status: :unprocessable_entity
-    end
-  end
-
-  private
 
   def document_set_table_columns
     [
@@ -605,6 +613,7 @@ View composition:
 Why this split works:
 
 - the create form owns record validation and persistence
+- validation failures render the same table state setup as `index`, so the editor, hidden fields, and table tag still receive `@table_preference_settings`
 - the editor owns only table display preferences and preset actions
 - the search form owns user-entered query params plus `table_preferences_hidden_fields(...)`
 - the table stays a normal host app list view and only opts into Rails Table Preferences through column keys
