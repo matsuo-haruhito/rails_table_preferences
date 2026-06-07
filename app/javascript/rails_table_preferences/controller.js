@@ -270,8 +270,9 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   syncStatusStateHook(state = this.statusState || "idle") {
-    if (!this.hasStatusTarget) return
-    this.statusTarget.setAttribute("data-rails-table-preferences-status-state", state || "idle")
+    const target = this.hasStatusTarget ? this.statusTarget : null
+    if (!target || typeof target.setAttribute !== "function") return
+    target.setAttribute("data-rails-table-preferences-status-state", state || "idle")
   }
 
   clearSuccessfulStatus() {
