@@ -229,7 +229,7 @@ Supported plain-param metadata:
 | `param` | Scalar filter param name |
 | `values_param` | Multi-value filter param name |
 | `from_param` | Lower-bound/range start param name |
-| `to_param` | Lower-bound/range end param name |
+| `to_param` | Upper-bound/range end param name |
 | `operator_param` | Optional param that receives the selected operator |
 | `sort_param` | Sort key name passed as the sort value |
 
