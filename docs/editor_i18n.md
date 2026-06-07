@@ -57,6 +57,20 @@ These keys label generated editor rows and table-header affordances:
 
 These are safe locale override points for wording changes. Structural changes to row layout, drag behavior, resize behavior, or keyboard behavior require copied ERB / JavaScript or host-app code.
 
+## Editor search and move labels
+
+The package entrypoint adds column search and row move controls after the bundled editor markup is rendered. The ERB partial passes the copy to controller-root values so packaged-controller screens can localize these affordances without copying JavaScript:
+
+- `rails_table_preferences.editor.search_columns` feeds `data-rails-table-preferences-editor-search-label-value`
+- `rails_table_preferences.editor.search_columns_placeholder` feeds `data-rails-table-preferences-editor-search-placeholder-value`
+- `rails_table_preferences.editor.no_search_results` feeds `data-rails-table-preferences-editor-no-search-results-label-value`
+- `rails_table_preferences.editor.move_up` feeds `data-rails-table-preferences-move-up-label-value`
+- `rails_table_preferences.editor.move_down` feeds `data-rails-table-preferences-move-down-label-value`
+
+Use locale overrides for global wording changes, or override those controller-root values on one mounted editor when a single screen needs different copy.
+
+These values are package entrypoint-only behavior. Host apps that register the copied base controller directly should not assume the search field or move buttons exist just because the ERB emits the root values. Use copied or replacement JavaScript when a copied-controller screen needs the same controls, different movement behavior, or a different search UI. Keep browser QA for the actual affordances in [Editor entrypoint affordances](editor_entrypoint_affordances.md).
+
 ## Filter and sort labels
 
 The bundled editor passes these values to the controller root so the Stimulus controller can reuse localized labels in filter panels, filter buttons, sort controls, `title`, and `aria-label` text:
@@ -139,6 +153,11 @@ ja:
       save: この設定を保存
       save_as_new: 新しい設定として保存
       action_hint: 画面に反映は現在の表示だけを更新し、保存は入力欄の設定名へ反映します。
+      search_columns: 表示列を検索
+      search_columns_placeholder: 列名・キー・グループで絞り込み
+      no_search_results: 一致する列がありません。
+      move_up: 1つ上へ移動
+      move_down: 1つ下へ移動
       filter: 条件で絞り込む
       filter_operator_labels:
         contains: 含める
@@ -156,9 +175,10 @@ Keep overrides close to the host app's normal locale files so copied ERB and cop
 Use the lightest path that matches the change:
 
 1. Locale keys for global wording changes across every bundled editor.
-2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, or scope fallback wording.
+2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, or row move wording.
 3. Package entrypoint `data-rails-table-preferences-filter-operator-labels-value` when a packaged-controller table only needs different filter operator display text.
-4. Copied ERB when markup, helper-text placement, or status-region structure needs to change.
-5. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, or filter panel interaction needs to change.
+4. Package entrypoint editor search / move label values when the packaged-controller table only needs different search or move button copy.
+5. Copied ERB when markup, helper-text placement, or status-region structure needs to change.
+6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, or row movement needs to change.
 
-See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.
+See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, [Editor entrypoint affordances](editor_entrypoint_affordances.md) for the package-only browser QA surface, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.
