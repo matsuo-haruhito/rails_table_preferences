@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, and checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files.
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, and checks that declaration targets' relative import/export references resolve to packaged `.d.ts` files.
 
 A successful run prints a message like:
 
@@ -26,16 +26,16 @@ A successful run prints a message like:
 Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 ```
 
-If required files, package export targets, or package-internal JavaScript imports are missing, the task prints the missing paths and exits with failure. Invalid packaged `package.json` metadata is reported as a package metadata error.
+If required files, package export targets, package-internal JavaScript imports, package-internal declaration imports, or packaged metadata are missing or invalid, the task prints the missing paths and exits with failure.
 
 Failure output starts with a compact summary line before the detailed lists:
 
 ```text
 Package verification failed: rails_table_preferences-0.1.0.alpha.gem
-Package verification summary: 3 issue(s) (required files: 1, package export targets: 1, package internal JavaScript imports: 1, package metadata errors: 0)
+Package verification summary: 4 issue(s) (required files: 1, package export targets: 1, package internal JavaScript imports: 1, package internal declaration imports: 1, package metadata errors: 0)
 ```
 
-Use the summary line in PR bodies, the pull request template's release/package evidence field, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, or package metadata error. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
+Use the summary line in PR bodies, the pull request template's release/package evidence field, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, unresolved declaration import, or package metadata error. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
 
 ## Manual inspection
 
@@ -152,7 +152,7 @@ Add a file to `REQUIRED_PATHS` when its absence would make the packaged gem unus
 Use these criteria when adding or reviewing required paths:
 
 - Runtime entrypoints that host apps call directly, such as public helpers, controllers, adapters, registry files, resource table partials, rake tasks, and copied generator templates.
-- JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript files.
+- JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
 - Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor root options, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
@@ -175,9 +175,15 @@ The package verification task reads the packaged `package.json` and confirms eve
 
 After confirming those export target files exist, the verifier scans JavaScript export targets' static relative `import ... from`, side-effect `import`, and `export ... from` references. Extensionless references such as `./controller` and `../controllers/rails_table_preferences_controller` must resolve to packaged JavaScript files, so package verification catches drift where an exported entrypoint ships but one of its internal package files does not.
 
-This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files and declarations, while the export target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the manual host-app Vite check in `docs/release_checklist.md`.
+The verifier performs the same lightweight relative-target check for packaged declaration export targets. For example, `app/javascript/rails_table_preferences/index.d.ts` re-exports `./controller`, and package verification now expects that reference to resolve to `app/javascript/rails_table_preferences/controller.d.ts` inside the same built gem. This keeps TypeScript host-app import metadata aligned without adding a full TypeScript compiler check.
+
+This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files and declarations, while the export target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, declaration re-exports, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the manual host-app Vite check in `docs/release_checklist.md`.
 
 The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution, and package verification should not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
+
+## Runtime import smoke boundary
+
+`bundle exec rake package:verify` confirms that package metadata, files, JavaScript relative imports, and TypeScript declaration re-exports are internally consistent in the built gem. It does not run a host-app bundler or install frontend dependencies. Keep the real `rails_table_preferences` and `rails_table_preferences/controller` ESM import smoke as release or host-app evidence in the Vite / `app/frontend` checklist rather than adding a partial CI import that could pass without proving real bundler integration.
 
 ## Why this matters
 
@@ -198,6 +204,6 @@ bundle exec rake package:verify
 
 The JavaScript syntax step checks the copied controller, the package controller entrypoint, and the package root entrypoint. Keep this snippet synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
-The package verification task also follows the documented package root and controller export targets and checks their packaged internal relative JavaScript references. That complements the syntax check by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior to the release checklist's manual Vite integration check.
+The package verification task also follows the documented package root and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax check by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior to the release checklist's manual Vite integration check.
 
 Manual package inspection is still recommended before tagging a release.
