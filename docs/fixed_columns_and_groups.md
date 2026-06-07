@@ -141,6 +141,17 @@ For PR-level evidence, record the exact table or demo screen, scroll position, f
 
 If a host app needs a different layering policy, override the provided CSS hooks near that table. For example, keep header cells above body cells, keep floating panels above pinned cells, and test the result with keyboard focus rather than relying only on mouse hover.
 
+## What is intentionally not included
+
+The current fixed-column surface is left-pinned and lightweight. Rails Table Preferences provides `pinned` / `fixed` metadata, left-side CSS hooks, and the default `--rails-table-preferences-pinned-left` offset variable. It does not provide a full sticky layout engine.
+
+Do not describe the current gem surface as supporting right-pinned columns. Right-pinned columns, multiple independent scroll containers, grouped headers combined with sticky columns, and advanced offset math remain host-owned or deferred directions. See [Non-goals and deferred directions](non_goals.md#right-pinned-columns-and-complex-sticky-layouts) for the current boundary.
+
+When a PR touches fixed-column docs, QA wording, or host-app examples, keep this split visible:
+
+- current gem surface: metadata, left-pinned hooks, simple scroll-wrapper guidance, and review evidence for focus/stacking
+- host-owned or deferred surface: right-pinned columns, complex sticky engines, final shadow/background design, and app-specific offset policy
+
 ## Multiple pinned columns
 
 For multiple pinned columns, the host application may set explicit left offsets if the default automatic behavior is not enough for the table layout:
@@ -253,7 +264,7 @@ Rails Table Preferences owns:
 Host applications own:
 
 - table scroll container design
-- final sticky offset policy
+- final sticky offset policy, including right-pinned or multi-scroll-container layouts
 - focus outline, z-index, and background checks for the app's real table content
 - grouped table header markup
 - visual styling
