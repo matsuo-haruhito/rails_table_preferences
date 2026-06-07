@@ -219,8 +219,11 @@ class LegacyOrdersController < ApplicationController
       .order_by(merged_params["sort"] || params[:sort])
       .page(params[:page])
 
-    @table_preference_collection_url = "/rails_table_preferences/preferences/#{@table_key}"
-    @table_preference_url = "#{@table_preference_collection_url}/#{ERB::Util.url_encode(@table_preference_name)}"
+    encoded_table_key = ERB::Util.url_encode(@table_key)
+    encoded_preference_name = ERB::Util.url_encode(@table_preference_name)
+
+    @table_preference_collection_url = "/rails_table_preferences/preferences/#{encoded_table_key}"
+    @table_preference_url = "#{@table_preference_collection_url}/#{encoded_preference_name}"
   end
 
   private
@@ -295,7 +298,7 @@ Why this pattern works:
 - the same `@table_columns` and `@table_preference_settings` can feed both `table_preferences_editor(...)` and the helper-free controller root, so the editor and table stay aligned
 - query execution, authorization, export actions, and any `config.mount_path` override still belong to the host app
 
-For the exact attribute list and table-target rules, see [JavaScript controller notes](javascript_controller.md). For the lighter introductory version of this pattern, see [Quick start](quick_start.md).
+For the exact attribute list and table-target rules, see [JavaScript controller notes](javascript_controller.md). For helper-free URL ownership and custom mount path examples, see [Helper-free controller root URLs](helper_free_controller_root_urls.md). For the lighter introductory version of this pattern, see [Quick start](quick_start.md).
 
 ## Example: keep the search form and export action separate
 
