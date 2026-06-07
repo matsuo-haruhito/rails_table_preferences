@@ -91,6 +91,28 @@ RSpec.describe "rails_table_preferences select filter option search copy" do
       script = <<~JS
         import { pathToFileURL } from "node:url"
 
+        globalThis.document = {
+          createElement() {
+            return {
+              _textContent: "",
+              set textContent(value) {
+                this._textContent = String(value)
+              },
+              get textContent() {
+                return this._textContent
+              },
+              get innerHTML() {
+                return this._textContent
+                  .replaceAll("&", "&amp;")
+                  .replaceAll("<", "&lt;")
+                  .replaceAll(">", "&gt;")
+                  .replaceAll('"', "&quot;")
+                  .replaceAll("'", "&#39;")
+              }
+            }
+          }
+        }
+
         const packageUrl = pathToFileURL(process.argv[1]).href
         const { default: PackageController } = await import(packageUrl)
         const controller = new PackageController()
