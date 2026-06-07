@@ -31,6 +31,7 @@ The bundled editor and Stimulus controller provide:
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
 - optional semantic table captions for the default `resource_table_for` and `tree_resource_table_for` partials when the host app passes `caption:`
 - package-entrypoint-only column search and row move buttons with accessible labels, plus disabled states for hidden, first, last, and busy rows
+- package-entrypoint-only Enter/Space auto-fit on focused resize handles, matching the existing double-click auto-fit shortcut without adding full keyboard width adjustment
 
 ## Sortable headers
 
@@ -85,7 +86,9 @@ Resize handles are generated as buttons and receive an `aria-label`:
 
 The bundled controller prefers the configured column label for that accessible name, falls back to the visible header text when needed, and only uses the raw column key when neither user-facing label is available.
 
-The default behavior is pointer-oriented. Host applications that need full keyboard resizing should provide a custom controller or additional keyboard shortcuts.
+The default resize behavior remains pointer-oriented. When the host app imports the packaged `rails_table_preferences/controller` entrypoint, a focused resize handle also accepts Enter or Space for the same one-shot auto-fit behavior as double-click. That shortcut is only an auto-fit affordance; it is not full keyboard width adjustment.
+
+Full keyboard resizing would need additional product decisions such as arrow-key bindings, step size, min/max width feedback, cancellation behavior, and status announcements. Host applications that need that level of keyboard width editing should provide a custom controller or additional shortcuts, then verify the focus model and announcements in their own table layout.
 
 ## Resource table captions
 
@@ -106,7 +109,7 @@ Rails Table Preferences does not try to generate page-level explanations, comple
 
 The default column reorder behavior uses native drag and drop for editor rows and table headers. Treat those drag affordances as pointer-oriented shortcuts, not as the only supported reorder path.
 
-The bundled editor also exposes numeric order inputs. Keyboard-only users can change a column's order number, move to the bundled `適用` action, and apply the editor state without relying on drag and drop. This is the bundled keyboard-friendly fallback for reordering.
+The bundled editor also exposes numeric order inputs. Keyboard-only users can change a column's order number, move to the bundled `適用` action, and apply the editor state without relying on drag and drop. This is the bundled keyboard-friendly fallback for reordering, not a resize keyboard fallback.
 
 When a host application imports the packaged `rails_table_preferences/controller` entrypoint, the editor also renders labelled column-search and row up/down controls around the generated rows. These controls are additive to the numeric order fallback: filtered-out rows stay in the DOM so apply/save still keeps every column, row movement is limited to visible filtered rows, and generated move buttons disable for hidden rows, first/last visible rows, and async busy state.
 
@@ -274,7 +277,8 @@ The host application owns:
 - complex table captions, explanatory copy, and custom partial layouts
 - focus order around surrounding UI
 - color contrast after applying app-specific styles
-- keyboard behavior beyond native form controls
+- keyboard behavior beyond native form controls, the bundled order-input reorder fallback, and the packaged resize auto-fit shortcut
+- full keyboard width adjustment for resize handles, including key bindings, step size, live feedback, and status announcements
 - custom confirmation dialogs
 - authorization messaging
 - testing with the application's real design system
@@ -310,6 +314,7 @@ Before releasing a screen, check:
 - When using the packaged entrypoint at 320px, 375px, and 390px-equivalent widths or narrow containers, the column search and row move buttons remain reachable without overlapping labels, numeric order inputs, width inputs, or truncate inputs.
 - Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
 - Resize handles announce the user-facing column label rather than only an internal column key.
+- Keyboard-only users can use Enter or Space on a focused resize handle for package-entrypoint auto-fit, but should not expect arrow-key or step-based width adjustment from the bundled controller.
 - Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.
 - Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
 - The table remains understandable when columns are hidden.
