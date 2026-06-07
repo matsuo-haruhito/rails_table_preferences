@@ -101,6 +101,7 @@ The default filter panel stays intentionally lightweight.
 - The select option search only filters rendered static options in the open panel. It does not change saved filter values, adapter params, query execution, remote option loading, or dependent select behavior, and selected options remain visible even when they do not match the current search text.
 - Screens that need autocomplete, async option loading, grouped option UX, virtualized selects, or host-specific authorization/scoping should keep that UI in a copied/custom controller or host-owned widget.
 - The bundled controller does not add a full popover library, focus trap, modal dialog abstraction, remote search endpoint, or richer select dependency.
+- For Tab / Shift+Tab leaving the panel, use [Filter panel keyboard boundary](filter_panel_keyboard_boundary.md) to decide whether normal browser focus movement is acceptable or the host app needs copied/replacement controller behavior.
 
 ## Table-only application rule
 
