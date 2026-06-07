@@ -113,14 +113,17 @@ docs/resource_tables.md
 docs/resource_table_cell_hooks.md
 docs/table_data_attributes.md
 docs/resource_table_formatter_contract.md
+docs/virtual_columns_query_boundary.md
 docs/decision_guide.md
 docs/scoped_presets.md
+docs/preset_selector_scope_labels.md
 docs/fixed_columns_and_groups.md
 docs/column_overflow.md
 docs/resize_auto_fit.md
 docs/export_integration.md
 docs/accessibility.md
 docs/editor_i18n.md
+docs/editor_entrypoint_affordances.md
 docs/editor_root_options.md
 docs/non_goals.md
 docs/visual_overview.md
@@ -154,7 +157,7 @@ Use these criteria when adding or reviewing required paths:
 - Runtime entrypoints that host apps call directly, such as public helpers, controllers, adapters, registry files, resource table partials, rake tasks, and copied generator templates.
 - JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
-- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor root options, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
+- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, preset selector scope labels, virtual column query boundary, editor root options, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
 
