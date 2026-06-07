@@ -134,13 +134,16 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         docs/resource_table_cell_hooks.md
         docs/table_data_attributes.md
         docs/resource_table_formatter_contract.md
+        docs/virtual_columns_query_boundary.md
         docs/decision_guide.md
         docs/scoped_presets.md
+        docs/preset_selector_scope_labels.md
         docs/fixed_columns_and_groups.md
         docs/column_overflow.md
         docs/resize_auto_fit.md
         docs/export_integration.md
         docs/accessibility.md
+        docs/editor_entrypoint_affordances.md
         docs/visual_overview.md
         docs/demo.md
         docs/sandbox.md
