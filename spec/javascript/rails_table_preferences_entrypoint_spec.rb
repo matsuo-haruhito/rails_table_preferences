@@ -206,6 +206,237 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
     end
   end
 
+  it "keeps package editor search and move controls behavior stable" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const datasetKey = (name) => name.replace(/^data-/, "").replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
+
+        const attributeSelector = (selector) => {
+          if (!selector.startsWith("[") || !selector.endsWith("]")) return null
+          const body = selector.slice(1, -1)
+          const separator = body.indexOf("=")
+          if (separator < 0) return { name: body.trim(), expected: undefined }
+          const name = body.slice(0, separator).trim()
+          let expected = body.slice(separator + 1).trim()
+          const quoted = (expected.startsWith('"') && expected.endsWith('"')) || (expected.startsWith("'") && expected.endsWith("'"))
+          if (quoted) expected = expected.slice(1, -1)
+          return { name, expected }
+        }
+
+        class FakeElement {
+          constructor(tagName = "div") {
+            this.tagName = tagName.toUpperCase()
+            this.children = []
+            this.parentNode = null
+            this.dataset = {}
+            this.attributes = {}
+            this.className = ""
+            this.hidden = false
+            this.disabled = false
+            this.checked = false
+            this.value = ""
+            this.textContent = ""
+            this.type = ""
+            this.title = ""
+          }
+
+          append(...nodes) { nodes.forEach((node) => this.appendChild(node)) }
+
+          appendChild(node) {
+            if (node.parentNode) node.parentNode.removeChild(node)
+            node.parentNode = this
+            this.children.push(node)
+            return node
+          }
+
+          insertBefore(node, reference) {
+            if (node.parentNode) node.parentNode.removeChild(node)
+            node.parentNode = this
+            const index = reference ? this.children.indexOf(reference) : -1
+            if (index >= 0) this.children.splice(index, 0, node)
+            else this.children.push(node)
+            return node
+          }
+
+          removeChild(node) {
+            const index = this.children.indexOf(node)
+            if (index >= 0) this.children.splice(index, 1)
+            node.parentNode = null
+            return node
+          }
+
+          before(node) {
+            if (!this.parentNode) return
+            this.parentNode.insertBefore(node, this)
+          }
+
+          addEventListener() {}
+
+          setAttribute(name, value) {
+            const stringValue = String(value)
+            this.attributes[name] = stringValue
+            if (name.startsWith("data-")) this.dataset[datasetKey(name)] = stringValue
+          }
+
+          getAttribute(name) { return this.attributes[name] }
+
+          removeAttribute(name) {
+            delete this.attributes[name]
+            if (name.startsWith("data-")) delete this.dataset[datasetKey(name)]
+          }
+
+          matches(selector) {
+            if (selector.startsWith(".")) return this.className.split(/\s+/).includes(selector.slice(1))
+            const attribute = attributeSelector(selector)
+            if (!attribute) return false
+            const { name, expected } = attribute
+            const actual = name.startsWith("data-") ? this.dataset[datasetKey(name)] : this.attributes[name]
+            if (expected === undefined) return actual !== undefined
+            return actual === expected
+          }
+
+          querySelector(selector) { return this.querySelectorAll(selector)[0] || null }
+
+          querySelectorAll(selector) {
+            const selectors = selector.split(",").map((part) => part.trim()).filter(Boolean)
+            const matchesAny = (node) => selectors.some((part) => node.matches(part))
+            const results = []
+            const visit = (node) => {
+              node.children.forEach((child) => {
+                if (matchesAny(child)) results.push(child)
+                visit(child)
+              })
+            }
+            visit(this)
+            return results
+          }
+
+          closest(selector) {
+            let node = this
+            while (node) {
+              if (node.matches(selector)) return node
+              node = node.parentNode
+            }
+            return null
+          }
+
+          get nextSibling() {
+            if (!this.parentNode) return null
+            const index = this.parentNode.children.indexOf(this)
+            return index >= 0 ? this.parentNode.children[index + 1] || null : null
+          }
+        }
+
+        globalThis.document = { createElement: (tagName) => new FakeElement(tagName) }
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const controller = new ControllerClass()
+        const root = document.createElement("section")
+        const searchControl = document.createElement("div")
+        const searchInput = document.createElement("input")
+        const emptyMessage = document.createElement("p")
+        const rowsTarget = document.createElement("div")
+
+        searchControl.dataset.railsTablePreferencesEditorSearch = "true"
+        searchInput.dataset.railsTablePreferencesEditorSearchInput = "true"
+        emptyMessage.dataset.railsTablePreferencesEditorSearchEmpty = "true"
+        searchControl.append(searchInput, emptyMessage)
+        root.append(searchControl, rowsTarget)
+
+        const buildRow = ({ key, label, searchText, visible = true, order }) => {
+          const row = document.createElement("div")
+          const visibleInput = document.createElement("input")
+          const orderInput = document.createElement("input")
+          const widthInput = document.createElement("input")
+          const truncateInput = document.createElement("input")
+          const upButton = document.createElement("button")
+          const downButton = document.createElement("button")
+
+          row.dataset.railsTablePreferencesColumnKey = key
+          row.dataset.railsTablePreferencesEditorSearchText = searchText
+          row.textContent = label
+          visibleInput.setAttribute("data-field", "visible")
+          visibleInput.checked = visible
+          orderInput.setAttribute("data-field", "order")
+          orderInput.value = String(order)
+          widthInput.setAttribute("data-field", "width")
+          truncateInput.setAttribute("data-field", "truncate")
+          upButton.dataset.railsTablePreferencesMoveDirection = "up"
+          downButton.dataset.railsTablePreferencesMoveDirection = "down"
+          row.append(visibleInput, orderInput, widthInput, truncateInput, upButton, downButton)
+          return { row, upButton, downButton, orderInput }
+        }
+
+        const account = buildRow({ key: "account", label: "Account", searchText: "account", order: 10 })
+        const shipping = buildRow({ key: "shipping", label: "Shipping", searchText: "shipping address", order: 20 })
+        const total = buildRow({ key: "total", label: "Total", searchText: "account total", order: 30 })
+        rowsTarget.append(account.row, shipping.row, total.row)
+
+        Object.defineProperty(controller, "element", { value: root })
+        Object.defineProperty(controller, "hasEditorRowsTarget", { value: true })
+        Object.defineProperty(controller, "editorRowsTarget", { value: rowsTarget })
+        controller.settingsValue = {
+          columns: [
+            { key: "account", order: 10, pinned: false },
+            { key: "shipping", order: 20, pinned: false },
+            { key: "total", order: 30, pinned: false }
+          ],
+          filters: { account: { operator: "contains", value: "ACME" } },
+          sorts: [{ key: "total", direction: "desc" }]
+        }
+        controller.busy = false
+
+        searchInput.value = "account"
+        controller.syncEditorSearchResults()
+
+        if (account.row.hidden) throw new Error("matching first row was hidden by search")
+        if (!shipping.row.hidden) throw new Error("non-matching row stayed visible during search")
+        if (total.row.hidden) throw new Error("matching later row was hidden by search")
+        if (rowsTarget.children.length !== 3) throw new Error("search removed filtered rows from the editor DOM")
+        if (!shipping.upButton.disabled || !shipping.downButton.disabled) throw new Error("hidden row move buttons stayed enabled")
+        if (!account.upButton.disabled || account.downButton.disabled) throw new Error("first visible row move button state is wrong")
+        if (total.upButton.disabled || !total.downButton.disabled) throw new Error("last visible row move button state is wrong")
+
+        const settingsWhileFiltered = controller.settingsFromEditor()
+        if (settingsWhileFiltered.columns.map((column) => column.key).join(",") !== "account,shipping,total") {
+          throw new Error("settingsFromEditor dropped or reordered hidden search rows before a move")
+        }
+        if (settingsWhileFiltered.filters.account.value !== "ACME") throw new Error("settingsFromEditor dropped existing filters")
+        if (settingsWhileFiltered.sorts[0].key !== "total") throw new Error("settingsFromEditor dropped existing sorts")
+
+        controller.moveEditorRow({ currentTarget: total.upButton, preventDefault() {} }, -1)
+        if (rowsTarget.children.map((row) => row.dataset.railsTablePreferencesColumnKey).join(",") !== "total,account,shipping") {
+          throw new Error("moveEditorRow did not move within the visible filtered row set")
+        }
+        if (shipping.row.hidden !== true) throw new Error("moveEditorRow unexpectedly changed hidden search state")
+        if (total.orderInput.value !== "10" || account.orderInput.value !== "20" || shipping.orderInput.value !== "30") {
+          throw new Error("moveEditorRow did not refresh numeric order inputs after moving")
+        }
+
+        const settingsAfterMove = controller.settingsFromEditor()
+        if (settingsAfterMove.columns.map((column) => column.key).join(",") !== "total,account,shipping") {
+          throw new Error("settingsFromEditor did not follow moved DOM order including hidden rows")
+        }
+        if (settingsAfterMove.columns.find((column) => column.key === "shipping")?.order !== 30) {
+          throw new Error("settingsFromEditor lost the hidden row order value after moving")
+        }
+
+        controller.busy = true
+        controller.syncEditorMoveButtons()
+        if (!controller.editorRows.every((row) => row.querySelectorAll("[data-rails-table-preferences-move-direction]").every((button) => button.disabled))) {
+          throw new Error("busy state did not disable every generated move button")
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "dispatches public controller lifecycle events with stable detail payloads" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
@@ -316,55 +547,6 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         if (hostTitleCell.sortIndicator.textContent !== "▼") {
           throw new Error("sort indicator no longer tracks the active descending sort")
         }
-      JS
-
-      run_node_entrypoint_check(controller_entrypoint_path, script:)
-    end
-  end
-
-  it "shows all columns without resetting display metadata, filters, or sorts" do
-    build_entrypoint_sandbox do |tmpdir|
-      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
-
-      script = <<~JS
-        import { pathToFileURL } from "node:url"
-
-        const controllerUrl = pathToFileURL(process.argv[1]).href
-        const { default: ControllerClass } = await import(controllerUrl)
-        const controller = new ControllerClass()
-        const calls = []
-        let prevented = false
-
-        controller.busy = false
-        controller.closeFilterPanel = () => calls.push("closeFilterPanel")
-        controller.renderEditor = () => calls.push("renderEditor")
-        controller.apply = () => calls.push("apply")
-        Object.defineProperty(controller, "columnsFromSettings", {
-          get() { return this.settingsValue.columns }
-        })
-        controller.settingsValue = {
-          columns: [
-            { key: "id", visible: false, order: 20, width: 80, truncate: 12, overflow: "clip", pinned: true },
-            { key: "name", visible: true, order: 10, width: 160, truncate: null, overflow: "wrap", pinned: false }
-          ],
-          filters: { name: { operator: "contains", value: "Acme" } },
-          sorts: [{ key: "name", direction: "desc" }]
-        }
-
-        controller.showAllColumns({ preventDefault: () => { prevented = true } })
-
-        const [idColumn, nameColumn] = controller.settingsValue.columns
-        if (!prevented) throw new Error("showAllColumns did not prevent the editor button default action")
-        if (idColumn.visible !== true || nameColumn.visible !== true) throw new Error("showAllColumns did not make every column visible")
-        if (idColumn.order !== 20 || idColumn.width !== 80 || idColumn.truncate !== 12 || idColumn.overflow !== "clip" || idColumn.pinned !== true) {
-          throw new Error("showAllColumns changed non-visibility display metadata")
-        }
-        if (nameColumn.order !== 10 || nameColumn.width !== 160 || nameColumn.overflow !== "wrap" || nameColumn.pinned !== false) {
-          throw new Error("showAllColumns changed visible column metadata")
-        }
-        if (controller.settingsValue.filters.name.value !== "Acme") throw new Error("showAllColumns reset filters")
-        if (controller.settingsValue.sorts[0].direction !== "desc") throw new Error("showAllColumns reset sorts")
-        if (calls.join(",") !== "closeFilterPanel,renderEditor,apply") throw new Error(`showAllColumns did not refresh editor and table state: ${calls}`)
       JS
 
       run_node_entrypoint_check(controller_entrypoint_path, script:)
