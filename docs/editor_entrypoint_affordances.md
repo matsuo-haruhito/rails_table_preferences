@@ -6,12 +6,15 @@ This note covers small browser checks for the packaged `rails_table_preferences/
 
 The package entrypoint adds a lightweight column search field before the generated editor rows. It filters the rendered editor row list by column label, key, or group text. Hidden rows remain in the DOM so applying or saving settings does not drop columns that are temporarily filtered out of view.
 
+Search is an editor navigation affordance, not a column visibility filter. A no-results search only means every editor row is temporarily hidden in the editor surface; applying, saving, or saving as new should still assemble settings from all editor rows. Clear the search before reviewing the visible row list, but do not treat the no-results state as a request to save a zero-column table.
+
 Use the bundled column search field when checking a table with many columns:
 
 - search by a visible column label and confirm only matching rows remain visible
 - search by a column key or group word when labels are similar
 - clear the search and confirm every editor row returns
 - apply or save while a search is active and confirm columns hidden by the search are not removed from the saved settings
+- apply or save while the search has no results and confirm the saved settings still keep the full column set after clearing the search or reloading the preset
 
 ## Row move buttons
 
