@@ -20,12 +20,13 @@ See [Quick start](quick_start.md), [Install path options](install_paths.md), [Mo
 ## 2. Choose the table rendering path
 
 - For convention-first Active Record lists, start with `resource_table_for` and use profile overrides only where the inferred columns need adjustment.
+- When using the default resource table partials, decide whether the table needs a short semantic `caption:`. Use it for a table name that helps distinguish the table surface; keep page headings, explanatory copy, and business-specific instructions in the host app around the generated table.
 - When a resource table profile formatter reads associations, such as `order.customer`, preload those associations in the host-app relation before rendering; Rails Table Preferences does not infer `includes`, joins, or authorization scopes from formatter code.
 - For tree-shaped records, use `tree_resource_table_for` only when the host app already has a stable parent id method.
 - For existing shared table partials, keep the host-app table markup and add the Rails Table Preferences data attributes to managed `th` / `td` cells.
 - Keep action links, badges, sensitive columns, and business-specific markup host-app-owned unless they are intentionally part of the managed column set.
 
-See [Resource table adapters](resource_tables.md), [Table data attribute merge boundary](table_data_attributes.md), and [JavaScript controller notes](javascript_controller.md).
+See [Resource table adapters](resource_tables.md), [Accessibility baseline](accessibility.md#resource-table-captions), [Table data attribute merge boundary](table_data_attributes.md), and [JavaScript controller notes](javascript_controller.md).
 
 ## 3. Preserve existing search and sort behavior
 
@@ -69,10 +70,11 @@ Before asking real users to try the screen, verify this path in the real host ap
 5. Submit the existing search form and confirm saved filter/sort state still round-trips. If the screen can keep an old `page` param, repeat the same check from a later page and confirm the host app either clears, clamps, or intentionally preserves that page after saved filters/sorts change the result set.
 6. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
 7. If resource table profile formatters read associations, render representative rows while watching the host app's query log or existing N+1 guard and confirm the relation preloads those associations explicitly.
-8. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
-9. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
-10. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
-11. Check the dense table layout in the real production shell:
+8. If `resource_table_for` or `tree_resource_table_for` uses `caption:`, confirm the caption is a short semantic table name and does not duplicate the page heading or surrounding instructions.
+9. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
+10. Confirm the mounted JSON API is reachable only through the expected host-app authentication, CSRF, and `before_action` boundary.
+11. If shared, role, or organization presets are enabled, sign in as a representative owner and confirm the expected non-owner preset is visible, non-editable from the regular editor path, and resolved from the same `scope_key` value the host app created.
+12. Check the dense table layout in the real production shell:
    - Move keyboard focus through editor controls, filter buttons, resize handles, sortable headers, sticky/fixed columns, and row actions.
    - Resize one managed column and confirm the handle remains visible and does not collide with header text, filter buttons, or sort indicators.
    - Horizontally scroll a table with sticky/fixed columns and confirm focused links, buttons, and inputs are not covered.
