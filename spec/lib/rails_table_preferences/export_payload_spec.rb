@@ -84,6 +84,27 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     expect(payload["columns"].first["export_key"]).to eq(:customer_display_name)
   end
 
+  it "keeps current column group metadata instead of saved settings group values" do
+    columns = [
+      { key: :customer_name, label: "得意先名", group: { key: :customer, label: "得意先情報" } },
+      { key: :status, label: "状態", group: "出荷情報" }
+    ]
+    settings = {
+      columns: [
+        { key: :customer_name, visible: true, order: 20, group: { key: :legacy, label: "古い得意先" } },
+        { key: :status, visible: true, order: 10, group: "古い出荷情報" }
+      ]
+    }
+
+    payload = described_class.call(settings: settings, columns: columns)
+
+    expect(payload["column_keys"]).to eq(%w[status customer_name])
+    expect(payload["columns"].map { |column| column["group"] }).to eq([
+      "出荷情報",
+      { "key" => :customer, "label" => "得意先情報" }
+    ])
+  end
+
   it "uses the same filter and order for export keys when hidden columns are included" do
     columns = [
       { key: :order_no, label: "受注番号", export_key: :number_for_export },
