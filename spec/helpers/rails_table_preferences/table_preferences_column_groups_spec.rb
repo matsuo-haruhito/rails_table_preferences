@@ -41,5 +41,39 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(groups.first).to include("key" => "", "label" => "", "colspan" => 1)
       expect(groups.last).to include("key" => "customer", "label" => "customer", "colspan" => 1)
     end
+
+    it "excludes ignored columns from groups and colspan" do
+      columns = [
+        helper.table_preferences_column(
+          :order_no,
+          label: "Order No",
+          group: { key: :order, label: "Order information" }
+        ),
+        helper.table_preferences_column(
+          :internal_cost,
+          label: "Internal cost",
+          group: { key: :order, label: "Order information" }
+        ),
+        helper.table_preferences_column(
+          :customer_name,
+          label: "Customer",
+          group: { key: :customer, label: "Customer information" }
+        ),
+        helper.table_preferences_column(:secret_note, label: "Secret")
+      ]
+
+      groups = helper.table_preferences_column_groups(
+        columns,
+        ignored_columns: %i[internal_cost secret_note]
+      )
+
+      grouped_keys = groups.flat_map { |group| group.fetch("columns").map { |column| column.fetch("key") } }
+
+      expect(grouped_keys).not_to include("internal_cost", "secret_note")
+      expect(groups).to contain_exactly(
+        include("key" => "order", "label" => "Order information", "colspan" => 1),
+        include("key" => "customer", "label" => "Customer information", "colspan" => 1)
+      )
+    end
   end
 end
