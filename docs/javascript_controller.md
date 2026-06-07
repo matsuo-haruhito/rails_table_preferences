@@ -46,7 +46,7 @@ The packaged controller entrypoint dispatches a small set of bubbling Stimulus e
 
 These lifecycle events are a package-entrypoint surface. Host applications that register the generated copied controller directly from `app/javascript/controllers/rails_table_preferences_controller.js` should not assume these events are present unless they port the same behavior into the copied or replacement controller. Use [Package-only controller boundary](javascript_entrypoints.md#package-only-controller-boundary) when deciding which registration path owns event listener QA.
 
-- `rails-table-preferences:applied` after editor settings are applied to the current table without saving
+- `rails-table-preferences:applied` after editor settings are applied to the current table without saving, or after the bundled clear-filters-and-sorts action clears filter/sort state
 - `rails-table-preferences:saved` after an existing preset save or save-as-new request succeeds
 - `rails-table-preferences:loaded` after a selected preset is loaded and applied
 - `rails-table-preferences:deleted` after an editable preset is deleted and the controller returns to the default preset
@@ -61,9 +61,11 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
-Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `clear-filters-and-sorts`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
 
 Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
+
+The bundled `clearFiltersAndSorts` action uses `rails-table-preferences:applied` with `event.detail.action === "clear-filters-and-sorts"` after it sets `settings.filters` to `{}` and `settings.sorts` to `[]`. It follows the existing busy guard and does not dispatch while busy. Button placement and action grouping remain outside this lifecycle surface; handle them through #560/#989 or host-owned UI work.
 
 Host apps can keep adoption code small by choosing one surrounding concern and reading only the existing detail fields. For example, an analytics integration can record successful preset saves without coupling to controller internals or changing the payload contract:
 
@@ -300,6 +302,7 @@ Important invariants include:
 - filters and sorts are preserved by editor actions
 - filter operator label overrides fall back to bundled defaults
 - package-entrypoint lifecycle events expose stable event names and detail payloads without leaking raw `Error` objects
+- clear filters/sorts lifecycle actions report the neutral filter/sort snapshot and keep the busy guard silent
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
 - document listeners and detached filter panels are cleaned up
