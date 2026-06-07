@@ -105,6 +105,26 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(result[:ok]).to eq(false)
       expect(result[:package_json_errors].join).to include("package.json could not be parsed")
     end
+
+    it "reports package metadata when resolver boundaries drift" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
+      allow(verifier).to receive(:packaged_files).and_return(%w[package.json])
+      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return(
+        {
+          "private" => false,
+          "version" => "1.2.3",
+          "exports" => {}
+        }.to_json
+      )
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(false)
+      expect(result[:package_json_errors]).to include(
+        a_string_including("private must remain true"),
+        a_string_including("version must remain 0.0.0")
+      )
+    end
   end
 
   describe ".summary" do
@@ -144,6 +164,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         docs/export_integration.md
         docs/accessibility.md
         docs/editor_entrypoint_affordances.md
+        docs/editor_root_options.md
+        docs/helper_free_controller_root_urls.md
         docs/visual_overview.md
         docs/demo.md
         docs/sandbox.md
