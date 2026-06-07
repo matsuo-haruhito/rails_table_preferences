@@ -61,6 +61,18 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
+TypeScript host apps can import the packaged lifecycle detail type and narrow the DOM event to a `CustomEvent` at the listener boundary:
+
+```ts
+import type { RailsTablePreferencesEventDetail } from "rails_table_preferences"
+
+document.addEventListener("rails-table-preferences:saved", (event) => {
+  const { tableKey, name, action, settings } = (event as CustomEvent<RailsTablePreferencesEventDetail>).detail
+
+  // Update host-app analytics, export previews, or surrounding UI here.
+})
+```
+
 Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
 
 Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
