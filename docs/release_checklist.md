@@ -136,6 +136,7 @@ For frontend integration, confirm:
 - [ ] `app/javascript/rails_table_preferences/controller.js` is packaged for `rails_table_preferences/controller` imports.
 - [ ] `app/javascript/rails_table_preferences/index.js` is packaged for package-root imports.
 - [ ] `package.json` is packaged and exposes `.` and `./controller` exports.
+- [ ] Treat Node.js 20 as the repository CI runtime for JavaScript syntax and package-entrypoint checks, not as a package consumer `engines` requirement; if that policy changes, update `package.json`, Support matrix, JavaScript entrypoints, and package verification together.
 - [ ] A Vite / `app/frontend/entrypoints/application.js` host app can register `rails_table_preferences/controller` as `rails-table-preferences`.
 - [ ] A default `stimulus-rails` host app still works with the copied controller.
 
