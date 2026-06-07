@@ -326,6 +326,8 @@ This keeps the resource-table path convention-first while making the params boun
 
 Renderer registries convert filter/editor metadata into HTML without making Rails Table Preferences depend on a specific form helper library.
 
+Use this path as the first copyable richer-widget slice when the table can keep the normal Rails Table Preferences metadata and only needs a different concrete control. The registry keeps Rails Table Preferences focused on metadata and saved state while the host app chooses, installs, and initializes the helper library that renders the widget.
+
 ```ruby
 RailsTablePreferences.configure do |config|
   config.filter_renderers.register("rails_fields_kit") do |form:, method:, filter:, **|
@@ -380,7 +382,7 @@ Keep the bundled select filter contract separate from this path. The default fil
 
 ## Rails Fields Kit end-to-end example
 
-When the host app wants Rails Table Preferences to describe filter/editor metadata and Rails Fields Kit to render the actual controls, keep the flow in three steps:
+When the host app wants Rails Table Preferences to describe filter/editor metadata and Rails Fields Kit to render the actual controls, treat this as the first copyable richer-widget example rather than a Rails Table Preferences dependency promise. Keep the flow in three steps:
 
 1. declare table column metadata
 2. register renderer mappings
@@ -408,7 +410,9 @@ class OrdersTableProfile < RailsTablePreferences::TableProfile
 end
 ```
 
-The important part is that the profile stores metadata objects such as `RailsFieldsKit::TableFilterInput.combobox(...)` and `RailsFieldsKit::TableCellInput.enum_select(...)`. Rails Table Preferences keeps those objects as column metadata; it does not render the HTML yet.
+The important part is that the profile stores metadata objects such as `RailsFieldsKit::TableFilterInput.combobox(...)` and `RailsFieldsKit::TableCellInput.enum_select(...)`. Rails Table Preferences keeps those objects as column metadata; it owns the column key, saved table state, renderer type lookup, and adapter params, but it does not render the richer widget HTML yet.
+
+For remote widgets such as the combobox above, the URL metadata only records how the host app wants the widget to be rendered. The host app still owns the endpoints, accepted params, selected-option preload behavior, authorization, query execution, validation copy, retry UI, and any Rails Fields Kit setup needed for the field to work.
 
 ### 2. Register renderer mappings in the host app
 
@@ -424,7 +428,7 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
-If the metadata uses a different Rails Fields Kit field type, map that type to the matching `rfk_*` helper here.
+If the metadata uses a different Rails Fields Kit field type, map that type to the matching `rfk_*` helper here. The mapping belongs to the host app, so Rails Table Preferences does not need to bundle Rails Fields Kit, Tom Select, or any other richer-widget dependency.
 
 ### 3. Render from the table partial
 
@@ -452,9 +456,9 @@ If the metadata uses a different Rails Fields Kit field type, map that type to t
 
 ### Responsibility split
 
-- Rails Table Preferences owns column metadata, saved table state, partial helper entrypoints, and renderer registry lookup.
+- Rails Table Preferences owns column metadata, saved table state, adapter params, partial helper entrypoints, and renderer registry lookup.
 - Rails Fields Kit owns the concrete form helper HTML and Stimulus/Tom Select behavior behind `rfk_*` helpers.
-- The host app owns the final partial layout, route URLs, and any controller/query behavior behind the rendered inputs.
+- The host app owns the final partial layout, route URLs, accepted params, selected-option preload behavior, query execution, authorization, and any validation or retry UI behind the rendered inputs.
 
 This split keeps the table gem independent from a specific form helper library while still giving the host app a copyable end-to-end path.
 
