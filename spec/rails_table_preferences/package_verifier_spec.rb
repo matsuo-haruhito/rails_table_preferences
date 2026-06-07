@@ -60,6 +60,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/accessibility.md",
         "docs/editor_i18n.md",
         "docs/editor_root_options.md",
+        "docs/helper_free_controller_root_urls.md",
         "docs/non_goals.md",
         "docs/visual_overview.md",
         "docs/images/visual-overview-editor-and-table.svg",
@@ -243,6 +244,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     allow(verifier).to receive(:packaged_file_contents) do |path|
       if path == "package.json"
         JSON.generate(
+          "private" => true,
+          "version" => "0.0.0",
           "exports" => {
             "." => {
               "types" => "./app/javascript/rails_table_preferences/index.d.ts",
