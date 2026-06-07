@@ -5,6 +5,35 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
     RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
   end
 
+  let(:round_trip_columns) do
+    [
+      helper.table_preferences_column(
+        :customer_name,
+        label: "Customer \"A&B\" <得意先> 'VIP'",
+        filter: {
+          type: :select,
+          options: [
+            { value: "vip&<1>", label: "VIP \"A\" & 日本語" },
+            { value: "quoted'value", label: "Quoted ' value > label" }
+          ]
+        }
+      )
+    ]
+  end
+
+  let(:round_trip_settings) do
+    {
+      columns: [{ key: :customer_name, width: 180 }],
+      filters: {
+        customer_name: {
+          operator: :in,
+          values: ["VIP \"A\" & 日本語", "quoted'value <tag>"]
+        }
+      },
+      sorts: [{ key: :customer_name, direction: :asc }]
+    }
+  end
+
   describe "#table_preferences_preference_url" do
     it "builds a URL using the configured mount path" do
       RailsTablePreferences.configuration.mount_path = "/preferences_engine"
@@ -169,6 +198,29 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include('data-rails-table-preferences-table-key-value="orders"')
       expect(html).to include('data-rails-table-preferences-url-value="/rails_table_preferences/preferences/orders/inspection"')
       expect(html).not_to include("/wrong")
+    end
+
+    it "round-trips special characters in columns and settings data attributes" do
+      html = helper.table_preferences_table_tag(
+        table_key: :orders,
+        columns: round_trip_columns,
+        settings: round_trip_settings
+      ) { "content" }
+
+      data = parsed_table_preferences_data(html, "table")
+
+      expect(data.fetch("columns").first).to include(
+        "label" => "Customer \"A&B\" <得意先> 'VIP'"
+      )
+      expect(data.dig("columns", 0, "filter", "options")).to eq(
+        [
+          { "value" => "vip&<1>", "label" => "VIP \"A\" & 日本語" },
+          { "value" => "quoted'value", "label" => "Quoted ' value > label" }
+        ]
+      )
+      expect(data.dig("settings", "filters", "customer_name", "values")).to eq(
+        ["VIP \"A\" & 日本語", "quoted'value <tag>"]
+      )
     end
   end
 
@@ -438,6 +490,29 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
       expect(html).to include("rails-table-preferences-target=\"editorRows\"")
     end
 
+    it "round-trips special characters in columns and settings data attributes" do
+      html = helper.table_preferences_editor(
+        table_key: :orders,
+        columns: round_trip_columns,
+        settings: round_trip_settings
+      )
+
+      data = parsed_table_preferences_data(html, ".rails-table-preferences-editor")
+
+      expect(data.fetch("columns").first).to include(
+        "label" => "Customer \"A&B\" <得意先> 'VIP'"
+      )
+      expect(data.dig("columns", 0, "filter", "options")).to eq(
+        [
+          { "value" => "vip&<1>", "label" => "VIP \"A\" & 日本語" },
+          { "value" => "quoted'value", "label" => "Quoted ' value > label" }
+        ]
+      )
+      expect(data.dig("settings", "filters", "customer_name", "values")).to eq(
+        ["VIP \"A\" & 日本語", "quoted'value <tag>"]
+      )
+    end
+
     it "allows a custom partial" do
       expect(helper).to receive(:render).with(
         hash_including(partial: "shared/custom_table_preferences_editor")
@@ -445,5 +520,15 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
 
       expect(helper.table_preferences_editor(table_key: :orders, columns: [], partial: "shared/custom_table_preferences_editor")).to eq("custom editor")
     end
+  end
+
+  def parsed_table_preferences_data(html, selector)
+    node = Nokogiri::HTML.fragment(html).at_css(selector)
+    expect(node).to be_present
+
+    {
+      "columns" => JSON.parse(node["data-rails-table-preferences-columns-value"]),
+      "settings" => JSON.parse(node["data-rails-table-preferences-settings-value"])
+    }
   end
 end

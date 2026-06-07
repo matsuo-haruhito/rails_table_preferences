@@ -137,6 +137,8 @@ Before shipping a screen with pinned columns, check at least one horizontally sc
 - pinned cells use an opaque background so scrolled content does not show through underneath focused controls
 - the scroll container owns horizontal overflow without trapping keyboard focus outside the table workflow
 
+For PR-level evidence, record the exact table or demo screen, scroll position, focused control or open filter button, viewport width, and whether the check used rendered browser evidence or a browser-capable handoff. Source inspection can support the review, but it is not enough by itself for focus outline, clipping, or stacking claims.
+
 If a host app needs a different layering policy, override the provided CSS hooks near that table. For example, keep header cells above body cells, keep floating panels above pinned cells, and test the result with keyboard focus rather than relying only on mouse hover.
 
 ## Multiple pinned columns

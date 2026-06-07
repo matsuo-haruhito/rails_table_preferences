@@ -51,7 +51,7 @@ Confirm:
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
-## 3. CI checks
+## 3. CI and mergeability checks
 
 Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
@@ -59,6 +59,11 @@ Confirm GitHub Actions passes for both the release commit and the latest release
 - [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 compatibility jobs.
 - [ ] Any additional release-time matrix jobs pass in the workflow where they actually run; they are not part of the required PR matrix unless `.github/workflows/ci.yml` adds them.
+- [ ] The latest release-prep pull request is compared against current `main`, not only against the `main` commit recorded when the PR body was written.
+- [ ] The current `main...branch` compare is not behind or diverged, and GitHub reports the PR as mergeable before using the PR as release evidence.
+- [ ] CI evidence names the workflow run for the current head SHA. If combined status is empty, check the GitHub Actions workflow runs for that SHA instead of treating the PR as unchecked.
+
+A successful workflow run on an older PR head is useful history, but it is not enough for release or merge readiness after `main` has moved. Record both the current compare/mergeability state and the head workflow run when refreshing an older PR.
 
 ## 4. Gem package checks
 
@@ -80,6 +85,21 @@ See [Package verification](package_verification.md) for the required file list, 
 If `package:verify` fails, copy the compact summary line into the release-prep PR or checklist note before listing details. It separates required file gaps, missing package export targets, unresolved package-internal JavaScript imports, and packaged `package.json` metadata errors so the next reviewer can see which category broke first.
 
 Pay special attention to generator templates, copied assets, `package.json`, and package JavaScript entrypoints. Missing templates or entrypoints usually appear only when a host app runs a generator or imports the gem through a JS bundler.
+
+### RubyGems publish boundary checks
+
+Package verification confirms the built gem contents. It does not decide RubyGems account policy, trusted publishing, MFA, checksum/provenance handling, or which release artifact a human should publish.
+
+Before publishing, the release owner should confirm:
+
+- [ ] `rails_table_preferences.gemspec` metadata URLs still resolve to the intended homepage, source, changelog, and documentation pages.
+- [ ] The RubyGems account or organization that will publish the gem has the expected MFA or account-security posture.
+- [ ] The release owner has decided whether this release uses manual `gem push`, trusted publishing, or another approved publishing path; this checklist does not choose the policy.
+- [ ] The exact `.gem` artifact selected for publish is the same build output that passed `bundle exec rake package:verify`, or the release note records why a fresh artifact was built and re-verified.
+- [ ] A checksum, provenance note, or artifact identifier is recorded in the release-prep PR, tag note, or release note when the release process requires one.
+- [ ] A human release owner, not an automated docs agent, reviews the final publish command, account, artifact path, and release gate before any publish action runs.
+
+Keep these checks as release-time evidence. Do not add repository secrets, change RubyGems settings, create a tag, or publish the gem from a docs-only release-readiness task.
 
 ## 5. Install generator checks
 

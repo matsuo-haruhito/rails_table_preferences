@@ -51,11 +51,60 @@ table_preferences_column(:internal_note, label: "内部メモ", filter: false, o
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
 
-For bundled `select` filters, `options:` is currently a scalar list. Each option is used as both the HTML `<option value>` and the visible option text, and saved filter summaries display the saved scalar values. If a host app needs separate machine values and human labels, keep that mapping in host-app code, provide a copied/custom controller or filter UI, or wait for a dedicated value/label pair feature rather than documenting `{ value:, label: }` as supported by the bundled controller today.
+For bundled `select` filters, `options:` accepts scalar values or label/value hashes. Scalar options keep the historical behavior: the same value is used for the HTML `<option value>`, visible option text, saved filter value, and adapter params.
+
+Use `{ value:, label: }` when the saved/search value should be stable machine data and the UI should show a human label:
+
+```ruby
+table_preferences_column(
+  :status,
+  label: "状態",
+  filter: {
+    type: :select,
+    values_param: :statuses,
+    options: [
+      { value: "pending", label: "未出荷" },
+      { value: "shipped", label: "出荷済" },
+      { value: "hold", label: "保留" }
+    ]
+  }
+)
+```
+
+The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
+
+For bundled single-value `text`, `number`, and `date` filters, `placeholder:` is rendered as the browser `placeholder` attribute on the generated value input:
+
+```ruby
+table_preferences_column(
+  :order_number,
+  label: "注文番号",
+  filter: { type: :text, placeholder: "例: ORD-1001" }
+)
+```
+
+For the `between` operator, use separate `from_placeholder:` and `to_placeholder:` metadata so the lower and upper bound inputs can show different examples:
+
+```ruby
+table_preferences_column(
+  :delivery_date,
+  label: "納品日",
+  filter: {
+    type: :date,
+    operators: %i[between],
+    from_placeholder: "2026-01-01",
+    to_placeholder: "2026-01-31"
+  }
+)
+```
+
+Placeholder values are escaped before they are written to the generated input attributes. They are only browser affordances; they do not change saved filter settings, controller params adapter output, validation, query execution, or filter summaries. Select filter prompts, visible hint text, and validation messages remain outside the bundled controller contract for this slice.
 
 ## Richer widget rendering
 
 The bundled filter panel intentionally renders simple browser controls from neutral metadata. If a screen needs a date picker, autocomplete, Select2-style select, Rails Fields Kit helper, or another form-helper widget, keep that widget as host-app-owned HTML instead of treating the bundled filter panel as the widget dependency owner.
+
+Use the renderer registry path as the first slice when the host app can keep the table partial shape and only swap the concrete control for one filter family. In that path, Rails Table Preferences carries the column key, filter metadata, saved filter state, and adapter params; the registered renderer owns the HTML for that one widget family. Use a custom partial instead when the screen needs a different header layout, grouped controls, surrounding help text, or other markup that is bigger than a metadata-to-helper mapping.
 
 A useful split is:
 
@@ -64,6 +113,8 @@ A useful split is:
 - The host app or external helper owns widget initialization, validation display, remote option loading, accepted query params, and authorization.
 
 For a copyable renderer registry path, see [Resource table adapters](resource_tables.md#renderer-registries). The Rails Fields Kit example there shows how Rails Table Preferences can carry metadata while the host app registers the concrete `rfk_*` rendering behavior. Do not add a widget JavaScript package or form-helper gem dependency to Rails Table Preferences just to render one screen's richer filter input.
+
+This means richer filter widgets are current host-app integration guidance, not a promise that the bundled controller will gain autocomplete, async option loading, dependent selects, or third-party widget initialization. Keep remote endpoints, query execution, authorization, validation copy, retry UI, and widget lifecycle policy in the host app or the helper library that renders the widget.
 
 ## Bundled default filter operators
 
@@ -157,7 +208,10 @@ columns = [
   table_preferences_column(
     :status,
     label: "状態",
-    filter: { type: :select, values_param: :statuses, options: ["未出荷", "出荷済"] }
+    filter: { type: :select, values_param: :statuses, options: [
+      { value: "pending", label: "未出荷" },
+      { value: "shipped", label: "出荷済" }
+    ] }
   ),
   table_preferences_column(
     :delivery_date,
@@ -205,7 +259,7 @@ Saved filter conditions use a neutral format:
     },
     "status": {
       "operator": "in",
-      "values": ["未出荷", "出荷済"]
+      "values": ["pending", "shipped"]
     },
     "delivery_date": {
       "operator": "between",
@@ -275,7 +329,7 @@ Example output:
 ```ruby
 {
   "search_word" => "山田",
-  "statuses" => ["未出荷", "出荷済"],
+  "statuses" => ["pending", "shipped"],
   "from_date" => "2026-01-01",
   "to_date" => "2026-01-31",
   "sort" => "-delivery_date"
