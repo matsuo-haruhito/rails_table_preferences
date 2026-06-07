@@ -11,6 +11,17 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     moveDownLabel: { type: String, default: "下へ移動" }
   }
 
+  buildPresetOption(preset) {
+    const option = super.buildPresetOption(preset)
+    const name = preset.name || "default"
+    const scopeType = preset.scope_type || "owner"
+    const scopeLabel = preset.scope_label || this.scopeFallbackLabel(scopeType)
+    const defaultMark = preset.default === true ? " *" : ""
+    const scopeMark = scopeLabel ? ` [${scopeLabel}]` : ""
+    option.textContent = `${name}${scopeMark}${defaultMark}`
+    return option
+  }
+
   filterValueHtml(filter, condition, selectedOperator) {
     if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
     if (selectedOperator === "between") {
