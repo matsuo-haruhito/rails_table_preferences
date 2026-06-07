@@ -71,6 +71,61 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     expect(payload["settings"].fetch("sorts").map { |sort| sort["key"] }).to eq(%w[deleted_column order_no])
   end
 
+  it "prefers current column metadata over stale saved column metadata" do
+    columns = [
+      {
+        key: :order_no,
+        label: "Current order number",
+        group: { key: :current_order, label: "Current order group" },
+        export_key: :current_order_number
+      },
+      {
+        key: :internal_cost,
+        label: "Current internal cost",
+        group: { key: :current_finance, label: "Current finance group" },
+        export_key: :current_cost_cents
+      }
+    ]
+    settings = {
+      columns: [
+        {
+          key: :internal_cost,
+          visible: false,
+          order: 10,
+          label: "Stale internal cost",
+          group: { key: :stale_finance, label: "Stale finance group" },
+          export_key: :stale_cost
+        },
+        {
+          key: :order_no,
+          visible: true,
+          order: 20,
+          label: "Stale order number",
+          group: { key: :stale_order, label: "Stale order group" },
+          export_key: :stale_order_number
+        }
+      ]
+    }
+
+    visible_payload = described_class.call(settings: settings, columns: columns)
+    full_payload = described_class.call(settings: settings, columns: columns, include_hidden: true)
+
+    expect(visible_payload["column_keys"]).to eq(%w[order_no])
+    expect(visible_payload["headers"]).to eq(["Current order number"])
+    expect(visible_payload["export_keys"]).to eq([:current_order_number])
+    expect(visible_payload["columns"].first["group"]).to eq("key" => :current_order, "label" => "Current order group")
+
+    expect(full_payload["column_keys"]).to eq(%w[internal_cost order_no])
+    expect(full_payload["headers"]).to eq(["Current internal cost", "Current order number"])
+    expect(full_payload["export_keys"]).to eq(%i[current_cost_cents current_order_number])
+    expect(full_payload["columns"].map { |column| column["group"] }).to eq(
+      [
+        { "key" => :current_finance, "label" => "Current finance group" },
+        { "key" => :current_order, "label" => "Current order group" }
+      ]
+    )
+  end
+
   it "keeps display column keys separate from export key metadata" do
     columns = [
       { key: :customer_name, label: "得意先名", group: { key: :customer, label: "得意先情報" }, export_key: :customer_display_name }
