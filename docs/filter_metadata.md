@@ -112,9 +112,9 @@ A useful split is:
 - A custom partial or renderer registry mapping owns the concrete widget HTML.
 - The host app or external helper owns widget initialization, validation display, remote option loading, accepted query params, and authorization.
 
-For a copyable renderer registry path, see [Resource table adapters](resource_tables.md#renderer-registries). The Rails Fields Kit example there shows how Rails Table Preferences can carry metadata while the host app registers the concrete `rfk_*` rendering behavior. Do not add a widget JavaScript package or form-helper gem dependency to Rails Table Preferences just to render one screen's richer filter input.
+For the first copyable renderer registry path, see the [Rails Fields Kit end-to-end example](resource_tables.md#rails-fields-kit-end-to-end-example). It shows Rails Table Preferences carrying metadata and saved state while the host app registers concrete `rfk_*` rendering behavior. Do not add a widget JavaScript package or form-helper gem dependency to Rails Table Preferences just to render one screen's richer filter input.
 
-This means richer filter widgets are current host-app integration guidance, not a promise that the bundled controller will gain autocomplete, async option loading, dependent selects, or third-party widget initialization. Keep remote endpoints, query execution, authorization, validation copy, retry UI, and widget lifecycle policy in the host app or the helper library that renders the widget.
+This means richer filter widgets are current host-app integration guidance, not a promise that the bundled controller will gain autocomplete, async option loading, dependent selects, or third-party widget initialization. Keep remote endpoints, query execution, authorization, validation copy, retry UI, selected-option preload policy, and widget lifecycle policy in the host app or the helper library that renders the widget.
 
 ## Bundled default filter operators
 
