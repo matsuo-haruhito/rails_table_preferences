@@ -51,7 +51,7 @@ Confirm:
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
-## 3. CI checks
+## 3. CI and mergeability checks
 
 Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
@@ -59,6 +59,11 @@ Confirm GitHub Actions passes for both the release commit and the latest release
 - [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 compatibility jobs.
 - [ ] Any additional release-time matrix jobs pass in the workflow where they actually run; they are not part of the required PR matrix unless `.github/workflows/ci.yml` adds them.
+- [ ] The latest release-prep pull request is compared against current `main`, not only against the `main` commit recorded when the PR body was written.
+- [ ] The current `main...branch` compare is not behind or diverged, and GitHub reports the PR as mergeable before using the PR as release evidence.
+- [ ] CI evidence names the workflow run for the current head SHA. If combined status is empty, check the GitHub Actions workflow runs for that SHA instead of treating the PR as unchecked.
+
+A successful workflow run on an older PR head is useful history, but it is not enough for release or merge readiness after `main` has moved. Record both the current compare/mergeability state and the head workflow run when refreshing an older PR.
 
 ## 4. Gem package checks
 
@@ -257,46 +262,3 @@ Before publishing, summarize:
 - [ ] JavaScript/CSS integration changes.
 - [ ] Known limitations.
 - [ ] Upgrade notes for existing users.
-
-Use `CHANGELOG.md` as the detailed release history. Use the release note as a short adoption-facing summary that a host-app maintainer can scan before trying the gem. Do not copy open pull requests, proposal issues, or unmerged behavior into the release note as released support.
-
-For the first public `0.1.0` release, start from this compact template in the release-prep PR body or GitHub release draft:
-
-```markdown
-## Summary
-
-- Rails Table Preferences provides owner-aware table display preferences for Rails index screens, including columns, filters, sorts, scoped presets, and export payload metadata.
-- The gem is intended to layer onto existing host-app queries, authorization, search forms, and CSV/Excel/report generation rather than replacing them.
-
-## Upgrade notes
-
-- Run the install generator and migration before using the bundled JSON API or helpers.
-- Mount the engine when using bundled preset save/load/delete endpoints.
-- Register either the copied Stimulus controller or the package entrypoint; do not register both for the same screen.
-- Treat existing `ColumnAdjustment` import, owner model configuration, and scoped preset setup as host-app integration work.
-
-## Known limitations
-
-- Host apps own database search, joins, authorization, pagination, and export file generation.
-- Host apps own complex sticky layout polish, grouped header markup, and final dense-table CSS verification.
-- Shared, role, and organization presets are supported as data scopes, but a full administrative UI for managing them is outside this release.
-- Newer Rails releases outside the documented representative CI matrix need additional host-app verification before production adoption.
-
-## Checks and evidence
-
-- CI on the release commit:
-- `bundle exec rake package:verify` result:
-- Demo or sandbox verification:
-- Manual QA / host-app smoke:
-- Known-good rollback target:
-```
-
-Keep the template current with the landed `main` product surface. If a line depends on an open pull request, proposal issue, publish policy, or dated changelog cutover, leave it out until the relevant decision lands.
-
-## 12. Publish or tag
-
-When everything is ready:
-
-- [ ] Ensure the working tree is clean.
-- [ ] Tag the release.
-- [ ] Push the tag.
