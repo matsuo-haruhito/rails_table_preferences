@@ -34,6 +34,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar select options, and host-app query ownership when select filters do not affect results.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
+- [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md): focused evidence guidance for old `page` params when saved filter/sort hidden fields roundtrip through existing search forms.
 - [Release checklist](release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
 - [Package verification](package_verification.md): build and inspect the gem package before tagging or publishing a release.
 - [Mounted JSON API](json_api.md): owner preset endpoints, request/response payloads, and the boundary with non-owner scoped preset administration.
@@ -71,14 +72,15 @@ This directory contains focused documentation for Rails Table Preferences.
 18. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
 19. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
 20. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-21. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-22. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-23. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-24. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-25. Verify the feature in a sandbox Rails app.
-26. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-27. Run the manual QA checklist before asking real users to try the feature.
-28. Before release, run the release checklist and package verification guide.
+21. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
+22. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+23. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+24. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+25. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+26. Verify the feature in a sandbox Rails app.
+27. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+28. Run the manual QA checklist before asking real users to try the feature.
+29. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
