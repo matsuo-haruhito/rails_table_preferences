@@ -65,7 +65,7 @@ RSpec.describe RailsTablePreferences::ValueResolver do
   it "passes the record, column, and view context to wider formatters" do
     record = Struct.new(:name).new("Order A")
     view_context = instance_double("ViewContext")
-    formatter = ->(value, column, context) { [value.name, column.fetch(:key), context] }
+    formatter = ->(value, column, context) { [value.name, column.fetch("key"), context] }
 
     result = described_class.call(
       record,
