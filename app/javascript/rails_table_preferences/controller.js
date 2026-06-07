@@ -429,6 +429,21 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
   }
 
+  showAllColumns(event) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+
+    this.settingsValue = {
+      ...this.settingsValue,
+      columns: this.columnsFromSettings.map((column) => ({ ...column, visible: true })),
+      filters: this.settingsValue?.filters || {},
+      sorts: this.settingsValue?.sorts || []
+    }
+    this.closeFilterPanel()
+    this.renderEditor()
+    this.apply()
+  }
+
   clearFiltersAndSorts(event) {
     if (this.busy) return
     if (event) event.preventDefault()
