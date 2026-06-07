@@ -94,7 +94,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   end
 
   def next_step_headings(output)
-    output.lines.grep(/^\s+\d\. /).map { |line| line.sub(/^\s+\d\. /, "").strip }
+    output.lines.grep(/^\s+\d+\. /).map { |line| line.sub(/^\s+\d+\. /, "").strip }
   end
 
   def engine_route
