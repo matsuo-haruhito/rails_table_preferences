@@ -4,6 +4,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   static values = {
     ...RailsTablePreferencesBaseController.values,
     filterOperatorLabels: { type: Object, default: {} },
+    selectFilterOptionSearchLabel: { type: String, default: "候補を絞り込み" },
+    selectFilterOptionSearchPlaceholder: { type: String, default: "候補を絞り込み" },
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
@@ -484,8 +486,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   selectFilterOptionSearchHtml(options) {
     if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
 
-    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
+    const searchLabel = String(this.selectFilterOptionSearchLabelValue || "候補を絞り込み")
+    const placeholder = String(this.selectFilterOptionSearchPlaceholderValue || searchLabel)
+    const label = `${this.filterValueLabelValue}: ${searchLabel}`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(placeholder)}">`
   }
 
   installSelectFilterOptionSearch(panel) {
