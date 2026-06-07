@@ -72,6 +72,7 @@ module RailsTablePreferences
       "docs/editor_i18n.md",
       "docs/editor_entrypoint_affordances.md",
       "docs/editor_root_options.md",
+      "docs/helper_free_controller_root_urls.md",
       "docs/non_goals.md",
       "docs/visual_overview.md",
       "docs/images/visual-overview-editor-and-table.svg",
@@ -145,6 +146,7 @@ module RailsTablePreferences
       end
       missing_package_internal_imports = self.missing_package_internal_imports
       missing_package_declaration_imports = self.missing_package_declaration_imports
+      package_json_errors = self.package_json_errors
 
       {
         gem_path: gem_path,
@@ -226,12 +228,33 @@ module RailsTablePreferences
     def package_json
       @package_json ||= JSON.parse(packaged_file_contents("package.json"))
     rescue JSON::ParserError => e
-      package_json_errors << "package.json could not be parsed: #{e.message}"
+      @package_json_parse_error = "package.json could not be parsed: #{e.message}"
       {}
     end
 
     def package_json_errors
-      @package_json_errors ||= []
+      @package_json_errors ||= begin
+        if packaged_files.include?("package.json")
+          metadata = package_json
+          errors = []
+          errors << @package_json_parse_error if @package_json_parse_error
+          errors.concat(package_metadata_errors(metadata)) unless @package_json_parse_error
+          errors
+        else
+          []
+        end
+      end
+    end
+
+    def package_metadata_errors(metadata)
+      errors = []
+      unless metadata["private"] == true
+        errors << "package.json private must remain true because the file is gem-packaged resolver metadata, not npm distribution policy"
+      end
+      unless metadata["version"] == "0.0.0"
+        errors << "package.json version must remain 0.0.0 because JavaScript package versioning is not a Ruby gem release policy"
+      end
+      errors
     end
 
     def export_targets_for(value, export_name = ".")
