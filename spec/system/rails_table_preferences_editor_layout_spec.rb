@@ -112,7 +112,7 @@ RSpec.describe "rails_table_preferences editor layout", type: :system, js: true 
 
       expect(page).to have_css(".rails-table-preferences-editor[role='region'][aria-labelledby]")
       expect(page).to have_css(".rails-table-preferences-editor__title", text: "受注一覧の表示設定")
-      expect(page).to have_css(".rails-table-preferences-editor__hint--maintenance", text: "削除とリセット")
+      expect(page).to have_css(".rails-table-preferences-editor__hint--maintenance", text: "Delete and reset")
 
       metrics = layout_metrics
       expect_no_clipped_editor_controls(metrics)
