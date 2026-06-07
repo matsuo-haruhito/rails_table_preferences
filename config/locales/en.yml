@@ -7,13 +7,23 @@ en:
       preset_select: Saved presets
       preset_select_hint: Choose which saved settings to load. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
       preset: Preset
+      preset_name_hint: Enter the preset name used when saving or saving as new.
       default_preset: Use as default
+      default_preset_hint: Saving or saving as new registers this preset as the default.
       apply: Apply
+      apply_context: Apply to the current table view
       save: Save
+      save_context: Save to the current preset name
       save_as_new: Save as new
+      save_as_new_context: Save as a new preset name
+      action_hint: Apply updates the current view, Save writes to the current preset name, and Save as new creates a new preset name.
       delete: Delete
       delete_confirm: Delete this saved preset?
+      maintenance_hint: Delete and reset strongly affect saved settings or current edits. Review the contents before running these actions.
       read_only_preset_hint: The selected saved preset cannot be overwritten directly. Check its name and scope in the saved presets list; saving will create or update a personal preset.
+      primary_action_group: Actions that apply changes to the view
+      save_action_group: Actions that save settings
+      maintenance_action_group: Actions that delete saved settings or reset to defaults
       scope_owner: owner
       scope_shared: shared
       scope_role: role
@@ -39,6 +49,11 @@ en:
       width: Width
       truncate: Truncate
       drag_to_reorder: Drag to reorder
+      search_columns: Search columns
+      search_columns_placeholder: Filter by column name
+      no_search_results: No matching columns. Change the search term and try again.
+      move_up: Move up
+      move_down: Move down
       resize_column: Resize column
       filter: Filter
       filter_operator: Operator
