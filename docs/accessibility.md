@@ -30,6 +30,7 @@ The bundled editor and Stimulus controller provide:
 - keyboard-focusable buttons and inputs through native HTML elements
 - per-editor ids for the preset select and preset name fields so multiple editors on one page do not collide; the bundled partial generates those ids automatically for each rendered instance, and copied/customized views should preserve the label/input pairing while keeping ids unique
 - optional semantic table captions for the default `resource_table_for` and `tree_resource_table_for` partials when the host app passes `caption:`
+- package-entrypoint-only column search and row move buttons with accessible labels, plus disabled states for hidden, first, last, and busy rows
 
 ## Sortable headers
 
@@ -104,6 +105,8 @@ Rails Table Preferences does not try to generate page-level explanations, comple
 The default column reorder behavior uses native drag and drop for editor rows and table headers. Treat those drag affordances as pointer-oriented shortcuts, not as the only supported reorder path.
 
 The bundled editor also exposes numeric order inputs. Keyboard-only users can change a column's order number, move to the bundled `適用` action, and apply the editor state without relying on drag and drop. This is the bundled keyboard-friendly fallback for reordering.
+
+When a host application imports the packaged `rails_table_preferences/controller` entrypoint, the editor also renders labelled column-search and row up/down controls around the generated rows. These controls are additive to the numeric order fallback: filtered-out rows stay in the DOM so apply/save still keeps every column, row movement is limited to visible filtered rows, and generated move buttons disable for hidden rows, first/last visible rows, and async busy state.
 
 For touch and narrow-viewport checks, do not assume table-header drag is the primary guaranteed path. Confirm the editor order inputs remain reachable and that applying those values updates the table order. Host applications that need stronger touch reordering, up/down controls, or full keyboard shortcuts should add those controls in a copied/custom controller rather than treating the bundled drag handles as a complete reorder design system.
 
@@ -301,6 +304,8 @@ Before releasing a screen, check:
 - Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
 - Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
+- When using the packaged `rails_table_preferences/controller` entrypoint, the column search input has a visible label or accessible name, filtered-out rows are not dropped from apply/save settings, row up/down buttons announce the configured move labels, and hidden/first/last/busy move-button states are disabled.
+- When using the packaged entrypoint at 320px, 375px, and 390px-equivalent widths or narrow containers, the column search and row move buttons remain reachable without overlapping labels, numeric order inputs, width inputs, or truncate inputs.
 - Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
 - Resize handles announce the user-facing column label rather than only an internal column key.
 - Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.

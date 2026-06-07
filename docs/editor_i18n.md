@@ -18,6 +18,10 @@ These keys label the saved preset selector, preset name input, and default prese
 
 Use locale overrides when the host app wants different wording for the same controls. Copy the ERB partial only when the host app needs different fields, helper-text placement, or preset-control markup.
 
+In the current bundled editor, the preset selector is the source for loading or switching saved settings, while the preset name input is the destination name used by save and save as new. If a user selects an existing preset, changes the name input, and saves, the bundled editor treats the typed name as the save target; it does not present that action as an in-place rename of the previously selected preset. Keep host-app copy close to that boundary when overriding the selector hint, name hint, or action hint. For focused review steps, see [Preset name save boundary](preset_name_save_boundary.md).
+
+When the selected preset is read-only, the bundled save action does not overwrite that scoped preset. It creates or updates an owner preset instead, using the current preset name input as the owner preset name. The selected read-only preset name is loaded into that input first, so users can keep the same visible name or change the input before saving a personal copy. If an owner preset with that name already exists, the bundled editor keeps the existing API failure path; host apps that need detailed duplicate-name guidance should customize the failure copy or controller behavior separately.
+
 ## Actions and reset copy
 
 These keys drive the bundled action buttons, button context, delete confirmation, and reset helper copy:
@@ -36,6 +40,8 @@ These keys drive the bundled action buttons, button context, delete confirmation
 - `rails_table_preferences.editor.reset_visible_hint`
 
 The context keys are used in `title` / `aria-label` text so users can tell whether an action applies the current view, saves to the current preset name, or creates a new preset.
+
+`delete_confirm` provides the base confirmation sentence. The bundled controller appends the selected preset display name from the preset selector, including any scope label already present in the option text, to the native confirmation message and the delete button's `title` / `aria-label`. Override the locale key for wording, and copy the controller only when the host app needs a different delete-confirmation composition or custom modal.
 
 The bundled reset action keeps its existing behavior: it discards unsaved editor changes and reapplies the table's default column settings from the current column definitions. It does not roll back to the preset that was last loaded from the selector. Host apps that need a "return to loaded preset" affordance should provide separate copy, markup, or controller behavior instead of reusing the bundled reset wording.
 
@@ -132,7 +138,7 @@ ja:
       apply: 画面に反映
       save: この設定を保存
       save_as_new: 新しい設定として保存
-      action_hint: 画面に反映は現在の表示だけを更新し、保存は選択中の設定へ反映します。
+      action_hint: 画面に反映は現在の表示だけを更新し、保存は入力欄の設定名へ反映します。
       filter: 条件で絞り込む
       filter_operator_labels:
         contains: 含める

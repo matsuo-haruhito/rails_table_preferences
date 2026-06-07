@@ -4,7 +4,11 @@
 
 ## Related Issues
 
-Closes #
+Choose the relationship intentionally and remove unused lines.
+
+- Closes #... when this PR fully completes the issue on merge.
+- Refs #... when this PR is partial, stacked, exploratory, or needs human review before the issue should close.
+- Supersedes #... when this PR replaces an older PR or proposal; name the replaced PR in Notes or the focused QA section.
 
 ## Changes
 
@@ -13,6 +17,7 @@ Closes #
 ## Verification
 
 - Automated checks, specs, or docs-only review:
+- Release/package evidence or package verification summary:
 - Manual QA applicability:
 - UI / visual evidence:
 
@@ -21,6 +26,7 @@ Closes #
 Use `docs/manual_qa_pr_smoke_matrix.md` when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance.
 
 - PR category:
+- Review state or handoff reason:
 - Screen or artifact checked:
 - Viewports or states checked:
 - Evidence:
@@ -45,6 +51,15 @@ For static visual docs or docs image changes, use the `Static visual docs or doc
   - Default desktop or host-app list width
   - One narrow width or narrow container when layout can wrap
   - One long-label, long-value, or empty/loading/error state when relevant
+  - One forced-colors or high contrast state when color, focus, filter, sort, resize, panel, or pinned/fixed column cues are touched
+- Narrow editor-row evidence, when editor layout or dense labels are touched:
+  - 320px / 375px / 390px-equivalent width, or narrow container used:
+  - Long Japanese or unbroken label checked:
+  - Drag handle, visible checkbox, order/width/truncate inputs remained reachable, or human handoff because:
+- Forced-colors / high contrast evidence, when relevant:
+  - Mode or environment used:
+  - States checked: active filter / sorted header / focused resize handle / open filter panel / pinned or fixed column / other:
+  - States skipped and why:
 - If browser capture was unavailable, substitute evidence is listed in the PR body or comment, such as focused specs, source-level DOM assertions, static visual reference review, or human reviewer handoff.
 
 ## Existing Behavior / Compatibility

@@ -97,7 +97,10 @@ The default filter panel stays intentionally lightweight.
 - Pressing `Escape` closes the panel and returns focus to the triggering filter button.
 - Clicking outside still closes the panel.
 - Scroll and viewport resize also close the panel so the body-mounted panel does not drift away from its header context.
-- The bundled controller does not add a full popover library, focus trap, or modal dialog abstraction.
+- Static `select` filters with many `options:` keep the browser `<select multiple>` control and add a small in-panel search field when the option count reaches the bundled threshold.
+- The select option search only filters rendered static options in the open panel. It does not change saved filter values, adapter params, query execution, remote option loading, or dependent select behavior, and selected options remain visible even when they do not match the current search text.
+- Screens that need autocomplete, async option loading, grouped option UX, virtualized selects, or host-specific authorization/scoping should keep that UI in a copied/custom controller or host-owned widget.
+- The bundled controller does not add a full popover library, focus trap, modal dialog abstraction, remote search endpoint, or richer select dependency.
 
 ## Table-only application rule
 
@@ -121,6 +124,8 @@ When a host app keeps its own `<table>` markup, the bundled controller still wor
 - Managed headers and cells must expose matching `data-rails-table-preferences-column-key` values.
 - Sort, filter, resize, reorder, and pinned-column behavior only apply to managed headers/cells inside that target table.
 - Columns without `data-rails-table-preferences-column-key` stay under normal host-app control.
+
+Managed column keys must be unique within the same logical table screen. Rails Table Preferences uses each column key as the shared identity for display settings, filters, sorts, export payload metadata, and DOM hooks. If two managed columns use the same key, saved column state is merged by that key and the controller cannot safely treat the two columns as separate identities by label, position, or cell content. When migrating helper-free tables, resource-table partials, or copied markup, check that each managed header/cell pair uses a distinct `data-rails-table-preferences-column-key` in that target table.
 
 This is the supported path for server-rendered tables that come from an existing partial, Markdown/HTML rewrite, or another renderer that cannot directly use `table_preferences_table_tag(...)`.
 
@@ -151,6 +156,9 @@ If the host app mounts the controller root manually instead of using the bundled
 - `data-rails-table-preferences-url-value`
 - `data-rails-table-preferences-columns-value`
 - `data-rails-table-preferences-settings-value`
+- `data-rails-table-preferences-name-value` when the same screen renders the bundled editor or preset select
+
+Treat these values as one logical table contract. The `table_key`, `columns`, and `settings` values should come from the same table definition, the collection/member URL values should point at the same mounted preferences endpoint, and the optional `name` value should match the preset name shown by the editor or preset select. If the table and editor are rendered from different partials, pass the same values into both partials instead of recomputing them independently.
 
 Optional UI labels such as `data-rails-table-preferences-filter-label-value`, `data-rails-table-preferences-filter-operator-labels-value`, and `data-rails-table-preferences-sort-asc-label-value` can also be overridden when the host app needs localized copy different from the defaults.
 
@@ -162,7 +170,7 @@ data-rails-table-preferences-filter-operator-labels-value='<%= { contains: "含�
 
 Operators omitted from the object keep the bundled Japanese defaults. Unknown custom operator names fall back to the operator string unless the object provides a label for that key. This root value changes display wording only; filter metadata, saved settings shape, adapters, and query execution remain host-app responsibilities.
 
-When the page also renders the bundled editor or preset select, pass `data-rails-table-preferences-name-value` too so the helper-free table root stays aligned with the current preset name.
+When the page also renders the bundled editor or preset select, pass `data-rails-table-preferences-name-value` too so the helper-free table root stays aligned with the current preset name. The controller can still mount without `name`, but preset save/load evidence is harder to interpret when the editor and table disagree about the current preset.
 
 Example manual root wiring:
 
@@ -204,6 +212,7 @@ Notes:
 - `備考` and `操作` stay fully host-app-owned because they do not expose `data-rails-table-preferences-column-key`.
 - The URL values above assume the default mount path. If the host app mounts the engine elsewhere, change both URLs to the mounted path that serves `/preferences/:table_key`.
 - The example intentionally reuses `@table_preference_settings` from `rails_table_preference_settings(...)` and the same column definitions the host app passes to `table_preferences_editor(...)`.
+- If the helper-free table and editor/preset select live in different partials, record that both partials receive the same `table_key`, `name`, `columns`, `settings`, collection/member URLs, and managed column keys during PR smoke. A mismatch usually means the host app is rendering two different logical table contracts on one screen.
 
 ## Bundled editor copy override path
 

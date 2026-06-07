@@ -9,9 +9,10 @@
 <% end %>
 
 <% caption = local_assigns.fetch(:caption, nil) %>
+<% empty_message = options[:empty_message] %>
 <% scroll_wrapper = local_assigns.fetch(:scroll_wrapper, false) %>
 <% wrapper_options = (local_assigns.fetch(:wrapper_options, {}) || {}).dup %>
-<% table_options = options.except(:class, :render_editor).merge(
+<% table_options = options.except(:class, :render_editor, :empty_message).merge(
   class: ["rails-table-preferences-resource-table", options[:class]].compact.join(" ")
 ) %>
 <% visible_columns = table_state.fetch("visible_columns") %>
@@ -41,7 +42,7 @@
       <% if records.empty? %>
         <tr class="rails-table-preferences-resource-table__empty-row">
           <td class="rails-table-preferences-resource-table__empty-cell" colspan="<%= fallback_colspan %>">
-            <%= I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
+            <%= empty_message.presence || I18n.t("rails_table_preferences.resource_table.empty", default: "No records to display") %>
           </td>
         </tr>
       <% elsif visible_columns.empty? %>
@@ -52,7 +53,7 @@
         </tr>
       <% else %>
         <% records.each do |record| %>
-          <tr>
+          <tr data-rails-table-preferences-resource-row="true">
             <% visible_columns.each do |column| %>
               <%= tag.td(data: table_preferences_column_data_attributes(column)) do %>
                 <%= table_preferences_value(record, column) %>
