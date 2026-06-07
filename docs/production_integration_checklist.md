@@ -45,6 +45,7 @@ See [Controller integration](controller_integration.md), [Filter metadata](filte
 - If CSV, Excel, or report exports should mirror visible columns and order, resolve `rails_table_preference_export_payload(...)` in the export action.
 - Keep file generation, authorization, joins, and business-specific formatting in the host app.
 - Verify that hidden columns and ignored columns do not expose sensitive data through HTML or export paths.
+- If an export flow uses `include_hidden: true`, record which host-app allowlist, serializer, or policy decides whether hidden or sensitive columns may be exported. Hidden columns are display preferences, not sensitivity markers.
 
 See [Export integration](export_integration.md).
 
@@ -68,7 +69,7 @@ Before asking real users to try the screen, verify this path in the real host ap
 3. Save the preset, reload the page, and confirm the same table state returns.
 4. Trigger one Turbo Drive or Turbo Frame replacement that re-renders the editor and target table, then confirm both reconnect with the same `table_key`, `name`, `columns`, `settings`, collection/member URL values, and managed column keys so saved visibility/order/filter/sort state does not drift between the editor and table. When pagination or filtering paths are also used, repeat the reload through those paths and confirm the same stable `table_key` still resolves the preset.
 5. Submit the existing search form and confirm saved filter/sort state still round-trips. If the screen can keep an old `page` param, repeat the same check from a later page and confirm the host app either clears, clamps, or intentionally preserves that page after saved filters/sorts change the result set.
-6. If exports are enabled, export once and confirm column order and hidden columns match the selected preset.
+6. If exports are enabled, export once and confirm column order and hidden columns match the selected preset. For `include_hidden: true` export paths, also record the host-app policy, serializer, or allowlist evidence that permits any hidden or sensitive columns in that export.
 7. If resource table profile formatters read associations, render representative rows while watching the host app's query log or existing N+1 guard and confirm the relation preloads those associations explicitly.
 8. If `resource_table_for` or `tree_resource_table_for` uses `caption:`, confirm the caption is a short semantic table name and does not duplicate the page heading or surrounding instructions.
 9. Confirm unmanaged columns, action links, authorization, pagination, and empty states still behave like the host app expects.
