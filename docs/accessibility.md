@@ -98,6 +98,8 @@ When the host app uses the default `resource_table_for` or `tree_resource_table_
 
 Use this for a short semantic table name that helps users distinguish the table surface. The caption is optional and only appears when the host app passes it.
 
+Prefer captions that stay true as filters, pagination, or saved column visibility change. They are most useful when the page has more than one table, when the table heading is not immediately adjacent, or when the host app wants a compact accessible name for the generated table surface without copying the partial.
+
 Rails Table Preferences does not try to generate page-level explanations, complex table summaries, or business-specific instructions. Keep those in the host application around the generated table, or use a custom partial when the caption needs richer markup than the default surface provides.
 
 ## Drag and drop
