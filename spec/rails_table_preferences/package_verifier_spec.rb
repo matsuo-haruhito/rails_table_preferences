@@ -69,6 +69,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/examples.md",
         "docs/troubleshooting.md",
         "docs/manual_qa.md",
+        "docs/release_checklist.md",
         "docs/package_verification.md",
         "docs/support_matrix.md",
         "docs/controller_integration.md",
