@@ -62,10 +62,10 @@ RSpec.describe RailsTablePreferences::ValueResolver do
     expect(result).to eq([record, view_context])
   end
 
-  it "passes the record, normalized column, and view context to wider formatters" do
+  it "passes the record, column, and view context to wider formatters" do
     record = Struct.new(:name).new("Order A")
     view_context = instance_double("ViewContext")
-    formatter = ->(value, column, context) { [value.name, column.fetch("key"), context] }
+    formatter = ->(value, column, context) { [value.name, column.fetch(:key), context] }
 
     result = described_class.call(
       record,
@@ -73,7 +73,7 @@ RSpec.describe RailsTablePreferences::ValueResolver do
       view_context: view_context
     )
 
-    expect(result).to eq(["Order A", "name", view_context])
+    expect(result).to eq(["Order A", :name, view_context])
   end
 
   it "keeps nil formatter results instead of falling back to the default value" do
