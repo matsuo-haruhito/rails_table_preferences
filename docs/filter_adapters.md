@@ -97,6 +97,8 @@ Ransack accepts `s` as an ordered array, so this adapter keeps the neutral `sort
 
 When the displayed column key differs from the Ransack field, pass normalized columns or use `table_preferences_params(adapter: :ransack)`. The adapter reads existing column metadata: `filter: { param: ... }` overrides the filter field before the predicate is appended, and `sort_param:` overrides the sort field. Without those metadata keys, the saved column key is used unchanged.
 
+Passing `columns:` is metadata mapping, not a security allowlist. Unknown saved filter or sort keys are preserved as fallback Ransack params when they use a supported operator and a valid sort direction, even if they are not present in the current column metadata. That keeps saved state and host-owned presets backward compatible; the host application's Ransack allowlist, scopes, and authorization policy remain the final defense for deciding which params can execute.
+
 ```ruby
 columns = [
   table_preferences_column(
