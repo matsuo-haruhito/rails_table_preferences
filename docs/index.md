@@ -19,6 +19,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal operating patterns.
 - [Preset selector scope labels](preset_selector_scope_labels.md): package entrypoint and copied/base controller scope-label display boundaries for owner and non-owner presets.
+- [Preset name save boundary](preset_name_save_boundary.md): selector, preset name input, save, and save-as-new wording boundaries so host-app copy does not imply an in-place rename API.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, horizontal scroll-container baseline, and `group:` metadata.
 - [Column overflow metadata](column_overflow.md): canonical `overflow:` / `default_overflow:` values, compatibility aliases, the boundary with `default_truncate:`, and why overflow mode is host-owned rather than edited in the bundled editor.
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
