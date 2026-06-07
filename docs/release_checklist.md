@@ -262,3 +262,46 @@ Before publishing, summarize:
 - [ ] JavaScript/CSS integration changes.
 - [ ] Known limitations.
 - [ ] Upgrade notes for existing users.
+
+Use `CHANGELOG.md` as the detailed release history. Use the release note as a short adoption-facing summary that a host-app maintainer can scan before trying the gem. Do not copy open pull requests, proposal issues, or unmerged behavior into the release note as released support.
+
+For the first public `0.1.0` release, start from this compact template in the release-prep PR body or GitHub release draft:
+
+```markdown
+## Summary
+
+- Rails Table Preferences provides owner-aware table display preferences for Rails index screens, including columns, filters, sorts, scoped presets, and export payload metadata.
+- The gem is intended to layer onto existing host-app queries, authorization, search forms, and CSV/Excel/report generation rather than replacing them.
+
+## Upgrade notes
+
+- Run the install generator and migration before using the bundled JSON API or helpers.
+- Mount the engine when using bundled preset save/load/delete endpoints.
+- Register either the copied Stimulus controller or the package entrypoint; do not register both for the same screen.
+- Treat existing `ColumnAdjustment` import, owner model configuration, and scoped preset setup as host-app integration work.
+
+## Known limitations
+
+- Host apps own database search, joins, authorization, pagination, and export file generation.
+- Host apps own complex sticky layout polish, grouped header markup, and final dense-table CSS verification.
+- Shared, role, and organization presets are supported as data scopes, but a full administrative UI for managing them is outside this release.
+- Newer Rails releases outside the documented representative CI matrix need additional host-app verification before production adoption.
+
+## Checks and evidence
+
+- CI on the release commit:
+- `bundle exec rake package:verify` result:
+- Demo or sandbox verification:
+- Manual QA / host-app smoke:
+- Known-good rollback target:
+```
+
+Keep the template current with the landed `main` product surface. If a line depends on an open pull request, proposal issue, publish policy, or dated changelog cutover, leave it out until the relevant decision lands.
+
+## 12. Publish or tag
+
+When everything is ready:
+
+- [ ] Ensure the working tree is clean.
+- [ ] Tag the release.
+- [ ] Push the tag.
