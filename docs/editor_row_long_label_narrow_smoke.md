@@ -2,6 +2,8 @@
 
 Use this focused smoke when a PR touches the bundled editor row layout, display preference copy, or manual QA evidence around narrow screens. It supplements `manual_qa.md` and `manual_qa_pr_smoke_matrix.md`; it does not replace rendered browser evidence when a PR claims a visual fix.
 
+This note is a focused PR-evidence aid, not a package verification required doc. Keep it reachable from PR smoke guidance for editor row or dense-label changes without promoting it into `PackageVerifier::REQUIRED_PATHS` unless it becomes a primary packaged docs entry point.
+
 ## Scope
 
 This smoke is limited to editor row label wrapping at narrow widths. It does not cover action grouping, filter panel reachability, drag-and-drop behavior, table header resize, or preset action UX.
