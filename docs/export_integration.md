@@ -181,6 +181,8 @@ Before exporting hidden or sensitive columns, keep this decision in the host app
 - exclude sensitive columns even when they are visible in the table unless the current user and export action are allowed to receive them
 - document or test whether `include_hidden: true` is available to all users, admin-only users, or only specific export flows
 
+For PR or release evidence, record the visibility check and the sensitive-data policy check separately. A passing `include_hidden: true` payload check only proves hidden display columns can be included in the ordered payload; it does not prove the host app should expose every included value to every requester.
+
 ## Export keys
 
 Use `export_key` when the display/preference key differs from the export method or attribute. Helper-defined columns can declare it directly:
