@@ -8,7 +8,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
-    moveDownLabel: { type: String, default: "下へ移動" }
+    moveDownLabel: { type: String, default: "下へ移動" },
+    resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" }
   }
 
   buildPresetOption(preset) {
@@ -20,25 +21,6 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const scopeMark = scopeLabel ? ` [${scopeLabel}]` : ""
     option.textContent = `${name}${scopeMark}${defaultMark}`
     return option
-  }
-
-  filterValueHtml(filter, condition, selectedOperator) {
-    if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
-    if (selectedOperator === "between") {
-      const inputType = this.filterInputType(filter)
-      const fromPlaceholder = this.filterPlaceholderAttribute(filter.from_placeholder)
-      const toPlaceholder = this.filterPlaceholderAttribute(filter.to_placeholder)
-      return `
-        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromPlaceholder}></label>
-        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toPlaceholder}></label>
-      `
-    }
-    if (filter.type === "select" && Array.isArray(filter.options)) {
-      const values = new Set(Array(condition.values || condition.value || []).map(String))
-      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<select data-field="values" multiple>${filter.options.map((option) => `<option value="${this.escapeHtml(option)}" ${values.has(String(option)) ? "selected" : ""}>${this.escapeHtml(option)}</option>`).join("")}</select></label>`
-    }
-    const placeholder = this.filterPlaceholderAttribute(filter.placeholder)
-    return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${placeholder}></label>`
   }
 
   filterPlaceholderAttribute(value) {
@@ -65,7 +47,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   resetEditor(event) {
     const wasBusy = this.busy
     const result = super.resetEditor(event)
-    if (!wasBusy) this.clearSuccessfulStatus()
+    if (!wasBusy) {
+      this.clearSuccessfulStatus()
+      this.dispatchPreferenceEvent("applied", { action: "reset" })
+    }
     return result
   }
 
@@ -83,6 +68,24 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  showAllEditorColumns(event) {
+    this.setEditorColumnVisibility(event, true)
+  }
+
+  hideAllEditorColumns(event) {
+    this.setEditorColumnVisibility(event, false)
+  }
+
+  setEditorColumnVisibility(event, visible) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    this.editorRows.forEach((row) => {
+      const visibleInput = row.querySelector('[data-field="visible"]')
+      if (visibleInput) visibleInput.checked = visible === true
+    })
+    this.clearSuccessfulStatus()
   }
 
   buildEditorMoveControls() {
@@ -228,8 +231,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   autoFitColumnFromHandle(event) {
-    super.autoFitColumnFromHandle(event)
-    this.clearSuccessfulStatus()
+    const wasBusy = this.busy
+    const result = super.autoFitColumnFromHandle(event)
+    if (!wasBusy) this.setStatus(this.resizeAutoFitStatusLabelValue, "success")
+    return result
   }
 
   dragTableColumnOver(event) {
@@ -263,8 +268,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   setStatus(message, state = "idle") {
-    this.statusState = message ? state : "idle"
+    const nextState = message ? state : "idle"
+    this.statusState = nextState
+    this.syncStatusStateHook(nextState)
     super.setStatus(message)
+  }
+
+  syncStatusStateHook(state = this.statusState || "idle") {
+    const target = this.hasStatusTarget ? this.statusTarget : null
+    if (!target || typeof target.setAttribute !== "function") return
+    target.setAttribute("data-rails-table-preferences-status-state", state || "idle")
   }
 
   clearSuccessfulStatus() {
@@ -354,6 +367,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   handleOperationError(error, message = this.operationFailedStatusLabelValue) {
     super.handleOperationError(error, message)
     this.statusState = "error"
+    this.syncStatusStateHook("error")
     this.dispatchPreferenceEvent("error", {
       action: this.currentPreferenceAction || "operation",
       message: message || this.operationFailedStatusLabelValue
@@ -427,6 +441,21 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   isResizeHandleAutoFitKey(event) {
     return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
+  }
+
+  showAllColumns(event) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+
+    this.settingsValue = {
+      ...this.settingsValue,
+      columns: this.columnsFromSettings.map((column) => ({ ...column, visible: true })),
+      filters: this.settingsValue?.filters || {},
+      sorts: this.settingsValue?.sorts || []
+    }
+    this.closeFilterPanel()
+    this.renderEditor()
+    this.apply()
   }
 
   clearFiltersAndSorts(event) {
