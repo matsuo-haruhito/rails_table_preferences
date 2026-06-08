@@ -21,6 +21,15 @@ Choose the relationship intentionally and remove unused lines.
 - Manual QA applicability:
 - UI / visual evidence:
 
+## Current Review State
+
+Record the current GitHub state used for review or merge decisions. Do not rely on older PR-body CI notes without refreshing these fields.
+
+- Head SHA or compare head:
+- Workflow run or checks summary:
+- Compare freshness, for example `behind_by: 0`, stacked base, or replacement PR:
+- Mergeability, for example `mergeable:true`, conflicts, or unknown:
+
 ## Focused Manual QA
 
 Use `docs/manual_qa_pr_smoke_matrix.md` when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance.
