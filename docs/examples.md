@@ -219,8 +219,11 @@ class LegacyOrdersController < ApplicationController
       .order_by(merged_params["sort"] || params[:sort])
       .page(params[:page])
 
-    @table_preference_collection_url = "/rails_table_preferences/preferences/#{@table_key}"
-    @table_preference_url = "#{@table_preference_collection_url}/#{ERB::Util.url_encode(@table_preference_name)}"
+    encoded_table_key = ERB::Util.url_encode(@table_key)
+    encoded_preference_name = ERB::Util.url_encode(@table_preference_name)
+
+    @table_preference_collection_url = "/rails_table_preferences/preferences/#{encoded_table_key}"
+    @table_preference_url = "#{@table_preference_collection_url}/#{encoded_preference_name}"
   end
 
   private
@@ -295,7 +298,7 @@ Why this pattern works:
 - the same `@table_columns` and `@table_preference_settings` can feed both `table_preferences_editor(...)` and the helper-free controller root, so the editor and table stay aligned
 - query execution, authorization, export actions, and any `config.mount_path` override still belong to the host app
 
-For the exact attribute list and table-target rules, see [JavaScript controller notes](javascript_controller.md). For the lighter introductory version of this pattern, see [Quick start](quick_start.md).
+For the exact attribute list and table-target rules, see [JavaScript controller notes](javascript_controller.md). For helper-free URL ownership and custom mount path examples, see [Helper-free controller root URLs](helper_free_controller_root_urls.md). For the lighter introductory version of this pattern, see [Quick start](quick_start.md).
 
 ## Example: keep the search form and export action separate
 
@@ -339,12 +342,20 @@ class WarehouseStocksController < ApplicationController
       .search(export_query_params)
       .order_by(export_query_params["sort"])
 
+    value_extractors = {
+      "warehouse_name" => ->(stock) { stock.warehouse.name },
+      "item_code" => ->(stock) { stock.item.code },
+      "item_name" => ->(stock) { stock.item.name },
+      "stock_quantity" => ->(stock) { stock.quantity },
+      "last_arrival_date" => ->(stock) { stock.last_arrival_date }
+    }
+
     csv_string = CSV.generate do |csv|
       csv << export_payload["headers"]
 
       scoped_stocks.find_each do |stock|
-        csv << export_payload["columns"].map do |column|
-          stock.public_send(column["export_key"] || column["key"])
+        csv << export_payload["export_keys"].map do |key|
+          value_extractors.fetch(key.to_s).call(stock)
         end
       end
     end
@@ -405,7 +416,8 @@ Why this split works:
 - the search form owns user-entered query params plus `table_preferences_hidden_fields(...)`, so saved filter/sort UI state can round-trip through the normal index request
 - the export form owns only the params that the export action actually accepts, which keeps export authorization and query scope explicit in the host app
 - `table_preference_name` still selects the same saved column order, visibility, and labels when `rails_table_preference_export_payload(...)` builds export metadata
-- query execution and file generation remain host app responsibilities even when the export follows the same visible table state
+- the export action maps ordered `export_keys` through a host-app-owned extractor allowlist instead of dispatching arbitrary methods from table preference metadata
+- query execution and file generation remain host app responsibilities even when the export follows the same visible table state; see [Export integration](export_integration.md) for hidden-column and sensitive-column boundaries
 
 ## Example: customer shipment list with Ransack
 
@@ -491,7 +503,29 @@ Controller:
 class Admin::DocumentSetsController < ApplicationController
   def index
     @document_set = DocumentSet.new
+    load_document_set_table_state
+  end
+
+  def create
+    @document_set = DocumentSet.new(document_set_params)
+
+    if @document_set.save
+      redirect_to admin_document_sets_path, notice: "作成しました"
+    else
+      load_document_set_table_state
+      render :index, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def load_document_set_table_state
     @table_columns = document_set_table_columns
+    @table_preference_settings = rails_table_preference_settings(
+      table_key: :admin_document_sets,
+      name: params[:table_preference_name],
+      fallback: {}
+    )
 
     preference_params = rails_table_preference_params(
       table_key: :admin_document_sets,
@@ -506,20 +540,6 @@ class Admin::DocumentSetsController < ApplicationController
       .order_by(merged_params["sort"] || params[:sort])
       .page(params[:page])
   end
-
-  def create
-    @document_set = DocumentSet.new(document_set_params)
-
-    if @document_set.save
-      redirect_to admin_document_sets_path, notice: "作成しました"
-    else
-      @table_columns = document_set_table_columns
-      @document_sets = DocumentSet.search(params).page(params[:page])
-      render :index, status: :unprocessable_entity
-    end
-  end
-
-  private
 
   def document_set_table_columns
     [
@@ -602,6 +622,7 @@ View composition:
 Why this split works:
 
 - the create form owns record validation and persistence
+- validation failures render the same table state setup as `index`, so the editor, hidden fields, and table tag still receive `@table_preference_settings`
 - the editor owns only table display preferences and preset actions
 - the search form owns user-entered query params plus `table_preferences_hidden_fields(...)`
 - the table stays a normal host app list view and only opts into Rails Table Preferences through column keys

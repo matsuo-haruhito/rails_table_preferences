@@ -21,7 +21,7 @@ The rendered table includes both controller tokens, for example:
 
 If the host app already includes `rails-table-preferences`, the helper keeps only one copy of the token. The host controller token stays first, and the Rails Table Preferences token is still present so the bundled behavior can mount.
 
-For an adoption-focused checklist, see [Coexisting table controllers manual QA](coexisting_table_controllers_manual_qa.md). It keeps the review on controller-token coexistence, generic host `data-*` preservation, and gem-owned runtime values without adding row selection, analytics, or inline edit behavior to Rails Table Preferences.
+For an adoption-focused checklist, see [Coexisting table controllers manual QA](coexisting_table_controllers_manual_qa.md). It stays a scoped companion to this merge-boundary guide rather than a separate docs-index or package-verification entry point, and it keeps the review on controller-token coexistence, generic host `data-*` preservation, and gem-owned runtime values without adding row selection, analytics, or inline edit behavior to Rails Table Preferences.
 
 ## Gem-owned data
 

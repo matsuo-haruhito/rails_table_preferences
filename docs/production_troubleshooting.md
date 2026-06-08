@@ -42,6 +42,68 @@ Check:
 
 Do not disable CSRF protection to make the request pass. Fix the host-app layout or shell so Rails can expose the normal token to the browser.
 
+## Save, load, or delete returns 401, redirects, or has no owner
+
+Symptoms:
+
+- Save, Load, or Delete redirects to the login page or returns `401 Unauthorized` / `403 Forbidden` from the mounted JSON API.
+- The host-app page renders, but the JSON request misses authentication, tenant, locale, or CSRF callbacks that the surrounding page depends on.
+- Logs mention `current_user` is nil, no owner can be resolved, or the configured owner method returns the wrong model.
+- These failures can look similar to the CSRF-specific `422` case above, a `404` mount-path mismatch, or a duplicate preset-name validation failure.
+
+Check:
+
+1. Confirm the mounted engine inherits the host controller that should own the request boundary.
+
+   `RailsTablePreferences.config.parent_controller_class_name` should point to `ApplicationController` or an authenticated base controller that runs the authentication, CSRF, tenant, locale, and other callbacks the preference API needs.
+
+2. Confirm the current-owner method is available from that same controller stack.
+
+   If the host app does not use `current_user`, configure `current_user_method` and `owner_model` together so the method returns a persisted instance of the configured owner model.
+
+3. Separate this from neighboring failures:
+
+   - `422` with authenticity-token logs usually points to missing CSRF meta tags or token headers.
+   - `404 Not Found` usually points to the engine route or `config.mount_path`.
+   - duplicate-name failures usually happen after a read-only scoped preset loaded successfully and the owner fallback tries to save an existing preset name.
+   - `401`, login redirects, wrong callbacks, or nil owner logs usually point to the host-app controller boundary or owner lookup setup.
+
+Do not move host-app authentication, authorization, tenant, or locale policy into Rails Table Preferences to make the request pass. Keep those checks in the configured host controller, then verify the mounted API uses that boundary.
+
+For the detailed setup checks, see [Save returns 401 or redirects to login](troubleshooting.md#save-returns-401-or-redirects-to-login), [Save, Load, or Delete uses the wrong controller boundary](troubleshooting.md#save-load-or-delete-uses-the-wrong-controller-boundary), [current_user is nil](troubleshooting.md#current_user-is-nil), and [Confirm the owner and engine contract](production_integration_checklist.md#1-confirm-the-owner-and-engine-contract).
+
+## Saving from a read-only scoped preset fails with a duplicate name
+
+Symptoms:
+
+- A shared, role, or organization preset loads correctly and shows as read-only, but Save fails after the user edits it.
+- The preset name field still contains the scoped preset's visible name.
+- The mounted JSON API uses the existing failure path rather than overwriting the shared, role, or organization preset.
+- Rails logs may mention `ActiveRecord::RecordInvalid` or a uniqueness validation on the preset `name`; current request coverage treats validation failures from `save!` as `500 Internal Server Error`, not as the CSRF-specific `422` path above.
+
+Check:
+
+1. Confirm the selected preset is read-only in the loaded payload.
+
+   Read-only scoped presets are returned with `editable: false`. The bundled editor disables destructive/default controls and shows helper copy explaining that Save writes to the owner preset path instead of modifying the scoped preset directly.
+
+2. Check whether the current owner already has a preset with the same `table_key` and `name`.
+
+   The owner fallback uses the current preset name input as the owner preset name. If that owner preset already exists, the normal editor does not silently rename it or update the shared, role, or organization preset instead.
+
+3. Separate this from neighboring failures:
+
+   - CSRF-token failures usually return `422` with authenticity-token logs.
+   - authentication or authorization filters usually look like `401`, login redirects, or host-app policy failures.
+   - unstable `table_key` problems usually save successfully but do not reload on the same logical screen.
+   - duplicate owner preset names usually fail during the JSON write after the read-only preset loaded successfully.
+
+4. Choose the host-app response deliberately.
+
+   For wording-only guidance, override the bundled status or helper copy described in [Bundled editor i18n keys](editor_i18n.md#preset-controls). If the screen needs a duplicate-name resolution flow, custom retry behavior, or a different owner-preset naming rule, copy or replace the controller/markup for that host app. Do not document the regular editor as an admin path that overwrites shared, role, or organization presets.
+
+For the accessibility-facing responsibility boundary, see [Read-only scoped presets](accessibility.md#read-only-scoped-presets).
+
 ## Saved presets do not come back on the same screen
 
 Symptoms:
