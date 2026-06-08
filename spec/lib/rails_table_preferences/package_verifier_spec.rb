@@ -187,8 +187,11 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
   end
 
   describe "required packaged locale files" do
-    it "keeps the default Japanese locale file in the package guard" do
-      expect(described_class::REQUIRED_PATHS).to include("config/locales/ja.yml")
+    it "keeps the default English and Japanese locale files in the package guard" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "config/locales/en.yml",
+        "config/locales/ja.yml"
+      )
     end
   end
 
