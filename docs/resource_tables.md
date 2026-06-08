@@ -43,6 +43,17 @@ If neither `model:` nor profile `model` is available and the collection has no `
 
 If the same management page also includes a search form, pagination, a create form, or other host-app actions, keep those as separate responsibilities around the table. See [Practical examples](examples.md) for copyable page-composition examples, including a convention-first list screen with small profile overrides and a create-form-plus-list screen.
 
+### Empty-state copy
+
+Use `empty_message:` when a screen needs resource-table-specific copy for the records-empty state:
+
+```erb
+<%= resource_table_for @orders, empty_message: "No orders yet" %>
+<%= tree_resource_table_for @projects, empty_message: "No projects yet" %>
+```
+
+Both flat and tree resource table defaults use the custom message only when the record collection is empty. When no custom message is provided, they keep the `rails_table_preferences.resource_table.empty` fallback. The all-columns-hidden message remains separate, so hiding every visible column still uses `rails_table_preferences.resource_table.all_columns_hidden` instead of the records-empty copy.
+
 ## Optional filtering of inferred columns
 
 ```erb

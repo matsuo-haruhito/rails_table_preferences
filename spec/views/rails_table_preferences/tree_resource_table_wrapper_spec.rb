@@ -64,6 +64,57 @@ RSpec.describe "rails_table_preferences/_tree_resource_table", type: :view do
     expect(page).to have_css("table#projects-table.tree-view-table.rails-table-preferences-tree-resource-table.projects-table")
   end
 
+  it "uses a custom empty message for records empty state" do
+    render_tree_resource_table(
+      records: [],
+      scroll_wrapper: false,
+      wrapper_options: {},
+      options: {
+        id: "projects-table",
+        empty_message: "No projects yet",
+        render_editor: false
+      }
+    )
+
+    page = Capybara.string(rendered)
+    table = page.find("table#projects-table")
+
+    expect(table).to have_css(".rails-table-preferences-resource-table__empty-cell", text: "No projects yet")
+    expect(table).to have_no_css("[empty_message]")
+  end
+
+  it "keeps the default empty message when no custom message is provided" do
+    render_tree_resource_table(
+      records: [],
+      scroll_wrapper: false,
+      wrapper_options: {},
+      options: { id: "projects-table", render_editor: false }
+    )
+
+    page = Capybara.string(rendered)
+
+    expect(page).to have_css(".rails-table-preferences-resource-table__empty-cell", text: "No records to display")
+  end
+
+  it "keeps the all-hidden columns message separate from the records empty message" do
+    render_tree_resource_table(
+      records: [double("Project")],
+      scroll_wrapper: false,
+      wrapper_options: {},
+      table_state: { "visible_columns" => [] },
+      options: {
+        id: "projects-table",
+        empty_message: "No projects yet",
+        render_editor: false
+      }
+    )
+
+    page = Capybara.string(rendered)
+
+    expect(page).to have_css(".rails-table-preferences-resource-table__hidden-columns-cell", text: "All columns are hidden")
+    expect(page).to have_no_text("No projects yet")
+  end
+
   it "does not include the default editor inside the scroll wrapper" do
     render_tree_resource_table(
       records: [],
@@ -75,7 +126,7 @@ RSpec.describe "rails_table_preferences/_tree_resource_table", type: :view do
     expect(rendered.index('id="table-preferences-editor"')).to be < rendered.index("rails-table-preferences-resource-table-scroll")
   end
 
-  def render_tree_resource_table(records:, scroll_wrapper:, wrapper_options:, options:, caption: nil)
+  def render_tree_resource_table(records:, scroll_wrapper:, wrapper_options:, options:, caption: nil, table_state: self.table_state)
     render partial: "rails_table_preferences/tree_resource_table", locals: {
       records: records,
       model: Class.new,
