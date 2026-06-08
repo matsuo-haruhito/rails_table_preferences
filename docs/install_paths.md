@@ -69,6 +69,8 @@ For Vite and similar bundlers, also add a resolver for `rails_table_preferences`
 
 When choosing between the copied controller, the package entrypoint, and a host-owned controller, verify any screen-specific controller-root values against that boundary. Package-only values such as `data-rails-table-preferences-filter-operator-labels-value` are available only when the registered controller comes from `rails_table_preferences/controller`; host-owned or copied controller paths need their own JavaScript for equivalent behavior.
 
+Row reorder helpers follow the same split. The copied controller keeps native row drag/drop and numeric order inputs as its keyboard-friendly fallback. The package entrypoint adds column search plus row up/down buttons around the generated rows, so do not expect those move buttons when a host app registers the copied controller or a host-owned controller.
+
 ## Demo option boundary
 
 `--with-demo` copies the demo controller and view only. Add this route yourself when you choose that path:
