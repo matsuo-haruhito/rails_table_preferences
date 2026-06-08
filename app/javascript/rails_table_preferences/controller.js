@@ -3,7 +3,10 @@ import RailsTablePreferencesBaseController from "../controllers/rails_table_pref
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
     ...RailsTablePreferencesBaseController.values,
+    editorIdPrefix: String,
     filterOperatorLabels: { type: Object, default: {} },
+    selectFilterOptionSearchLabel: { type: String, default: "候補を絞り込み" },
+    selectFilterOptionSearchPlaceholder: { type: String, default: "候補を絞り込み" },
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
@@ -21,6 +24,22 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const scopeMark = scopeLabel ? ` [${scopeLabel}]` : ""
     option.textContent = `${name}${scopeMark}${defaultMark}`
     return option
+  }
+
+  settingsFromEditor() {
+    const editorSettings = super.settingsFromEditor()
+    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+  }
+
+  filterPanelId(columnKey) {
+    const namespace = this.filterPanelIdNamespace
+    const normalizedColumnKey = String(columnKey || "column").replace(/[^a-zA-Z0-9_-]+/g, "-")
+    return `rails-table-preferences-filter-panel-${namespace}-${normalizedColumnKey}`
+  }
+
+  get filterPanelIdNamespace() {
+    const namespace = this.editorIdPrefixValue || this.tableKeyValue || "table"
+    return String(namespace).replace(/[^a-zA-Z0-9_-]+/g, "-")
   }
 
   filterPlaceholderAttribute(value) {
@@ -479,8 +498,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   selectFilterOptionSearchHtml(options) {
     if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
 
-    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
+    const label = `${this.filterValueLabelValue}: ${this.selectFilterOptionSearchLabelValue}`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(this.selectFilterOptionSearchPlaceholderValue)}">`
   }
 
   installSelectFilterOptionSearch(panel) {
