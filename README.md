@@ -205,7 +205,7 @@ Included in v0.1 scope:
 - Column width
 - Text truncation metadata
 - Fixed/pinned column metadata and CSS/JS hooks
-- Column group metadata
+- Column group metadata and grouping helper
 - Multiple presets and default presets
 - Ignored columns
 - Configurable column labels through explicit labels, explicit i18n keys, database column comments, and optional locale/humanize fallbacks
