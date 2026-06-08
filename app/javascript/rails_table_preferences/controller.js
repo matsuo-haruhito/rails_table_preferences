@@ -47,7 +47,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   resetEditor(event) {
     const wasBusy = this.busy
     const result = super.resetEditor(event)
-    if (!wasBusy) this.clearSuccessfulStatus()
+    if (!wasBusy) {
+      this.clearSuccessfulStatus()
+      this.dispatchPreferenceEvent("applied", { action: "reset" })
+    }
     return result
   }
 
