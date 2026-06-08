@@ -18,6 +18,9 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("const value = this.selectFilterOptionValue(option)")
     expect(controller_source).to include("const label = this.selectFilterOptionLabel(option, value)")
     expect(controller_source).to include("${this.selectFilterOptionSearchHtml(filter.options)}<select data-field=\"values\" multiple>")
-    expect(controller_source).to include("get selectFilterOptionSearchThreshold() { return 8 }")
+    expect(controller_source).to include("selectFilterOptionSearchThreshold: { type: Number, default: 8 }")
+    expect(controller_source).to include("const threshold = Number(this.selectFilterOptionSearchThresholdValue)")
+    expect(controller_source).to include("if (!Number.isFinite(threshold)) return 8")
+    expect(controller_source).to include("return Math.floor(threshold)")
   end
 end
