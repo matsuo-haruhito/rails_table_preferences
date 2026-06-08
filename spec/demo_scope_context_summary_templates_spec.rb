@@ -21,10 +21,14 @@ RSpec.describe "demo scope context summary templates" do
     expect(template).to include('"organization" => organization')
   end
 
-  it "shows the current scope context in the generated demo view" do
+  it "shows the current owner and scope context in the generated demo view" do
     template = File.read(view_template_path)
 
-    expect(template).to include("<h2>Current scope context</h2>")
+    expect(template).to include("<h2>Verification context</h2>")
+    expect(template).to include("<h3>Current owner</h3>")
+    expect(template).to include("<h3>Owner switch</h3>")
+    expect(template).to include("<h3>Current scope context</h3>")
+    expect(template).to include("<h3>Scope switch</h3>")
     expect(template).to include("owner-only")
     expect(template).to include('roles: [#{@demo_scope_context_summary.fetch("roles").join(", ")}]')
     expect(template).to include('organization: #{@demo_scope_context_summary["organization"]}')
