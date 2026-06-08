@@ -8,7 +8,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
-    moveDownLabel: { type: String, default: "下へ移動" }
+    moveDownLabel: { type: String, default: "下へ移動" },
+    selectFilterOptionSearchThreshold: { type: Number, default: 8 }
   }
 
   buildPresetOption(preset) {
@@ -477,26 +478,34 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
 
     const label = `${this.filterValueLabelValue}: 候補を絞り込み`
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
+    const emptyLabel = "一致する候補はありません。選択済みの候補は表示したままです。"
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
   }
 
   installSelectFilterOptionSearch(panel) {
     const input = panel?.querySelector("[data-field='option-search']")
     const select = panel?.querySelector("[data-field='values']")
+    const emptyMessage = panel?.querySelector("[data-rails-table-preferences-option-search-empty]")
     if (!input || !select || input.dataset.railsTablePreferencesOptionSearchInstalled === "true") return
 
     input.dataset.railsTablePreferencesOptionSearchInstalled = "true"
-    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select))
-    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select))
-    this.filterSelectOptionsBySearch(input, select)
+    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select, emptyMessage))
+    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select, emptyMessage))
+    this.filterSelectOptionsBySearch(input, select, emptyMessage)
   }
 
-  filterSelectOptionsBySearch(input, select) {
+  filterSelectOptionsBySearch(input, select, emptyMessage = null) {
     const query = String(input?.value || "").trim().toLocaleLowerCase()
+    let matchingUnselectedOptions = 0
+
     Array.from(select?.options || []).forEach((option) => {
       const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
-      option.hidden = Boolean(query) && !option.selected && !searchableText.includes(query)
+      const matchesQuery = searchableText.includes(query)
+      if (matchesQuery && !option.selected) matchingUnselectedOptions += 1
+      option.hidden = Boolean(query) && !option.selected && !matchesQuery
     })
+
+    if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0
   }
 
   selectFilterOptionValue(option) {
@@ -515,7 +524,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return String(option ?? "")
   }
 
-  get selectFilterOptionSearchThreshold() { return 8 }
+  get selectFilterOptionSearchThreshold() {
+    const rawValue = this.element?.dataset?.railsTablePreferencesSelectFilterOptionSearchThresholdValue
+    if (rawValue !== undefined && String(rawValue).trim() === "") return 8
+
+    const threshold = Number(this.selectFilterOptionSearchThresholdValue)
+    if (!Number.isFinite(threshold)) return 8
+    return Math.floor(threshold)
+  }
 
   filterOperatorText(operator) {
     const key = String(operator)
