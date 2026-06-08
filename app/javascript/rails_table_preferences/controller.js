@@ -464,6 +464,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
     this.closeFilterPanel()
     this.apply()
+    this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })
   }
 
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
