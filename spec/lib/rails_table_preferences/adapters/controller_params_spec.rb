@@ -85,6 +85,43 @@ RSpec.describe RailsTablePreferences::Adapters::ControllerParams do
       )
     end
 
+    it "does not emit operator params for range filters" do
+      columns = [
+        {
+          key: :delivery_date,
+          filter: {
+            type: :date,
+            from_param: :from_date,
+            to_param: :to_date,
+            operator_param: :delivery_date_operator
+          }
+        },
+        {
+          key: :created_at,
+          filter: {
+            type: :date,
+            from_param: :created_after,
+            to_param: :created_before,
+            operator_param: :created_at_operator
+          }
+        }
+      ]
+
+      expect(
+        described_class.filter_params(
+          filters: {
+            delivery_date: { operator: :between, from: "2026-01-01", to: "2026-01-31" },
+            created_at: { operator: :gteq, value: "2026-02-01" }
+          },
+          columns: columns
+        )
+      ).to eq(
+        "from_date" => "2026-01-01",
+        "to_date" => "2026-01-31",
+        "created_after" => "2026-02-01"
+      )
+    end
+
     it "maps gteq and lteq to from/to params" do
       expect(
         described_class.filter_params(
@@ -125,6 +162,32 @@ RSpec.describe RailsTablePreferences::Adapters::ControllerParams do
           columns: columns
         )
       ).to eq("statuses" => %w[未出荷 出荷済])
+    end
+
+    it "does not emit operator params for multi-value filters" do
+      columns = [
+        {
+          key: :status,
+          filter: { type: :select, values_param: :statuses, operator_param: :status_operator }
+        },
+        {
+          key: :warehouse,
+          filter: { type: :select, values_param: :warehouse_ids, operator_param: :warehouse_operator }
+        }
+      ]
+
+      expect(
+        described_class.filter_params(
+          filters: {
+            status: { operator: :in, values: %w[pending shipped] },
+            warehouse: { operator: :not_in, value: "archived" }
+          },
+          columns: columns
+        )
+      ).to eq(
+        "statuses" => %w[pending shipped],
+        "warehouse_ids" => ["archived"]
+      )
     end
 
     it "keeps operator-only filters as operator params" do
