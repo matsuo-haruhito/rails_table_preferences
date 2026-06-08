@@ -55,6 +55,7 @@ ja:
       move_up: 上へ移動
       move_down: 下へ移動
       resize_column: 列幅を変更
+      resize_auto_fit_status: 列幅を自動調整しました。
       filter: 絞り込み
       filter_operator: 条件
       filter_operator_labels:
