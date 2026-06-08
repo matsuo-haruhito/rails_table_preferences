@@ -492,7 +492,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   filterPanelHtml(column) {
     return super.filterPanelHtml(column).replace(
       'class="rails-table-preferences-filter-panel__title"',
-      `id="${this.filterPanelTitleId(column.key)}-title" class="rails-table-preferences-filter-panel__title"`
+      `id="${this.filterPanelTitleId(column.key)}" class="rails-table-preferences-filter-panel__title"`
     )
   }
 
