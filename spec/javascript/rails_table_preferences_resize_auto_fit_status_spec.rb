@@ -30,8 +30,8 @@ RSpec.describe "rails_table_preferences resize auto-fit status feedback" do
   it "keeps manual drag resize as success-status clearing rather than saved-state feedback" do
     resize_column_source = package_controller_source[/resizeColumn\(event\) \{.*?\n  \}/m]
 
-    expect(resize_column_source).to include("super.resizeColumn(event)")
     expect(resize_column_source).to include("this.clearSuccessfulStatus()")
+    expect(resize_column_source).not_to include("this.setStatus(")
     expect(resize_column_source).not_to include("resizeAutoFitStatusLabelValue")
   end
 
