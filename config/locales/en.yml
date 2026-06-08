@@ -42,6 +42,7 @@ en:
       deleted_status: Saved settings deleted.
       deleting_failed_status: Could not finish deleting the saved preset.
       operation_failed_status: Could not complete the table preference action.
+      reset_status: Table defaults restored.
       reset: Reset to table defaults
       reset_hint: Discard unsaved display changes and return to the table's default column settings, not the loaded preset.
       reset_visible_hint: Resetting returns to the table defaults and discards unsaved changes. It does not roll back to the loaded preset.
