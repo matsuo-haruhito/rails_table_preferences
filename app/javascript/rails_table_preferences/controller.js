@@ -498,8 +498,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   selectFilterOptionSearchHtml(options) {
     if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
 
-    const label = `${this.filterValueLabelValue}: ${this.selectFilterOptionSearchLabelValue}`
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(this.selectFilterOptionSearchPlaceholderValue)}">`
+    const searchLabel = this.selectFilterOptionSearchLabelValue || "候補を絞り込み"
+    const searchPlaceholder = this.selectFilterOptionSearchPlaceholderValue || "候補を絞り込み"
+    const label = `${this.filterValueLabelValue}: ${searchLabel}`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}">`
   }
 
   installSelectFilterOptionSearch(panel) {
