@@ -78,6 +78,7 @@ app/views/rails_table_preferences/_resource_table.html.erb
 app/views/rails_table_preferences/_tree_resource_table.html.erb
 app/views/rails_table_preferences/_tree_resource_table_row.html.erb
 config/routes.rb
+config/locales/en.yml
 config/locales/ja.yml
 lib/generators/rails_table_preferences/install/install_generator.rb
 lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb
@@ -148,7 +149,7 @@ docs/javascript_entrypoints.md
 docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entry guards the shipped Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entries guard the shipped English and Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
 ## Required path selection criteria
 
@@ -158,7 +159,7 @@ Use these criteria when adding or reviewing required paths:
 
 - Runtime entrypoints that host apps call directly, such as public helpers, controllers, adapters, registry files, resource table partials, rake tasks, and copied generator templates.
 - JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
-- Default locale files that shipped views and docs use as the I18n override baseline. `config/locales/ja.yml` is required for this reason; it is not a full `config/` inventory and does not freeze locale wording or key policy.
+- Default locale files that shipped views and docs use as the I18n override baseline. `config/locales/en.yml` and `config/locales/ja.yml` are required for this reason; they are not a full `config/` inventory and do not freeze locale wording or key policy.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
 - Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
@@ -193,7 +194,7 @@ The packaged `package.json` is resolver metadata for these gem-packaged JavaScri
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, rake tasks, changelog, default locale file, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, rake tasks, changelog, default locale files, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 

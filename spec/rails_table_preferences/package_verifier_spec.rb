@@ -35,6 +35,13 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       )
     end
 
+    it "guards default locale files used by bundled UI surfaces" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "config/locales/en.yml",
+        "config/locales/ja.yml"
+      )
+    end
+
     it "guards editor helper extensions that are documented package entrypoints" do
       expect(described_class::REQUIRED_PATHS).to include(
         "app/helpers/rails_table_preferences/table_preferences_editor_html_options_helper.rb",

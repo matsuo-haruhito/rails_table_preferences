@@ -25,6 +25,7 @@ module RailsTablePreferences
       "app/views/rails_table_preferences/_tree_resource_table.html.erb",
       "app/views/rails_table_preferences/_tree_resource_table_row.html.erb",
       "config/routes.rb",
+      "config/locales/en.yml",
       "config/locales/ja.yml",
       "lib/generators/rails_table_preferences/install/install_generator.rb",
       "lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb",
