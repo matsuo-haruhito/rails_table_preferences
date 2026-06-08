@@ -40,7 +40,7 @@ BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rspec
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rspec
 ```
 
-These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compatibility matrix. Newer host-app Rails releases, such as Rails 8.1, should be treated as additional verification work until a separate support-policy or CI-matrix decision adds them here.
+These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compatibility matrix. The Rails 7.0 command is the checklist's Ruby 3.1 lower-bound evidence because it runs the Rails lower-bound gemfile on the gemspec's minimum supported Ruby version. Newer host-app Rails releases, such as Rails 8.1, should be treated as additional verification work until a separate support-policy or CI-matrix decision adds them here.
 
 Confirm:
 
