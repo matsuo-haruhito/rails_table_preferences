@@ -36,7 +36,11 @@ module RailsTablePreferences
       if host_class.present?
         merged_class = class_names("rails-table-preferences-editor", host_class)
         unless html.sub!(/class="rails-table-preferences-editor"/, tag.attributes(class: merged_class).strip)
-          options[:class] = merged_class
+          if html.sub!(/\A(\s*<div\b[^>]*?)\sclass="([^"]*)"/) { "#{Regexp.last_match(1)} #{tag.attributes(class: class_names(Regexp.last_match(2), merged_class)).strip}" }
+            options.delete(:class)
+          else
+            options[:class] = merged_class
+          end
         end
       end
 
