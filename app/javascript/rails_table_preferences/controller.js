@@ -50,6 +50,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const key = row.dataset.railsTablePreferencesColumnKey
       const current = this.columnByKey(key) || {}
       return this.withColumnWidthMetadata({
+        ...current,
         key,
         visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
         order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? (index + 1) * 10,
