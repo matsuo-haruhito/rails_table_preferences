@@ -2,6 +2,8 @@
 
 Use this focused checklist when a host application mounts Rails Table Preferences on the same table root as one or more host-owned Stimulus controllers.
 
+This page is a companion checklist for [Table data attribute merge boundary](table_data_attributes.md), not a primary docs-index catalog entry. Keep it outside package verification required paths unless it is promoted from nearby checklist to packaged public entry point; `docs/table_data_attributes.md` is the required package entrance for this boundary.
+
 The goal is to confirm the attribute boundary, not to test the host controller implementation. Row selection, analytics, inline editing, bulk actions, and surrounding toolbar behavior remain host-app responsibilities.
 
 ## Setup surface

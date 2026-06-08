@@ -104,13 +104,17 @@ Placeholder values are escaped before they are written to the generated input at
 
 The bundled filter panel intentionally renders simple browser controls from neutral metadata. If a screen needs a date picker, autocomplete, Select2-style select, Rails Fields Kit helper, or another form-helper widget, keep that widget as host-app-owned HTML instead of treating the bundled filter panel as the widget dependency owner.
 
+Use the renderer registry path as the first slice when the host app can keep the table partial shape and only swap the concrete control for one filter family. In that path, Rails Table Preferences carries the column key, filter metadata, saved filter state, and adapter params; the registered renderer owns the HTML for that one widget family. Use a custom partial instead when the screen needs a different header layout, grouped controls, surrounding help text, or other markup that is bigger than a metadata-to-helper mapping.
+
 A useful split is:
 
 - Rails Table Preferences owns the column key, filter metadata, saved filter state, and adapter params.
 - A custom partial or renderer registry mapping owns the concrete widget HTML.
 - The host app or external helper owns widget initialization, validation display, remote option loading, accepted query params, and authorization.
 
-For a copyable renderer registry path, see [Resource table adapters](resource_tables.md#renderer-registries). The Rails Fields Kit example there shows how Rails Table Preferences can carry metadata while the host app registers the concrete `rfk_*` rendering behavior. Do not add a widget JavaScript package or form-helper gem dependency to Rails Table Preferences just to render one screen's richer filter input.
+For the first copyable renderer registry path, see the [Rails Fields Kit end-to-end example](resource_tables.md#rails-fields-kit-end-to-end-example). It shows Rails Table Preferences carrying metadata and saved state while the host app registers concrete `rfk_*` rendering behavior. Do not add a widget JavaScript package or form-helper gem dependency to Rails Table Preferences just to render one screen's richer filter input.
+
+This means richer filter widgets are current host-app integration guidance, not a promise that the bundled controller will gain autocomplete, async option loading, dependent selects, or third-party widget initialization. Keep remote endpoints, query execution, authorization, validation copy, retry UI, selected-option preload policy, and widget lifecycle policy in the host app or the helper library that renders the widget.
 
 ## Bundled default filter operators
 

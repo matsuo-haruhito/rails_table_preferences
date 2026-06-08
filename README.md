@@ -20,11 +20,13 @@ Focused documentation is available under [`docs/`](docs/index.md). Start with th
 - [Quick start](docs/quick_start.md): the shortest path from installation to a working table preference UI.
 - [日本語 quick start](docs/quick_start_ja.md): low-drift Japanese orientation for business-app integration; the English focused docs remain the detailed source of truth.
 - [Production integration checklist](docs/production_integration_checklist.md): move from a working demo or quick start to a real host-app index screen.
+- [Production troubleshooting notes](docs/production_troubleshooting.md): symptom-driven checks for real host-app screens where the demo or quick start works but save, reload, auth, CSRF, owner lookup, or stable table keys fail.
 - [Install path options](docs/install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](docs/support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Demo screen generator](docs/demo.md): copy a lightweight browser verification screen into a host app.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
+- [Select filter troubleshooting](docs/select_filter_troubleshooting.md): focused checks for `values_param`, scalar select options, and host-app query ownership when saved select filters do not affect results.
 
 Core topic guides are grouped in the [docs index](docs/index.md), including resource tables, scoped presets, fixed columns, filter metadata, filter adapters, controller integration, export integration, accessibility, JavaScript entrypoints, mounted JSON API, manual QA, release checks, and package verification.
 

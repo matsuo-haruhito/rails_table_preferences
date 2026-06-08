@@ -19,7 +19,7 @@ Pull requests run the default package and test job plus representative Rails com
 
 | CI job | Ruby | Rails / Gemfile | What it represents |
 | --- | --- | --- | --- |
-| RSpec, JavaScript syntax, gem build, and package verification | 3.3 | development `Gemfile` / Rails 8.0.x | Current repository development baseline, package build, package contents, and JavaScript package entrypoint smoke coverage |
+| RSpec, JavaScript syntax, gem build, and package verification | 3.3 | development `Gemfile` / Rails 8.0.x | Current repository development baseline, package build, package contents, JavaScript package entrypoint smoke coverage, and packaged declaration metadata checks |
 | PR Rails compatibility (7.0) | 3.1 | `gemfiles/rails_7_0.gemfile` | Lower-bound Rails 7.0 regression check |
 | PR Rails compatibility (7.1) | 3.2 | `gemfiles/rails_7_1.gemfile` | Representative Rails 7.1 regression check |
 | PR Rails compatibility (7.2) | 3.2 | `gemfiles/rails_7_2.gemfile` | Representative Rails 7.2 regression check |
@@ -31,9 +31,11 @@ This matrix is representative CI coverage for this repository. It is not a blank
 
 The default CI job sets up Node.js 20 and checks the copied Stimulus controller plus the package root and controller entrypoints with `node --check`. It then builds the gem and runs `bundle exec rake package:verify`, which verifies that the packaged `package.json` export targets point at files included in the built gem.
 
-RSpec also includes package-entrypoint smoke coverage for importing `rails_table_preferences` and `rails_table_preferences/controller` in a minimal Node sandbox. Together, those checks guard repository syntax, package metadata, export target presence, and representative package-entrypoint behavior.
+Current package metadata also exposes minimal TypeScript declaration targets for `rails_table_preferences` and `rails_table_preferences/controller`. Package verification checks that those `.d.ts` files ship in the gem, that `package.json` `types` / `exports.types` targets point at packaged files, and that declaration re-exports resolve to packaged declaration files.
 
-Host applications still own final bundler integration. Vite, custom jsbundling, TypeScript declarations, and any resolver alias for `rails_table_preferences` / `rails_table_preferences/controller` should be verified in the host app with [JavaScript entrypoints](javascript_entrypoints.md), [Package verification](package_verification.md), and the app's own frontend build.
+RSpec also includes package-entrypoint smoke coverage for importing `rails_table_preferences` and `rails_table_preferences/controller` in a minimal Node sandbox. Together, those checks guard repository syntax, package metadata, export target presence, declaration target presence, and representative package-entrypoint behavior.
+
+Host applications still own final bundler integration. Vite, custom jsbundling, resolver aliases for `rails_table_preferences` / `rails_table_preferences/controller`, and richer TypeScript declarations for host-app replacement controllers should be verified in the host app with [JavaScript entrypoints](javascript_entrypoints.md), [Package verification](package_verification.md), and the app's own frontend build.
 
 ## Evaluating newer host-app Rails releases
 
@@ -54,7 +56,7 @@ Host applications still own:
 - database query behavior and joins
 - CSV, Excel, and report file generation
 - custom ERB/CSS/JavaScript overrides
-- package-entrypoint resolver aliases, TypeScript declarations, and final frontend bundler compatibility
+- package-entrypoint resolver aliases, app-specific TypeScript declarations beyond the packaged minimal entrypoint declarations, and final frontend bundler compatibility
 - final browser and accessibility checks in application-specific layouts
 
 Use [Package verification](package_verification.md) and [Release checklist](release_checklist.md) before tagging or publishing a release.

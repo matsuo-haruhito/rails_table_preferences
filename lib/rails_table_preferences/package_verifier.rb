@@ -25,6 +25,7 @@ module RailsTablePreferences
       "app/views/rails_table_preferences/_tree_resource_table.html.erb",
       "app/views/rails_table_preferences/_tree_resource_table_row.html.erb",
       "config/routes.rb",
+      "config/locales/ja.yml",
       "lib/generators/rails_table_preferences/install/install_generator.rb",
       "lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb",
       "lib/generators/rails_table_preferences/install/templates/initializer.rb",
@@ -60,15 +61,19 @@ module RailsTablePreferences
       "docs/resource_table_cell_hooks.md",
       "docs/table_data_attributes.md",
       "docs/resource_table_formatter_contract.md",
+      "docs/virtual_columns_query_boundary.md",
       "docs/decision_guide.md",
       "docs/scoped_presets.md",
+      "docs/preset_selector_scope_labels.md",
       "docs/fixed_columns_and_groups.md",
       "docs/column_overflow.md",
       "docs/resize_auto_fit.md",
       "docs/export_integration.md",
       "docs/accessibility.md",
       "docs/editor_i18n.md",
+      "docs/editor_entrypoint_affordances.md",
       "docs/editor_root_options.md",
+      "docs/helper_free_controller_root_urls.md",
       "docs/non_goals.md",
       "docs/visual_overview.md",
       "docs/images/visual-overview-editor-and-table.svg",
@@ -94,10 +99,11 @@ module RailsTablePreferences
       [:missing, "required files"],
       [:missing_package_export_targets, "package export targets"],
       [:missing_package_internal_imports, "package internal JavaScript imports"],
+      [:missing_package_declaration_imports, "package internal declaration imports"],
       [:package_json_errors, "package metadata errors"]
     ].freeze
 
-    JAVASCRIPT_RELATIVE_IMPORT_PATTERN = /(?:^|\n)\s*(?:import\s+(?:[^"'\n]+?\s+from\s+)?|export\s+[^"'\n]+?\s+from\s+)["'](?<specifier>\.[^"']+)["']/.freeze
+    RELATIVE_IMPORT_PATTERN = /(?:^|\n)\s*(?:import\s+(?:[^"'\n]+?\s+from\s+)?|export\s+[^"'\n]+?\s+from\s+)["'](?<specifier>\.[^"']+)["']/.freeze
 
     attr_reader :gem_path, :required_paths
 
@@ -140,6 +146,8 @@ module RailsTablePreferences
         packaged_files.include?(export_target.fetch(:target))
       end
       missing_package_internal_imports = self.missing_package_internal_imports
+      missing_package_declaration_imports = self.missing_package_declaration_imports
+      package_json_errors = self.package_json_errors
 
       {
         gem_path: gem_path,
@@ -147,10 +155,12 @@ module RailsTablePreferences
         missing: missing,
         missing_package_export_targets: missing_package_export_targets,
         missing_package_internal_imports: missing_package_internal_imports,
+        missing_package_declaration_imports: missing_package_declaration_imports,
         package_json_errors: package_json_errors,
         ok: missing.empty? &&
           missing_package_export_targets.empty? &&
           missing_package_internal_imports.empty? &&
+          missing_package_declaration_imports.empty? &&
           package_json_errors.empty?
       }
     end
@@ -171,52 +181,81 @@ module RailsTablePreferences
     end
 
     def missing_package_internal_imports
-      @missing_package_internal_imports ||= package_export_targets.flat_map do |export_target|
-        entrypoint = export_target.fetch(:target)
-        next [] unless entrypoint.end_with?(".js") && packaged_files.include?(entrypoint)
+      @missing_package_internal_imports ||= missing_package_relative_imports(extension: ".js")
+    end
 
-        javascript_relative_imports_for(entrypoint).filter_map do |specifier|
-          resolved_target = resolve_javascript_relative_import(entrypoint, specifier)
+    def missing_package_declaration_imports
+      @missing_package_declaration_imports ||= missing_package_relative_imports(extension: ".d.ts")
+    end
+
+    def missing_package_relative_imports(extension:)
+      package_export_targets.flat_map do |export_target|
+        entrypoint = export_target.fetch(:target)
+        next [] unless entrypoint.end_with?(extension) && packaged_files.include?(entrypoint)
+
+        relative_imports_for(entrypoint).filter_map do |specifier|
+          resolved_target = resolve_relative_import(entrypoint, specifier, extension: extension)
           next if resolved_target
 
           {
             export: export_target.fetch(:export),
             entrypoint: entrypoint,
             import: specifier,
-            target: unresolved_javascript_relative_import_target(entrypoint, specifier)
+            target: unresolved_relative_import_target(entrypoint, specifier)
           }
         end
       end.sort_by { |missing_import| [missing_import.fetch(:entrypoint), missing_import.fetch(:import)] }
     end
 
-    def javascript_relative_imports_for(entrypoint)
-      packaged_file_contents(entrypoint).scan(JAVASCRIPT_RELATIVE_IMPORT_PATTERN).flatten.uniq.sort
+    def relative_imports_for(entrypoint)
+      packaged_file_contents(entrypoint).scan(RELATIVE_IMPORT_PATTERN).flatten.uniq.sort
     end
 
-    def resolve_javascript_relative_import(entrypoint, specifier)
-      candidate = unresolved_javascript_relative_import_target(entrypoint, specifier)
+    def resolve_relative_import(entrypoint, specifier, extension:)
+      candidate = unresolved_relative_import_target(entrypoint, specifier)
       candidates = [candidate]
       if File.extname(candidate).empty?
-        candidates << "#{candidate}.js"
-        candidates << File.join(candidate, "index.js")
+        candidates << "#{candidate}#{extension}"
+        candidates << File.join(candidate, "index#{extension}")
       end
 
       candidates.find { |path| packaged_files.include?(path) }
     end
 
-    def unresolved_javascript_relative_import_target(entrypoint, specifier)
+    def unresolved_relative_import_target(entrypoint, specifier)
       Pathname.new(File.dirname(entrypoint)).join(specifier).cleanpath.to_s
     end
 
     def package_json
       @package_json ||= JSON.parse(packaged_file_contents("package.json"))
     rescue JSON::ParserError => e
-      package_json_errors << "package.json could not be parsed: #{e.message}"
+      @package_json_parse_error = "package.json could not be parsed: #{e.message}"
       {}
     end
 
     def package_json_errors
-      @package_json_errors ||= []
+      @package_json_errors ||= begin
+        if packaged_files.include?("package.json")
+          metadata = package_json
+          errors = []
+          errors << @package_json_parse_error if @package_json_parse_error
+          errors.concat(package_metadata_errors(metadata)) unless @package_json_parse_error
+          errors
+        else
+          []
+        end
+      end
+    end
+
+    def package_metadata_errors(metadata)
+      errors = []
+      unless metadata["private"] == true
+        errors << "package.json private must remain true because the file is gem-packaged resolver metadata, not npm distribution policy"
+      end
+      unless metadata["version"] == "0.0.0"
+        errors << "package.json version must remain 0.0.0 because JavaScript package versioning is not a Ruby gem release policy"
+      end
+      errors
     end
 
     def export_targets_for(value, export_name = ".")

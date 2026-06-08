@@ -77,12 +77,13 @@ The current fixed/pinned column support is intentionally lightweight.
 The gem provides metadata, CSS hooks, and simple left-pinned behavior. The host application owns complex table layout polish, including:
 
 - right-pinned columns
+- `dir="rtl"` or right-to-left table offset policy
 - multiple scroll containers
 - grouped headers combined with sticky columns
 - design-system-specific shadows and backgrounds
 - advanced sticky offset policies
 
-These areas can be reconsidered if real applications show strong demand, but they should not be expanded prematurely.
+These areas can be reconsidered if real applications show strong demand, but they should not be expanded prematurely. In particular, an RTL host app should treat any logical-property migration, mirrored offset variable, or right-to-left browser evidence as host-owned unless a future issue explicitly changes the gem surface.
 
 ## Guiding principle
 

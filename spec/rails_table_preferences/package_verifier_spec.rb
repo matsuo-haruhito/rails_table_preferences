@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "rails_table_preferences/package_verifier"
+require "rexml/document"
 
 RSpec.describe RailsTablePreferences::PackageVerifier do
   describe "REQUIRED_PATHS" do
@@ -59,6 +60,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/accessibility.md",
         "docs/editor_i18n.md",
         "docs/editor_root_options.md",
+        "docs/helper_free_controller_root_urls.md",
         "docs/non_goals.md",
         "docs/visual_overview.md",
         "docs/images/visual-overview-editor-and-table.svg",
@@ -80,6 +82,24 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/javascript_controller.md"
       )
     end
+
+    it "guards visual overview SVG accessibility metadata" do
+      required_overview_svg_paths.each do |path|
+        document = REXML::Document.new(File.read(repository_root.join(path)))
+        svg = document.root
+        labelledby_ids = svg.attributes["aria-labelledby"].to_s.split
+        referenced_elements = labelledby_ids.map do |id|
+          REXML::XPath.first(svg, ".//*[@id='#{id}']")
+        end
+
+        expect(svg.name).to eq("svg")
+        expect(svg.attributes["role"]).to eq("img")
+        expect(labelledby_ids).to include("title", "desc")
+        expect(referenced_elements).to all(be_present)
+        expect(REXML::XPath.first(svg, "./title").text.to_s.strip).not_to be_empty
+        expect(REXML::XPath.first(svg, "./desc").text.to_s.strip).not_to be_empty
+      end
+    end
   end
 
   describe "#call" do
@@ -91,15 +111,23 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
             export { default } from "./controller"
             export { default as RailsTablePreferencesController } from "./controller"
           JS
-          "app/javascript/rails_table_preferences/controller.js" => <<~JS
+          "app/javascript/rails_table_preferences/controller.js" => <<~JS,
             import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
 
             export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {}
           JS
+          "app/javascript/rails_table_preferences/index.d.ts" => <<~TS,
+            export { default } from "./controller"
+            export { default as RailsTablePreferencesController } from "./controller"
+          TS
+          "app/javascript/rails_table_preferences/controller.d.ts" => <<~TS
+            export default class RailsTablePreferencesController {}
+          TS
         }
       )
 
       expect(result[:missing_package_internal_imports]).to eq([])
+      expect(result[:missing_package_declaration_imports]).to eq([])
       expect(result[:ok]).to be(true)
     end
 
@@ -108,11 +136,13 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         packaged_files: package_entrypoint_files - ["app/javascript/controllers/rails_table_preferences_controller.js"],
         javascript_files: {
           "app/javascript/rails_table_preferences/index.js" => "export { default } from \"./controller\"\n",
-          "app/javascript/rails_table_preferences/controller.js" => <<~JS
+          "app/javascript/rails_table_preferences/controller.js" => <<~JS,
             import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
 
             export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {}
           JS
+          "app/javascript/rails_table_preferences/index.d.ts" => "export { default } from \"./controller\"\n",
+          "app/javascript/rails_table_preferences/controller.d.ts" => "export default class RailsTablePreferencesController {}\n"
         }
       )
 
@@ -124,6 +154,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
           target: "app/javascript/controllers/rails_table_preferences_controller"
         }
       )
+      expect(result[:missing_package_declaration_imports]).to eq([])
       expect(result[:ok]).to be(false)
     end
   end
@@ -139,6 +170,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         missing_package_internal_imports: [
           { export: "./controller", entrypoint: "app/javascript/rails_table_preferences/controller.js", import: "../controllers/rails_table_preferences_controller", target: "app/javascript/controllers/rails_table_preferences_controller" }
         ],
+        missing_package_declaration_imports: [],
         package_json_errors: ["package.json could not be parsed"]
       }
 
@@ -149,6 +181,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
           missing: 2,
           missing_package_export_targets: 1,
           missing_package_internal_imports: 1,
+          missing_package_declaration_imports: 0,
           package_json_errors: 1
         }
       )
@@ -162,11 +195,12 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         missing_package_internal_imports: [
           { export: "./controller", entrypoint: "app/javascript/rails_table_preferences/controller.js", import: "../controllers/rails_table_preferences_controller", target: "app/javascript/controllers/rails_table_preferences_controller" }
         ],
+        missing_package_declaration_imports: [],
         package_json_errors: []
       }
 
       expect(described_class.summary_lines(result)).to eq([
-        "Package verification summary: 2 issue(s) (required files: 1, package export targets: 0, package internal JavaScript imports: 1, package metadata errors: 0)"
+        "Package verification summary: 2 issue(s) (required files: 1, package export targets: 0, package internal JavaScript imports: 1, package internal declaration imports: 0, package metadata errors: 0)"
       ])
     end
 
@@ -176,6 +210,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         missing: [],
         missing_package_export_targets: [],
         missing_package_internal_imports: [],
+        missing_package_declaration_imports: [],
         package_json_errors: []
       }
 
@@ -185,6 +220,10 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
   def repository_root
     Pathname.new(File.expand_path("../..", __dir__))
+  end
+
+  def required_overview_svg_paths
+    described_class::REQUIRED_PATHS.grep(%r{\Adocs/images/visual-overview-.*\.svg\z})
   end
 
   def package_entrypoint_files
@@ -205,6 +244,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     allow(verifier).to receive(:packaged_file_contents) do |path|
       if path == "package.json"
         JSON.generate(
+          "private" => true,
+          "version" => "0.0.0",
           "exports" => {
             "." => {
               "types" => "./app/javascript/rails_table_preferences/index.d.ts",
