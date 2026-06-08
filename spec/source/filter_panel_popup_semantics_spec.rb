@@ -16,7 +16,7 @@ RSpec.describe "filter panel popup semantics" do
 
   it "keeps the bundled filter panel as a non-modal floating region" do
     expect(controller_source).to include('button.setAttribute("aria-expanded", "false")')
-    expect(controller_source).to include('button.setAttribute("aria-controls", this.filterPanel.id)')
+    expect(controller_source).to include('button.setAttribute("aria-controls", panel.id)')
     expect(controller_source).to include('button.removeAttribute("aria-controls")')
     expect(controller_source).to include('panel.id = this.filterPanelId(column.key)')
 
