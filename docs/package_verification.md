@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, checks that declaration targets' relative import/export references resolve to packaged `.d.ts` files, and verifies that the packaged `package.json` remains private resolver metadata (`private: true`, `version: "0.0.0"`).
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, default locale, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, checks that declaration targets' relative import/export references resolve to packaged `.d.ts` files, and verifies that the packaged `package.json` remains private resolver metadata (`private: true`, `version: "0.0.0"`).
 
 A successful run prints a message like:
 
@@ -78,6 +78,7 @@ app/views/rails_table_preferences/_resource_table.html.erb
 app/views/rails_table_preferences/_tree_resource_table.html.erb
 app/views/rails_table_preferences/_tree_resource_table_row.html.erb
 config/routes.rb
+config/locales/ja.yml
 lib/generators/rails_table_preferences/install/install_generator.rb
 lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb
 lib/generators/rails_table_preferences/install/templates/initializer.rb
@@ -147,7 +148,7 @@ docs/javascript_entrypoints.md
 docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, and resource table files rather than a complete freeze of every file under `lib/`. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entry guards the shipped Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
 ## Required path selection criteria
 
@@ -157,6 +158,7 @@ Use these criteria when adding or reviewing required paths:
 
 - Runtime entrypoints that host apps call directly, such as public helpers, controllers, adapters, registry files, resource table partials, rake tasks, and copied generator templates.
 - JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
+- Default locale files that shipped views and docs use as the I18n override baseline. `config/locales/ja.yml` is required for this reason; it is not a full `config/` inventory and does not freeze locale wording or key policy.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
 - Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
@@ -164,7 +166,7 @@ Use these criteria when adding or reviewing required paths:
 
 Do not add every repository file just because it exists. In particular, avoid requiring all docs, all examples, temporary/generated intermediate files, test files, mockups, or future proposal notes unless they are promoted to a packaged public entry point. A docs page that is only linked from a nearby guide can stay outside `REQUIRED_PATHS` when the package remains usable without treating that page as a primary entrance. For a new docs guide, first decide whether README or `docs/index.md` should make it a primary package entrance; if not, leave the fixed list unchanged and document the narrower link from the nearby guide instead.
 
-When a new public helper, partial, package export, packaged declaration, README-linked guide, docs-index primary guide, or required visual asset is added, update `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`, the package verifier spec, and this guide together. If the choice is unclear, leave the fixed list unchanged and document the follow-up question in the relevant Issue or PR instead of broadening the guardrail by default.
+When a new public helper, partial, package export, packaged declaration, default locale file, README-linked guide, docs-index primary guide, or required visual asset is added, update `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`, the package verifier spec, and this guide together. If the choice is unclear, leave the fixed list unchanged and document the follow-up question in the relevant Issue or PR instead of broadening the guardrail by default.
 
 ## Package export targets
 
@@ -191,7 +193,7 @@ The packaged `package.json` is resolver metadata for these gem-packaged JavaScri
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, rake tasks, changelog, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, rake tasks, changelog, default locale file, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 
