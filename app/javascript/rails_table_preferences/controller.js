@@ -265,8 +265,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   setStatus(message, state = "idle") {
-    this.statusState = message ? state : "idle"
+    const nextState = message ? state : "idle"
+    this.statusState = nextState
+    this.syncStatusStateHook(nextState)
     super.setStatus(message)
+  }
+
+  syncStatusStateHook(state = this.statusState || "idle") {
+    const target = this.hasStatusTarget ? this.statusTarget : null
+    if (!target || typeof target.setAttribute !== "function") return
+    target.setAttribute("data-rails-table-preferences-status-state", state || "idle")
   }
 
   clearSuccessfulStatus() {
@@ -356,6 +364,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   handleOperationError(error, message = this.operationFailedStatusLabelValue) {
     super.handleOperationError(error, message)
     this.statusState = "error"
+    this.syncStatusStateHook("error")
     this.dispatchPreferenceEvent("error", {
       action: this.currentPreferenceAction || "operation",
       message: message || this.operationFailedStatusLabelValue
