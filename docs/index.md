@@ -25,6 +25,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, browser QA handoff, and copied-controller boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
 - [Editor root HTML options](editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
