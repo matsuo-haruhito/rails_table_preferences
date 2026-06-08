@@ -26,6 +26,7 @@ Focused documentation is available under [`docs/`](docs/index.md). Start with th
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Demo screen generator](docs/demo.md): copy a lightweight browser verification screen into a host app.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
+- [Select filter troubleshooting](docs/select_filter_troubleshooting.md): focused checks for `values_param`, scalar select options, and host-app query ownership when saved select filters do not affect results.
 
 Core topic guides are grouped in the [docs index](docs/index.md), including resource tables, scoped presets, fixed columns, filter metadata, filter adapters, controller integration, export integration, accessibility, JavaScript entrypoints, mounted JSON API, manual QA, release checks, and package verification.
 
@@ -204,7 +205,7 @@ Included in v0.1 scope:
 - Column width
 - Text truncation metadata
 - Fixed/pinned column metadata and CSS/JS hooks
-- Column group metadata and grouping helper
+- Column group metadata
 - Multiple presets and default presets
 - Ignored columns
 - Configurable column labels through explicit labels, explicit i18n keys, database column comments, and optional locale/humanize fallbacks
