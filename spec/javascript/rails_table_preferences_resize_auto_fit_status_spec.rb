@@ -35,6 +35,15 @@ RSpec.describe "rails_table_preferences resize auto-fit status feedback" do
     expect(resize_column_source).not_to include("resizeAutoFitStatusLabelValue")
   end
 
+  it "keeps current column metadata when editor width values are rebuilt" do
+    settings_from_editor_source = package_controller_source[/settingsFromEditor\(\) \{.*?\n  \}/m]
+
+    expect(settings_from_editor_source).to include("const current = this.columnByKey(key) || {}")
+    expect(settings_from_editor_source).to include("...current")
+    expect(settings_from_editor_source).to include("width: this.clampColumnWidth(key")
+    expect(settings_from_editor_source).to include("pinned: current.pinned === true")
+  end
+
   it "documents the package-entrypoint-only feedback boundary" do
     expect(entrypoint_docs).to include("Resize auto-fit feedback")
     expect(entrypoint_docs).to include("rails_table_preferences.editor.resize_auto_fit_status")
