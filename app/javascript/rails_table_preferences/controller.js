@@ -489,23 +489,23 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
-    return this.filterScalarValueHtml(filter, condition, selectedOperator)
-  }
+    if (["number", "date"].includes(this.filterInputType(filter))) {
+      if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
+      if (selectedOperator === "between") {
+        const inputType = this.filterInputType(filter)
+        const fromAttributes = this.filterInputAffordanceAttributes(filter, filter.from_placeholder)
+        const toAttributes = this.filterInputAffordanceAttributes(filter, filter.to_placeholder)
+        return `
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromAttributes}></label>
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toAttributes}></label>
+        `
+      }
 
-  filterScalarValueHtml(filter, condition, selectedOperator) {
-    if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
-    if (selectedOperator === "between") {
-      const inputType = this.filterInputType(filter)
-      const fromAttributes = this.filterInputAffordanceAttributes(filter, filter.from_placeholder)
-      const toAttributes = this.filterInputAffordanceAttributes(filter, filter.to_placeholder)
-      return `
-        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromAttributes}></label>
-        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toAttributes}></label>
-      `
+      const attributes = this.filterInputAffordanceAttributes(filter, filter.placeholder)
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
     }
 
-    const attributes = this.filterInputAffordanceAttributes(filter, filter.placeholder)
-    return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
+    return super.filterValueHtml(filter, condition, selectedOperator)
   }
 
   selectFilterOptionSearchHtml(options) {
