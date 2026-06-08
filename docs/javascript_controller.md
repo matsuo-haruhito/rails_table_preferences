@@ -61,7 +61,21 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
+TypeScript host apps can import the packaged lifecycle detail type and narrow the DOM event to a `CustomEvent` at the listener boundary:
+
+```ts
+import type { RailsTablePreferencesEventDetail } from "rails_table_preferences"
+
+document.addEventListener("rails-table-preferences:saved", (event) => {
+  const { tableKey, name, action, settings } = (event as CustomEvent<RailsTablePreferencesEventDetail>).detail
+
+  // Update host-app analytics, export previews, or surrounding UI here.
+})
+```
+
 Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `clear-filters-and-sorts`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+
+The `rails-table-preferences:error` `action` values are stable operation labels for package-entrypoint diagnostics and UI sync. Current values are `load-presets` for initial preset-list loading, `load` for selected preset loading, `save` for updating an editable preset, `create` for save-as-new or owner fallback creation, `delete` for editable preset deletion, and fallback `operation` when an error is reported outside a named preference operation. When a future package-entrypoint operation adds another public error action, update this list and the source-level lifecycle event specs with that action.
 
 Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
 
@@ -103,6 +117,7 @@ The default filter panel stays intentionally lightweight.
 - The select option search only filters rendered static options in the open panel. It does not change saved filter values, adapter params, query execution, remote option loading, or dependent select behavior, and selected options remain visible even when they do not match the current search text.
 - Screens that need autocomplete, async option loading, grouped option UX, virtualized selects, or host-specific authorization/scoping should keep that UI in a copied/custom controller or host-owned widget.
 - The bundled controller does not add a full popover library, focus trap, modal dialog abstraction, remote search endpoint, or richer select dependency.
+- For Tab / Shift+Tab leaving the panel, use [Filter panel keyboard boundary](filter_panel_keyboard_boundary.md) to decide whether normal browser focus movement is acceptable or the host app needs copied/replacement controller behavior.
 
 ## Table-only application rule
 
@@ -251,7 +266,7 @@ In practice that means:
 
 - filter/sort labels, filter operator labels, and scope fallback labels can be overridden per controller root through `data-rails-table-preferences-*-label-value` or `data-rails-table-preferences-filter-operator-labels-value`
 - bundled helper/status/reset wording is usually better changed through host-app locale entries
-- copied ERB is only needed when the host app wants different markup, helper-text placement, or a custom status surface
+- copied ERB is only needed when the host app wants different markup, helper-text placement, or status-region structure
 - copied or replacement JavaScript is still needed when the host app wants controller vocabulary or behavior that is not exposed as a root value, such as different busy-state logic
 
 For a route-by-route decision guide and locale example, see [Accessibility baseline](accessibility.md).
