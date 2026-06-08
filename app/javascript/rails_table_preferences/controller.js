@@ -67,6 +67,24 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return row
   }
 
+  showAllEditorColumns(event) {
+    this.setEditorColumnVisibility(event, true)
+  }
+
+  hideAllEditorColumns(event) {
+    this.setEditorColumnVisibility(event, false)
+  }
+
+  setEditorColumnVisibility(event, visible) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    this.editorRows.forEach((row) => {
+      const visibleInput = row.querySelector('[data-field="visible"]')
+      if (visibleInput) visibleInput.checked = visible === true
+    })
+    this.clearSuccessfulStatus()
+  }
+
   buildEditorMoveControls() {
     const controls = document.createElement("div")
     controls.className = "rails-table-preferences-editor__row-actions"
