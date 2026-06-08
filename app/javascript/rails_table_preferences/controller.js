@@ -12,6 +12,28 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" }
   }
 
+  buildDefaultSettings() {
+    const settings = super.buildDefaultSettings()
+    return {
+      ...settings,
+      columns: settings.columns.map((column) => {
+        const definition = this.columnDefinitionByKey(column.key)
+        return { ...column, draggable: definition?.draggable }
+      })
+    }
+  }
+
+  mergeSettings(defaultSettings, savedSettings) {
+    const settings = super.mergeSettings(defaultSettings, savedSettings)
+    return {
+      ...settings,
+      columns: settings.columns.map((column) => {
+        const definition = this.columnDefinitionByKey(column.key)
+        return { ...column, draggable: definition?.draggable }
+      })
+    }
+  }
+
   buildPresetOption(preset) {
     const option = super.buildPresetOption(preset)
     const name = preset.name || "default"
@@ -371,6 +393,39 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       settings: this.settingsValue,
       ...detail
     }
+  }
+
+  installTableColumnDragHandles() {
+    this.headerCells.forEach((cell) => {
+      if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") return
+      if (!this.tableColumnDraggable(cell)) {
+        cell.draggable = false
+        cell.dataset.railsTablePreferencesTableDragDisabled = "true"
+        return
+      }
+
+      cell.draggable = true
+      cell.dataset.railsTablePreferencesTableDragInstalled = "true"
+      cell.classList.add("rails-table-preferences-table-column-draggable")
+      cell.addEventListener("dragstart", this.startTableColumnDrag.bind(this))
+      cell.addEventListener("dragover", this.dragTableColumnOver.bind(this))
+      cell.addEventListener("drop", this.dropTableColumn.bind(this))
+      cell.addEventListener("dragend", this.endTableColumnDrag.bind(this))
+    })
+  }
+
+  startTableColumnDrag(event) {
+    if (!this.tableColumnDraggable(event.currentTarget)) {
+      event.preventDefault()
+      return
+    }
+
+    super.startTableColumnDrag(event)
+  }
+
+  tableColumnDraggable(cell) {
+    const key = cell?.dataset?.railsTablePreferencesColumnKey
+    return this.columnDefinitionByKey(key)?.draggable !== false
   }
 
   installSortControls() {
