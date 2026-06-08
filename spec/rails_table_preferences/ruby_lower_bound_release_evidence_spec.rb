@@ -28,5 +28,8 @@ RSpec.describe "Ruby lower-bound release evidence" do
     expect(release_checklist).to include(
       "These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compatibility matrix."
     )
+    expect(release_checklist).to include(
+      "The Rails 7.0 command is the checklist's Ruby 3.1 lower-bound evidence because it runs the Rails lower-bound gemfile on the gemspec's minimum supported Ruby version."
+    )
   end
 end
