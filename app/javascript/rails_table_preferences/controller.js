@@ -489,7 +489,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
-    if (["number", "date"].includes(this.filterInputType(filter))) {
+    if (["text", "number", "date"].includes(this.filterInputType(filter))) {
       if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
       if (selectedOperator === "between") {
         const inputType = this.filterInputType(filter)
