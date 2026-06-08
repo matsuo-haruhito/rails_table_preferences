@@ -120,7 +120,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   withColumnWidthMetadata(column) {
-    const definition = this.columnsValue.find((candidate) => candidate.key === column.key) || {}
+    const definition = this.columnDefinitions.find((candidate) => candidate.key === column.key) || {}
     const minWidth = this.positiveIntegerValue(definition.min_width)
     const maxWidth = this.positiveIntegerValue(definition.max_width)
     const attributes = { ...column }
@@ -135,11 +135,15 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   columnWidthBounds(key, fallbacks = {}) {
-    const definition = this.columnsValue.find((column) => column.key === key) || {}
+    const definition = this.columnDefinitions.find((column) => column.key === key) || {}
     return {
       min: this.positiveIntegerValue(definition.min_width) ?? this.positiveIntegerValue(fallbacks.min),
       max: this.positiveIntegerValue(definition.max_width) ?? this.positiveIntegerValue(fallbacks.max)
     }
+  }
+
+  get columnDefinitions() {
+    return Array.isArray(this.columnsValue) ? this.columnsValue : []
   }
 
   clampColumnWidth(key, width, fallbacks = {}) {
