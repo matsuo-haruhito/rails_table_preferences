@@ -6,6 +6,7 @@ This directory contains focused documentation for Rails Table Preferences.
 
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Production integration checklist](production_integration_checklist.md): the short path from a working demo or quick start to a real host-app index screen.
+- [Production troubleshooting notes](production_troubleshooting.md): symptom-driven checks for CSRF 422s, auth redirects, owner lookup failures, unstable `table_key` values, duplicate preset names, and saved presets that do not return on real host-app screens.
 - [日本語 quick start](quick_start_ja.md): a low-drift Japanese entrypoint for the main installation, editor, preset, filter/sort, export, and QA workflows.
 - [Install path options](install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
@@ -17,11 +18,14 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Virtual column query boundary](virtual_columns_query_boundary.md): practical virtual/computed column examples that keep joins, preloading, filtering, and sorting in host-app code.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal operating patterns.
+- [Preset selector scope labels](preset_selector_scope_labels.md): package entrypoint and copied/base controller scope-label display boundaries for owner and non-owner presets.
+- [Preset name save boundary](preset_name_save_boundary.md): selector, preset name input, save, and save-as-new wording boundaries so host-app copy does not imply an in-place rename API.
 - [Fixed columns and column groups](fixed_columns_and_groups.md): `fixed:` / `pinned:` columns, sticky CSS hooks, horizontal scroll-container baseline, and `group:` metadata.
 - [Column overflow metadata](column_overflow.md): canonical `overflow:` / `default_overflow:` values, compatibility aliases, the boundary with `default_truncate:`, and why overflow mode is host-owned rather than edited in the bundled editor.
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, browser QA handoff, and copied-controller boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
 - [Editor root HTML options](editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
@@ -29,10 +33,12 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Demo screen generator](demo.md): `--with-demo` and `--with-demo-route` generator options for copying a lightweight browser verification screen into a host app.
 - [Sandbox Rails app verification](sandbox.md): minimal Rails app setup for end-to-end verification before real app integration.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
+- [Helper-free controller root URLs](helper_free_controller_root_urls.md): collection/member URL ownership when an existing table partial mounts `data-controller="rails-table-preferences"` manually.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, legacy import, and customization issues.
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar select options, and host-app query ownership when select filters do not affect results.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
+- [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md): focused evidence guidance for old `page` params when saved filter/sort hidden fields roundtrip through existing search forms.
 - [Release checklist](release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
 - [Package verification](package_verification.md): build and inspect the gem package before tagging or publishing a release.
 - [Mounted JSON API](json_api.md): owner preset endpoints, request/response payloads, and the boundary with non-owner scoped preset administration.
@@ -70,14 +76,15 @@ This directory contains focused documentation for Rails Table Preferences.
 18. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
 19. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
 20. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-21. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-22. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-23. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-24. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-25. Verify the feature in a sandbox Rails app.
-26. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-27. Run the manual QA checklist before asking real users to try the feature.
-28. Before release, run the release checklist and package verification guide.
+21. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
+22. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+23. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+24. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+25. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+26. Verify the feature in a sandbox Rails app.
+27. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+28. Run the manual QA checklist before asking real users to try the feature.
+29. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 

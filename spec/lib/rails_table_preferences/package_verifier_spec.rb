@@ -22,12 +22,14 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(result[:missing]).to eq(%w[CHANGELOG.md docs/index.md])
     end
 
-    it "reports success when package exports point to packaged JavaScript entrypoints" do
+    it "reports success when package exports point to packaged JavaScript and declaration entrypoints" do
       verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
       allow(verifier).to receive(:packaged_files).and_return(
         %w[
           app/javascript/controllers/rails_table_preferences_controller.js
+          app/javascript/rails_table_preferences/controller.d.ts
           app/javascript/rails_table_preferences/controller.js
+          app/javascript/rails_table_preferences/index.d.ts
           app/javascript/rails_table_preferences/index.js
           package.json
         ]
@@ -39,6 +41,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(result[:ok]).to eq(true)
       expect(result[:missing_package_export_targets]).to eq([])
       expect(result[:missing_package_internal_imports]).to eq([])
+      expect(result[:missing_package_declaration_imports]).to eq([])
       expect(result[:package_json_errors]).to eq([])
     end
 
@@ -56,11 +59,37 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
       expect(result[:ok]).to eq(false)
       expect(result[:missing]).to eq([])
-      expect(result[:missing_package_export_targets]).to eq(
+      expect(result[:missing_package_export_targets]).to include(
+        {
+          export: "./controller",
+          target: "app/javascript/rails_table_preferences/controller.js"
+        }
+      )
+    end
+
+    it "reports declaration re-export targets that are missing from the built gem" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
+      allow(verifier).to receive(:packaged_files).and_return(
+        %w[
+          app/javascript/controllers/rails_table_preferences_controller.js
+          app/javascript/rails_table_preferences/controller.js
+          app/javascript/rails_table_preferences/index.d.ts
+          app/javascript/rails_table_preferences/index.js
+          package.json
+        ]
+      )
+      stub_packaged_file_contents(verifier)
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(false)
+      expect(result[:missing_package_declaration_imports]).to eq(
         [
           {
-            export: "./controller",
-            target: "app/javascript/rails_table_preferences/controller.js"
+            export: ".",
+            entrypoint: "app/javascript/rails_table_preferences/index.d.ts",
+            import: "./controller",
+            target: "app/javascript/rails_table_preferences/controller"
           }
         ]
       )
@@ -76,6 +105,42 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(result[:ok]).to eq(false)
       expect(result[:package_json_errors].join).to include("package.json could not be parsed")
     end
+
+    it "reports package metadata when resolver boundaries drift" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[package.json])
+      allow(verifier).to receive(:packaged_files).and_return(%w[package.json])
+      allow(verifier).to receive(:packaged_file_contents).with("package.json").and_return(
+        {
+          "private" => false,
+          "version" => "1.2.3",
+          "exports" => {}
+        }.to_json
+      )
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(false)
+      expect(result[:package_json_errors]).to include(
+        a_string_including("private must remain true"),
+        a_string_including("version must remain 0.0.0")
+      )
+    end
+  end
+
+  describe ".summary" do
+    it "counts missing declaration imports separately from JavaScript imports" do
+      summary = described_class.summary(
+        ok: false,
+        missing: [],
+        missing_package_export_targets: [],
+        missing_package_internal_imports: [],
+        missing_package_declaration_imports: ["app/javascript/rails_table_preferences/controller.d.ts"],
+        package_json_errors: []
+      )
+
+      expect(summary).to include(ok: false, total: 1)
+      expect(summary.fetch(:counts)).to include(missing_package_declaration_imports: 1)
+    end
   end
 
   describe "required packaged docs" do
@@ -89,13 +154,18 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         docs/resource_table_cell_hooks.md
         docs/table_data_attributes.md
         docs/resource_table_formatter_contract.md
+        docs/virtual_columns_query_boundary.md
         docs/decision_guide.md
         docs/scoped_presets.md
+        docs/preset_selector_scope_labels.md
         docs/fixed_columns_and_groups.md
         docs/column_overflow.md
         docs/resize_auto_fit.md
         docs/export_integration.md
         docs/accessibility.md
+        docs/editor_entrypoint_affordances.md
+        docs/editor_root_options.md
+        docs/helper_free_controller_root_urls.md
         docs/visual_overview.md
         docs/demo.md
         docs/sandbox.md
@@ -116,6 +186,12 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     end
   end
 
+  describe "required packaged locale files" do
+    it "keeps the default Japanese locale file in the package guard" do
+      expect(described_class::REQUIRED_PATHS).to include("config/locales/ja.yml")
+    end
+  end
+
   def stub_packaged_file_contents(verifier)
     allow(verifier).to receive(:packaged_file_contents) do |path|
       case path
@@ -125,6 +201,10 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "export { default } from \"./controller\"\n"
       when "app/javascript/rails_table_preferences/controller.js"
         "import RailsTablePreferencesBaseController from \"../controllers/rails_table_preferences_controller\"\n"
+      when "app/javascript/rails_table_preferences/index.d.ts"
+        "export { default, default as RailsTablePreferencesController } from \"./controller\"\n"
+      when "app/javascript/rails_table_preferences/controller.d.ts"
+        "export default class RailsTablePreferencesController {}\n"
       else
         raise KeyError, path
       end
@@ -136,8 +216,14 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       "private" => true,
       "version" => "0.0.0",
       "exports" => {
-        "." => "./app/javascript/rails_table_preferences/index.js",
-        "./controller" => "./app/javascript/rails_table_preferences/controller.js"
+        "." => {
+          "types" => "./app/javascript/rails_table_preferences/index.d.ts",
+          "default" => "./app/javascript/rails_table_preferences/index.js"
+        },
+        "./controller" => {
+          "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
+          "default" => "./app/javascript/rails_table_preferences/controller.js"
+        }
       }
     }.to_json
   end

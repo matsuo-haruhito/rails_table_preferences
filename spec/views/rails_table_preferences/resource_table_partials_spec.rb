@@ -51,6 +51,38 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).not_to include("render_editor")
   end
 
+  it "keeps flat resource table captions inside the table with forwarded table options" do
+    render partial: "rails_table_preferences/resource_table", locals: base_locals.merge(
+      caption: "Orders",
+      scroll_wrapper: true,
+      wrapper_options: {
+        class: "orders-scroll",
+        data: { qa: "orders-wrapper" }
+      },
+      options: {
+        render_editor: false,
+        id: "orders-table",
+        class: "orders-grid",
+        data: { turbo_frame: "orders-frame" },
+        aria: { describedby: "orders-help" }
+      }
+    )
+
+    table_open_tag = rendered[/<table[^>]*>/]
+    caption = "<caption>Orders</caption>"
+
+    expect(rendered).to include("rails-table-preferences-resource-table-scroll orders-scroll")
+    expect(rendered).to include("data-qa=\"orders-wrapper\"")
+    expect(table_open_tag).to include("id=\"orders-table\"")
+    expect(table_open_tag).to include("rails-table-preferences-resource-table orders-grid")
+    expect(table_open_tag).to include("data-turbo-frame=\"orders-frame\"")
+    expect(table_open_tag).to include("aria-describedby=\"orders-help\"")
+    expect(table_open_tag).not_to include("caption=\"Orders\"")
+    expect(rendered).to include(caption)
+    expect(rendered.index(caption)).to be > rendered.index("<table")
+    expect(rendered.index(caption)).to be < rendered.index("<thead>")
+  end
+
   it "renders only the tree resource table surface when render_editor is false" do
     stub_tree_view_for_partial
     view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
@@ -65,6 +97,21 @@ RSpec.describe "rails_table_preferences resource table partials", type: :view do
     expect(rendered).to include("rails-table-preferences-tree-resource-table")
     expect(rendered).to include("data-rails-table-preferences-table-key-value=\"users\"")
     expect(rendered).not_to include("render_editor")
+  end
+
+  it "renders tree resource table captions as semantic table captions" do
+    stub_tree_view_for_partial
+    view.define_singleton_method(:tree_view_rows) { |_render_state| "".html_safe }
+
+    render partial: "rails_table_preferences/tree_resource_table", locals: base_locals.merge(
+      caption: "Project hierarchy",
+      parent_id_method: :parent_id,
+      options: { render_editor: false }
+    )
+
+    expect(rendered).to include("<caption>Project hierarchy</caption>")
+    expect(rendered.index("<caption>Project hierarchy</caption>")).to be < rendered.index("<thead>")
+    expect(rendered).not_to include("caption=\"Project hierarchy\"")
   end
 
   it "renders a table-specific empty message for empty resource table records" do

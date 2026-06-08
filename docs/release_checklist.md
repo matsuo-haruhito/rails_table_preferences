@@ -40,7 +40,7 @@ BUNDLE_GEMFILE=gemfiles/rails_7_2.gemfile bundle exec rspec
 BUNDLE_GEMFILE=gemfiles/rails_8_0.gemfile bundle exec rspec
 ```
 
-These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compatibility matrix. Newer host-app Rails releases, such as Rails 8.1, should be treated as additional verification work until a separate support-policy or CI-matrix decision adds them here.
+These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compatibility matrix. The Rails 7.0 command is the checklist's Ruby 3.1 lower-bound evidence because it runs the Rails lower-bound gemfile on the gemspec's minimum supported Ruby version. Newer host-app Rails releases, such as Rails 8.1, should be treated as additional verification work until a separate support-policy or CI-matrix decision adds them here.
 
 Confirm:
 
@@ -51,7 +51,7 @@ Confirm:
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
 - [ ] No generated files are unexpectedly changed.
 
-## 3. CI checks
+## 3. CI and mergeability checks
 
 Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
@@ -59,6 +59,11 @@ Confirm GitHub Actions passes for both the release commit and the latest release
 - [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 compatibility jobs.
 - [ ] Any additional release-time matrix jobs pass in the workflow where they actually run; they are not part of the required PR matrix unless `.github/workflows/ci.yml` adds them.
+- [ ] The latest release-prep pull request is compared against current `main`, not only against the `main` commit recorded when the PR body was written.
+- [ ] The current `main...branch` compare is not behind or diverged, and GitHub reports the PR as mergeable before using the PR as release evidence.
+- [ ] CI evidence names the workflow run for the current head SHA. If combined status is empty, check the GitHub Actions workflow runs for that SHA instead of treating the PR as unchecked.
+
+A successful workflow run on an older PR head is useful history, but it is not enough for release or merge readiness after `main` has moved. Record both the current compare/mergeability state and the head workflow run when refreshing an older PR.
 
 ## 4. Gem package checks
 
@@ -131,6 +136,7 @@ For frontend integration, confirm:
 - [ ] `app/javascript/rails_table_preferences/controller.js` is packaged for `rails_table_preferences/controller` imports.
 - [ ] `app/javascript/rails_table_preferences/index.js` is packaged for package-root imports.
 - [ ] `package.json` is packaged and exposes `.` and `./controller` exports.
+- [ ] Treat Node.js 20 as the repository CI runtime for JavaScript syntax and package-entrypoint checks, not as a package consumer `engines` requirement; if that policy changes, update `package.json`, Support matrix, JavaScript entrypoints, and package verification together.
 - [ ] A Vite / `app/frontend/entrypoints/application.js` host app can register `rails_table_preferences/controller` as `rails-table-preferences`.
 - [ ] A default `stimulus-rails` host app still works with the copied controller.
 

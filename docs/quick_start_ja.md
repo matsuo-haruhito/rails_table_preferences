@@ -58,6 +58,13 @@ owner-specific preferences は gem が保存します。shared / role / organiza
 
 Rails Table Preferences が担当するのは table display preference と preset metadata です。誰が preset を作れるか、どの tenant / role に見せるか、業務上どの preset を標準にするかは host app の認可・運用設計に従います。
 
+scoped presets を最初に評価するときは、次の順番で小さく切り分けます。
+
+1. 個人設定だけで足りるか、全員向けの `shared` baseline が必要かを決めます。
+2. role / organization preset を使う場合、host app の `scope_context_method` が返す stable identifier と保存済み `scope_key` を同じ値にそろえます。
+3. shared / role / organization preset は通常の user-facing editor では read-only として扱われ、編集や配布の admin workflow は host app 側で保護します。
+4. demo では [Demo screen generator](demo.md) の role / organization lanes を使い、実画面では [Manual QA checklist](manual_qa.md#6-scoped-preset-behavior) で selector、default resolution、read-only hint、認可境界を確認します。
+
 ## 4. filter / sort は UI state として扱う
 
 `filter:` や `sortable: true` は、検索 UI state と params 連携のための metadata です。実際の database query、join、authorization-aware filtering は host app または search adapter が担当します。
@@ -76,6 +83,13 @@ Rails Table Preferences が担当するのは table display preference と prese
 CSV / Excel / report file の生成は Rails Table Preferences の責務ではありません。host app の export code から `rails_table_preference_export_payload` を使い、保存済みの column visibility、order、labels、metadata を再利用します。
 
 詳しくは [Export integration](export_integration.md) を確認してください。display/preference key と export value extraction key を分ける必要がある画面では、`export_key` metadata の扱いも同 guide を正本にします。
+
+初回導入では、export を table UI の保存設定と同じものとして扱いすぎないよう、次だけを日本語側で確認します。
+
+- Rails Table Preferences は export payload、headers、ordered column metadata を渡します。CSV / Excel / report file の生成、認可、value extractor / serializer、出力形式は host app 側で決めます。
+- 既存の search form と export form は、必要な params を分けて扱います。保存済み filter/sort hidden fields を使う場合も、どの query params を export action に渡すかは host app 側の責務です。
+- `column_keys` / `export_keys` / `export_key` の読み分けは [Export integration](export_integration.md) を正本にします。日本語 quick start では詳細コード例を複製しません。
+- 実画面へ移す前に [Production integration checklist](production_integration_checklist.md) と [Manual QA checklist](manual_qa.md) で、認可、検索条件、出力対象列、空結果、権限外データの扱いを確認します。
 
 ## 6. 本番導入 checklist / demo / sandbox / manual QA で確認する
 
@@ -101,6 +115,7 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 - filter や sort の UI は変わるが検索結果に反映されない: [Troubleshooting](troubleshooting.md#filter-or-sort-ui-changes-do-not-change-database-results)、[Controller integration](controller_integration.md)、[Filter adapters](filter_adapters.md) を確認します。Rails Table Preferences は UI state と adapter params を扱い、database query は host app 側が適用します。
 - 既存の検索フォームに保存済み filter/sort を渡したい、または hidden fields が期待どおり roundtrip しない: [Controller integration の hidden fields section](controller_integration.md#hidden-fields-for-existing-search-forms)、[Demo screen generator](demo.md)、[Manual QA checklist](manual_qa.md#13-existing-search-form-integration) を確認します。hidden field の描画、blank value omission、array params、host-app search execution を分けて見ます。
 - select filter が表示されるが値が効かない、複数選択の保存値が想定と違う: [Select filter troubleshooting](select_filter_troubleshooting.md) を確認します。一般的な filter/sort params ではなく、`values_param`、scalar `options:`、host-app query ownership を切り分けます。
+- export payload の列順や見出しは合っているが、CSV / Excel / report の値、認可、検索条件、出力形式が期待と違う: [Export integration](export_integration.md)、[Production integration checklist](production_integration_checklist.md)、[Manual QA checklist](manual_qa.md) を確認します。Rails Table Preferences は payload を渡し、file generation と value extraction は host app 側が所有します。
 - shared / role / organization preset が selector に出ない: [Troubleshooting](troubleshooting.md#scoped-preset-exists-but-does-not-appear-in-the-selector) と [Scoped presets](scoped_presets.md) を確認します。`scope_context_method` が返す runtime value と保存済み `scope_key` が同じ stable identifier かを見ます。
 - CSS、dense table layout、fixed / pinned columns、resize handles、accessibility state cues が崩れる: [Troubleshooting](troubleshooting.md)、[Resize and auto-fit guidance](resize_auto_fit.md)、[Fixed columns and column groups](fixed_columns_and_groups.md)、[Accessibility baseline](accessibility.md) を確認します。
 - どの helper や adapter を使うか迷う: [Decision guide](decision_guide.md) を確認します。

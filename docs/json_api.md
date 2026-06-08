@@ -27,6 +27,28 @@ DELETE /rails_table_preferences/preferences/:table_key/:name
 
 `:table_key` identifies the table surface, such as `orders` or `warehouse_stocks`. `:name` identifies the preset name. When a request omits `name` in the body, the controller falls back to `preference_name` and then to `default`.
 
+## URL source of truth
+
+The bundled helpers build the editor and table root JSON API URLs from `RailsTablePreferences.configuration.mount_path`. Keep that initializer value synchronized with the path used when mounting the engine in `config/routes.rb`.
+
+For example, a host app that mounts the engine at a tenant-scoped path should configure the same path:
+
+```ruby
+# config/routes.rb
+mount RailsTablePreferences::Engine, at: "/tenant/preferences_engine"
+```
+
+```ruby
+# config/initializers/rails_table_preferences.rb
+RailsTablePreferences.configure do |config|
+  config.mount_path = "/tenant/preferences_engine"
+end
+```
+
+With that configuration, `table_preferences_editor` and `table_preferences_table_tag` emit URLs such as `/tenant/preferences_engine/preferences/orders`. `table_key` and preset `name` are URL-encoded by the helper before they are written into the `collectionUrl` and `url` data values.
+
+Do not rely on route helper names as the public source of truth for these bundled JSON API URLs. If Save returns 404 after using a custom mount path, compare the rendered `data-rails-table-preferences-collection-url-value` / `data-rails-table-preferences-url-value` with the engine mount path first.
+
 ## List presets
 
 Request:

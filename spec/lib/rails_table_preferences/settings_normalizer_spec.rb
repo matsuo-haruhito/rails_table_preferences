@@ -54,5 +54,59 @@ RSpec.describe RailsTablePreferences::SettingsNormalizer do
         { "key" => "name", "visible" => true, "pinned" => false }
       )
     end
+
+    it "normalizes filter aliases while preserving false and zero values" do
+      settings = {
+        filters: {
+          active: { predicate: :eq, value: false },
+          score: { operator: "gteq", values: 0 },
+          created_on: { operator: "between", from: "2026-01-01", to: "2026-01-31" }
+        }
+      }
+
+      normalized = described_class.call(settings)
+
+      expect(normalized["filters"]).to eq(
+        "active" => { "operator" => "eq", "value" => false },
+        "score" => { "operator" => "gteq", "values" => [0] },
+        "created_on" => { "operator" => "between", "from" => "2026-01-01", "to" => "2026-01-31" }
+      )
+    end
+
+    it "keeps array filter values and drops empty value arrays" do
+      settings = {
+        filters: {
+          status: { operator: :in, values: %w[draft published] },
+          category: { operator: :in, values: [] }
+        }
+      }
+
+      normalized = described_class.call(settings)
+
+      expect(normalized["filters"]).to eq(
+        "status" => { "operator" => "in", "values" => %w[draft published] },
+        "category" => { "operator" => "in" }
+      )
+    end
+
+    it "normalizes sort aliases and drops unsupported directions" do
+      settings = {
+        sorts: [
+          { column: :published_at, dir: :DESC },
+          { key: :title, direction: "asc" },
+          { key: :ignored, direction: "sideways" },
+          { column: :missing_direction }
+        ]
+      }
+
+      normalized = described_class.call(settings)
+
+      expect(normalized["sorts"]).to eq(
+        [
+          { "key" => "published_at", "direction" => "desc" },
+          { "key" => "title", "direction" => "asc" }
+        ]
+      )
+    end
   end
 end
