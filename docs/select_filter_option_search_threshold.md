@@ -13,6 +13,12 @@ Host apps that use the package entrypoint controller can adjust only this displa
 </div>
 ```
 
+## Empty Results
+
+When the search input is visible and the query matches no unselected option, the package entrypoint shows a small no-results message next to the input. Selected options remain visible even if they do not match the query, so users can still see and clear the current selection.
+
+The message is a package default copy and does not change option rendering, submitted values, saved settings, or query execution.
+
 ## Boundary
 
 This value is package-entrypoint-only. It does not add filter metadata, change saved settings, change ControllerParams or Ransack adapter output, or affect query execution.
