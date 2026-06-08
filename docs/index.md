@@ -25,6 +25,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Active filter button cue](active_filter_button_cue.md): default active-filter visual cue, host-app styling boundary, and manual QA checks.
 - [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, browser QA handoff, and copied-controller boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
 - [Editor root HTML options](editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
@@ -78,13 +79,14 @@ This directory contains focused documentation for Rails Table Preferences.
 20. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
 21. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
 22. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-23. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-24. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-25. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-26. Verify the feature in a sandbox Rails app.
-27. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-28. Run the manual QA checklist before asking real users to try the feature.
-29. Before release, run the release checklist and package verification guide.
+23. Review [Active filter button cue](active_filter_button_cue.md) when validating the default active-filter visual affordance in a host-app theme.
+24. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+25. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+26. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+27. Verify the feature in a sandbox Rails app.
+28. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+29. Run the manual QA checklist before asking real users to try the feature.
+30. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
