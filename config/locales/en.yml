@@ -55,6 +55,7 @@ en:
       move_up: Move up
       move_down: Move down
       resize_column: Resize column
+      resize_auto_fit_status: Column width auto-fitted.
       filter: Filter
       filter_operator: Operator
       filter_operator_labels:

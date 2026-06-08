@@ -28,6 +28,20 @@ Use the row up/down buttons during browser QA:
 - confirm the numeric order inputs update after each move
 - confirm async preset actions still disable the generated editor controls while the request is busy
 
+## Resize auto-fit feedback
+
+The package entrypoint keeps resize auto-fit as a one-shot affordance. Double-clicking a resize handle and pressing Enter or Space on a focused resize handle both run the same `autoFitColumnFromHandle` path, then announce a short local result in the existing editor status region with `rails_table_preferences.editor.resize_auto_fit_status` copy.
+
+Use resize auto-fit during browser QA:
+
+- double-click a resize handle and confirm the column auto-fits and the status region announces the auto-fit result
+- focus a resize handle, press Enter, and confirm it uses the same status feedback
+- focus a resize handle, press Space, and confirm it uses the same status feedback
+- confirm drag resize still clears previous success feedback rather than implying that a manual width change has been saved
+- confirm async preset actions still guard resize handles while requests are busy
+
+This feedback is intentionally coarse. It only confirms that auto-fit ran; it does not distinguish clamp, unchanged width, min/max metadata, or step-based width editing. Full keyboard resizing remains outside the package entrypoint first slice.
+
 ## Existing checklist routing
 
 Use this note together with the existing checklist entries rather than as a replacement for them:
@@ -38,6 +52,8 @@ Use this note together with the existing checklist entries rather than as a repl
 - `docs/accessibility.md` covers the package-entrypoint-only column search and row move controls, including accessible labels, filtered-row preservation, first/last/hidden/busy disabled states, and narrow-width checks.
 
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
+
+`spec/javascript/rails_table_preferences_resize_auto_fit_status_spec.rb` guards the package entrypoint resize auto-fit feedback surface: the editor root exposes the localized status copy, auto-fit writes to the existing status region, pointer and keyboard auto-fit share the same path, and manual drag resize keeps clearing previous success feedback.
 
 When this package entrypoint is changed, record in the PR comment or sign-off note which of those checklist areas were actually run. If browser access is not available, say that explicitly and rely on behavior-level entrypoint specs plus source-level guards until a human or browser-capable environment can complete the visual check.
 

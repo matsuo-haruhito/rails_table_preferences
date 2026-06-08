@@ -8,7 +8,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
-    moveDownLabel: { type: String, default: "下へ移動" }
+    moveDownLabel: { type: String, default: "下へ移動" },
+    resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" }
   }
 
   buildPresetOption(preset) {
@@ -209,8 +210,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   autoFitColumnFromHandle(event) {
-    super.autoFitColumnFromHandle(event)
-    this.clearSuccessfulStatus()
+    const wasBusy = this.busy
+    const result = super.autoFitColumnFromHandle(event)
+    if (!wasBusy) this.setStatus(this.resizeAutoFitStatusLabelValue, "success")
+    return result
   }
 
   dragTableColumnOver(event) {
