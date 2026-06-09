@@ -178,18 +178,20 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
           { export: "./controller", entrypoint: "app/javascript/rails_table_preferences/controller.js", import: "../controllers/rails_table_preferences_controller", target: "app/javascript/controllers/rails_table_preferences_controller" }
         ],
         missing_package_declaration_imports: [],
-        package_json_errors: ["package.json could not be parsed"]
+        package_json_errors: ["package.json could not be parsed"],
+        gemspec_metadata_errors: ["gemspec metadata documentation_uri must point to docs/index.md"]
       }
 
       expect(described_class.summary(result)).to eq(
         ok: false,
-        total: 5,
+        total: 6,
         counts: {
           missing: 2,
           missing_package_export_targets: 1,
           missing_package_internal_imports: 1,
           missing_package_declaration_imports: 0,
-          package_json_errors: 1
+          package_json_errors: 1,
+          gemspec_metadata_errors: 1
         }
       )
     end
@@ -203,11 +205,12 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
           { export: "./controller", entrypoint: "app/javascript/rails_table_preferences/controller.js", import: "../controllers/rails_table_preferences_controller", target: "app/javascript/controllers/rails_table_preferences_controller" }
         ],
         missing_package_declaration_imports: [],
-        package_json_errors: []
+        package_json_errors: [],
+        gemspec_metadata_errors: []
       }
 
       expect(described_class.summary_lines(result)).to eq([
-        "Package verification summary: 2 issue(s) (required files: 1, package export targets: 0, package internal JavaScript imports: 1, package internal declaration imports: 0, package metadata errors: 0)"
+        "Package verification summary: 2 issue(s) (required files: 1, package export targets: 0, package internal JavaScript imports: 1, package internal declaration imports: 0, package metadata errors: 0, gemspec metadata errors: 0)"
       ])
     end
 
@@ -218,7 +221,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         missing_package_export_targets: [],
         missing_package_internal_imports: [],
         missing_package_declaration_imports: [],
-        package_json_errors: []
+        package_json_errors: [],
+        gemspec_metadata_errors: []
       }
 
       expect(described_class.summary_lines(result)).to eq(["Package verification summary: ok"])

@@ -6,11 +6,15 @@ RSpec.describe "rails_table_preferences select filter option search source" do
 
   it "keeps selected options visible while hiding only unmatched unselected options" do
     method_source = controller_source.match(
-      /  filterSelectOptionsBySearch\(input, select\) \{(?<body>[\s\S]*?)\n  \}\n\n  selectFilterOptionValue/
+      /  filterSelectOptionsBySearch\(input, select, emptyMessage = null\) \{(?<body>[\s\S]*?)\n  \}\n\n  selectFilterOptionValue/
     )&.[](:body)
 
     expect(method_source).to include("const query = String(input?.value || \"\").trim().toLocaleLowerCase()")
+    expect(method_source).to include("let matchingUnselectedOptions = 0")
     expect(method_source).to include("const searchableText = `${option.textContent || \"\"} ${option.value || \"\"}`.toLocaleLowerCase()")
-    expect(method_source).to include("option.hidden = Boolean(query) && !option.selected && !searchableText.includes(query)")
+    expect(method_source).to include("const matchesQuery = searchableText.includes(query)")
+    expect(method_source).to include("if (matchesQuery && !option.selected) matchingUnselectedOptions += 1")
+    expect(method_source).to include("option.hidden = Boolean(query) && !option.selected && !matchesQuery")
+    expect(method_source).to include("if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0")
   end
 end
