@@ -2,6 +2,12 @@
 
 Rails Table Preferences ships two JavaScript integration paths for the bundled Stimulus controller.
 
+## Source-of-truth role
+
+This guide is the reader-facing source of truth for the JavaScript public surface that host apps import or copy. Keep package-root imports, the `rails_table_preferences/controller` direct import, the copied `app/javascript/controllers/rails_table_preferences_controller.js` path, and the package-only controller boundary synchronized here before downstream apps use a new gem revision as evidence.
+
+Rails Table Preferences does not currently maintain a TreeView-style machine-readable public API manifest. The first guard family is this guide plus `package.json`, the JavaScript entrypoint smoke specs, and package verification. Consider a manifest only if helper option sets, lifecycle event details, or additional JavaScript exports grow beyond what this guide and the existing package checks can keep clear.
+
 ## Default stimulus-rails path
 
 The install generator copies the bundled controller into the host application:
