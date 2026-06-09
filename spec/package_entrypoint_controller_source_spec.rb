@@ -7,6 +7,10 @@ RSpec.describe "package entrypoint controller source" do
     File.expand_path("../app/javascript/rails_table_preferences/controller.js", __dir__)
   end
 
+  let(:base_controller_source_path) do
+    File.expand_path("../app/javascript/controllers/rails_table_preferences_controller.js", __dir__)
+  end
+
   let(:controller_declaration_path) do
     File.expand_path("../app/javascript/rails_table_preferences/controller.d.ts", __dir__)
   end
@@ -16,6 +20,7 @@ RSpec.describe "package entrypoint controller source" do
   end
 
   let(:controller_source) { File.read(controller_source_path) }
+  let(:base_controller_source) { File.read(base_controller_source_path) }
   let(:controller_declaration) { File.read(controller_declaration_path) }
   let(:index_declaration) { File.read(index_declaration_path) }
 
@@ -38,5 +43,21 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include('this.dispatchPreferenceEvent("applied", { action: "reset" })')
     expect(controller_declaration).to include('export type RailsTablePreferencesSuccessAction = "apply" | "reset" | "save" | "create" | "load" | "delete"')
     expect(index_declaration).to include("RailsTablePreferencesSuccessAction")
+  end
+
+  it "keeps editor search as a package entrypoint-only visibility filter" do
+    expect(controller_source).to include("this.ensureEditorSearchControl()")
+    expect(controller_source).to include("this.syncEditorSearchResults()")
+    expect(controller_source).to include("row.hidden = hidden")
+    expect(controller_source).to include("if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0")
+    expect(base_controller_source).not_to include("ensureEditorSearchControl")
+    expect(base_controller_source).not_to include("syncEditorSearchResults")
+  end
+
+  it "keeps hidden editor rows in apply/save settings while moves use visible rows" do
+    expect(base_controller_source).to include("const columns = this.editorRows.map((row, index) => {")
+    expect(controller_source).to include("const visibleRows = this.editorRows.filter((row) => !row.hidden)")
+    expect(controller_source).to include("return visibleRows.length > 0 ? visibleRows : this.editorRows")
+    expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : rows.length - 1)")
   end
 end
