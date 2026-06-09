@@ -168,7 +168,7 @@ RSpec.describe "rails_table_preferences package dirty-state behavior" do
           return { ok: true, status: 204 }
         }
 
-        controller.element = { appendChild(element) { dirtyStateElement = element } }
+        controller.element = { appendChild(element) { dirtyStateElement = element }, querySelector() { return null } }
         controller.defaultSettings = { columns: [{ key: "name", visible: true, order: 10 }], filters: {}, sorts: [] }
         controller.settingsValue = JSON.parse(JSON.stringify(currentSettings))
         controller.dirtyStateLabelValue = "Unsaved changes"
