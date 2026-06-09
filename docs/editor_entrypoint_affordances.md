@@ -8,10 +8,13 @@ The package entrypoint adds a lightweight column search field before the generat
 
 Search is an editor navigation affordance, not a column visibility filter. A no-results search only means every editor row is temporarily hidden in the editor surface; applying, saving, or saving as new should still assemble settings from all editor rows. Clear the search before reviewing the visible row list, but do not treat the no-results state as a request to save a zero-column table.
 
+The Show all columns and Hide all columns bulk actions keep their all-row scope while a search is active. They toggle every editor row's visibility checkbox, including rows temporarily hidden by the search, and do not create a search-results-only visibility mode.
+
 Use the bundled column search field when checking a table with many columns:
 
 - search by a visible column label and confirm only matching rows remain visible
 - search by a column key or group word when labels are similar
+- use Show all columns or Hide all columns while search is active and confirm hidden search rows are included in the bulk checkbox change
 - clear the search and confirm every editor row returns
 - apply or save while a search is active and confirm columns hidden by the search are not removed from the saved settings
 - apply or save while the search has no results and confirm the saved settings still keep the full column set after clearing the search or reloading the preset
