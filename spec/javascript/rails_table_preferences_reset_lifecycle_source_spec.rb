@@ -12,6 +12,6 @@ RSpec.describe "rails_table_preferences reset lifecycle event source" do
     expect(source).to include("const wasBusy = this.busy")
     expect(source).to include("const result = super.resetEditor(event)")
     expect(source).to include('this.dispatchPreferenceEvent("applied", { action: "reset" })')
-    expect(source).to match(/if \(!wasBusy\) \{\n\s+this\.clearSuccessfulStatus\(\)\n\s+this\.dispatchPreferenceEvent\("applied", \{ action: "reset" \}\)\n\s+\}/)
+    expect(source).to match(/if \(!wasBusy\) \{\n\s+this\.setStatus\(this\.resetStatusLabelValue, "success"\)\n\s+this\.syncResetButtonState\(\)\n\s+this\.dispatchPreferenceEvent\("applied", \{ action: "reset" \}\)\n\s+\}/)
   end
 end
