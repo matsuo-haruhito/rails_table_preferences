@@ -35,8 +35,9 @@ RSpec.describe "package entrypoint controller source" do
   end
 
   it "keeps visibility bulk actions scoped to all editor rows" do
-    bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.fetch(:body)
+    bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.[](:body)
 
+    expect(bulk_visibility_body).not_to be_nil
     expect(bulk_visibility_body).to include("this.editorRows.forEach((row) => {")
     expect(bulk_visibility_body).not_to include("this.editorRowsForMovement")
     expect(bulk_visibility_body).not_to include("!row.hidden")
