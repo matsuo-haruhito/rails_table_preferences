@@ -8,6 +8,8 @@ This note is a focused PR-evidence aid, not a package verification required doc.
 
 This smoke is limited to editor row label wrapping at narrow widths. It does not cover action grouping, filter panel reachability, drag-and-drop behavior, table header resize, or preset action UX.
 
+For action grouping, primary/save/maintenance separation, and long action labels near the editor buttons, use the focused [editor action group narrow smoke](editor_action_group_narrow_smoke.md) note instead of treating it as covered here.
+
 ## Representative labels
 
 Check at least one long Japanese label and one long unbroken label so both normal wrapping and overflow pressure are visible.
