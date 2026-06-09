@@ -4,6 +4,20 @@ This directory contains focused documentation for Rails Table Preferences.
 
 ## Start here
 
+### Choose your first path
+
+Use this short map before the full catalog when you are opening the docs for the first time.
+
+- New install or smallest working UI: start with [Quick start](quick_start.md), then use [Install path options](install_paths.md) if the host app uses Vite, skipped copied assets, or demo generator options.
+- Japanese business-app orientation: start with [日本語 quick start](quick_start_ja.md), then follow its links to the English source-of-truth guides for detailed steps.
+- Browser preview before a real host-app screen: generate the [Demo screen](demo.md), then use [Sandbox Rails app verification](sandbox.md) if you want a clean end-to-end install check.
+- Convention-first Active Record table: start with [Resource table adapters](resource_tables.md), then move to the [Production integration checklist](production_integration_checklist.md) for real index-screen owner, route, query, layout, and export checks.
+- Existing custom or hand-written table: use [Quick start](quick_start.md) for the minimum editor/table wiring and [Decision guide](decision_guide.md) when choosing helpers, hidden fields, controller params, exports, or customization paths.
+- Real host-app screen already wired but failing: use [Production troubleshooting notes](production_troubleshooting.md) before changing implementation, especially for auth redirects, CSRF, owner lookup, stable `table_key`, or preset persistence issues.
+- Release or package-readiness review: use [Release checklist](release_checklist.md), [Package verification](package_verification.md), and [Manual QA checklist](manual_qa.md) after the integration path is working.
+
+## Full catalog
+
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Production integration checklist](production_integration_checklist.md): the short path from a working demo or quick start to a real host-app index screen.
 - [Production troubleshooting notes](production_troubleshooting.md): symptom-driven checks for CSRF 422s, auth redirects, owner lookup failures, unstable `table_key` values, duplicate preset names, and saved presets that do not return on real host-app screens.
