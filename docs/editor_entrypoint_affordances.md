@@ -23,8 +23,6 @@ Use the bundled column search field when checking a table with many columns:
 
 The package entrypoint also adds small up/down buttons beside each editor row. These buttons are a visible alternative to dragging rows and a quicker path than editing numeric order values by hand.
 
-The package entrypoint row drag handle is only a visual affordance; keyboard reorder evidence should use the row up/down buttons or the numeric order input. See [Editor reorder accessibility note](editor_reorder_accessibility.md) for the visual-only handle, keyboard-control, and copied-controller boundary.
-
 The copied/base controller does not render these row move buttons. In that path, the keyboard-friendly reorder fallback remains the numeric order input plus the bundled `適用` action. Keep this distinction visible when choosing an install path: package entrypoint screens can verify row up/down controls, while copied-controller screens should verify the order input fallback instead.
 
 Use the row up/down buttons during browser QA:
@@ -49,6 +47,17 @@ Use resize auto-fit during browser QA:
 
 This feedback is intentionally coarse. It only confirms that auto-fit ran; it does not distinguish clamp, unchanged width, min/max metadata, or step-based width editing. Full keyboard resizing remains outside the package entrypoint first slice.
 
+## Reset affordance
+
+The package entrypoint keeps the bundled reset action tied to the existing editor status region. When the current editor draft already matches the table default settings, the reset button is disabled so the control does not look like a meaningful no-op. After a successful local reset, the status region announces the reset result with `rails_table_preferences.editor.reset_status` copy.
+
+Use the reset action during browser QA:
+
+- open an editor in its default state and confirm the reset button is disabled
+- change visibility, order, width, truncate, filter, or sort state and confirm reset becomes available
+- reset the editor and confirm the table returns to default settings, the reset button disables again, and the status region announces the reset result
+- confirm the existing visible reset helper still explains that unsaved editor changes are discarded and defaults are restored
+
 ## Existing checklist routing
 
 Use this note together with the existing checklist entries rather than as a replacement for them:
@@ -57,11 +66,12 @@ Use this note together with the existing checklist entries rather than as a repl
 - `docs/manual_qa.md` section 16 already covers accessibility baseline checks for focus order, async busy disabling, numeric order fallback, touch/narrow viewport fallback, and keyboard-only reordering.
 - `docs/manual_qa.md` section 18 already covers browser and layout checks for narrow widths, editor input overlap, and reachable column controls.
 - `docs/accessibility.md` covers the package-entrypoint-only column search and row move controls, including accessible labels, filtered-row preservation, first/last/hidden/busy disabled states, and narrow-width checks.
-- `docs/editor_reorder_accessibility.md` keeps the package-entrypoint visual-only drag handle boundary separate from keyboard-reachable row move buttons and copied-controller choices.
 
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
 
 `spec/javascript/rails_table_preferences_resize_auto_fit_status_spec.rb` guards the package entrypoint resize auto-fit feedback surface: the editor root exposes the localized status copy, auto-fit writes to the existing status region, pointer and keyboard auto-fit share the same path, and manual drag resize keeps clearing previous success feedback.
+
+`spec/javascript/rails_table_preferences_reset_feedback_spec.rb` guards the package entrypoint reset feedback surface: the editor root exposes reset result copy, reset completion uses the bundled status region, and the reset affordance is synchronized with the current default-state draft.
 
 When this package entrypoint is changed, record in the PR comment or sign-off note which of those checklist areas were actually run. If browser access is not available, say that explicitly and rely on behavior-level entrypoint specs plus source-level guards until a human or browser-capable environment can complete the visual check.
 
