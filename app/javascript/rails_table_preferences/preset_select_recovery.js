@@ -1,4 +1,4 @@
-import RailsTablePreferencesController from "./controller"
+import RailsTablePreferencesController from "./controller.js"
 
 export default class RailsTablePreferencesPresetSelectRecoveryController extends RailsTablePreferencesController {
   async selectPreset(event) {
