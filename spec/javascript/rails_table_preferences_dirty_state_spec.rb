@@ -137,6 +137,101 @@ RSpec.describe "rails_table_preferences package dirty-state behavior" do
     end
   end
 
+  it "clears the dirty-state helper after successful save, save as new, preset load, and read-only save fallback" do
+    build_entrypoint_sandbox do |tmpdir|
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+
+      script = <<~JS
+        import { pathToFileURL } from "node:url"
+
+        const controllerUrl = pathToFileURL(process.argv[1]).href
+        const { default: ControllerClass } = await import(controllerUrl)
+        const operations = [
+          {
+            name: "save",
+            expectedAction: "save",
+            configure(controller) { controller.currentPreferenceEditable = true },
+            run(controller) { return controller.save({ preventDefault() {} }) }
+          },
+          {
+            name: "save as new",
+            expectedAction: "create",
+            configure(controller) { controller.currentPreferenceEditable = true },
+            run(controller) { return controller.createPresetFromEditor({ preventDefault() {} }) }
+          },
+          {
+            name: "preset load",
+            expectedAction: "load",
+            configure(controller) { controller.currentPreferenceEditable = true },
+            run(controller) { return controller.selectPreset({ preventDefault() {} }) }
+          },
+          {
+            name: "read-only save fallback",
+            expectedAction: "create",
+            configure(controller) { controller.currentPreferenceEditable = false },
+            run(controller) { return controller.save({ preventDefault() {} }) }
+          }
+        ]
+
+        globalThis.document = {
+          createElement() {
+            return {
+              className: "",
+              dataset: {},
+              attributes: {},
+              hidden: false,
+              textContent: "",
+              setAttribute(name, value) { this.attributes[name] = value }
+            }
+          }
+        }
+
+        for (const operation of operations) {
+          const controller = new ControllerClass()
+          let dirtyStateElement = null
+          let currentSettings = { columns: [{ key: "name", visible: true, order: 10 }], filters: {}, sorts: [] }
+          let observedAction = null
+
+          controller.element = { appendChild(element) { dirtyStateElement = element }, querySelector() { return null } }
+          controller.dirtyStateLabelValue = "Unsaved changes"
+          controller.statusState = "idle"
+          controller.nameValue = "custom"
+          controller.urlValue = "/preferences/custom"
+          operation.configure(controller)
+
+          Object.defineProperty(controller, "hasDirtyStateTarget", { get() { return dirtyStateElement !== null } })
+          Object.defineProperty(controller, "dirtyStateTarget", { get() { return dirtyStateElement } })
+          Object.defineProperty(controller, "hasStatusTarget", { get() { return false } })
+          Object.defineProperty(controller, "hasEditorRowsTarget", { get() { return true } })
+          Object.defineProperty(controller, "editorRowsTarget", { get() { return { addEventListener() {}, removeEventListener() {}, querySelectorAll() { return [] } } } })
+
+          controller.settingsFromEditor = () => JSON.parse(JSON.stringify(currentSettings))
+          controller.withPreferenceAction = async (action) => {
+            observedAction = action
+            controller.statusState = "success"
+            return { ok: true }
+          }
+          controller.clearEditorSearchQuery = () => {}
+          controller.dispatchPreferenceEvent = () => {}
+
+          controller.installDirtyStateTracking()
+          controller.markEditorClean()
+          currentSettings = { columns: [{ key: "name", visible: false, order: 10 }], filters: {}, sorts: [] }
+          controller.updateDirtyStateFromEditor()
+
+          if (controller.dirtyStateTarget.hidden) throw new Error(`${operation.name}: dirty-state helper should be visible before the action`)
+
+          await operation.run(controller)
+
+          if (observedAction !== operation.expectedAction) throw new Error(`${operation.name}: expected ${operation.expectedAction} action, saw ${observedAction}`)
+          if (!controller.dirtyStateTarget.hidden || controller.dirtyStateTarget.textContent !== "") throw new Error(`${operation.name}: dirty-state helper should clear after success`)
+        }
+      JS
+
+      run_node_entrypoint_check(controller_entrypoint_path, script:)
+    end
+  end
+
   it "clears the dirty-state helper after a successful preset delete" do
     build_entrypoint_sandbox do |tmpdir|
       controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
