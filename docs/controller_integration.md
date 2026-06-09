@@ -88,6 +88,10 @@ class WarehouseStocksController < ApplicationController
 end
 ```
 
+Because this example uses `params.to_unsafe_h.merge(preference_params)`, saved preference values win when they use the same keys as user-entered request params. That is usually what a saved preset apply flow wants: the selected preset becomes the effective filter/sort state for the list action.
+
+If the host app has a search form where the current request input must win over saved preference values, keep that policy in the host app by changing the merge order or by omitting the conflicting saved keys before calling the search layer. Rails Table Preferences converts saved filter/sort state into params; it does not decide which source should win for every screen.
+
 Example output from `rails_table_preference_params`:
 
 ```ruby
@@ -140,6 +144,8 @@ This renders ordinary hidden fields:
 
 Saved boolean values are preserved as values. For example, a saved filter value of `false` renders as a hidden field value of `false`, including when it appears inside an array value. `nil`, empty strings, and blank array items are still omitted so a saved preference does not submit empty search params.
 
+When a visible input and a saved hidden field share the same param name, the host app should treat that as an intentional precedence choice instead of an automatic merge. If user-entered values must win on a screen, avoid submitting a conflicting saved hidden field for that key, or normalize the submitted params in the controller before passing them to the search layer.
+
 Use `namespace:` for nested params such as Ransack's `q`:
 
 ```erb
@@ -175,7 +181,9 @@ merged_params = rails_table_preference_merged_params(
   .order_by(merged_params["sort"] || params[:sort])
 ```
 
-Saved preference params override existing params when keys overlap.
+Saved preference params override existing params when keys overlap. The helper is equivalent to converting the current params to a hash and then applying `base_params.merge(rails_table_preference_params(...))`.
+
+Use the helper when the selected preset should be authoritative for filter/sort keys. When the current request should stay authoritative, build the hash explicitly instead, for example by merging in the opposite order or deleting the saved keys that the search form owns before calling the host application's search method.
 
 ## Pagination and page params
 
@@ -290,5 +298,6 @@ The host application remains responsible for:
 - validating searchable fields
 - business-specific search behavior
 - deciding whether saved filter/sort changes should clear or clamp pagination params
+- deciding whether saved filter/sort params or user-entered request params win when the same key appears from both sources
 - CSV, Excel, or report file generation
 - admin UI and permission checks for shared, role, or organization presets

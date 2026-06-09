@@ -72,5 +72,41 @@ RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
         expect(describedby_ids).to include(hint_id)
       end
     end
+
+    it "keeps generated ids and accessibility references unique across multiple editors" do
+      html = [
+        helper.table_preferences_editor(
+          table_key: :orders,
+          name: :default,
+          columns: [:customer_code],
+          editor_instance_key: "drawer"
+        ),
+        helper.table_preferences_editor(
+          table_key: :orders,
+          name: :default,
+          columns: [:customer_code],
+          editor_instance_key: "sidebar"
+        )
+      ].join
+
+      ids = html.scan(/\bid="([^"]+)"/).flatten
+      label_targets = html.scan(/<label for="([^"]+)"/).flatten
+      labelledby_ids = html.scan(/aria-labelledby="([^"]+)"/).flatten
+      describedby_ids = html.scan(/aria-describedby="([^"]+)"/).flatten.flat_map(&:split)
+
+      expect(ids).to eq(ids.uniq)
+      expect(ids).to include(
+        "rails-table-preferences-orders-default-drawer-title",
+        "rails-table-preferences-orders-default-sidebar-title",
+        "rails-table-preferences-orders-default-drawer-preset-select",
+        "rails-table-preferences-orders-default-sidebar-preset-select",
+        "rails-table-preferences-orders-default-drawer-preset-name",
+        "rails-table-preferences-orders-default-sidebar-preset-name"
+      )
+
+      (label_targets + labelledby_ids + describedby_ids).each do |referenced_id|
+        expect(ids).to include(referenced_id)
+      end
+    end
   end
 end
