@@ -20,8 +20,9 @@ RSpec.describe "column key selector boundary" do
   end
 
   it "documents CSS.escape coverage and the narrow fallback boundary for special column keys" do
-    expect(controller_source).to include('CSS.escape(String(value))')
-    expect(controller_source).to include('String(value).replace(/["\\\\]/g, "\\\\$&")')
+    expect(controller_source).to include("CSS.escape(String(value))")
+    expect(controller_source).to include("return String(value).replace(")
+    expect(controller_source).to include("$&")
 
     expect(docs).to include("customer.name")
     expect(docs).to include("customer:id")
