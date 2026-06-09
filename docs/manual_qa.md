@@ -15,6 +15,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
 - [ ] Switch to another owner or demo owner link and confirm saved presets do not leak between owners.
+- [ ] When the generated demo is the smoke surface, check the support sections that match the changed area: `Current owner`, `Current scope context`, `Demo state reset`, `Async failure check`, hidden fields preview, or export payload preview. Use [Demo screen generator](demo.md) as the detailed source of truth and record any sections intentionally handed off.
 - [ ] Open one filter panel or preset action with keyboard focus and confirm focus, labels, and status copy remain understandable.
 - [ ] Check one narrow desktop width and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable.
 
@@ -102,6 +103,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] Confirm those controls re-enable after success.
 - [ ] Trigger at least one API failure and confirm the matching action-specific failure status appears and the controls recover.
 - [ ] Prefer a lightweight browser-devtools failure such as request blocking, then unblock it and confirm the same action succeeds normally.
+- [ ] If you use the generated demo example, use the `Async failure check` section to make one save, load, or delete request fail exactly once, then retry the same action and confirm it succeeds.
 
 ## 6. Scoped preset behavior
 
@@ -112,6 +114,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 - [ ] If you use the generated demo example, configure `scope_context_method = :table_preference_scope_context` once, use `Organization preset lane`, and confirm `東京組織ビュー [organization:tokyo-hq]` appears.
 - [ ] If you use the generated demo example, use `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` to switch the scope context without editing `ApplicationController` between requests.
 - [ ] If you use the generated demo example, confirm the `Current scope context` summary follows the active scope link before reading the preset selector.
+- [ ] If you use the generated demo example, use `Demo state reset` before repeating scoped/default precedence checks when earlier save testing may have created owner-scoped demo presets.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner, role, organization, and shared presets are grouped in the selector when multiple scope buckets are returned, while single-scope owner presets remain easy to scan.
 - [ ] Confirm owner default is preferred over role, organization, and shared defaults.
@@ -204,6 +207,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm exported headers use the expected labels.
 - [ ] Confirm `export_key` is used when display key and export method differ.
 - [ ] Confirm group metadata is available for grouped CSV/Excel headers.
+- [ ] If you use the generated demo example, confirm the export payload preview excludes hidden columns and follows the saved visible-column order after save and reload.
 - [ ] Confirm host app authorization decides whether sensitive values are exportable.
 
 ## 12. Controller params integration
@@ -223,6 +227,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm array params render with `[]` names where expected.
 - [ ] Confirm blank filter values are not submitted unnecessarily.
 - [ ] Confirm normal user-entered search params still work.
+- [ ] If you use the generated demo example, confirm the hidden fields preview updates after reload, keeps expected `[]` array param names, omits blank values, and preserves saved boolean `false` values.
 - [ ] Confirm saved preference params and user-entered params merge in the intended precedence order.
 
 ## 14. Ransack integration
