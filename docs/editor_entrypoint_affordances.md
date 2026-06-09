@@ -23,6 +23,8 @@ Use the bundled column search field when checking a table with many columns:
 
 The package entrypoint also adds small up/down buttons beside each editor row. These buttons are a visible alternative to dragging rows and a quicker path than editing numeric order values by hand.
 
+The package entrypoint row drag handle is only a visual affordance; keyboard reorder evidence should use the row up/down buttons or the numeric order input. See [Editor reorder accessibility note](editor_reorder_accessibility.md) for the visual-only handle, keyboard-control, and copied-controller boundary.
+
 The copied/base controller does not render these row move buttons. In that path, the keyboard-friendly reorder fallback remains the numeric order input plus the bundled `適用` action. Keep this distinction visible when choosing an install path: package entrypoint screens can verify row up/down controls, while copied-controller screens should verify the order input fallback instead.
 
 Use the row up/down buttons during browser QA:
@@ -55,6 +57,7 @@ Use this note together with the existing checklist entries rather than as a repl
 - `docs/manual_qa.md` section 16 already covers accessibility baseline checks for focus order, async busy disabling, numeric order fallback, touch/narrow viewport fallback, and keyboard-only reordering.
 - `docs/manual_qa.md` section 18 already covers browser and layout checks for narrow widths, editor input overlap, and reachable column controls.
 - `docs/accessibility.md` covers the package-entrypoint-only column search and row move controls, including accessible labels, filtered-row preservation, first/last/hidden/busy disabled states, and narrow-width checks.
+- `docs/editor_reorder_accessibility.md` keeps the package-entrypoint visual-only drag handle boundary separate from keyboard-reachable row move buttons and copied-controller choices.
 
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
 
