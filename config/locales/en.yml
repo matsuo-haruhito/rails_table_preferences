@@ -85,3 +85,6 @@ en:
       filter_from: From
       filter_to: To
       filter_clear: Clear
+      sort_asc: Sort ascending
+      sort_desc: Sort descending
+      sort_clear: Clear sort
