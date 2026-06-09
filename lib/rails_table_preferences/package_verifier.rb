@@ -25,6 +25,7 @@ module RailsTablePreferences
       "app/views/rails_table_preferences/_tree_resource_table.html.erb",
       "app/views/rails_table_preferences/_tree_resource_table_row.html.erb",
       "config/routes.rb",
+      "config/locales/en.yml",
       "config/locales/ja.yml",
       "lib/generators/rails_table_preferences/install/install_generator.rb",
       "lib/generators/rails_table_preferences/install/templates/create_table_preferences.rb",
@@ -100,7 +101,8 @@ module RailsTablePreferences
       [:missing_package_export_targets, "package export targets"],
       [:missing_package_internal_imports, "package internal JavaScript imports"],
       [:missing_package_declaration_imports, "package internal declaration imports"],
-      [:package_json_errors, "package metadata errors"]
+      [:package_json_errors, "package metadata errors"],
+      [:gemspec_metadata_errors, "gemspec metadata errors"]
     ].freeze
 
     RELATIVE_IMPORT_PATTERN = /(?:^|\n)\s*(?:import\s+(?:[^"'\n]+?\s+from\s+)?|export\s+[^"'\n]+?\s+from\s+)["'](?<specifier>\.[^"']+)["']/.freeze
@@ -148,6 +150,7 @@ module RailsTablePreferences
       missing_package_internal_imports = self.missing_package_internal_imports
       missing_package_declaration_imports = self.missing_package_declaration_imports
       package_json_errors = self.package_json_errors
+      gemspec_metadata_errors = self.gemspec_metadata_errors
 
       {
         gem_path: gem_path,
@@ -157,18 +160,24 @@ module RailsTablePreferences
         missing_package_internal_imports: missing_package_internal_imports,
         missing_package_declaration_imports: missing_package_declaration_imports,
         package_json_errors: package_json_errors,
+        gemspec_metadata_errors: gemspec_metadata_errors,
         ok: missing.empty? &&
           missing_package_export_targets.empty? &&
           missing_package_internal_imports.empty? &&
           missing_package_declaration_imports.empty? &&
-          package_json_errors.empty?
+          package_json_errors.empty? &&
+          gemspec_metadata_errors.empty?
       }
     end
 
     private
 
+    def package_spec
+      @package_spec ||= Gem::Package.new(gem_path).spec
+    end
+
     def packaged_files
-      @packaged_files ||= Gem::Package.new(gem_path).spec.files.sort
+      @packaged_files ||= package_spec.files.sort
     end
 
     def package_export_targets
@@ -256,6 +265,29 @@ module RailsTablePreferences
         errors << "package.json version must remain 0.0.0 because JavaScript package versioning is not a Ruby gem release policy"
       end
       errors
+    end
+
+    def gemspec_metadata_errors
+      @gemspec_metadata_errors ||= begin
+        expected_gemspec_metadata.filter_map do |key, expected_url|
+          actual_url = package_spec.metadata.fetch(key, nil)
+          next if actual_url == expected_url
+
+          "gemspec metadata #{key} must point to #{expected_url} (got #{actual_url.inspect})"
+        end
+      end
+    rescue Errno::ENOENT, Gem::Package::FormatError
+      []
+    end
+
+    def expected_gemspec_metadata
+      homepage = package_spec.homepage.to_s.delete_suffix("/")
+      {
+        "homepage_uri" => homepage,
+        "source_code_uri" => homepage,
+        "changelog_uri" => "#{homepage}/blob/main/CHANGELOG.md",
+        "documentation_uri" => "#{homepage}/blob/main/docs/index.md"
+      }
     end
 
     def export_targets_for(value, export_name = ".")

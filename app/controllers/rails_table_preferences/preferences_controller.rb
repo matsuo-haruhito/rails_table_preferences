@@ -18,6 +18,8 @@ module RailsTablePreferences
     def show
       preference = resolved_preference
 
+      return render_preference_not_found if preference.nil? && explicit_preference_request?
+
       render json: preference_payload(preference)
     end
 
@@ -113,6 +115,14 @@ module RailsTablePreferences
 
     def explicit_scope_param?
       params[:scope_type].present? || params[:scope_key].present?
+    end
+
+    def explicit_preference_request?
+      explicit_scope_param? || preference_name != "default"
+    end
+
+    def render_preference_not_found
+      render json: { error: "not_found", message: "Preference not found" }, status: :not_found
     end
 
     def owner_for_write_scope
