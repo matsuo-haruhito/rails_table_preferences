@@ -58,6 +58,6 @@ RSpec.describe "package entrypoint controller source" do
     expect(base_controller_source).to include("const columns = this.editorRows.map((row, index) => {")
     expect(controller_source).to include("const visibleRows = this.editorRows.filter((row) => !row.hidden)")
     expect(controller_source).to include("return visibleRows.length > 0 ? visibleRows : this.editorRows")
-    expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : rows.length - 1)")
+    expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : index === rows.length - 1)")
   end
 end
