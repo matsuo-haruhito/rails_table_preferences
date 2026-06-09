@@ -71,6 +71,7 @@ module RailsTablePreferences
       "docs/resize_auto_fit.md",
       "docs/export_integration.md",
       "docs/accessibility.md",
+      "docs/active_filter_button_cue.md",
       "docs/editor_i18n.md",
       "docs/editor_entrypoint_affordances.md",
       "docs/editor_root_options.md",
