@@ -75,6 +75,10 @@
   display: none;
 }
 
+.rails-table-preferences-editor__dirty-state {
+  font-weight: 700;
+}
+
 .rails-table-preferences-editor__hint[data-rails-table-preferences-target="readOnlyHint"],
 .rails-table-preferences-editor__hint--maintenance {
   opacity: 1;
