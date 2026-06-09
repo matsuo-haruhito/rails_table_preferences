@@ -7,7 +7,12 @@ RSpec.describe "package entrypoint controller source" do
     File.expand_path("../app/javascript/rails_table_preferences/controller.js", __dir__)
   end
 
+  let(:base_controller_source_path) do
+    File.expand_path("../app/javascript/controllers/rails_table_preferences_controller.js", __dir__)
+  end
+
   let(:controller_source) { File.read(controller_source_path) }
+  let(:base_controller_source) { File.read(base_controller_source_path) }
 
   it "keeps filterValueHtml as a single package entrypoint override" do
     expect(controller_source.scan(/\n\s+filterValueHtml\(filter, condition, selectedOperator\) \{/).size).to eq(1)
@@ -22,5 +27,21 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("const threshold = Number(this.selectFilterOptionSearchThresholdValue)")
     expect(controller_source).to include("if (!Number.isFinite(threshold)) return 8")
     expect(controller_source).to include("return Math.floor(threshold)")
+  end
+
+  it "keeps editor search as a package entrypoint-only visibility filter" do
+    expect(controller_source).to include("this.ensureEditorSearchControl()")
+    expect(controller_source).to include("this.syncEditorSearchResults()")
+    expect(controller_source).to include("row.hidden = hidden")
+    expect(controller_source).to include("if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0")
+    expect(base_controller_source).not_to include("ensureEditorSearchControl")
+    expect(base_controller_source).not_to include("syncEditorSearchResults")
+  end
+
+  it "keeps hidden editor rows in apply/save settings while moves use visible rows" do
+    expect(base_controller_source).to include("const columns = this.editorRows.map((row, index) => {")
+    expect(controller_source).to include("const visibleRows = this.editorRows.filter((row) => !row.hidden)")
+    expect(controller_source).to include("return visibleRows.length > 0 ? visibleRows : this.editorRows")
+    expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : rows.length - 1)")
   end
 end
