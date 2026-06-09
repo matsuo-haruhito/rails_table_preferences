@@ -119,6 +119,14 @@ Add the JSON API route used by the bundled editor:
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
 
+If the host app wants the generator to add that default mount route, pass `--with-engine-route` when running the install generator:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-engine-route
+```
+
+Keep the manual route path when the app reviews routes by hand or uses a custom mount path. See [Install path options](install_paths.md) for the route option boundary and [Mounted JSON API](json_api.md) for the endpoint contract.
+
 If you change the mount path, set the same value in the initializer:
 
 ```ruby
