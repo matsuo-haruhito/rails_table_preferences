@@ -46,7 +46,7 @@ The packaged controller entrypoint dispatches a small set of bubbling Stimulus e
 
 These lifecycle events are a package-entrypoint surface. Host applications that register the generated copied controller directly from `app/javascript/controllers/rails_table_preferences_controller.js` should not assume these events are present unless they port the same behavior into the copied or replacement controller. Use [Package-only controller boundary](javascript_entrypoints.md#package-only-controller-boundary) when deciding which registration path owns event listener QA.
 
-- `rails-table-preferences:applied` after editor settings are applied to the current table without saving
+- `rails-table-preferences:applied` after editor settings are applied to the current table without saving, including reset-to-defaults actions
 - `rails-table-preferences:saved` after an existing preset save or save-as-new request succeeds
 - `rails-table-preferences:loaded` after a selected preset is loaded and applied
 - `rails-table-preferences:deleted` after an editable preset is deleted and the controller returns to the default preset
@@ -61,9 +61,23 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
-Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+TypeScript host apps can import the packaged lifecycle detail type and narrow the DOM event to a `CustomEvent` at the listener boundary:
 
-Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
+```ts
+import type { RailsTablePreferencesEventDetail } from "rails_table_preferences"
+
+document.addEventListener("rails-table-preferences:saved", (event) => {
+  const { tableKey, name, action, settings } = (event as CustomEvent<RailsTablePreferencesEventDetail>).detail
+
+  // Update host-app analytics, export previews, or surrounding UI here.
+})
+```
+
+Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `reset`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+
+The `rails-table-preferences:error` `action` values are stable operation labels for package-entrypoint diagnostics and UI sync. Current values are `load-presets` for initial preset-list loading, `load` for selected preset loading, `save` for updating an editable preset, `create` for save-as-new or owner fallback creation, `delete` for editable preset deletion, and fallback `operation` when an error is reported outside a named preference operation. When a future package-entrypoint operation adds another public error action, update this list and the source-level lifecycle event specs with that action.
+
+Apply and reset both use `rails-table-preferences:applied`; distinguish them through `event.detail.action` (`apply` vs `reset`). Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
 
 Host apps can keep adoption code small by choosing one surrounding concern and reading only the existing detail fields. For example, an analytics integration can record successful preset saves without coupling to controller internals or changing the payload contract:
 
@@ -250,7 +264,7 @@ In practice that means:
 
 - filter/sort labels, filter operator labels, and scope fallback labels can be overridden per controller root through `data-rails-table-preferences-*-label-value` or `data-rails-table-preferences-filter-operator-labels-value`
 - bundled helper/status/reset wording is usually better changed through host-app locale entries
-- copied ERB is only needed when the host app wants different markup, helper-text placement, or a custom status surface
+- copied ERB is only needed when the host app wants different markup, helper-text placement, or status-region structure
 - copied or replacement JavaScript is still needed when the host app wants controller vocabulary or behavior that is not exposed as a root value, such as different busy-state logic
 
 For a route-by-route decision guide and locale example, see [Accessibility baseline](accessibility.md).
