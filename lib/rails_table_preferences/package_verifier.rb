@@ -92,6 +92,7 @@ module RailsTablePreferences
       "docs/filter_metadata.md",
       "docs/filter_adapters.md",
       "docs/select_filter_troubleshooting.md",
+      "docs/select_filter_option_search_threshold.md",
       "docs/javascript_entrypoints.md",
       "docs/javascript_controller.md"
     ].freeze
