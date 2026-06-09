@@ -119,7 +119,11 @@ import RailsTablePreferencesController from "rails_table_preferences/controller"
 import { RailsTablePreferencesController as NamedRailsTablePreferencesController } from "rails_table_preferences"
 ```
 
-These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.
+The package root also re-exports lifecycle event detail types such as `RailsTablePreferencesEventDetail` and `RailsTablePreferencesEventName`. When a TypeScript host app listens for package-entrypoint lifecycle events, keep the listener boundary local by narrowing the DOM event to `CustomEvent<RailsTablePreferencesEventDetail>` and use [Host app lifecycle events](javascript_controller.md#host-app-lifecycle-events) for the current typed example, event names, and action meanings.
+
+Those lifecycle event types describe the package entrypoint surface only. Host apps that register a copied or replacement controller should not import them as proof that the copied controller dispatches the same events unless that app has ported the package-entrypoint event behavior too.
+
+These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class and lifecycle event detail surface, but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.
 
 If the host app uses an older gem version without packaged declarations, or if it replaces the controller and wants richer local typing for custom methods, keep a local declaration file in the host app. For example, `app/frontend/types/rails_table_preferences.d.ts` can still refine the app-specific contract as long as the directory is included by the app's `tsconfig.json`.
 
