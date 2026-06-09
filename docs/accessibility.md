@@ -23,7 +23,7 @@ The bundled editor and Stimulus controller provide:
 - per-button `title` and `aria-label` text on the bundled `適用`, `保存`, and `別名で保存` buttons so users can tell whether they are applying the current editor state, saving to the current preset name, or creating a separately named preset
 - a visible helper message when saving from a read-only preset will create or update the owner preset path instead of overwriting the shared preset directly
 - a visible helper message and `aria-describedby` context for the bundled default preset checkbox so users can tell it only takes effect when they save or save as new
-- a live `role="status"` region for bundled save/load/delete feedback
+- a live `role="status"` region for bundled save/load/delete feedback and package-entrypoint resize auto-fit success feedback
 - a visible helper message plus explanatory `title`, `aria-label`, and `aria-describedby` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings without relying only on hover text
 - visible maintenance helper copy for delete/reset actions, with `aria-describedby` context on the maintenance group and delete/reset buttons
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
@@ -88,6 +88,8 @@ The bundled controller prefers the configured column label for that accessible n
 
 The default resize behavior remains pointer-oriented. When the host app imports the packaged `rails_table_preferences/controller` entrypoint, a focused resize handle also accepts Enter or Space for the same one-shot auto-fit behavior as double-click. That shortcut is only an auto-fit affordance; it is not full keyboard width adjustment.
 
+The package entrypoint reports that one-shot auto-fit success through the existing status region using `rails_table_preferences.editor.resize_auto_fit_status`. This is success feedback for the packaged shortcut, not a promise that the copied/base controller path has the same keyboard shortcut or status message unless the host app ports that behavior.
+
 Full keyboard resizing would need additional product decisions such as arrow-key bindings, step size, min/max width feedback, cancellation behavior, and status announcements. Host applications that need that level of keyboard width editing should provide a custom controller or additional shortcuts, then verify the focus model and announcements in their own table layout.
 
 ## Resource table captions
@@ -125,13 +127,14 @@ This prevents the regular user-facing editor from accidentally overwriting share
 
 ## Status region and busy state
 
-The bundled editor now includes a lightweight status region for the main async preset actions:
+The bundled editor now includes a lightweight status region for the main async preset actions and package-entrypoint resize auto-fit feedback:
 
 - loading saved settings
 - saving the current settings
 - saving as a new preset
 - deleting the current preset
 - reporting action-specific failure copy when load, save, save as new, or delete cannot complete
+- reporting package-entrypoint Enter / Space auto-fit success after a focused resize handle uses the one-shot auto-fit shortcut
 
 The default markup uses a native live region:
 
@@ -162,6 +165,7 @@ Representative locale keys include:
 - `rails_table_preferences.editor.loading_status`
 - `rails_table_preferences.editor.saved_status`
 - `rails_table_preferences.editor.deleting_failed_status`
+- `rails_table_preferences.editor.resize_auto_fit_status`
 - `rails_table_preferences.editor.reset_hint`
 - `rails_table_preferences.editor.reset_visible_hint`
 
@@ -171,6 +175,7 @@ Those keys feed different bundled accessibility surfaces:
 - `maintenance_hint`: the visible helper text and `aria-describedby` context for delete/reset maintenance actions
 - `read_only_preset_hint`: the helper text shown when a shared, role, or organization preset is read-only
 - `*_status`: the live `role="status"` region used for async preset feedback
+- `resize_auto_fit_status`: the same live status region after package-entrypoint Enter / Space auto-fit on a focused resize handle
 - `reset_hint`: the bundled reset button `title` and `aria-label`
 - `reset_visible_hint`: the visible helper text and `aria-describedby` context for the bundled reset button
 
@@ -190,6 +195,7 @@ Typical locale-driven surfaces include:
 - read-only preset helper text
 - reset visible helper and button wording
 - async status-region progress, success, and failure copy
+- package-entrypoint resize auto-fit success copy
 
 This is the best default when the same wording should stay consistent across every screen that uses the bundled editor.
 
@@ -248,6 +254,7 @@ ja:
       loading_status: 設定を読み込み中です...
       saved_status: 設定を保存しました。
       deleting_failed_status: 設定の削除を完了できませんでした。
+      resize_auto_fit_status: 列幅を自動調整しました。
       reset_hint: 保存前の変更を破棄して初期表示へ戻します。
       reset_visible_hint: 初期状態に戻すと、保存前の変更は破棄されます。
 ```
@@ -315,6 +322,7 @@ Before releasing a screen, check:
 - Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
 - Resize handles announce the user-facing column label rather than only an internal column key.
 - Keyboard-only users can use Enter or Space on a focused resize handle for package-entrypoint auto-fit, but should not expect arrow-key or step-based width adjustment from the bundled controller.
+- Package-entrypoint auto-fit updates the status region with the configured `resize_auto_fit_status` copy.
 - Keyboard-only users can reorder columns through the editor order inputs and the bundled `適用` action without relying on drag and drop.
 - Touch and narrow-viewport checks confirm the editor order inputs remain usable as the fallback when table-header drag is not comfortable or reliable.
 - The table remains understandable when columns are hidden.

@@ -125,6 +125,53 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         a_string_including("version must remain 0.0.0")
       )
     end
+
+    it "accepts gemspec metadata URLs that point to the repository entrypoints" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[README.md CHANGELOG.md docs/index.md])
+      homepage = "https://github.com/matsuo-haruhito/rails_table_preferences"
+      allow(verifier).to receive(:package_spec).and_return(
+        package_spec_double(
+          files: %w[CHANGELOG.md README.md docs/index.md],
+          homepage: homepage,
+          metadata: {
+            "homepage_uri" => homepage,
+            "source_code_uri" => homepage,
+            "changelog_uri" => "#{homepage}/blob/main/CHANGELOG.md",
+            "documentation_uri" => "#{homepage}/blob/main/docs/index.md"
+          }
+        )
+      )
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(true)
+      expect(result[:gemspec_metadata_errors]).to eq([])
+    end
+
+    it "reports gemspec metadata URLs that drift from repository entrypoints" do
+      verifier = described_class.new(gem_path: "dummy.gem", required_paths: %w[README.md CHANGELOG.md docs/index.md])
+      homepage = "https://github.com/matsuo-haruhito/rails_table_preferences"
+      allow(verifier).to receive(:package_spec).and_return(
+        package_spec_double(
+          files: %w[CHANGELOG.md README.md docs/index.md],
+          homepage: homepage,
+          metadata: {
+            "homepage_uri" => homepage,
+            "source_code_uri" => homepage,
+            "changelog_uri" => "#{homepage}/blob/main/docs/changelog.md",
+            "documentation_uri" => "#{homepage}/blob/main/docs/README.md"
+          }
+        )
+      )
+
+      result = verifier.call
+
+      expect(result[:ok]).to eq(false)
+      expect(result[:gemspec_metadata_errors]).to include(
+        "gemspec metadata changelog_uri must point to #{homepage}/blob/main/CHANGELOG.md (got \"#{homepage}/blob/main/docs/changelog.md\")",
+        "gemspec metadata documentation_uri must point to #{homepage}/blob/main/docs/index.md (got \"#{homepage}/blob/main/docs/README.md\")"
+      )
+    end
   end
 
   describe ".summary" do
@@ -187,8 +234,11 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
   end
 
   describe "required packaged locale files" do
-    it "keeps the default Japanese locale file in the package guard" do
-      expect(described_class::REQUIRED_PATHS).to include("config/locales/ja.yml")
+    it "keeps the default English and Japanese locale files in the package guard" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "config/locales/en.yml",
+        "config/locales/ja.yml"
+      )
     end
   end
 
@@ -209,6 +259,10 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         raise KeyError, path
       end
     end
+  end
+
+  def package_spec_double(files:, homepage:, metadata: {})
+    instance_double(Gem::Specification, files: files, homepage: homepage, metadata: metadata)
   end
 
   def package_json
