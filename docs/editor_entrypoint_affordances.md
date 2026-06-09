@@ -10,12 +10,16 @@ Search is an editor navigation affordance, not a column visibility filter. A no-
 
 The Show all columns and Hide all columns bulk actions keep their all-row scope while a search is active. They toggle every editor row's visibility checkbox, including rows temporarily hidden by the search, and do not create a search-results-only visibility mode.
 
+Reset, preset load, and preset delete replace the editor state with another settings snapshot, so the package entrypoint clears the search query after those operations. Apply, save, and save as new keep the current query because they operate within the same editing context. Clearing the query restores all editor rows, hides the no-results message, and recalculates the row move buttons for the full visible list.
+
 Use the bundled column search field when checking a table with many columns:
 
 - search by a visible column label and confirm only matching rows remain visible
 - search by a column key or group word when labels are similar
 - use Show all columns or Hide all columns while search is active and confirm hidden search rows are included in the bulk checkbox change
 - clear the search and confirm every editor row returns
+- reset, preset load, or preset delete while a search is active and confirm the search field clears, every editor row returns, the no-results message is hidden, and row move buttons recalculate for the full list
+- apply, save, or save as new while a search is active and confirm the search query stays in place because the same editing context remains active
 - apply or save while a search is active and confirm columns hidden by the search are not removed from the saved settings
 - apply or save while the search has no results and confirm the saved settings still keep the full column set after clearing the search or reloading the preset
 
