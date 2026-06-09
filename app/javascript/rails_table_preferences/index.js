@@ -1,2 +1,4 @@
-export { default } from "./controller"
-export { default as RailsTablePreferencesController } from "./controller"
+import RailsTablePreferencesController from "./preset_select_recovery"
+
+export default RailsTablePreferencesController
+export { RailsTablePreferencesController }
