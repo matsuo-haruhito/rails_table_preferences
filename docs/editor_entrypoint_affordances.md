@@ -2,6 +2,8 @@
 
 This note covers small browser checks for the packaged `rails_table_preferences/controller` entrypoint. The copied base controller remains the escape hatch for host applications that want to own their editor markup or interaction model directly.
 
+For PRs that touch editor search, hidden rows, or the first-run preset selector fallback, use [Bundled editor state boundaries](bundled_editor_state_boundaries.md) to keep browser-visible state, saved settings payloads, and package-entrypoint-only behavior separate.
+
 ## Column search
 
 The package entrypoint adds a lightweight column search field before the generated editor rows. It filters the rendered editor row list by column label, key, or group text. Hidden rows remain in the DOM so applying or saving settings does not drop columns that are temporarily filtered out of view.
@@ -48,6 +50,7 @@ This feedback is intentionally coarse. It only confirms that auto-fit ran; it do
 
 Use this note together with the existing checklist entries rather than as a replacement for them:
 
+- `docs/bundled_editor_state_boundaries.md` separates hidden-row payload checks, visible-subset move expectations, first-run selector fallback wording, and package-entrypoint-only boundaries.
 - `docs/manual_qa.md` section 4 already covers display preference behavior, order input fallback, narrow editor rows, and saved metadata after apply/save/reload/reset flows.
 - `docs/manual_qa.md` section 16 already covers accessibility baseline checks for focus order, async busy disabling, numeric order fallback, touch/narrow viewport fallback, and keyboard-only reordering.
 - `docs/manual_qa.md` section 18 already covers browser and layout checks for narrow widths, editor input overlap, and reachable column controls.
