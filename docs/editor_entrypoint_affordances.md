@@ -20,6 +20,8 @@ Use the bundled column search field when checking a table with many columns:
 
 The package entrypoint also adds small up/down buttons beside each editor row. These buttons are a visible alternative to dragging rows and a quicker path than editing numeric order values by hand.
 
+The copied/base controller does not render these row move buttons. In that path, the keyboard-friendly reorder fallback remains the numeric order input plus the bundled `適用` action. Keep this distinction visible when choosing an install path: package entrypoint screens can verify row up/down controls, while copied-controller screens should verify the order input fallback instead.
+
 Use the row up/down buttons during browser QA:
 
 - move a middle row up and down, then apply and confirm the table order changes
