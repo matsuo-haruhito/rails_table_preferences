@@ -71,6 +71,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   buildEditorRow(column) {
     const row = super.buildEditorRow(column)
+    this.replaceEditorDragHandle(row)
     const syncEditorDraftState = () => {
       this.clearSuccessfulStatus()
       this.syncResetButtonState()
@@ -80,6 +81,19 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  replaceEditorDragHandle(row) {
+    const handle = row.querySelector(".rails-table-preferences-editor__drag-handle")
+    if (!handle) return
+
+    const visualHandle = document.createElement("span")
+    visualHandle.className = handle.className
+    visualHandle.dataset.railsTablePreferencesEditorDragHandle = "visual"
+    visualHandle.draggable = false
+    visualHandle.setAttribute("aria-hidden", "true")
+    visualHandle.textContent = handle.textContent || "↕"
+    handle.replaceWith(visualHandle)
   }
 
   showAllEditorColumns(event) {
@@ -274,6 +288,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     super.endTableColumnDrag(event)
     this.clearSuccessfulStatus()
     this.syncResetButtonState()
+    this.syncEditorMoveButtons()
   }
 
   toggleSortFromHeader(event, cell, column) {
