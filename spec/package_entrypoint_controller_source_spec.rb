@@ -34,6 +34,14 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("return Math.floor(threshold)")
   end
 
+  it "keeps visibility bulk actions scoped to all editor rows" do
+    bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.fetch(:body)
+
+    expect(bulk_visibility_body).to include("this.editorRows.forEach((row) => {")
+    expect(bulk_visibility_body).not_to include("this.editorRowsForMovement")
+    expect(bulk_visibility_body).not_to include("!row.hidden")
+  end
+
   it "keeps reset as a packaged success lifecycle action" do
     expect(controller_source).to include('this.dispatchPreferenceEvent("applied", { action: "reset" })')
     expect(controller_declaration).to include('export type RailsTablePreferencesSuccessAction = "apply" | "reset" | "save" | "create" | "load" | "delete"')
