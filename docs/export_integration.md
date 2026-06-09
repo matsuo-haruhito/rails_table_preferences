@@ -88,6 +88,34 @@ Minimal list screen example:
 
 If the index screen already uses `table_preferences_hidden_fields(...)` for saved filter/sort UI state, keep that form submission separate from the export button and pass only the params that the export action actually needs. Rails Table Preferences owns the saved table preference payload; the host app still owns which query params are valid for export.
 
+When an export action should reuse saved filter/sort state, resolve those params through the controller params helpers before running the host app search. `rails_table_preference_export_payload` remains the column metadata helper; it is not the query params source of truth. See [Controller integration](controller_integration.md) for the full controller params boundary.
+
+For example, an export action can merge saved filter/sort params with the request params it intentionally allows for export:
+
+```ruby
+def export
+  columns = table_columns
+  export_payload = rails_table_preference_export_payload(
+    table_key: :orders,
+    columns: columns,
+    name: params[:table_preference_name]
+  )
+
+  export_params = rails_table_preference_merged_params(
+    params.permit(:table_preference_name, :search_word, :sort),
+    table_key: :orders,
+    columns: columns,
+    name: params[:table_preference_name]
+  )
+
+  scoped_orders = Order.search(export_params)
+
+  # Host app still owns CSV/Excel generation, value extraction, and policy checks.
+end
+```
+
+Use this pattern only for params the export action deliberately supports. Keep the normal search form, hidden fields that preserve table UI state, and export form as separate responsibilities so a saved preference cannot silently expand the export action's query or authorization surface.
+
 Minimal export action example:
 
 ```ruby
