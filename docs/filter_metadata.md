@@ -85,6 +85,8 @@ table_preferences_column(
 
 The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
 
+For long static option lists, the package entrypoint controller can show an in-panel option search when the option count reaches the configured threshold. See [Select filter option search threshold](select_filter_option_search_threshold.md) for the root value, no-results cue, and package-entrypoint-only boundary.
+
 For bundled single-value `text`, `number`, and `date` filters, `placeholder:` is rendered as the browser `placeholder` attribute on the generated value input:
 
 ```ruby
