@@ -35,7 +35,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Practical examples](examples.md): realistic list-screen integrations for existing `search(params)` / `order_by(params[:sort])` controllers and Ransack controllers.
 - [Helper-free controller root URLs](helper_free_controller_root_urls.md): collection/member URL ownership when an existing table partial mounts `data-controller="rails-table-preferences"` manually.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, legacy import, and customization issues.
-- [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar select options, and host-app query ownership when select filters do not affect results.
+- [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar or label/value select options, option-search threshold cues, and host-app query ownership when select filters do not affect results.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
 - [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md): focused evidence guidance for old `page` params when saved filter/sort hidden fields roundtrip through existing search forms.
