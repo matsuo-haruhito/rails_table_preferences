@@ -1,15 +1,15 @@
 # Manual QA smoke matrix for PRs
 
-Use this matrix when a PR is too small for the full manual QA checklist but still needs a clear browser or review evidence boundary. It complements `manual_qa.md`; it does not replace the full release or host-app launch checklist.
+Use this matrix when a PR is too small for the full manual QA checklist but still needs a clear browser or review evidence boundary. It is the category and evidence-boundary guide for focused PR checks; the pull request template or PR comment remains the per-PR record. It complements `manual_qa.md`; it does not replace the full release or host-app launch checklist.
 
 ## How to use this matrix
 
 1. Choose the closest PR category below.
 2. Run the focused smoke items for that category.
-3. Record what was checked, what was skipped, and why in the PR body or a PR comment.
+3. Record the selected category, what was checked, what was skipped, the evidence used, and any browser-capable handoff in the PR body or a PR comment.
 4. Escalate to the full `manual_qa.md` checklist when the PR touches multiple categories, changes runtime UI behavior, changes public helper contracts, or reveals visual/accessibility concerns.
 
-When browser capture is not available, use the strongest available substitute: focused system spec, DOM assertion, static visual reference check, source-level invariant, or a clear `needs-human` handoff. Do not describe source inspection as visual evidence when the acceptance criteria require rendered UI proof.
+When browser capture is not available, use the strongest available substitute: focused system spec, DOM assertion, static visual reference check, source-level invariant, or a clear `needs-human` handoff. Record the substitute and the browser-capable check that remains in the PR template or comment. Do not describe source inspection as visual evidence when the acceptance criteria require rendered UI proof.
 
 ## PR category matrix
 

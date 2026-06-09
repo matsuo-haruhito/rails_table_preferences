@@ -32,7 +32,7 @@ Record the current GitHub state used for review or merge decisions. Do not rely 
 
 ## Focused Manual QA
 
-Use `docs/manual_qa_pr_smoke_matrix.md` when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance.
+Use `docs/manual_qa_pr_smoke_matrix.md` as the category guide when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance. This template is the per-PR record: copy the closest matrix category here, then record what was checked, what was skipped, what evidence was used, and any browser-capable handoff.
 
 - PR category:
 - Review state or handoff reason:
@@ -48,7 +48,7 @@ For docs-only or spec-only changes, it is fine to write `not applicable` when th
 
 Use this section only when the PR changes visible UI, layout, copy that affects a control, or a visual reference. Docs-only API wording and non-visual code changes can mark this as not applicable.
 
-For static visual docs or docs image changes, use the `Static visual docs or docs image` category in `docs/manual_qa_pr_smoke_matrix.md` to record whether source diff, rendered visual confirmation, or a browser-capable handoff was used. This does not replace browser evidence for runtime UI, layout, or control-copy changes.
+For static visual docs or docs image changes, use the `Static visual docs or docs image` category in `docs/manual_qa_pr_smoke_matrix.md` to decide the evidence boundary, then record here whether source diff, rendered visual confirmation, or a browser-capable handoff was used. This does not replace browser evidence for runtime UI, layout, or control-copy changes.
 
 - Screenshot or visual evidence attached, or not applicable because:
 - Representative surface checked:
