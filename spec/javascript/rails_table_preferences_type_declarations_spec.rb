@@ -19,7 +19,7 @@ RSpec.describe "rails_table_preferences TypeScript declarations" do
       "export type RailsTablePreferencesEventName",
       "`rails-table-preferences:${RailsTablePreferencesLifecycleEvent}`",
       "export type RailsTablePreferencesSuccessAction",
-      "\"apply\" | \"save\" | \"create\" | \"load\" | \"delete\"",
+      "\"apply\" | \"reset\" | \"save\" | \"create\" | \"load\" | \"delete\"",
       "export type RailsTablePreferencesErrorAction",
       "\"load-presets\" | \"operation\"",
       "export interface RailsTablePreferencesSettingsSnapshot",
