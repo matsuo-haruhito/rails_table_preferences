@@ -98,6 +98,14 @@ Mount the engine when using the bundled JSON API:
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
 
+If the host app wants the generator to add that default mount route, use `--with-engine-route`:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-engine-route
+```
+
+Keep the manual route path when the app reviews routes by hand or uses a custom `config.mount_path`. See [Install path options](docs/install_paths.md) for the route option boundary and custom mount-path note.
+
 For Vite / `app/frontend/entrypoints/application.js`, register the packaged Stimulus controller explicitly:
 
 ```js
