@@ -3,6 +3,8 @@ import RailsTablePreferencesBaseController from "../controllers/rails_table_pref
 const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])
 
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
+  static targets = [...(RailsTablePreferencesBaseController.targets || []), "dirtyState"]
+
   static values = {
     ...RailsTablePreferencesBaseController.values,
     filterOperatorLabels: { type: Object, default: {} },
@@ -11,6 +13,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
+    dirtyStateLabel: { type: String, default: "未保存の変更があります。" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
     selectFilterOptionSearchThreshold: { type: Number, default: 8 }
   }
@@ -35,11 +38,19 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   connect() {
     this.statusState = "idle"
     super.connect()
+    this.installDirtyStateTracking()
+    this.markEditorClean()
+  }
+
+  disconnect() {
+    this.uninstallDirtyStateTracking()
+    super.disconnect()
   }
 
   applyFromEditor(event) {
     const wasBusy = this.busy
     const result = super.applyFromEditor(event)
+    this.updateDirtyStateFromEditor()
     if (!wasBusy) {
       this.clearSuccessfulStatus()
       this.dispatchPreferenceEvent("applied", { action: "apply" })
@@ -50,6 +61,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   resetEditor(event) {
     const wasBusy = this.busy
     const result = super.resetEditor(event)
+    this.updateDirtyStateFromEditor()
     if (!wasBusy) {
       this.clearEditorSearchQuery()
       this.clearSuccessfulStatus()
@@ -63,6 +75,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.ensureEditorSearchControl()
     this.syncEditorSearchResults()
     this.syncEditorMoveButtons()
+    this.updateDirtyStateFromEditor()
   }
 
   buildEditorRow(column) {
@@ -103,6 +116,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const visibleInput = row.querySelector('[data-field="visible"]')
       if (visibleInput) visibleInput.checked = visible === true
     })
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
   }
 
@@ -239,24 +253,28 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   dropEditorRow(event) {
     super.dropEditorRow(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
   }
 
   dragEditorRowEnd(event) {
     super.dragEditorRowEnd(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
   }
 
   resizeColumn(event) {
     super.resizeColumn(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
   }
 
   autoFitColumnFromHandle(event) {
     const wasBusy = this.busy
     const result = super.autoFitColumnFromHandle(event)
+    this.updateDirtyStateFromEditor()
     if (!wasBusy) this.setStatus(this.resizeAutoFitStatusLabelValue, "success")
     return result
   }
@@ -268,28 +286,109 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   dropTableColumn(event) {
     super.dropTableColumn(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
   }
 
   endTableColumnDrag(event) {
     super.endTableColumnDrag(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
   }
 
   toggleSortFromHeader(event, cell, column) {
     super.toggleSortFromHeader(event, cell, column)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
   }
 
   applyFilterPanel(key, panel) {
     super.applyFilterPanel(key, panel)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
   }
 
   clearFilter(key) {
     super.clearFilter(key)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
+  }
+
+  applyPreferencePayload(payload) {
+    super.applyPreferencePayload(payload)
+    this.markEditorClean()
+  }
+
+  refreshEditorOrderInputs() {
+    super.refreshEditorOrderInputs()
+    this.updateDirtyStateFromEditor()
+  }
+
+  installDirtyStateTracking() {
+    this.ensureDirtyStateElement()
+    if (this.dirtyStateTrackingInstalled) return
+    if (!this.hasEditorRowsTarget) return
+
+    this.boundUpdateDirtyStateFromEditor = this.updateDirtyStateFromEditor.bind(this)
+    this.editorRowsTarget.addEventListener("input", this.boundUpdateDirtyStateFromEditor)
+    this.editorRowsTarget.addEventListener("change", this.boundUpdateDirtyStateFromEditor)
+    this.dirtyStateTrackingInstalled = true
+  }
+
+  uninstallDirtyStateTracking() {
+    if (!this.dirtyStateTrackingInstalled || !this.hasEditorRowsTarget || !this.boundUpdateDirtyStateFromEditor) return
+
+    this.editorRowsTarget.removeEventListener("input", this.boundUpdateDirtyStateFromEditor)
+    this.editorRowsTarget.removeEventListener("change", this.boundUpdateDirtyStateFromEditor)
+    this.boundUpdateDirtyStateFromEditor = null
+    this.dirtyStateTrackingInstalled = false
+  }
+
+  ensureDirtyStateElement() {
+    if (this.hasDirtyStateTarget) return
+
+    const element = document.createElement("p")
+    element.className = "rails-table-preferences-editor__hint rails-table-preferences-editor__dirty-state"
+    element.dataset.railsTablePreferencesTarget = "dirtyState"
+    element.setAttribute("aria-live", "polite")
+    element.setAttribute("aria-atomic", "true")
+    element.hidden = true
+
+    if (this.hasStatusTarget) {
+      this.statusTarget.parentNode.insertBefore(element, this.statusTarget)
+    } else {
+      this.element.appendChild(element)
+    }
+  }
+
+  markEditorClean() {
+    this.savedSettingsSnapshot = this.normalizedSettingsSignature(this.settingsFromEditor())
+    this.updateDirtyStateFromEditor()
+  }
+
+  updateDirtyStateFromEditor() {
+    if (!this.hasDirtyStateTarget || !this.hasEditorRowsTarget) return
+    if (!this.savedSettingsSnapshot) this.savedSettingsSnapshot = this.normalizedSettingsSignature(this.settingsFromEditor())
+
+    const dirty = this.normalizedSettingsSignature(this.settingsFromEditor()) !== this.savedSettingsSnapshot
+    this.dirtyStateTarget.hidden = !dirty
+    this.dirtyStateTarget.textContent = dirty ? this.dirtyStateLabelValue : ""
+  }
+
+  normalizedSettingsSignature(settings) {
+    return JSON.stringify(this.normalizeSettingsValue(settings))
+  }
+
+  normalizeSettingsValue(value) {
+    if (Array.isArray(value)) return value.map((item) => this.normalizeSettingsValue(item))
+    if (value && typeof value === "object") {
+      return Object.keys(value).sort().reduce((normalized, key) => {
+        normalized[key] = this.normalizeSettingsValue(value[key])
+        return normalized
+      }, {})
+    }
+    return value ?? null
   }
 
   setStatus(message, state = "idle") {
@@ -331,7 +430,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor(event)
 
     const result = await this.withPreferenceAction("save", () => super.save(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "save" })
+    if (result !== null && this.statusState === "success") {
+      this.markEditorClean()
+      this.dispatchPreferenceEvent("saved", { action: "save" })
+    } else {
+      this.updateDirtyStateFromEditor()
+    }
     return result
   }
 
@@ -339,7 +443,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.busy) return null
 
     const result = await this.withPreferenceAction("create", () => super.createPresetFromEditor(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "create" })
+    if (result !== null && this.statusState === "success") {
+      this.markEditorClean()
+      this.dispatchPreferenceEvent("saved", { action: "create" })
+    } else {
+      this.updateDirtyStateFromEditor()
+    }
     return result
   }
 
@@ -349,7 +458,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
     if (result !== null && this.statusState === "success") {
       this.clearEditorSearchQuery()
+      this.markEditorClean()
       this.dispatchPreferenceEvent("loaded", { action: "load" })
+    } else {
+      this.updateDirtyStateFromEditor()
     }
     return result
   }
@@ -378,6 +490,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         this.clearEditorSearchQuery()
         this.apply()
         this.syncPresetEditingState()
+        this.markEditorClean()
         await this.refreshPresetOptions()
       }, {
         busyLabel: this.deletingStatusLabelValue,
@@ -485,6 +598,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.markEditorClean()
   }
 
   clearFiltersAndSorts(event) {
@@ -493,6 +607,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
     this.closeFilterPanel()
     this.apply()
+    this.updateDirtyStateFromEditor()
   }
 
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
