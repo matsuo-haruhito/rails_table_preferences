@@ -6,10 +6,23 @@ Use this matrix when a PR is too small for the full manual QA checklist but stil
 
 1. Choose the closest PR category below.
 2. Run the focused smoke items for that category.
-3. Record the selected category, what was checked, what was skipped, the evidence used, and any browser-capable handoff in the PR body or a PR comment.
+3. Record the selected category, what was checked, what was skipped, the evidence used, the evidence status, and any browser-capable handoff in the PR body or a PR comment.
 4. Escalate to the full `manual_qa.md` checklist when the PR touches multiple categories, changes runtime UI behavior, changes public helper contracts, or reveals visual/accessibility concerns.
 
 When browser capture is not available, use the strongest available substitute: focused system spec, DOM assertion, static visual reference check, source-level invariant, or a clear `needs-human` handoff. Record the substitute and the browser-capable check that remains in the PR template or comment. Do not describe source inspection as visual evidence when the acceptance criteria require rendered UI proof.
+
+## Browser-capable evidence note
+
+Use this note when a PR body or review comment says a browser-capable reviewer must confirm the final rendered behavior. The goal is a short, repeatable handoff, not a screenshot requirement for every PR.
+
+Record these four items whenever rendered evidence matters:
+
+- `Evidence status`: `checked`, `substituted`, `handed off`, or `not applicable`.
+- `Environment or state`: browser, viewport, input mode, forced-colors/high-contrast mode, or screen/workflow that matters.
+- `Evidence used`: screenshot, browser notes, focused system spec, DOM/static assertion, source-level invariant, or source inspection.
+- `Remaining browser-capable check`: the exact state a human should still verify, or `none` when the rendered check was completed.
+
+Keep evidence proportional to the change. Pointer/touch changes should name the pointer mode and action tried. Narrow viewport or filter panel reachability should name the viewport height/width and the action that remained reachable. Forced-colors or high-contrast claims should name the mode and representative controls checked. Live region changes should record whether a real screen reader/browser announcement was checked, or explicitly leave that announcement behavior for human review. CI success, source-level specs, and DOM/static assertions can support a claim, but they do not replace rendered browser evidence for contrast, overlap, focus visibility, scroll reachability, or announcement timing.
 
 ## PR category matrix
 
@@ -50,9 +63,11 @@ Use this section when the PR is blocked by review state rather than by another b
 
 - PR category:
 - Review state or handoff reason:
+- Evidence status: checked / substituted / handed off / not applicable
 - Screen or artifact checked:
 - Viewports or states checked:
-- Evidence:
+- Evidence used:
+- Remaining browser-capable check:
 - Skipped full-checklist areas and reason:
 - Follow-up needed:
 ```
