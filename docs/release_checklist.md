@@ -136,7 +136,9 @@ For frontend integration, confirm:
 - [ ] `app/javascript/controllers/rails_table_preferences_controller.js` is packaged for copy-based `stimulus-rails` use.
 - [ ] `app/javascript/rails_table_preferences/controller.js` is packaged for `rails_table_preferences/controller` imports.
 - [ ] `app/javascript/rails_table_preferences/index.js` is packaged for package-root imports.
-- [ ] `package.json` is packaged and exposes `.` and `./controller` exports.
+- [ ] `app/javascript/rails_table_preferences/controller.d.ts` and `app/javascript/rails_table_preferences/index.d.ts` are packaged for TypeScript host-app imports.
+- [ ] `package.json` is packaged and exposes `.` and `./controller` exports, including the top-level `types` target and each `exports.*.types` declaration target.
+- [ ] Package verification confirms the declaration targets and their relative `.d.ts` re-exports resolve inside the built gem; keep any real TypeScript resolver or compiler smoke as host-app evidence rather than runtime JavaScript syntax evidence.
 - [ ] Treat Node.js 20 as the repository CI runtime for JavaScript syntax and package-entrypoint checks, not as a package consumer `engines` requirement; if that policy changes, update `package.json`, Support matrix, JavaScript entrypoints, and package verification together.
 - [ ] A Vite / `app/frontend/entrypoints/application.js` host app can register `rails_table_preferences/controller` as `rails-table-preferences`.
 - [ ] A default `stimulus-rails` host app still works with the copied controller.
