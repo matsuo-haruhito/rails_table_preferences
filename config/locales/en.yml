@@ -25,7 +25,7 @@ en:
       save_action_group: Actions that save settings
       maintenance_action_group: Actions that delete saved settings or reset to defaults
       visibility_bulk_action_group: Actions that update column visibility in bulk
-      visibility_bulk_hint: Show all and hide all toggle every column visibility checkbox. Apply or save to use the changes. These actions do not toggle columns by group.
+      visibility_bulk_hint: Show all and hide all toggle every column visibility checkbox, including rows temporarily hidden by column search. Apply or save to use the changes. These actions do not toggle only search results or columns by group.
       show_all_columns: Show all columns
       hide_all_columns: Hide all columns
       show_all_columns_hint: Show only hidden columns again while keeping column order, widths, filters, and sorts. Saving is a separate action.
