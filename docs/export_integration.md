@@ -66,13 +66,16 @@ The returned payload contains:
 }
 ```
 
+The export payload is the column snapshot for the file. It is not the source of truth for list query params, and it does not execute saved filters or sorts. When an export should use the same filter/sort state as the current list, build those query params separately with the controller-param helpers described in [Controller integration](controller_integration.md), or merge the host app's current request params by policy in the export action.
+
 ## Minimal list-to-export wiring
 
 The common host app flow is:
 
 1. show a normal list screen with filters and a selected `table_preference_name`
-2. submit the same params to a separate export action
-3. build the file from `headers` and `columns` in the export action
+2. decide which filter/sort params the export action should receive
+3. submit those params to a separate export action
+4. build the file from `headers` and `columns` in the export action
 
 Minimal list screen example:
 
@@ -86,7 +89,21 @@ Minimal list screen example:
 <% end %>
 ```
 
-If the index screen already uses `table_preferences_hidden_fields(...)` for saved filter/sort UI state, keep that form submission separate from the export button and pass only the params that the export action actually needs. Rails Table Preferences owns the saved table preference payload; the host app still owns which query params are valid for export.
+If the export should apply the selected saved preset instead of only the current request params, resolve that filter/sort state in the export action with `rails_table_preference_params(...)` or `rails_table_preference_merged_params(...)`:
+
+```ruby
+export_params = rails_table_preference_merged_params(
+  table_key: :orders,
+  columns: columns,
+  name: params[:table_preference_name]
+)
+
+scoped_orders = Order.search(export_params)
+```
+
+Use this pattern when the selected preset should be authoritative for saved filter/sort keys. If the current request form should remain authoritative, build the hash explicitly, for example by merging in the opposite order or by only forwarding the query params that the export action accepts.
+
+If the index screen already uses `table_preferences_hidden_fields(...)` for saved filter/sort UI state, keep that form submission separate from the export button and pass only the params that the export action actually needs. Hidden fields are a way to submit saved filter/sort params through a normal search form; the export form is still a host-app-owned request with its own accepted params. Rails Table Preferences owns the saved table preference payload; the host app still owns which query params are valid for export and whether saved params or user-entered params win when both are present.
 
 Minimal export action example:
 
@@ -150,6 +167,8 @@ payload["export_keys"] # value-extraction keys
 The direct object and controller helper return the same payload keys.
 
 For direct object usage, treat `columns`, `column_keys`, `export_keys`, and `headers` as the export source of truth. They are built from the current column definitions and saved display preferences, so stale saved column keys are not reintroduced into the ordered export column list. The returned `settings` value is the normalized settings snapshot and may still include saved filter, sort, or column entries for keys that no longer exist in the current `columns` list.
+
+Do not pass the direct object's `settings` snapshot straight into a host-app search layer as if it were controller params. If an export action needs saved filter/sort params, use `rails_table_preference_params(...)`, `rails_table_preference_merged_params(...)`, or `table_preferences_params(...)` with the same `columns` and adapter policy that the list action uses.
 
 ## Hidden columns
 
@@ -276,10 +295,13 @@ Rails Table Preferences owns:
 - filtering hidden columns unless `include_hidden: true`
 - ordering export columns according to saved display order
 - returning labels and metadata
+- converting saved filter/sort settings into params when the controller-param helpers are used
 
 The host application owns:
 
 - authorization
+- deciding which request params an export action accepts
+- deciding whether saved filter/sort params or user-entered request params win
 - query execution
 - CSV/Excel/report file generation
 - formatting values
