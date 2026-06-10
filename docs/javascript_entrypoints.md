@@ -50,6 +50,14 @@ The import specifiers above are backed by the `package.json` file that is packag
 
 Host apps should rely on the documented `exports` specifiers, `rails_table_preferences` and `rails_table_preferences/controller`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
 
+### Stylesheet boundary
+
+The package entrypoint controls JavaScript registration only. The packaged `package.json` currently exports `rails_table_preferences` and `rails_table_preferences/controller`; it does not export a CSS subpath such as `rails_table_preferences/styles.css`.
+
+If the host app uses `rails_table_preferences/controller` and keeps the generated stylesheet, load the copied `app/assets/stylesheets/rails_table_preferences.css` through the host app's normal asset path. If the host app also uses `--skip-stylesheets`, Rails Table Preferences will not provide a bundler CSS import for that screen; the host app owns equivalent CSS for the editor, table state cues, resize handles, fixed-column hooks, and any local theme integration.
+
+Treat a future CSS subpath export as a separate feature decision. It would need `package.json` exports, package verification evidence, release checklist wording, and host-app bundler smoke coverage to move together instead of being inferred from the JavaScript entrypoint.
+
 ### Package-only controller boundary
 
 The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`.
@@ -137,12 +145,15 @@ This path is also the lighter choice for wording and label changes that can stay
 
 Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass.
 
+The stylesheet decision remains separate from the controller decision. Keeping the copied stylesheet is the current default even when JavaScript registration moves to the package entrypoint. If the host app skips the stylesheet, it owns CSS parity evidence for editor layout, table state cues, resize handles, fixed-column hooks, and any local theme overrides.
+
 ## Moving from a copied controller to the package entrypoint
 
 When an existing host app moves from the copied controller to `rails_table_preferences/controller`, check these items before removing the copied file from active registration:
 
 - The host app has exactly one Stimulus application registration for `rails-table-preferences`.
 - The bundler resolves both `rails_table_preferences/controller` and, if used, `rails_table_preferences`.
+- The host app still loads either the generated stylesheet or equivalent host-app CSS; package entrypoint imports do not load CSS for the screen.
 - Any local changes in `app/javascript/controllers/rails_table_preferences_controller.js` have been classified as wording, markup, or behavior changes.
 - Wording-only changes have moved to Rails locale keys or controller-root label values where possible.
 - Markup changes remain in copied ERB, not in the package entrypoint import.
