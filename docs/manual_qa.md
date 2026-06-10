@@ -21,6 +21,17 @@ Use this short path when you need a first browser confidence check for a docs PR
 
 After this quick smoke, continue into the relevant sections below for the feature area you changed. For release sign-off or host-app launch, complete the full checklist and record any skipped areas in the sign-off notes.
 
+## Track-based starting points
+
+Use these track entries to choose the first manual QA scope for small PRs. They do not replace the quick smoke, the full checklist, or the [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md). Use the smoke matrix when a PR comment needs category-specific evidence wording, escalation criteria, or browser-capable handoff language.
+
+- `track:docs`: start with source-of-truth review rather than browser smoke unless the text claims a rendered state. Check changed links, commands, option names, issue or PR references, and the neighboring guide that owns the behavior. If README, docs index, English quick start, or a focused entrypoint changes, compare the low-drift Japanese quick start links and summaries when relevant.
+- `track:design`: start with the quick smoke plus the UI, CSS, accessibility, or high-contrast sections touched by the PR. For editor layout, action grouping, filter panel reachability, forced-colors, focus visibility, or visual docs, use the smoke matrix category to record rendered evidence or an explicit browser-capable handoff.
+- `track:feature`: start with the quick smoke, then run the sections for the changed public surface, such as presets, filters, sort, fixed columns, exports, controller params, generator/demo flow, JavaScript entrypoints, or resource table helpers. Add the release or package verification sections only when the PR changes package contents, setup paths, or release-facing behavior.
+- `track:quality`: start with the invariant or regression area the PR protects, then run the smallest browser/manual check that would reveal the same failure in a real screen. Keep source-level specs, CI results, and browser evidence separate; use the smoke matrix when the PR needs a review-state handoff instead of more checklist work.
+
+For mixed-track PRs, choose the strictest entry that matches the user-visible risk. Escalate to the full checklist for release candidates, host-app launch checks, custom integration points, multi-category changes, or any suspicious quick-smoke result.
+
 ## 1. Environment and installation
 
 - [ ] Create or select a Rails application for manual testing.
