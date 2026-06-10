@@ -27,6 +27,8 @@ The option is deliberately separate from `--with-demo-route`. Use it when the ho
 
 `--skip-javascript` only skips the copied `app/javascript/controllers/rails_table_preferences_controller.js` file. It does not remove the JavaScript requirement: the host app must still register either the package entrypoint or a compatible host-owned controller with the `rails-table-preferences` Stimulus name.
 
+`--skip-stylesheets` is separate from the JavaScript choice. A host app can register `rails_table_preferences/controller` from a Vite or `app/frontend` entrypoint and still use the copied stylesheet, or it can skip the stylesheet and provide equivalent host-app CSS. The package entrypoint does not currently expose a CSS subpath import through `package.json` `exports`, so skipped stylesheets require host-app evidence for the editor, table state, resize handles, and fixed-column hooks.
+
 ## Owner requirement for demo and API checks
 
 The bundled editor, mounted JSON API, and copied demo screen all use the configured current-owner method. By default that is `current_user` and the owner model is `User`.
@@ -75,6 +77,8 @@ application.register("rails-table-preferences", RailsTablePreferencesController)
 ```
 
 For Vite and similar bundlers, also add a resolver for `rails_table_preferences` and `rails_table_preferences/controller`. Keep [JavaScript entrypoints](javascript_entrypoints.md) as the source of truth for the full resolver example, TypeScript declaration note, and the package-only controller behavior boundary.
+
+This JavaScript entrypoint choice does not decide how the stylesheet is loaded. If `--skip-stylesheets` is not used, the generated stylesheet remains the default CSS path. If `--skip-stylesheets` is used, the host app owns equivalent CSS and should verify the editor layout, table state cues, resize handles, and fixed-column hooks. Do not treat `rails_table_preferences/controller` as a CSS import path.
 
 When choosing between the copied controller, the package entrypoint, and a host-owned controller, verify any screen-specific controller-root values against that boundary. Package-only values such as `data-rails-table-preferences-filter-operator-labels-value` are available only when the registered controller comes from `rails_table_preferences/controller`; host-owned or copied controller paths need their own JavaScript for equivalent behavior.
 
