@@ -51,6 +51,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const wasBusy = this.busy
     const result = super.resetEditor(event)
     if (!wasBusy) {
+      this.clearEditorSearchQuery()
       this.clearSuccessfulStatus()
       this.dispatchPreferenceEvent("applied", { action: "reset" })
     }
@@ -174,6 +175,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     wrapper.append(label, empty)
     this.editorRowsTarget.before(wrapper)
+  }
+
+  clearEditorSearchQuery() {
+    const input = this.editorSearchInput
+    if (input) input.value = ""
+    this.syncEditorSearchResults()
   }
 
   syncEditorSearchResults() {
@@ -340,7 +347,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.busy) return null
 
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("loaded", { action: "load" })
+    if (result !== null && this.statusState === "success") {
+      this.clearEditorSearchQuery()
+      this.dispatchPreferenceEvent("loaded", { action: "load" })
+    }
     return result
   }
 
@@ -365,6 +375,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         this.settingsValue = this.defaultSettings
         this.closeFilterPanel()
         this.renderEditor()
+        this.clearEditorSearchQuery()
         this.apply()
         this.syncPresetEditingState()
         await this.refreshPresetOptions()
