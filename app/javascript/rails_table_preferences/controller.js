@@ -70,9 +70,24 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.replaceEditorDragHandle(row)
     row.addEventListener("input", () => this.clearSuccessfulStatus())
     row.addEventListener("change", () => this.clearSuccessfulStatus())
-    row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
+    row.dataset.railsTablePreferencesEditorSearchText = this.editorSearchTextForColumn(column)
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  editorSearchTextForColumn(column) {
+    return [
+      column.label,
+      column.key,
+      ...this.editorSearchGroupTokens(column.group)
+    ].filter(Boolean).map((token) => String(token).toLowerCase()).join(" ")
+  }
+
+  editorSearchGroupTokens(group) {
+    if (!group) return []
+    if (Array.isArray(group)) return group.flatMap((item) => this.editorSearchGroupTokens(item))
+    if (typeof group === "object") return [group.key, group.label].filter(Boolean)
+    return [group]
   }
 
   replaceEditorDragHandle(row) {
@@ -170,6 +185,9 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const empty = document.createElement("p")
     empty.className = "rails-table-preferences-editor__search-empty"
     empty.dataset.railsTablePreferencesEditorSearchEmpty = "true"
+    empty.setAttribute("role", "status")
+    empty.setAttribute("aria-live", "polite")
+    empty.setAttribute("aria-atomic", "true")
     empty.hidden = true
     empty.textContent = this.editorNoSearchResultsLabelValue
 
