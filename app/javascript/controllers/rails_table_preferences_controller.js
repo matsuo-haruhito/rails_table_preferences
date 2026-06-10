@@ -501,7 +501,7 @@ export default class extends Controller {
       handle.className = "rails-table-preferences-resize-handle"
       handle.dataset.railsTablePreferencesResizeHandle = "true"
       handle.setAttribute("aria-label", this.resizeHandleLabel(cell))
-      handle.addEventListener("mousedown", this.startColumnResize.bind(this))
+      handle.addEventListener("pointerdown", this.startColumnResize.bind(this))
       handle.addEventListener("dblclick", this.autoFitColumnFromHandle.bind(this))
       handle.addEventListener("click", (event) => event.preventDefault())
       this.applyResizeHandleHitArea(cell, handle)
@@ -542,9 +542,12 @@ export default class extends Controller {
     handle.style.cursor = "col-resize"
     handle.style.opacity = "0"
     handle.style.zIndex = "1"
+    handle.style.touchAction = "none"
+    handle.style.userSelect = "none"
   }
 
   startColumnResize(event) {
+    if (event.button !== undefined && event.button !== 0) return
     event.preventDefault()
     event.stopPropagation()
     if (this.busy) return
@@ -554,12 +557,14 @@ export default class extends Controller {
     this.resizingColumn = {
       key: headerCell.dataset.railsTablePreferencesColumnKey,
       startX: event.clientX,
-      startWidth: headerCell.getBoundingClientRect().width
+      startWidth: headerCell.getBoundingClientRect().width,
+      pointerId: event.pointerId
     }
     this.boundResizeColumn = this.resizeColumn.bind(this)
     this.boundStopColumnResize = this.stopColumnResize.bind(this)
-    document.addEventListener("mousemove", this.boundResizeColumn)
-    document.addEventListener("mouseup", this.boundStopColumnResize)
+    document.addEventListener("pointermove", this.boundResizeColumn)
+    document.addEventListener("pointerup", this.boundStopColumnResize)
+    document.addEventListener("pointercancel", this.boundStopColumnResize)
   }
 
   resizeColumn(event) {
@@ -621,8 +626,11 @@ export default class extends Controller {
   }
 
   uninstallDocumentResizeListeners() {
-    if (this.boundResizeColumn) document.removeEventListener("mousemove", this.boundResizeColumn)
-    if (this.boundStopColumnResize) document.removeEventListener("mouseup", this.boundStopColumnResize)
+    if (this.boundResizeColumn) document.removeEventListener("pointermove", this.boundResizeColumn)
+    if (this.boundStopColumnResize) {
+      document.removeEventListener("pointerup", this.boundStopColumnResize)
+      document.removeEventListener("pointercancel", this.boundStopColumnResize)
+    }
     this.boundResizeColumn = null
     this.boundStopColumnResize = null
   }
