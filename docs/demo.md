@@ -43,6 +43,8 @@ The same screen now includes a lightweight hidden fields preview for the generat
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers`, `column_keys`, and `export_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion, saved order, and `export_key` metadata without wiring a real CSV action first.
 
+Both preview sections include copy controls for collecting evidence quickly. If the browser does not expose the Clipboard API, the copy button is disabled but the preview remains readable; if a copy attempt fails, select the visible preview text manually and use that as the evidence instead.
+
 The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup. Apply and table-header drag update the leaf headers and body cells live; the demo-only grouped header row is server-rendered and should be verified after save/reload, when it follows the current visible columns again.
 
 The generated screen also includes a `Demo state reset` section with a `Reset demo verification state` button. Use it to delete owner-scoped presets for the current owner and demo table, then reload into the seeded shared / role / organization baseline before repeating scoped precedence checks.
@@ -178,6 +180,7 @@ The generated demo screen includes:
 - existing search form hidden fields
 - hidden fields preview for existing search form roundtrip checks
 - export payload preview for ordered `headers`, `column_keys`, and `export_keys`
+- copy controls for preview evidence, with disabled-copy and failed-copy fallback to manual preview text selection
 - representative `export_key` metadata so export value keys can differ from display/preference keys
 
 For the accessibility-side contract behind these checks, see [Accessibility baseline](accessibility.md).
@@ -208,6 +211,7 @@ On the demo screen, confirm:
 - [ ] Reload restores saved settings.
 - [ ] The search form hidden fields preview updates after reload to show saved filter/sort inputs separately from the export payload preview.
 - [ ] The hidden fields preview keeps array params visible with `[]` names, omits blank values, and shows saved boolean false values when that state is saved.
+- [ ] If the hidden fields preview copy control is disabled or reports a copy failure, the preview text remains readable and can be selected manually as evidence.
 - [ ] Save as new creates another preset.
 - [ ] `共有ビュー [shared]` appears in the preset selector.
 - [ ] Selecting `共有ビュー [shared]` loads the shared preset and keeps the normal editor usable.
@@ -234,6 +238,7 @@ On the demo screen, confirm:
 - [ ] The export payload preview excludes hidden columns by default.
 - [ ] After saving a new visible-column order, the export payload preview shows the same header order, column key order, and export key order.
 - [ ] The export payload preview shows `customer_name` in `column_keys` and `customer_display_name` in `export_keys`, confirming the demo's representative `export_key` metadata.
+- [ ] If the export payload preview copy control is disabled or reports a copy failure, the preview text remains readable and can be selected manually as evidence.
 
 ## Use Demo state reset before scoped checks
 
