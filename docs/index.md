@@ -61,8 +61,19 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Controller integration](controller_integration.md): how to resolve saved preferences and pass filter/sort params to existing Rails controllers.
 - [Filter metadata](filter_metadata.md): how to declare filterable/sortable columns and how neutral filter/sort settings are stored.
 - [Filter adapters](filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
-- [JavaScript entrypoints](javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, custom JS bundlers, and Turbo reconnect checks.
+- [JavaScript entrypoints](javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, custom JS bundlers, Turbo reconnect checks, and the JavaScript public-surface source-of-truth role.
 - [JavaScript controller notes](javascript_controller.md): responsibilities, event boundaries, and safety invariants for the bundled Stimulus controller.
+
+## Public surface source-of-truth family
+
+Rails Table Preferences keeps the first public-surface source of truth in the existing docs and package verification family rather than a dedicated manifest file.
+
+- JavaScript package imports and the copied-controller boundary are defined in [JavaScript entrypoints](javascript_entrypoints.md), then checked by package metadata, entrypoint smoke specs, JavaScript syntax checks, and package verification.
+- Helper options, rendered table/editor responsibilities, filter/sort metadata, scoped presets, export payloads, and resource-table adapters are defined in the focused guides linked above instead of being mirrored into README.
+- Generator options, copied assets, package contents, and release evidence are guarded by [Install path options](install_paths.md), [Release checklist](release_checklist.md), and [Package verification](package_verification.md).
+- README remains the newcomer-facing entry point. This docs index remains the detailed map. Package verification decides which docs and runtime files must ship in the gem.
+
+Do not add a TreeView-style public API manifest as the default first response to drift. Consider one only when a surface becomes too large for the focused guide plus package/spec checks to keep clear, such as a growing helper option inventory, many lifecycle event detail keys, or additional package-root JavaScript exports.
 
 ## Maintainer entry
 
