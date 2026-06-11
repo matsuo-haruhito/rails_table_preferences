@@ -31,11 +31,12 @@ module RailsTablePreferences
                 :editor,
                 :sortable,
                 :sort_param,
+                :draggable,
                 :model,
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, editor: nil, sortable: nil, sort_param: nil)
+    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, editor: nil, sortable: nil, sort_param: nil, draggable: nil)
       @key = key.to_s
       @export_key = export_key&.to_s.presence
       @model = model
@@ -54,6 +55,7 @@ module RailsTablePreferences
       @editor = normalize_editor(editor)
       @sortable = normalize_sortable(sortable)
       @sort_param = sort_param&.to_s
+      @draggable = normalize_draggable(draggable)
     end
 
     def to_h
@@ -72,7 +74,8 @@ module RailsTablePreferences
         "filter" => filter,
         "editor" => editor,
         "sortable" => sortable,
-        "sort_param" => sort_param
+        "sort_param" => sort_param,
+        "draggable" => draggable
       }.compact
     end
 
@@ -227,6 +230,12 @@ module RailsTablePreferences
     end
 
     def normalize_sortable(value)
+      return nil if value.nil?
+
+      ActiveModel::Type::Boolean.new.cast(value)
+    end
+
+    def normalize_draggable(value)
       return nil if value.nil?
 
       ActiveModel::Type::Boolean.new.cast(value)
