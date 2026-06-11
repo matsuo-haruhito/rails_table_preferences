@@ -58,7 +58,8 @@ module RailsTablePreferences
           ignore: attributes["ignore"],
           filter: normalize_filter(attributes["filter"]),
           sortable: attributes["sortable"],
-          sort_param: attributes["sort_param"]
+          sort_param: attributes["sort_param"],
+          draggable: attributes["draggable"]
         ).to_h.merge(extra_attributes(attributes))
       end
 
