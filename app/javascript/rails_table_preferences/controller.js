@@ -1,5 +1,7 @@
 import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
 
+const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])
+
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
     ...RailsTablePreferencesBaseController.values,
@@ -9,7 +11,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
-    resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" }
+    resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
+    selectFilterOptionSearchThreshold: { type: Number, default: 8 }
   }
 
   buildPresetOption(preset) {
@@ -47,7 +50,11 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   resetEditor(event) {
     const wasBusy = this.busy
     const result = super.resetEditor(event)
-    if (!wasBusy) this.clearSuccessfulStatus()
+    if (!wasBusy) {
+      this.clearEditorSearchQuery()
+      this.clearSuccessfulStatus()
+      this.dispatchPreferenceEvent("applied", { action: "reset" })
+    }
     return result
   }
 
@@ -60,11 +67,43 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   buildEditorRow(column) {
     const row = super.buildEditorRow(column)
+    this.replaceEditorDragHandle(row)
     row.addEventListener("input", () => this.clearSuccessfulStatus())
     row.addEventListener("change", () => this.clearSuccessfulStatus())
     row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  replaceEditorDragHandle(row) {
+    const handle = row.querySelector(".rails-table-preferences-editor__drag-handle")
+    if (!handle) return
+
+    const visualHandle = document.createElement("span")
+    visualHandle.className = handle.className
+    visualHandle.dataset.railsTablePreferencesEditorDragHandle = "visual"
+    visualHandle.draggable = false
+    visualHandle.setAttribute("aria-hidden", "true")
+    visualHandle.textContent = handle.textContent || "↕"
+    handle.replaceWith(visualHandle)
+  }
+
+  showAllEditorColumns(event) {
+    this.setEditorColumnVisibility(event, true)
+  }
+
+  hideAllEditorColumns(event) {
+    this.setEditorColumnVisibility(event, false)
+  }
+
+  setEditorColumnVisibility(event, visible) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+    this.editorRows.forEach((row) => {
+      const visibleInput = row.querySelector('[data-field="visible"]')
+      if (visibleInput) visibleInput.checked = visible === true
+    })
+    this.clearSuccessfulStatus()
   }
 
   buildEditorMoveControls() {
@@ -136,6 +175,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     wrapper.append(label, empty)
     this.editorRowsTarget.before(wrapper)
+  }
+
+  clearEditorSearchQuery() {
+    const input = this.editorSearchInput
+    if (input) input.value = ""
+    this.syncEditorSearchResults()
   }
 
   syncEditorSearchResults() {
@@ -229,6 +274,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   endTableColumnDrag(event) {
     super.endTableColumnDrag(event)
     this.clearSuccessfulStatus()
+    this.syncEditorMoveButtons()
   }
 
   toggleSortFromHeader(event, cell, column) {
@@ -247,8 +293,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   setStatus(message, state = "idle") {
-    this.statusState = message ? state : "idle"
+    const nextState = message ? state : "idle"
+    this.statusState = nextState
+    this.syncStatusStateHook(nextState)
     super.setStatus(message)
+  }
+
+  syncStatusStateHook(state = this.statusState || "idle") {
+    const target = this.hasStatusTarget ? this.statusTarget : null
+    if (!target || typeof target.setAttribute !== "function") return
+    target.setAttribute("data-rails-table-preferences-status-state", state || "idle")
   }
 
   clearSuccessfulStatus() {
@@ -293,7 +347,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.busy) return null
 
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("loaded", { action: "load" })
+    if (result !== null && this.statusState === "success") {
+      this.clearEditorSearchQuery()
+      this.dispatchPreferenceEvent("loaded", { action: "load" })
+    }
     return result
   }
 
@@ -318,6 +375,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         this.settingsValue = this.defaultSettings
         this.closeFilterPanel()
         this.renderEditor()
+        this.clearEditorSearchQuery()
         this.apply()
         this.syncPresetEditingState()
         await this.refreshPresetOptions()
@@ -338,6 +396,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   handleOperationError(error, message = this.operationFailedStatusLabelValue) {
     super.handleOperationError(error, message)
     this.statusState = "error"
+    this.syncStatusStateHook("error")
     this.dispatchPreferenceEvent("error", {
       action: this.currentPreferenceAction || "operation",
       message: message || this.operationFailedStatusLabelValue
@@ -413,6 +472,21 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return event.key === "Enter" || event.key === " " || event.key === "Spacebar"
   }
 
+  showAllColumns(event) {
+    if (this.busy) return
+    if (event) event.preventDefault()
+
+    this.settingsValue = {
+      ...this.settingsValue,
+      columns: this.columnsFromSettings.map((column) => ({ ...column, visible: true })),
+      filters: this.settingsValue?.filters || {},
+      sorts: this.settingsValue?.sorts || []
+    }
+    this.closeFilterPanel()
+    this.renderEditor()
+    this.apply()
+  }
+
   clearFiltersAndSorts(event) {
     if (this.busy) return
     if (event) event.preventDefault()
@@ -480,26 +554,34 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
 
     const label = `${this.filterValueLabelValue}: 候補を絞り込み`
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}">`
+    const emptyLabel = "一致する候補はありません。選択済みの候補は表示したままです。"
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
   }
 
   installSelectFilterOptionSearch(panel) {
     const input = panel?.querySelector("[data-field='option-search']")
     const select = panel?.querySelector("[data-field='values']")
+    const emptyMessage = panel?.querySelector("[data-rails-table-preferences-option-search-empty]")
     if (!input || !select || input.dataset.railsTablePreferencesOptionSearchInstalled === "true") return
 
     input.dataset.railsTablePreferencesOptionSearchInstalled = "true"
-    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select))
-    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select))
-    this.filterSelectOptionsBySearch(input, select)
+    input.addEventListener("input", () => this.filterSelectOptionsBySearch(input, select, emptyMessage))
+    select.addEventListener("change", () => this.filterSelectOptionsBySearch(input, select, emptyMessage))
+    this.filterSelectOptionsBySearch(input, select, emptyMessage)
   }
 
-  filterSelectOptionsBySearch(input, select) {
+  filterSelectOptionsBySearch(input, select, emptyMessage = null) {
     const query = String(input?.value || "").trim().toLocaleLowerCase()
+    let matchingUnselectedOptions = 0
+
     Array.from(select?.options || []).forEach((option) => {
       const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
-      option.hidden = Boolean(query) && !option.selected && !searchableText.includes(query)
+      const matchesQuery = searchableText.includes(query)
+      if (matchesQuery && !option.selected) matchingUnselectedOptions += 1
+      option.hidden = Boolean(query) && !option.selected && !matchesQuery
     })
+
+    if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0
   }
 
   selectFilterOptionValue(option) {
@@ -518,7 +600,27 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return String(option ?? "")
   }
 
-  get selectFilterOptionSearchThreshold() { return 8 }
+  get selectFilterOptionSearchThreshold() {
+    const rawValue = this.element?.dataset?.railsTablePreferencesSelectFilterOptionSearchThresholdValue
+    if (rawValue !== undefined && String(rawValue).trim() === "") return 8
+
+    const threshold = Number(this.selectFilterOptionSearchThresholdValue)
+    if (!Number.isFinite(threshold)) return 8
+    return Math.floor(threshold)
+  }
+
+  filterOperatorsFor(filter) {
+    if (Array.isArray(filter.operators) && filter.operators.length > 0) return filter.operators.map(String)
+    if (DATE_TIME_FILTER_TYPES.has(String(filter.type))) return ["equals", "gteq", "lteq", "between", "blank", "present"]
+    return super.filterOperatorsFor(filter)
+  }
+
+  filterInputType(filter) {
+    const type = String(filter.type)
+    if (type === "datetime" || type === "datetime-local") return "datetime-local"
+    if (type === "time") return "time"
+    return super.filterInputType(filter)
+  }
 
   filterOperatorText(operator) {
     const key = String(operator)

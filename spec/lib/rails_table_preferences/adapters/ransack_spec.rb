@@ -21,6 +21,23 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
       ).to eq("customer_name_cont" => "山田")
     end
 
+    it "preserves unknown filter keys as fallback params when columns metadata is provided" do
+      expect(
+        described_class.filter_params(
+          {
+            customer_id: { operator: :contains, value: "山田" },
+            legacy_status: { operator: :equals, value: "archived" }
+          },
+          columns: [
+            { key: :customer_id, filter: { param: :customer_name } }
+          ]
+        )
+      ).to eq(
+        "customer_name_cont" => "山田",
+        "legacy_status_eq" => "archived"
+      )
+    end
+
     it "converts equality and comparison filters" do
       expect(
         described_class.filter_params(
@@ -157,6 +174,20 @@ RSpec.describe RailsTablePreferences::Adapters::Ransack do
           ]
         )
       ).to eq("s" => ["customer_name asc"])
+    end
+
+    it "preserves unknown sort keys as fallback params when columns metadata is provided" do
+      expect(
+        described_class.sort_params(
+          [
+            { key: :customer_id, direction: :asc },
+            { key: :legacy_status, direction: :desc }
+          ],
+          columns: [
+            { key: :customer_id, sort_param: :customer_name }
+          ]
+        )
+      ).to eq("s" => ["customer_name asc", "legacy_status desc"])
     end
 
     it "ignores invalid sort directions" do

@@ -12,6 +12,7 @@ RSpec.describe "editor package entrypoint affordances" do
   it "keeps package entrypoint search and move affordances wired without changing the base controller" do
     expect(controller_source).to include("editorSearchLabel")
     expect(controller_source).to include("ensureEditorSearchControl")
+    expect(controller_source).to include("clearEditorSearchQuery")
     expect(controller_source).to include("syncEditorSearchResults")
     expect(controller_source).to include("buildEditorMoveControls")
     expect(controller_source).to include("moveEditorRow")
@@ -25,6 +26,22 @@ RSpec.describe "editor package entrypoint affordances" do
     expect(controller_source).to include("this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0")
     expect(controller_source).not_to include("row.remove()")
     expect(controller_source).not_to include("removeChild(row)")
+  end
+
+  it "clears editor search only when replacing the editor state" do
+    apply_source = controller_source[/  applyFromEditor\(event\).*?^  \}/m]
+    save_source = controller_source[/  async save\(event\).*?^  \}/m]
+    create_source = controller_source[/  async createPresetFromEditor\(event\).*?^  \}/m]
+
+    expect(controller_source).to include("const input = this.editorSearchInput")
+    expect(controller_source).to include('if (input) input.value = ""')
+    expect(controller_source).to include("this.syncEditorSearchResults()")
+    expect(controller_source).to match(/resetEditor\(event\).*clearEditorSearchQuery\(\).*dispatchPreferenceEvent\("applied", \{ action: "reset" \}\)/m)
+    expect(controller_source).to match(/selectPreset\(event\).*clearEditorSearchQuery\(\).*dispatchPreferenceEvent\("loaded", \{ action: "load" \}\)/m)
+    expect(controller_source).to match(/deletePreset\(event\).*renderEditor\(\).*clearEditorSearchQuery\(\).*apply\(\)/m)
+    expect(apply_source).not_to include("clearEditorSearchQuery")
+    expect(save_source).not_to include("clearEditorSearchQuery")
+    expect(create_source).not_to include("clearEditorSearchQuery")
   end
 
   it "limits move actions to visible rows while preserving an all-row fallback" do
@@ -63,6 +80,8 @@ RSpec.describe "editor package entrypoint affordances" do
   it "documents browser checks and the existing QA checklist routing" do
     expect(docs_source).to include("Use the bundled column search field")
     expect(docs_source).to include("Search is an editor navigation affordance, not a column visibility filter")
+    expect(docs_source).to include("reset, preset load, or preset delete")
+    expect(docs_source).to include("apply, save, or save as new")
     expect(docs_source).to include("no-results search")
     expect(docs_source).to include("saving as new")
     expect(docs_source).to include("Use the row up/down buttons")

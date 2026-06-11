@@ -127,6 +127,15 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("demo_hidden_fields_preview = demo_hidden_fields_html.present?")
     expect(view.read).to include("h(demo_hidden_fields_preview)")
     expect(view.read).to include("Array params keep their")
+    expect(view.read).to include("Verification context")
+    expect(view.read).to include("rails-table-preferences-demo-verification-grid")
+    expect(view.read).to include("Current owner")
+    expect(view.read).to include("Owner switch")
+    expect(view.read).to include("Current scope context")
+    expect(view.read).to include("Scope switch")
+    expect(view.read).to include("rails-table-preferences-demo-owner-switch--active")
+    expect(view.read).to include("rails-table-preferences-demo-scope-switch--active")
+    expect(view.read).to include("aria-current")
     expect(view.read).to include("Export payload preview")
     expect(view.read).to include("Default column keys")
     expect(view.read).to include("Include-hidden column keys")
@@ -204,7 +213,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(output).to include("Rails Table Preferences installed.", "Next steps:")
     expect(next_step_headings(output)).to eq([
       "Run: bin/rails db:migrate",
-      "Mount the engine in config/routes.rb:",
+      "Mount the engine in config/routes.rb, or rerun with --with-engine-route:",
       "Ensure app/assets/stylesheets/rails_table_preferences.css is loaded by your application stylesheet.",
       "Ensure the copied Stimulus controller is registered."
     ])
@@ -216,7 +225,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
     expect(next_step_headings(output)).to eq([
       "Run: bin/rails db:migrate",
-      "Mount the engine in config/routes.rb:",
+      "Mount the engine in config/routes.rb, or rerun with --with-engine-route:",
       "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name."
     ])
     expect(output).to include("rails_table_preferences/controller")
@@ -230,7 +239,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
     expect(next_step_headings(output)).to eq([
       "Run: bin/rails db:migrate",
-      "Mount the engine in config/routes.rb:",
+      "Mount the engine in config/routes.rb, or rerun with --with-engine-route:",
       "Register either a host-owned controller or the package entrypoint with the rails-table-preferences Stimulus name.",
       "Demo route configured in config/routes.rb:"
     ])

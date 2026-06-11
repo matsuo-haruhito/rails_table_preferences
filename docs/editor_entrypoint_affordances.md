@@ -8,17 +8,28 @@ The package entrypoint adds a lightweight column search field before the generat
 
 Search is an editor navigation affordance, not a column visibility filter. A no-results search only means every editor row is temporarily hidden in the editor surface; applying, saving, or saving as new should still assemble settings from all editor rows. Clear the search before reviewing the visible row list, but do not treat the no-results state as a request to save a zero-column table.
 
+The Show all columns and Hide all columns bulk actions keep their all-row scope while a search is active. They toggle every editor row's visibility checkbox, including rows temporarily hidden by the search, and do not create a search-results-only visibility mode.
+
+Reset, preset load, and preset delete replace the editor state with another settings snapshot, so the package entrypoint clears the search query after those operations. Apply, save, and save as new keep the current query because they operate within the same editing context. Clearing the query restores all editor rows, hides the no-results message, and recalculates the row move buttons for the full visible list.
+
 Use the bundled column search field when checking a table with many columns:
 
 - search by a visible column label and confirm only matching rows remain visible
 - search by a column key or group word when labels are similar
+- use Show all columns or Hide all columns while search is active and confirm hidden search rows are included in the bulk checkbox change
 - clear the search and confirm every editor row returns
+- reset, preset load, or preset delete while a search is active and confirm the search field clears, every editor row returns, the no-results message is hidden, and row move buttons recalculate for the full list
+- apply, save, or save as new while a search is active and confirm the search query stays in place because the same editing context remains active
 - apply or save while a search is active and confirm columns hidden by the search are not removed from the saved settings
 - apply or save while the search has no results and confirm the saved settings still keep the full column set after clearing the search or reloading the preset
 
 ## Row move buttons
 
 The package entrypoint also adds small up/down buttons beside each editor row. These buttons are a visible alternative to dragging rows and a quicker path than editing numeric order values by hand.
+
+The package entrypoint row drag handle is only a visual affordance; keyboard reorder evidence should use the row up/down buttons or the numeric order input. See [Editor reorder accessibility note](editor_reorder_accessibility.md) for the visual-only handle, keyboard-control, and copied-controller boundary.
+
+The copied/base controller does not render these row move buttons. In that path, the keyboard-friendly reorder fallback remains the numeric order input plus the bundled `適用` action. Keep this distinction visible when choosing an install path: package entrypoint screens can verify row up/down controls, while copied-controller screens should verify the order input fallback instead.
 
 Use the row up/down buttons during browser QA:
 
@@ -50,6 +61,7 @@ Use this note together with the existing checklist entries rather than as a repl
 - `docs/manual_qa.md` section 16 already covers accessibility baseline checks for focus order, async busy disabling, numeric order fallback, touch/narrow viewport fallback, and keyboard-only reordering.
 - `docs/manual_qa.md` section 18 already covers browser and layout checks for narrow widths, editor input overlap, and reachable column controls.
 - `docs/accessibility.md` covers the package-entrypoint-only column search and row move controls, including accessible labels, filtered-row preservation, first/last/hidden/busy disabled states, and narrow-width checks.
+- `docs/editor_reorder_accessibility.md` keeps the package-entrypoint visual-only drag handle boundary separate from keyboard-reachable row move buttons and copied-controller choices.
 
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
 

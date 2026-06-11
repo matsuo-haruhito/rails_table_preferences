@@ -26,7 +26,7 @@ Focused documentation is available under [`docs/`](docs/index.md). Start with th
 - [Decision guide](docs/decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Demo screen generator](docs/demo.md): copy a lightweight browser verification screen into a host app.
 - [Troubleshooting](docs/troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, and customization issues.
-- [Select filter troubleshooting](docs/select_filter_troubleshooting.md): focused checks for `values_param`, scalar select options, and host-app query ownership when saved select filters do not affect results.
+- [Select filter troubleshooting](docs/select_filter_troubleshooting.md): focused checks for `values_param`, scalar or label/value select options, option-search threshold cues, and host-app query ownership when saved select filters do not affect results.
 
 Core topic guides are grouped in the [docs index](docs/index.md), including resource tables, scoped presets, fixed columns, filter metadata, filter adapters, controller integration, export integration, accessibility, JavaScript entrypoints, mounted JSON API, manual QA, release checks, and package verification.
 
@@ -97,6 +97,14 @@ Mount the engine when using the bundled JSON API:
 # config/routes.rb
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
+
+If the host app wants the generator to add that default mount route, use `--with-engine-route`:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-engine-route
+```
+
+Keep the manual route path when the app reviews routes by hand or uses a custom `config.mount_path`. See [Install path options](docs/install_paths.md) for the route option boundary and custom mount-path note.
 
 For Vite / `app/frontend/entrypoints/application.js`, register the packaged Stimulus controller explicitly:
 
@@ -846,17 +854,17 @@ Run the Ruby test suite:
 bundle exec rspec
 ```
 
-Check the bundled Stimulus controller for JavaScript syntax errors:
+Check the copied controller and packaged JavaScript export targets for syntax errors:
 
 ```bash
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 ```
 
 The current minimum local verification before pushing changes is:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 ```
 
@@ -866,7 +874,7 @@ Before tagging or publishing a release, also inspect the built package with [Pac
 
 ## Development status
 
-This gem is in active initial development. The current test suite is expected to pass locally, and the bundled Stimulus controller should pass `node --check`.
+This gem is in active initial development. The current test suite is expected to pass locally, and the copied controller plus packaged JavaScript export targets should pass `node script/check_javascript_syntax.mjs`.
 
 ## License
 
