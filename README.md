@@ -854,17 +854,17 @@ Run the Ruby test suite:
 bundle exec rspec
 ```
 
-Check the bundled Stimulus controller for JavaScript syntax errors:
+Check the copied controller and packaged JavaScript export targets for syntax errors:
 
 ```bash
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 ```
 
 The current minimum local verification before pushing changes is:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 ```
 
@@ -874,7 +874,7 @@ Before tagging or publishing a release, also inspect the built package with [Pac
 
 ## Development status
 
-This gem is in active initial development. The current test suite is expected to pass locally, and the bundled Stimulus controller should pass `node --check`.
+This gem is in active initial development. The current test suite is expected to pass locally, and the copied controller plus packaged JavaScript export targets should pass `node script/check_javascript_syntax.mjs`.
 
 ## License
 
