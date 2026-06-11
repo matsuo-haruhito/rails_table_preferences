@@ -110,7 +110,7 @@ The default resource table partials pass basic table HTML options through to `ta
 
 ### Horizontal scroll wrapper
 
-`resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
+`resource_table_for` and `tree_resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
 
 ```erb
 <%= resource_table_for(
@@ -125,11 +125,19 @@ The default resource table partials pass basic table HTML options through to `ta
 ) %>
 ```
 
-`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>`. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
+```erb
+<%= tree_resource_table_for(
+  @projects,
+  parent_id_method: :parent_project_id,
+  scroll_wrapper: true,
+  wrapper_options: { class: "projects-tree-scroll" },
+  class: "projects-tree-table"
+) %>
+```
 
-Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
+`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>` for both flat and tree resource tables. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
 
-`tree_resource_table_for` does not receive this option yet. If a tree table needs a wrapper, keep it in host markup or a custom partial until the tree path is planned separately.
+Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat or tree resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
 
 ### Captions
 

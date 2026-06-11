@@ -293,6 +293,7 @@ module RailsTablePreferencesDemo
         table_preferences_column(
           :customer_name,
           label: "得意先名",
+          export_key: :customer_display_name,
           default_width: 240,
           default_truncate: 24,
           group: { key: :customer, label: "得意先情報" },

@@ -415,9 +415,9 @@
   <h2>Export payload preview</h2>
 
   <p>
-    This preview compares the ordered headers and column keys that the current
-    saved table settings would pass into the export helper by default and with
-    <code>include_hidden: true</code>.
+    This preview compares the ordered headers, column keys, and export keys that
+    the current saved table settings would pass into the export helper by
+    default and with <code>include_hidden: true</code>.
   </p>
 
   <% export_payload_with_hidden_preview = RailsTablePreferences::ExportPayload.call(
@@ -438,6 +438,11 @@
     </div>
 
     <div>
+      <dt>Default export keys</dt>
+      <dd><code><%= @export_payload_preview.fetch("export_keys", []).join(", ") %></code></dd>
+    </div>
+
+    <div>
       <dt>Include-hidden headers</dt>
       <dd><%= export_payload_with_hidden_preview.fetch("headers", []).join(" / ") %></dd>
     </div>
@@ -446,13 +451,21 @@
       <dt>Include-hidden column keys</dt>
       <dd><code><%= export_payload_with_hidden_preview.fetch("column_keys", []).join(", ") %></code></dd>
     </div>
+
+    <div>
+      <dt>Include-hidden export keys</dt>
+      <dd><code><%= export_payload_with_hidden_preview.fetch("export_keys", []).join(", ") %></code></dd>
+    </div>
   </dl>
 
   <p>
     Hidden columns stay out of the default payload and appear in the
-    include-hidden payload. Change visibility or order in the editor, save once,
-    and reload to compare both export-helper results before wiring a host-app
-    CSV, Excel, or report export.
+    include-hidden payload. Compare <code>column_keys</code> with
+    <code>export_keys</code> to confirm when export value extraction uses
+    <code>export_key</code> metadata instead of the display/preference key.
+    Change visibility or order in the editor, save once, and reload to compare
+    both export-helper results before wiring a host-app CSV, Excel, or report
+    export.
   </p>
 </section>
 
