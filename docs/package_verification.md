@@ -203,14 +203,12 @@ CI runs:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
-node --check app/javascript/rails_table_preferences/controller.js
-node --check app/javascript/rails_table_preferences/index.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The JavaScript syntax step checks the copied controller, the package controller entrypoint, and the package root entrypoint. Keep this snippet synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
+The JavaScript syntax step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets. Keep this command synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
 The package verification task also follows the documented package root and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax check by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior to the release checklist's manual Vite integration check.
 

@@ -30,10 +30,7 @@ jobs:
         run: bundle exec rspec
 
       - name: Check JavaScript syntax
-        run: |
-          node --check app/javascript/controllers/rails_table_preferences_controller.js
-          node --check app/javascript/rails_table_preferences/controller.js
-          node --check app/javascript/rails_table_preferences/index.js
+        run: node script/check_javascript_syntax.mjs
 
       - name: Build gem package
         run: bundle exec rake build
