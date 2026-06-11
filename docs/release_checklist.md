@@ -25,12 +25,12 @@ Run the minimum local checks:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
-node --check app/javascript/rails_table_preferences/controller.js
-node --check app/javascript/rails_table_preferences/index.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
+
+The JavaScript syntax script checks the copied controller plus the JavaScript targets declared by `package.json` exports, keeping the release checklist aligned when package entrypoints change.
 
 Representative Rails compatibility checks are also useful before a release:
 
@@ -46,7 +46,7 @@ These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compat
 Confirm:
 
 - [ ] RSpec passes.
-- [ ] JavaScript syntax checks pass for the copied controller and package entrypoints.
+- [ ] JavaScript syntax script passes for the copied controller and package entrypoints.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
