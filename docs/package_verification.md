@@ -134,6 +134,7 @@ docs/export_integration.md
 docs/accessibility.md
 docs/editor_i18n.md
 docs/editor_entrypoint_affordances.md
+docs/header_drag_reorder.md
 docs/editor_root_options.md
 docs/helper_free_controller_root_urls.md
 docs/non_goals.md
@@ -170,7 +171,7 @@ Use these criteria when adding or reviewing required paths:
 - JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
 - Default locale files that shipped views and docs use as the I18n override baseline. `config/locales/en.yml` and `config/locales/ja.yml` are required for this reason; they are not a full `config/` inventory and do not freeze locale wording or key policy.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
-- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, select filter option search threshold, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
+- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, header drag reorder, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, select filter option search threshold, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
 
