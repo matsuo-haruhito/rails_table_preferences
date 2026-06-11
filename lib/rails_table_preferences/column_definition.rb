@@ -9,7 +9,7 @@ module RailsTablePreferences
       truncated: "ellipsis",
       ellipsis: "ellipsis",
       clip: "clip",
-      clipped: "clipped",
+      clipped: "clip",
       wrap: "wrap",
       wrapped: "wrap",
       nowrap: "nowrap",
