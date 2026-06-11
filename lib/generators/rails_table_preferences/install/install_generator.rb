@@ -261,14 +261,14 @@ module RailsTablePreferences
                   const trigger = document.createElement("button")
                   trigger.type = "button"
                   trigger.className = "rails-table-preferences-demo-reset-trigger"
-                  trigger.dataset.railsTablePreferencesDemoCopyTrigger = label
+                  trigger.setAttribute("data-rails-table-preferences-demo-copy-trigger", label)
                   trigger.textContent = label
 
                   const status = document.createElement("p")
                   status.className = "rails-table-preferences-demo-reset-status"
                   status.setAttribute("role", "status")
                   status.setAttribute("aria-live", "polite")
-                  status.dataset.railsTablePreferencesDemoCopyStatus = label
+                  status.setAttribute("data-rails-table-preferences-demo-copy-status", label)
 
                   if (!demoClipboardSupported()) {
                     trigger.disabled = true
