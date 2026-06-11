@@ -79,9 +79,7 @@ Current representative pull-request compatibility coverage is Rails 7.0, Rails 7
 Repository-level release confidence is expected to come from:
 
 - `bundle exec rspec`
-- `node --check app/javascript/controllers/rails_table_preferences_controller.js`
-- `node --check app/javascript/rails_table_preferences/controller.js`
-- `node --check app/javascript/rails_table_preferences/index.js`
+- `node script/check_javascript_syntax.mjs`
 - `bundle exec rake build`
 - `bundle exec rake package:verify`
 - representative pull-request compatibility lanes for Rails 7.0 / 7.1 / 7.2 / 8.0
