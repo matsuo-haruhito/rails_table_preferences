@@ -140,6 +140,16 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("Default column keys")
     expect(view.read).to include("Include-hidden column keys")
     expect(view.read).to include("include_hidden: true")
+    expect(view.read.scan("data-rails-table-preferences-demo-copy-trigger").size).to eq(2)
+    expect(view.read).to include("Copy hidden fields preview")
+    expect(view.read).to include("Copy export payload preview")
+    expect(view.read).to include("data-rails-table-preferences-demo-copy-target=\"rails-table-preferences-demo-hidden-fields-preview\"")
+    expect(view.read).to include("data-rails-table-preferences-demo-copy-target=\"rails-table-preferences-demo-export-payload-preview\"")
+    expect(view.read).to include("data-rails-table-preferences-demo-copy-status")
+    expect(view.read).to include("railsTablePreferencesDemoCopyInstalled")
+    expect(view.read).to include("navigator.clipboard.writeText")
+    expect(view.read).to include("Copy unavailable in this browser. Select the preview text manually.")
+    expect(view.read).to include("Copy failed. Select the preview text manually.")
     expect(view.read).to include("Demo state reset")
     expect(view.read).to include("Reset demo verification state")
     expect(view.read).to include("railsTablePreferencesDemoResetInstalled")
@@ -306,7 +316,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   end
 
   def next_step_headings(output)
-    output.lines.grep(/^\s+\d+\. /).map { |line| line.sub(/^\s+\d+\. /, "").strip }
+    output.lines.grep(/^\s+\d\. /).map { |line| line.sub(/^\s+\d\. /, "").strip }
   end
 
   def generated_migration
