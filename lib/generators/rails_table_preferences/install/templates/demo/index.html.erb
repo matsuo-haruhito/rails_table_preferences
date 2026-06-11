@@ -111,6 +111,15 @@
     margin-bottom: 0;
   }
 
+  .rails-table-preferences-demo-support-details > summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .rails-table-preferences-demo-support-details > summary + p {
+    margin-top: 0.75rem;
+  }
+
   .rails-table-preferences-demo-hidden-fields-preview {
     max-width: 100%;
     overflow-x: auto;
@@ -223,8 +232,8 @@
   <%= submit_tag "検索" %>
 <% end %>
 
-<section class="rails-table-preferences-demo-summary">
-  <h2>Search form hidden fields preview</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">
+  <summary>Search form hidden fields preview</summary>
 
   <p>
     This preview shows the hidden inputs that the existing search form above
@@ -241,7 +250,7 @@
     omitted, and saved boolean false values remain visible when they are part of
     the saved preference state.
   </p>
-</section>
+</details>
 
 <div class="rails-table-preferences-demo-scroll">
   <%= table_preferences_table_tag(
@@ -411,8 +420,8 @@
   </div>
 </section>
 
-<section class="rails-table-preferences-demo-summary">
-  <h2>Export payload preview</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">
+  <summary>Export payload preview</summary>
 
   <p>
     This preview compares the ordered headers and column keys that the current
@@ -454,10 +463,10 @@
     and reload to compare both export-helper results before wiring a host-app
     CSV, Excel, or report export.
   </p>
-</section>
+</details>
 
-<section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-reset>
-  <h2>Demo state reset</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details" data-rails-table-preferences-demo-reset>
+  <summary>Demo state reset</summary>
 
   <p>
     Use this demo-only button to delete owner-scoped presets for the current
@@ -475,10 +484,10 @@
      role="status"
      aria-live="polite"
      data-rails-table-preferences-demo-reset-status></p>
-</section>
+</details>
 
-<section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-failure>
-  <h2>Async failure check</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details" data-rails-table-preferences-demo-failure>
+  <summary>Async failure check</summary>
 
   <p>
     Use this demo-only button to make the next preset save, load, or delete
@@ -495,7 +504,7 @@
      role="status"
      aria-live="polite"
      data-rails-table-preferences-demo-failure-status></p>
-</section>
+</details>
 
 <script<%= respond_to?(:content_security_policy_nonce) && content_security_policy_nonce.present? ? tag.attributes(nonce: content_security_policy_nonce) : nil %>>
   (() => {
