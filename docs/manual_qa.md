@@ -26,7 +26,7 @@ After this quick smoke, continue into the relevant sections below for the featur
 Use these track entries to choose the first manual QA scope for small PRs. They do not replace the quick smoke, the full checklist, or the [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md). Use the smoke matrix when a PR comment needs category-specific evidence wording, escalation criteria, or browser-capable handoff language.
 
 - `track:docs`: start with source-of-truth review rather than browser smoke unless the text claims a rendered state. Check changed links, commands, option names, issue or PR references, and the neighboring guide that owns the behavior. If README, docs index, English quick start, or a focused entrypoint changes, compare the low-drift Japanese quick start links and summaries when relevant.
-- `track:design`: start with the quick smoke plus the UI, CSS, accessibility, or high-contrast sections touched by the PR. For editor layout, action grouping, filter panel reachability, forced-colors, focus visibility, or visual docs, use the smoke matrix category to record rendered evidence or an explicit browser-capable handoff.
+- `track:design`: start with the quick smoke plus the UI, CSS, accessibility, or high-contrast sections touched by the PR. For editor layout, action grouping, filter panel reachability, forced-colors, focus visibility, or visual docs, use the smoke matrix category to record rendered evidence or an explicit browser-capable handoff. When the PR specifically needs forced-colors or high-contrast evidence, use the [Forced-colors manual QA note](forced_colors_manual_qa.md) for the focused browser/mode record.
 - `track:feature`: start with the quick smoke, then run the sections for the changed public surface, such as presets, filters, sort, fixed columns, exports, controller params, generator/demo flow, JavaScript entrypoints, or resource table helpers. Add the release or package verification sections only when the PR changes package contents, setup paths, or release-facing behavior.
 - `track:quality`: start with the invariant or regression area the PR protects, then run the smallest browser/manual check that would reveal the same failure in a real screen. Keep source-level specs, CI results, and browser evidence separate; use the smoke matrix when the PR needs a review-state handoff instead of more checklist work.
 
@@ -287,6 +287,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm async preset actions also keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request finishes.
 - [ ] Confirm sticky/fixed columns do not cover focused links, buttons, or inputs while the table is horizontally scrolled.
 - [ ] Confirm custom host app scroll containers, backgrounds, and `z-index` overrides keep focus outlines and interactive cell content visible.
+- [ ] For forced-colors or high-contrast sign-off, use the [Forced-colors manual QA note](forced_colors_manual_qa.md) to record the browser/mode, active-filter cue, sorted-header cue, resize focus, filter panel boundary, and pinned-column evidence.
 - [ ] Confirm custom host app colors meet the application's contrast requirements.
 
 ## 17. Customization
