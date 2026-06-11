@@ -66,6 +66,7 @@ Current package-only behavior is intentionally small:
 
 - `filterOperatorLabelsValue` allows package-entrypoint users to override bundled filter operator labels without editing a copied controller.
 - Sortable header handling preserves host-provided `title` attributes while still generating sort hints for untitled headers.
+- Table-header drag reorder remains package-entrypoint behavior for managed header cells, and columns with interactive header content can opt out with `draggable: false`; use [Header drag reorder](header_drag_reorder.md) for that boundary.
 - Resize handles also listen for `Enter`, Space, and legacy `Spacebar` key presses and route them to the packaged keyboard auto-fit behavior after the base controller installs the handles.
 - Lifecycle events such as `rails-table-preferences:applied`, `rails-table-preferences:saved`, `rails-table-preferences:loaded`, `rails-table-preferences:deleted`, and `rails-table-preferences:error` are dispatched by the package entrypoint. Host apps that register the copied controller directly should not assume the same event surface unless they port that behavior into their copied or replacement controller.
 - `rails-table-preferences:error` exposes stable operation labels in `event.detail.action`; use [JavaScript controller notes](javascript_controller.md#host-app-lifecycle-events) for the current action list and fallback meaning.
