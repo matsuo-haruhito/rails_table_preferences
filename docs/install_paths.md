@@ -25,6 +25,8 @@ mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 
 The option is deliberately separate from `--with-demo-route`. Use it when the host app wants the bundled JSON API route inserted by the generator; omit it when the app reviews routes manually. If the host app changes `config.mount_path` in the initializer, update the route path manually to match that value. The generator does not infer custom mount paths from initializer edits.
 
+Route duplicate detection is intentionally lightweight. The generator recognizes the standard one-line engine mount shown above, including common optional parentheses and quote styles. Scoped routes, namespaced route blocks, multiline route declarations, commented examples, or custom mount paths remain host-app route review work. If the generator cannot recognize an equivalent custom route, remove any duplicate default route manually instead of expecting Rails routes DSL parsing.
+
 `--skip-javascript` only skips the copied `app/javascript/controllers/rails_table_preferences_controller.js` file. It does not remove the JavaScript requirement: the host app must still register either the package entrypoint or a compatible host-owned controller with the `rails-table-preferences` Stimulus name.
 
 `--skip-stylesheets` is separate from the JavaScript choice. A host app can register `rails_table_preferences/controller` from a Vite or `app/frontend` entrypoint and still use the copied stylesheet, or it can skip the stylesheet and provide equivalent host-app CSS. The package entrypoint does not currently expose a CSS subpath import through `package.json` `exports`, so skipped stylesheets require host-app evidence for the editor, table state, resize handles, and fixed-column hooks.
@@ -93,6 +95,8 @@ get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/or
 ```
 
 `--with-demo-route` implies `--with-demo`, copies the same demo files, and asks the generator to add the route when it is not already present.
+
+The demo route uses the same lightweight duplicate check as the engine route: the generator recognizes the standard one-line `get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"` declaration, including common optional parentheses and quote styles. Namespaced/scoped routes, multiline declarations, commented examples, or host-app-specific aliases should be reviewed manually.
 
 The demo route option is independent from `--with-engine-route`: `--with-demo-route` adds only the local browser verification screen route, while `--with-engine-route` mounts the JSON API engine. Use both options together when a sandbox install should include the API mount and copied demo route in one generator run.
 
