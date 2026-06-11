@@ -77,7 +77,7 @@ module RailsTablePreferences
       }
     end
 
-    def tree_resource_table_for(records, model: nil, table_key: nil, parent_id_method: :parent_id, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, profile: nil, partial: nil, caption: nil, **options)
+    def tree_resource_table_for(records, model: nil, table_key: nil, parent_id_method: :parent_id, name: "default", settings: nil, only: nil, except: nil, include_id: false, include_associations: true, profile: nil, partial: nil, caption: nil, scroll_wrapper: false, wrapper_options: {}, **options)
       model ||= table_preferences_model_for(records, profile: profile)
       table_key ||= "#{model.model_name.route_key}_tree"
       columns = table_preferences_resource_columns(
@@ -101,6 +101,8 @@ module RailsTablePreferences
         table_state: table_state,
         profile: profile,
         caption: caption,
+        scroll_wrapper: scroll_wrapper,
+        wrapper_options: wrapper_options,
         options: options
       }
     end
@@ -172,7 +174,7 @@ module RailsTablePreferences
       "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
-    def table_preferences_column(key, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def table_preferences_column(key, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil, draggable: nil)
       ColumnDefinition.new(
         key: key,
         export_key: export_key,
@@ -193,7 +195,8 @@ module RailsTablePreferences
         ignore: ignore,
         filter: filter,
         sortable: sortable,
-        sort_param: sort_param
+        sort_param: sort_param,
+        draggable: draggable
       ).to_h
     end
 

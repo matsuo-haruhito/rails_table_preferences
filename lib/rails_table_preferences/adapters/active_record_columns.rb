@@ -73,7 +73,7 @@ module RailsTablePreferences
           foreign_key = reflection.foreign_key.to_s
           next unless model.attribute_names.include?(foreign_key)
           next if except.include?(reflection.name.to_s)
-          next if only && !only.include?(reflection.name.to_s) && !only.include?(foreign_key)
+          next if only && !only.include?(reflection.name.to_s)
 
           RailsTablePreferences::ColumnDefinition.new(
             key: reflection.name,

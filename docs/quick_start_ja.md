@@ -20,6 +20,8 @@ bin/rails generate rails_table_preferences:install
 bin/rails db:migrate
 ```
 
+bundled JSON API を使う画面では engine route も必要です。route を generator で追加したい場合は `--with-engine-route` を使い、既存の routes 管理に合わせて手動で mount したい場合は [Install path options](install_paths.md) と [Mounted JSON API](json_api.md) を正本にしてください。
+
 Vite / `app/frontend` など package entrypoint を使う場合は、copied controller ではなく `rails_table_preferences/controller` の import と bundler alias を確認します。詳細は [JavaScript entrypoints](javascript_entrypoints.md) を参照してください。
 
 既存の `app/frontend/entrypoints/application.js` などで Stimulus application をすでに start している host app では、その `application` に `application.register(...)` だけを追加します。`Application.start()` を含む例は新規 minimal entrypoint 用です。同じ host app で `Application.start()` を二重に呼ばないでください。

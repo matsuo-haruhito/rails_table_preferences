@@ -80,7 +80,11 @@ Choose the column key by the behavior the host app wants:
 - use the foreign key attribute, such as `customer_id`, when the raw stored id is intentionally part of the operator workflow
 - use `include_associations: false` when the page wants attribute-only inference, avoids association readers for that table, or will add explicit virtual/profile columns instead
 
+When `only:` is present, association names and foreign key attribute names are matched independently. `only: %i[customer]` keeps the inferred `customer` association column. `only: %i[customer_id]` keeps the raw `customer_id` attribute column and does not add the `customer` association column. Include both keys only when the screen intentionally needs both the stored id and the associated-record display surface.
+
 ```erb
+<%= resource_table_for @orders, only: %i[customer] %>
+<%= resource_table_for @orders, only: %i[customer_id] %>
 <%= resource_table_for @orders, include_associations: false %>
 ```
 
@@ -106,7 +110,7 @@ The default resource table partials pass basic table HTML options through to `ta
 
 ### Horizontal scroll wrapper
 
-`resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
+`resource_table_for` and `tree_resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
 
 ```erb
 <%= resource_table_for(
@@ -121,11 +125,19 @@ The default resource table partials pass basic table HTML options through to `ta
 ) %>
 ```
 
-`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>`. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
+```erb
+<%= tree_resource_table_for(
+  @projects,
+  parent_id_method: :parent_project_id,
+  scroll_wrapper: true,
+  wrapper_options: { class: "projects-tree-scroll" },
+  class: "projects-tree-table"
+) %>
+```
 
-Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
+`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>` for both flat and tree resource tables. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
 
-`tree_resource_table_for` does not receive this option yet. If a tree table needs a wrapper, keep it in host markup or a custom partial until the tree path is planned separately.
+Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat or tree resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
 
 ### Captions
 

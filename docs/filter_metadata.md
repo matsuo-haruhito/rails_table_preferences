@@ -30,6 +30,18 @@ columns = [
     sortable: true
   ),
   table_preferences_column(
+    :shipped_at,
+    label: "出荷日時",
+    filter: { type: :datetime },
+    sortable: true
+  ),
+  table_preferences_column(
+    :dispatch_time,
+    label: "出荷時刻",
+    filter: { type: :time },
+    sortable: true
+  ),
+  table_preferences_column(
     :note,
     label: "備考",
     filter: true,
@@ -72,6 +84,8 @@ table_preferences_column(
 ```
 
 The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
+
+For long static option lists, the package entrypoint controller can show an in-panel option search when the option count reaches the configured threshold. See [Select filter option search threshold](select_filter_option_search_threshold.md) for the root value, no-results cue, and package-entrypoint-only boundary.
 
 For bundled single-value `text`, `number`, and `date` filters, `placeholder:` is rendered as the browser `placeholder` attribute on the generated value input:
 
@@ -125,10 +139,14 @@ When `operators:` is omitted, the bundled controller chooses a default operator 
 | `text` / default | `contains`, `equals`, `starts_with`, `ends_with`, `blank`, `present` |
 | `number` | `equals`, `gteq`, `lteq`, `gt`, `lt`, `blank`, `present` |
 | `date` | `equals`, `gteq`, `lteq`, `between`, `blank`, `present` |
+| `datetime` / `datetime-local` | `equals`, `gteq`, `lteq`, `between`, `blank`, `present` |
+| `time` | `equals`, `gteq`, `lteq`, `between`, `blank`, `present` |
 | `select` | `in`, `not_in`, `blank`, `present` |
 | `boolean` | `true`, `false`, `blank`, `present` |
 
 Passing `operators:` replaces the default list instead of appending to it. The order in the array is the order shown in the bundled filter panel, so use a short explicit list when the host app search layer only supports a subset of predicates.
+
+The bundled controller maps `datetime` and `datetime-local` to a native `datetime-local` input, and maps `time` to a native `time` input. Their saved values remain the browser input strings in the same neutral `value` / `from` / `to` shape used by `date`. Rails Table Preferences does not normalize time zones, convert browser-local datetimes, or build database queries; the host application must interpret those strings in its own timezone and search layer.
 
 The bundled controller has labels for additional operators such as `not_contains` and `not_equals`, but those operators are not included in the default text set. Host apps may opt in by passing them through `operators:`, but Rails Table Preferences still only saves neutral filter state and shapes adapter params. Query execution, unsupported predicate handling, joins, and authorization remain the responsibility of the host application or search adapter.
 
@@ -218,6 +236,12 @@ columns = [
     label: "納品日",
     filter: { type: :date, from_param: :from_date, to_param: :to_date },
     sortable: true
+  ),
+  table_preferences_column(
+    :shipped_at,
+    label: "出荷日時",
+    filter: { type: :datetime, from_param: :from_shipped_at, to_param: :to_shipped_at },
+    sortable: true
   )
 ]
 ```
@@ -265,6 +289,15 @@ Saved filter conditions use a neutral format:
       "operator": "between",
       "from": "2026-01-01",
       "to": "2026-01-31"
+    },
+    "shipped_at": {
+      "operator": "between",
+      "from": "2026-01-01T09:00",
+      "to": "2026-01-01T18:00"
+    },
+    "dispatch_time": {
+      "operator": "gteq",
+      "value": "09:30"
     }
   },
   "sorts": [
@@ -281,6 +314,8 @@ Saved filter conditions use a neutral format:
 ```
 
 The saved `sorts` array keeps the order written by the bundled controller, an import, or a host-app custom/copied controller. The bundled controller writes at most one entry, while custom controllers can write multiple entries when the host app owns the multi-sort interaction.
+
+`datetime` / `datetime-local` and `time` filters do not change the saved condition shape. The values above are strings from the browser input and are passed through adapters without timezone normalization. Convert them to the host application's timezone-aware query representation before executing database searches.
 
 `SettingsNormalizer` normalizes:
 

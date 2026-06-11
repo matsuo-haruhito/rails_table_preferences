@@ -5,7 +5,7 @@ ja:
       all_columns_hidden: すべての列が非表示です
     editor:
       preset_select: 保存済み設定
-      preset_select_hint: 読み込む保存済み設定を選びます。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。
+      preset_select_hint: 読み込む保存済み設定を選びます。初回など保存済み設定がまだない場合は現在の設定名だけを表示しますが、保存済み設定が存在するという意味ではありません。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。
       preset: 設定名
       preset_name_hint: 保存または別名保存で使う設定名を入力します。
       default_preset: 標準設定にする
@@ -24,6 +24,11 @@ ja:
       primary_action_group: 表示に反映する操作
       save_action_group: 設定を保存する操作
       maintenance_action_group: 保存済み設定の削除や初期設定に戻す操作
+      visibility_bulk_action_group: 列の表示をまとめて切り替える操作
+      visibility_bulk_hint: 全列表示と全列非表示は、列検索で一時的に隠れている行も含め、すべての列の表示チェックボックスをまとめて切り替えます。反映するには適用または保存を実行してください。検索結果だけやグループ単位の切り替えはこの操作では行いません。
+      show_all_columns: 全列表示
+      hide_all_columns: 全列非表示
+      show_all_columns_hint: 列の並び、幅、絞り込み、並び替えは維持したまま、非表示の列だけを再表示します。保存は別操作です。
       scope_owner: 個人
       scope_shared: 共有
       scope_role: ロール

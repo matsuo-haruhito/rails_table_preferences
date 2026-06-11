@@ -139,8 +139,11 @@ The bundled editor exposes a live status region for async preset actions. These 
 - `rails_table_preferences.editor.deleted_status`
 - `rails_table_preferences.editor.deleting_failed_status`
 - `rails_table_preferences.editor.operation_failed_status`
+- `rails_table_preferences.editor.resize_auto_fit_status`
 
-Use locale overrides for message wording. Use copied ERB / JavaScript when the host app wants a different status surface, notification system, or busy-state behavior.
+`resize_auto_fit_status` is package-entrypoint-only success copy for Enter / Space auto-fit on a focused resize handle. It feeds `data-rails-table-preferences-resize-auto-fit-status-label-value` and is shown in the same status region after the one-shot auto-fit shortcut completes.
+
+Use locale overrides for message wording. Use copied ERB / JavaScript when the host app wants a different status surface, notification system, busy-state behavior, or copied-controller support for package-entrypoint-only resize auto-fit feedback.
 
 ## Minimal host-app override example
 
@@ -166,6 +169,7 @@ ja:
       sort_desc: 降順で並び替え
       saved_status: 表示設定を保存しました。
       saving_failed_status: 表示設定を保存できませんでした。
+      resize_auto_fit_status: 列幅を自動調整しました。
 ```
 
 Keep overrides close to the host app's normal locale files so copied ERB and copied JavaScript stay unnecessary for wording-only changes.
@@ -175,10 +179,10 @@ Keep overrides close to the host app's normal locale files so copied ERB and cop
 Use the lightest path that matches the change:
 
 1. Locale keys for global wording changes across every bundled editor.
-2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, or row move wording.
+2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, or resize auto-fit status wording.
 3. Package entrypoint `data-rails-table-preferences-filter-operator-labels-value` when a packaged-controller table only needs different filter operator display text.
 4. Package entrypoint editor search / move label values when the packaged-controller table only needs different search or move button copy.
 5. Copied ERB when markup, helper-text placement, or status-region structure needs to change.
-6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, or row movement needs to change.
+6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, row movement, or resize auto-fit status handling needs to change.
 
 See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, [Editor entrypoint affordances](editor_entrypoint_affordances.md) for the package-only browser QA surface, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.

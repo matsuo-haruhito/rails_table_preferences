@@ -107,6 +107,11 @@
     font-weight: 600;
   }
 
+  .rails-table-preferences-demo-support-details summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+
   .rails-table-preferences-demo-details p:last-child {
     margin-bottom: 0;
   }
@@ -120,9 +125,39 @@
     white-space: pre-wrap;
   }
 
+  .rails-table-preferences-demo-verification-context {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .rails-table-preferences-demo-verification-context > p {
+    margin: 0;
+  }
+
+  .rails-table-preferences-demo-verification-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .rails-table-preferences-demo-verification-panel {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+  }
+
+  .rails-table-preferences-demo-verification-panel h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .rails-table-preferences-demo-verification-panel p {
+    margin: 0;
+  }
+
   .rails-table-preferences-demo-owner-note,
   .rails-table-preferences-demo-scope-note {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0;
   }
 
   .rails-table-preferences-demo-owner-switches,
@@ -193,8 +228,8 @@
   <%= submit_tag "検索" %>
 <% end %>
 
-<section class="rails-table-preferences-demo-summary">
-  <h2>Search form hidden fields preview</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">
+  <summary>Search form hidden fields preview</summary>
 
   <p>
     This preview shows the hidden inputs that the existing search form above
@@ -211,7 +246,7 @@
     omitted, and saved boolean false values remain visible when they are part of
     the saved preference state.
   </p>
-</section>
+</details>
 
 <div class="rails-table-preferences-demo-scroll">
   <%= table_preferences_table_tag(
@@ -256,127 +291,138 @@
   <% end %>
 </div>
 
-<section class="rails-table-preferences-demo-summary">
-  <h2>Current owner</h2>
+<section class="rails-table-preferences-demo-summary rails-table-preferences-demo-verification-context">
+  <h2>Verification context</h2>
 
   <p>
-    Shared presets save back into this owner context when you use
-    <strong>Save</strong> or <strong>Save as new</strong>.
+    Compare the active owner and scope before checking how presets resolve,
+    save, and stay isolated between demo contexts.
   </p>
 
-  <dl>
-    <div>
-      <dt>Model</dt>
-      <dd><%= @demo_owner_summary.fetch("model_name") %></dd>
+  <div class="rails-table-preferences-demo-verification-grid">
+    <div class="rails-table-preferences-demo-verification-panel">
+      <h3>Current owner</h3>
+
+      <p>
+        Shared presets save back into this owner context when you use
+        <strong>Save</strong> or <strong>Save as new</strong>.
+      </p>
+
+      <dl>
+        <div>
+          <dt>Model</dt>
+          <dd><%= @demo_owner_summary.fetch("model_name") %></dd>
+        </div>
+
+        <div>
+          <dt>Display</dt>
+          <dd><%= @demo_owner_summary.fetch("display_name") %></dd>
+        </div>
+
+        <div>
+          <dt>Identifier</dt>
+          <dd><%= @demo_owner_summary.fetch("identifier") %></dd>
+        </div>
+      </dl>
     </div>
 
-    <div>
-      <dt>Display</dt>
-      <dd><%= @demo_owner_summary.fetch("display_name") %></dd>
+    <div class="rails-table-preferences-demo-verification-panel">
+      <h3>Owner switch</h3>
+
+      <p>
+        Use these demo-only links to switch the active owner and confirm that
+        saved presets stay isolated between representative owners.
+      </p>
+
+      <% if @demo_owner_switch_ready %>
+        <ul class="rails-table-preferences-demo-owner-switches">
+          <% @demo_owner_switches.each do |switch| %>
+            <li>
+              <%= link_to switch.fetch("label"),
+                          switch.fetch("path"),
+                          class: [
+                            "rails-table-preferences-demo-owner-switch",
+                            ("rails-table-preferences-demo-owner-switch--active" if switch["active"])
+                          ].compact.join(" "),
+                          "aria-current": ("page" if switch["active"]) %>
+              <span><%= switch.fetch("description") %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="rails-table-preferences-demo-owner-note">
+          Keep the host app owner and create at least one more owner record to
+          compare save/load isolation here.
+        </p>
+      <% end %>
     </div>
 
-    <div>
-      <dt>Identifier</dt>
-      <dd><%= @demo_owner_summary.fetch("identifier") %></dd>
+    <div class="rails-table-preferences-demo-verification-panel">
+      <h3>Current scope context</h3>
+
+      <p>
+        <strong>Current context:</strong>
+        <% if @demo_scope_context_summary["owner_only"] %>
+          owner-only
+        <% else %>
+          <% summary_parts = [] %>
+          <% if @demo_scope_context_summary.fetch("roles", []).any? %>
+            <% summary_parts << "roles: [#{@demo_scope_context_summary.fetch("roles").join(", ")}]" %>
+          <% end %>
+          <% if @demo_scope_context_summary["organization"].present? %>
+            <% summary_parts << "organization: #{@demo_scope_context_summary["organization"]}" %>
+          <% end %>
+          <code><%= summary_parts.join(" / ") %></code>
+        <% end %>
+      </p>
+
+      <p>
+        Use this summary to confirm which scope the preset selector and default
+        resolution below should reflect before comparing owner, role, and
+        organization behavior.
+      </p>
     </div>
-  </dl>
-</section>
 
-<section class="rails-table-preferences-demo-summary">
-  <h2>Owner switch</h2>
+    <div class="rails-table-preferences-demo-verification-panel">
+      <h3>Scope switch</h3>
 
-  <p>
-    Use these demo-only links to switch the active owner and confirm that saved
-    presets stay isolated between representative owners.
-  </p>
+      <p>
+        Use these demo-only links to compare owner, role, and organization
+        preset resolution without editing controller code between requests.
+      </p>
 
-  <% if @demo_owner_switch_ready %>
-    <ul class="rails-table-preferences-demo-owner-switches">
-      <% @demo_owner_switches.each do |switch| %>
-        <li>
-          <%= link_to switch.fetch("label"),
-                      switch.fetch("path"),
-                      class: [
-                        "rails-table-preferences-demo-owner-switch",
-                        ("rails-table-preferences-demo-owner-switch--active" if switch["active"])
-                      ].compact.join(" "),
-                      "aria-current": ("page" if switch["active"]) %>
-          <span><%= switch.fetch("description") %></span>
-        </li>
+      <% unless @demo_scope_context_toggle_ready %>
+        <p class="rails-table-preferences-demo-scope-note">
+          Set <code>scope_context_method</code> to <code>table_preference_scope_context</code>
+          once to make the owner / role / organization links below drive the demo.
+        </p>
       <% end %>
-    </ul>
-  <% else %>
-    <p class="rails-table-preferences-demo-owner-note">
-      Keep the host app owner and create at least one more owner record to
-      compare save/load isolation here.
-    </p>
-  <% end %>
+
+      <ul class="rails-table-preferences-demo-scope-switches">
+        <% @demo_scope_context_switches.each do |switch| %>
+          <li>
+            <%= link_to switch.fetch("label"),
+                        switch.fetch("path"),
+                        class: [
+                          "rails-table-preferences-demo-scope-switch",
+                          ("rails-table-preferences-demo-scope-switch--active" if switch["active"])
+                        ].compact.join(" "),
+                        "aria-current": ("page" if switch["active"]) %>
+            <span><%= switch.fetch("description") %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
 </section>
 
-<section class="rails-table-preferences-demo-summary">
-  <h2>Current scope context</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">
+  <summary>Export payload preview</summary>
 
   <p>
-    <strong>Current context:</strong>
-    <% if @demo_scope_context_summary["owner_only"] %>
-      owner-only
-    <% else %>
-      <% summary_parts = [] %>
-      <% if @demo_scope_context_summary.fetch("roles", []).any? %>
-        <% summary_parts << "roles: [#{@demo_scope_context_summary.fetch("roles").join(", ")}]" %>
-      <% end %>
-      <% if @demo_scope_context_summary["organization"].present? %>
-        <% summary_parts << "organization: #{@demo_scope_context_summary["organization"]}" %>
-      <% end %>
-      <code><%= summary_parts.join(" / ") %></code>
-    <% end %>
-  </p>
-
-  <p>
-    Use this summary to confirm which scope the preset selector and default
-    resolution below should reflect before comparing owner, role, and
-    organization behavior.
-  </p>
-</section>
-
-<section class="rails-table-preferences-demo-summary">
-  <h2>Scope switch</h2>
-
-  <p>
-    Use these demo-only links to compare owner, role, and organization preset
-    resolution without editing controller code between requests.
-  </p>
-
-  <% unless @demo_scope_context_toggle_ready %>
-    <p class="rails-table-preferences-demo-scope-note">
-      Set <code>scope_context_method</code> to <code>table_preference_scope_context</code>
-      once to make the owner / role / organization links below drive the demo.
-    </p>
-  <% end %>
-
-  <ul class="rails-table-preferences-demo-scope-switches">
-    <% @demo_scope_context_switches.each do |switch| %>
-      <li>
-        <%= link_to switch.fetch("label"),
-                    switch.fetch("path"),
-                    class: [
-                      "rails-table-preferences-demo-scope-switch",
-                      ("rails-table-preferences-demo-scope-switch--active" if switch["active"])
-                    ].compact.join(" "),
-                    "aria-current": ("page" if switch["active"]) %>
-        <span><%= switch.fetch("description") %></span>
-      </li>
-    <% end %>
-  </ul>
-</section>
-
-<section class="rails-table-preferences-demo-summary">
-  <h2>Export payload preview</h2>
-
-  <p>
-    This preview compares the ordered headers and column keys that the current
-    saved table settings would pass into the export helper by default and with
-    <code>include_hidden: true</code>.
+    This preview compares the ordered headers, column keys, and export keys that
+    the current saved table settings would pass into the export helper by
+    default and with <code>include_hidden: true</code>.
   </p>
 
   <% export_payload_with_hidden_preview = RailsTablePreferences::ExportPayload.call(
@@ -397,6 +443,11 @@
     </div>
 
     <div>
+      <dt>Default export keys</dt>
+      <dd><code><%= @export_payload_preview.fetch("export_keys", []).join(", ") %></code></dd>
+    </div>
+
+    <div>
       <dt>Include-hidden headers</dt>
       <dd><%= export_payload_with_hidden_preview.fetch("headers", []).join(" / ") %></dd>
     </div>
@@ -405,18 +456,26 @@
       <dt>Include-hidden column keys</dt>
       <dd><code><%= export_payload_with_hidden_preview.fetch("column_keys", []).join(", ") %></code></dd>
     </div>
+
+    <div>
+      <dt>Include-hidden export keys</dt>
+      <dd><code><%= export_payload_with_hidden_preview.fetch("export_keys", []).join(", ") %></code></dd>
+    </div>
   </dl>
 
   <p>
     Hidden columns stay out of the default payload and appear in the
-    include-hidden payload. Change visibility or order in the editor, save once,
-    and reload to compare both export-helper results before wiring a host-app
-    CSV, Excel, or report export.
+    include-hidden payload. Compare <code>column_keys</code> with
+    <code>export_keys</code> to confirm when export value extraction uses
+    <code>export_key</code> metadata instead of the display/preference key.
+    Change visibility or order in the editor, save once, and reload to compare
+    both export-helper results before wiring a host-app CSV, Excel, or report
+    export.
   </p>
-</section>
+</details>
 
-<section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-reset>
-  <h2>Demo state reset</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details" data-rails-table-preferences-demo-reset>
+  <summary>Demo state reset</summary>
 
   <p>
     Use this demo-only button to delete owner-scoped presets for the current
@@ -434,10 +493,10 @@
      role="status"
      aria-live="polite"
      data-rails-table-preferences-demo-reset-status></p>
-</section>
+</details>
 
-<section class="rails-table-preferences-demo-summary" data-rails-table-preferences-demo-failure>
-  <h2>Async failure check</h2>
+<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details" data-rails-table-preferences-demo-failure>
+  <summary>Async failure check</summary>
 
   <p>
     Use this demo-only button to make the next preset save, load, or delete
@@ -454,7 +513,7 @@
      role="status"
      aria-live="polite"
      data-rails-table-preferences-demo-failure-status></p>
-</section>
+</details>
 
 <script<%= respond_to?(:content_security_policy_nonce) && content_security_policy_nonce.present? ? tag.attributes(nonce: content_security_policy_nonce) : nil %>>
   (() => {

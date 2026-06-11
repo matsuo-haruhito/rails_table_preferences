@@ -50,6 +50,14 @@ The import specifiers above are backed by the `package.json` file that is packag
 
 Host apps should rely on the documented `exports` specifiers, `rails_table_preferences` and `rails_table_preferences/controller`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
 
+### Stylesheet boundary
+
+The package entrypoint controls JavaScript registration only. The packaged `package.json` currently exports `rails_table_preferences` and `rails_table_preferences/controller`; it does not export a CSS subpath such as `rails_table_preferences/styles.css`.
+
+If the host app uses `rails_table_preferences/controller` and keeps the generated stylesheet, load the copied `app/assets/stylesheets/rails_table_preferences.css` through the host app's normal asset path. If the host app also uses `--skip-stylesheets`, Rails Table Preferences will not provide a bundler CSS import for that screen; the host app owns equivalent CSS for the editor, table state cues, resize handles, fixed-column hooks, and any local theme integration.
+
+Treat a future CSS subpath export as a separate feature decision. It would need `package.json` exports, package verification evidence, release checklist wording, and host-app bundler smoke coverage to move together instead of being inferred from the JavaScript entrypoint.
+
 ### Package-only controller boundary
 
 The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`.
@@ -58,8 +66,10 @@ Current package-only behavior is intentionally small:
 
 - `filterOperatorLabelsValue` allows package-entrypoint users to override bundled filter operator labels without editing a copied controller.
 - Sortable header handling preserves host-provided `title` attributes while still generating sort hints for untitled headers.
+- Table-header drag reorder remains package-entrypoint behavior for managed header cells, and columns with interactive header content can opt out with `draggable: false`; use [Header drag reorder](header_drag_reorder.md) for that boundary.
 - Resize handles also listen for `Enter`, Space, and legacy `Spacebar` key presses and route them to the packaged keyboard auto-fit behavior after the base controller installs the handles.
 - Lifecycle events such as `rails-table-preferences:applied`, `rails-table-preferences:saved`, `rails-table-preferences:loaded`, `rails-table-preferences:deleted`, and `rails-table-preferences:error` are dispatched by the package entrypoint. Host apps that register the copied controller directly should not assume the same event surface unless they port that behavior into their copied or replacement controller.
+- `rails-table-preferences:error` exposes stable operation labels in `event.detail.action`; use [JavaScript controller notes](javascript_controller.md#host-app-lifecycle-events) for the current action list and fallback meaning.
 
 Do not assume those package-only values, overrides, events, or keyboard affordances exist when an application registers the copied controller directly. If a behavior must work in both paths, keep it in the copied controller and cover it as base controller behavior. If it is only needed by package import users, keep it in the package entrypoint and document the boundary here.
 
@@ -71,7 +81,7 @@ The current contract boundary is:
 | Filter operator labels | Uses the base controller defaults. A copied or replacement controller is needed for controller-side operator vocabulary changes not exposed by base values. | Adds `filterOperatorLabelsValue` so packaged-controller tables can override operator text through a root JSON value. | Use locale/root values for wording-only operator labels on the package path; use copied JavaScript for copied-controller or behavior changes. |
 | Sortable header `title` attributes | Base sort setup may replace generated title text while it manages sort hints. | Preserves host-provided nonblank `title` values and restores them after sort state sync. | Prefer the package entrypoint when host-rendered header titles must survive packaged sort controls. Validate copied-controller screens separately. |
 | Resize handle keyboard auto-fit | Base resize handles are generated and pointer-oriented. | Adds keyboard auto-fit on resize handles for `Enter`, Space, and legacy `Spacebar`. | Treat this as package-entrypoint-only unless a future issue deliberately moves the keyboard affordance into the base controller. |
-| Lifecycle events | Copied-controller registrations do not receive the package-entrypoint lifecycle event surface unless the host app ports that behavior into its copied or replacement controller. | Dispatches package-entrypoint lifecycle events such as `applied`, `saved`, `loaded`, `deleted`, and `error` with stable detail payloads. | Check host-app event listeners against the registration path that actually owns the screen. |
+| Lifecycle events | Copied-controller registrations do not receive the package-entrypoint lifecycle event surface unless the host app ports that behavior into their copied or replacement controller. | Dispatches package-entrypoint lifecycle events such as `applied`, `saved`, `loaded`, `deleted`, and `error` with stable detail payloads, including documented `error` action labels. | Check host-app event listeners against the registration path that actually owns the screen. Use JavaScript controller notes for the `error` action list. |
 | Future additive behavior | Should only receive behavior that must work for generated copied-controller users too. | May receive package-import adapter behavior, but each addition must be documented here. | If a difference becomes important for both paths, open a focused follow-up rather than silently expanding one path in place. |
 
 If this table reveals a behavior that should be shared by both paths, keep this Issue as documentation only and split the implementation into a follow-up with its own compatibility and test plan. That follow-up should name whether it is a feature change, a quality/spec guard, or another docs-only clarification.
@@ -118,7 +128,11 @@ import RailsTablePreferencesController from "rails_table_preferences/controller"
 import { RailsTablePreferencesController as NamedRailsTablePreferencesController } from "rails_table_preferences"
 ```
 
-These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.
+The package root also re-exports lifecycle event detail types such as `RailsTablePreferencesEventDetail` and `RailsTablePreferencesEventName`. When a TypeScript host app listens for package-entrypoint lifecycle events, keep the listener boundary local by narrowing the DOM event to `CustomEvent<RailsTablePreferencesEventDetail>` and use [Host app lifecycle events](javascript_controller.md#host-app-lifecycle-events) for the current typed example, event names, and action meanings.
+
+Those lifecycle event types describe the package entrypoint surface only. Host apps that register a copied or replacement controller should not import them as proof that the copied controller dispatches the same events unless that app has ported the package-entrypoint event behavior too.
+
+These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class and lifecycle event detail surface, but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.
 
 If the host app uses an older gem version without packaged declarations, or if it replaces the controller and wants richer local typing for custom methods, keep a local declaration file in the host app. For example, `app/frontend/types/rails_table_preferences.d.ts` can still refine the app-specific contract as long as the directory is included by the app's `tsconfig.json`.
 
@@ -132,12 +146,15 @@ This path is also the lighter choice for wording and label changes that can stay
 
 Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass.
 
+The stylesheet decision remains separate from the controller decision. Keeping the copied stylesheet is the current default even when JavaScript registration moves to the package entrypoint. If the host app skips the stylesheet, it owns CSS parity evidence for editor layout, table state cues, resize handles, fixed-column hooks, and any local theme overrides.
+
 ## Moving from a copied controller to the package entrypoint
 
 When an existing host app moves from the copied controller to `rails_table_preferences/controller`, check these items before removing the copied file from active registration:
 
 - The host app has exactly one Stimulus application registration for `rails-table-preferences`.
 - The bundler resolves both `rails_table_preferences/controller` and, if used, `rails_table_preferences`.
+- The host app still loads either the generated stylesheet or equivalent host-app CSS; package entrypoint imports do not load CSS for the screen.
 - Any local changes in `app/javascript/controllers/rails_table_preferences_controller.js` have been classified as wording, markup, or behavior changes.
 - Wording-only changes have moved to Rails locale keys or controller-root label values where possible.
 - Markup changes remain in copied ERB, not in the package entrypoint import.

@@ -5,7 +5,7 @@ en:
       all_columns_hidden: All columns are hidden
     editor:
       preset_select: Saved presets
-      preset_select_hint: Choose which saved settings to load. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
+      preset_select_hint: Choose which saved settings to load. On first run, or when no saved presets exist yet, the selector shows only the current preset name; that does not mean a saved preset already exists. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
       preset: Preset
       preset_name_hint: Enter the preset name used when saving or saving as new.
       default_preset: Use as default
@@ -24,6 +24,11 @@ en:
       primary_action_group: Actions that apply changes to the view
       save_action_group: Actions that save settings
       maintenance_action_group: Actions that delete saved settings or reset to defaults
+      visibility_bulk_action_group: Actions that update column visibility in bulk
+      visibility_bulk_hint: Show all and hide all toggle every column visibility checkbox, including rows temporarily hidden by column search. Apply or save to use the changes. These actions do not toggle only search results or columns by group.
+      show_all_columns: Show all columns
+      hide_all_columns: Hide all columns
+      show_all_columns_hint: Show only hidden columns again while keeping column order, widths, filters, and sorts. Saving is a separate action.
       scope_owner: owner
       scope_shared: shared
       scope_role: role

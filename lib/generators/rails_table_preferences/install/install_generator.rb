@@ -10,6 +10,9 @@ module RailsTablePreferences
       include ActiveRecord::Generators::Migration
 
       source_root File.expand_path("templates", __dir__)
+      ENGINE_ROUTE = 'mount RailsTablePreferences::Engine, at: "/rails_table_preferences"'
+      ENGINE_ROUTE_PATH = "/rails_table_preferences"
+      ENGINE_ROUTE_PATTERN = /mount\s*(?:\(\s*)?RailsTablePreferences::Engine\s*,\s*at:\s*["']#{Regexp.escape(ENGINE_ROUTE_PATH)}["']/.freeze
       DEMO_ROUTE = 'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
       DEMO_ROUTE_PATH = "/rails_table_preferences_demo/orders"
       DEMO_ROUTE_TO = "rails_table_preferences_demo/orders#index"
@@ -34,6 +37,11 @@ module RailsTablePreferences
                    type: :boolean,
                    default: false,
                    desc: "Skip copying the default stylesheet into app/assets/stylesheets."
+
+      class_option :with_engine_route,
+                   type: :boolean,
+                   default: false,
+                   desc: "Also mount the Rails Table Preferences JSON API engine in config/routes.rb."
 
       class_option :with_demo,
                    type: :boolean,
@@ -72,6 +80,18 @@ module RailsTablePreferences
 
         copy_file "demo/orders_controller.rb", "app/controllers/rails_table_preferences_demo/orders_controller.rb"
         copy_file "demo/index.html.erb", "app/views/rails_table_preferences_demo/orders/index.html.erb"
+        inject_demo_preview_copy_script
+      end
+
+      def add_engine_route
+        return unless options[:with_engine_route]
+
+        routes_path = File.join(destination_root, "config/routes.rb")
+        if File.exist?(routes_path) && engine_route_present?(File.read(routes_path))
+          say_status :identical, "config/routes.rb"
+        else
+          route ENGINE_ROUTE
+        end
       end
 
       def add_demo_route
@@ -123,8 +143,9 @@ module RailsTablePreferences
         steps = [
           ["Run: bin/rails db:migrate"],
           [
-            "Mount the engine in config/routes.rb:",
-            "       mount RailsTablePreferences::Engine, at: \"/rails_table_preferences\""
+            engine_route_step_heading,
+            "       #{ENGINE_ROUTE}",
+            "     If you use a custom initializer mount_path, update the route path manually to match it."
           ]
         ]
 
@@ -164,6 +185,14 @@ module RailsTablePreferences
         steps
       end
 
+      def engine_route_step_heading
+        if options[:with_engine_route]
+          "Engine route configured in config/routes.rb:"
+        else
+          "Mount the engine in config/routes.rb, or rerun with --with-engine-route:"
+        end
+      end
+
       def demo_route_step_heading
         if options[:with_demo_route]
           "Demo route configured in config/routes.rb:"
@@ -176,8 +205,108 @@ module RailsTablePreferences
         options[:with_demo] || options[:with_demo_route]
       end
 
+      def engine_route_present?(routes_source)
+        routes_source.match?(ENGINE_ROUTE_PATTERN)
+      end
+
       def demo_route_present?(routes_source)
         routes_source.match?(DEMO_ROUTE_PATTERN)
+      end
+
+      def inject_demo_preview_copy_script
+        inject_into_file(
+          "app/views/rails_table_preferences_demo/orders/index.html.erb",
+          demo_preview_copy_script,
+          after: "  (() => {\n"
+        )
+      end
+
+      def demo_preview_copy_script
+        <<~JAVASCRIPT
+              if (!window.__railsTablePreferencesDemoPreviewCopyInstalled) {
+                window.__railsTablePreferencesDemoPreviewCopyInstalled = true
+
+                const demoPreviewCopySections = [
+                  {
+                    title: "Search form hidden fields preview",
+                    label: "Copy hidden fields evidence",
+                    success: "Hidden fields evidence copied.",
+                    evidence: (section) => section.querySelector(".rails-table-preferences-demo-hidden-fields-preview")?.textContent?.trim() || ""
+                  },
+                  {
+                    title: "Export payload preview",
+                    label: "Copy export payload evidence",
+                    success: "Export payload evidence copied.",
+                    evidence: (section) => Array.from(section.querySelectorAll("dl div")).map((item) => {
+                      const name = item.querySelector("dt")?.textContent?.trim()
+                      const value = item.querySelector("dd")?.textContent?.trim()
+                      return name && value ? `${name}: ${value}` : ""
+                    }).filter(Boolean).join("\\n")
+                  }
+                ]
+                const demoClipboardUnavailable = "Copy is unavailable because this browser does not expose the Clipboard API. The preview remains readable for manual selection."
+                const demoClipboardFailure = "Copy failed. Select the preview evidence manually."
+
+                const demoPreviewSection = (title) => Array.from(document.querySelectorAll(".rails-table-preferences-demo-summary")).find((section) => (
+                  section.querySelector("h2")?.textContent?.trim() === title
+                ))
+                const demoClipboardSupported = () => Boolean(navigator.clipboard?.writeText)
+                const setDemoPreviewCopyStatus = (status, message) => { status.textContent = message }
+
+                const installDemoPreviewCopyControl = ({ title, label, success, evidence }) => {
+                  const section = demoPreviewSection(title)
+                  const heading = section?.querySelector("h2")
+                  if (!section || !heading || section.querySelector("[data-rails-table-preferences-demo-copy-trigger]")) return
+
+                  const trigger = document.createElement("button")
+                  trigger.type = "button"
+                  trigger.className = "rails-table-preferences-demo-reset-trigger"
+                  trigger.setAttribute("data-rails-table-preferences-demo-copy-trigger", label)
+                  trigger.textContent = label
+
+                  const status = document.createElement("p")
+                  status.className = "rails-table-preferences-demo-reset-status"
+                  status.setAttribute("role", "status")
+                  status.setAttribute("aria-live", "polite")
+                  status.setAttribute("data-rails-table-preferences-demo-copy-status", label)
+
+                  if (!demoClipboardSupported()) {
+                    trigger.disabled = true
+                    setDemoPreviewCopyStatus(status, demoClipboardUnavailable)
+                  }
+
+                  trigger.addEventListener("click", async () => {
+                    const text = evidence(section)
+                    if (!text) {
+                      setDemoPreviewCopyStatus(status, "No preview evidence is available yet.")
+                      return
+                    }
+
+                    try {
+                      await navigator.clipboard.writeText(text)
+                      setDemoPreviewCopyStatus(status, success)
+                    } catch (error) {
+                      setDemoPreviewCopyStatus(status, demoClipboardFailure)
+                      console.error(error)
+                    }
+                  })
+
+                  heading.insertAdjacentElement("afterend", status)
+                  heading.insertAdjacentElement("afterend", trigger)
+                }
+
+                const installDemoPreviewCopyControls = () => {
+                  demoPreviewCopySections.forEach(installDemoPreviewCopyControl)
+                }
+
+                if (document.readyState === "loading") {
+                  document.addEventListener("DOMContentLoaded", installDemoPreviewCopyControls, { once: true })
+                } else {
+                  installDemoPreviewCopyControls()
+                }
+              }
+
+        JAVASCRIPT
       end
     end
   end
