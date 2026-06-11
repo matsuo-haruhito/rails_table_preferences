@@ -140,7 +140,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("Default column keys")
     expect(view.read).to include("Include-hidden column keys")
     expect(view.read).to include("include_hidden: true")
-    expect(view.read.scan("data-rails-table-preferences-demo-copy-trigger").size).to eq(2)
+    expect(view.read.scan("class=\"rails-table-preferences-demo-copy-trigger\"").size).to eq(2)
     expect(view.read).to include("Copy hidden fields preview")
     expect(view.read).to include("Copy export payload preview")
     expect(view.read).to include("data-rails-table-preferences-demo-copy-target=\"rails-table-preferences-demo-hidden-fields-preview\"")
