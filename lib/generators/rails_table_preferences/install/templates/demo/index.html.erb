@@ -125,6 +125,38 @@
     white-space: pre-wrap;
   }
 
+  .rails-table-preferences-demo-copy-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0.75rem 0;
+  }
+
+  .rails-table-preferences-demo-copy-controls h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .rails-table-preferences-demo-copy-trigger {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #9ca3af;
+    border-radius: 999px;
+    background: white;
+    color: #111827;
+    font-weight: 600;
+  }
+
+  .rails-table-preferences-demo-copy-trigger:disabled {
+    opacity: 0.7;
+  }
+
+  .rails-table-preferences-demo-copy-status {
+    font-weight: 600;
+  }
+
   .rails-table-preferences-demo-verification-context {
     display: grid;
     gap: 1rem;
@@ -238,7 +270,25 @@
   </p>
 
   <% demo_hidden_fields_preview = demo_hidden_fields_html.present? ? String.new(demo_hidden_fields_html.to_s) : "No saved filter or sort hidden fields are currently generated." %>
-  <pre class="rails-table-preferences-demo-hidden-fields-preview"><code><%= h(demo_hidden_fields_preview) %></code></pre>
+  <div class="rails-table-preferences-demo-copy-controls">
+    <h3 id="rails-table-preferences-demo-hidden-fields-copy-heading">Hidden fields evidence</h3>
+    <button type="button"
+            class="rails-table-preferences-demo-copy-trigger"
+            data-rails-table-preferences-demo-copy-trigger
+            data-rails-table-preferences-demo-copy-source="hidden-fields"
+            data-rails-table-preferences-demo-copy-target="rails-table-preferences-demo-hidden-fields-preview"
+            aria-describedby="rails-table-preferences-demo-hidden-fields-copy-status">
+      Copy hidden fields preview
+    </button>
+    <span class="rails-table-preferences-demo-copy-status"
+          id="rails-table-preferences-demo-hidden-fields-copy-status"
+          role="status"
+          aria-live="polite"
+          data-rails-table-preferences-demo-copy-status
+          data-rails-table-preferences-demo-copy-source="hidden-fields"></span>
+  </div>
+
+  <pre class="rails-table-preferences-demo-hidden-fields-preview" id="rails-table-preferences-demo-hidden-fields-preview"><code><%= h(demo_hidden_fields_preview) %></code></pre>
 
   <p>
     Save a filter or sort, reload, and compare this markup with the search
@@ -431,7 +481,25 @@
     include_hidden: true
   ) %>
 
-  <dl>
+  <div class="rails-table-preferences-demo-copy-controls">
+    <h3 id="rails-table-preferences-demo-export-payload-copy-heading">Export payload evidence</h3>
+    <button type="button"
+            class="rails-table-preferences-demo-copy-trigger"
+            data-rails-table-preferences-demo-copy-trigger
+            data-rails-table-preferences-demo-copy-source="export-payload"
+            data-rails-table-preferences-demo-copy-target="rails-table-preferences-demo-export-payload-preview"
+            aria-describedby="rails-table-preferences-demo-export-payload-copy-status">
+      Copy export payload preview
+    </button>
+    <span class="rails-table-preferences-demo-copy-status"
+          id="rails-table-preferences-demo-export-payload-copy-status"
+          role="status"
+          aria-live="polite"
+          data-rails-table-preferences-demo-copy-status
+          data-rails-table-preferences-demo-copy-source="export-payload"></span>
+  </div>
+
+  <dl id="rails-table-preferences-demo-export-payload-preview">
     <div>
       <dt>Default headers</dt>
       <dd><%= @export_payload_preview.fetch("headers", []).join(" / ") %></dd>
@@ -517,6 +585,59 @@
 
 <script<%= respond_to?(:content_security_policy_nonce) && content_security_policy_nonce.present? ? tag.attributes(nonce: content_security_policy_nonce) : nil %>>
   (() => {
+    if (!window.__railsTablePreferencesDemoCopyInstalled) {
+      window.__railsTablePreferencesDemoCopyInstalled = true
+
+      const copyTriggers = () => document.querySelectorAll("[data-rails-table-preferences-demo-copy-trigger]")
+      const copyStatusesFor = (source) => document.querySelectorAll(`[data-rails-table-preferences-demo-copy-status][data-rails-table-preferences-demo-copy-source="${source}"]`)
+      const copyAvailable = () => Boolean(navigator.clipboard?.writeText)
+      const copyTargetText = (target) => target?.innerText?.trim() || target?.textContent?.trim() || ""
+      const setCopyStatus = (source, message) => {
+        copyStatusesFor(source).forEach((element) => { element.textContent = message })
+      }
+      const updateCopyAvailability = () => {
+        copyTriggers().forEach((trigger) => {
+          const available = copyAvailable()
+          trigger.disabled = !available
+          if (!available) {
+            setCopyStatus(trigger.dataset.railsTablePreferencesDemoCopySource, "Copy unavailable in this browser. Select the preview text manually.")
+          }
+        })
+      }
+
+      updateCopyAvailability()
+
+      document.addEventListener("click", async (event) => {
+        const trigger = event.target.closest("[data-rails-table-preferences-demo-copy-trigger]")
+        if (!trigger) return
+
+        event.preventDefault()
+
+        const source = trigger.dataset.railsTablePreferencesDemoCopySource
+        const target = document.getElementById(trigger.dataset.railsTablePreferencesDemoCopyTarget)
+        const text = copyTargetText(target)
+
+        if (!copyAvailable()) {
+          trigger.disabled = true
+          setCopyStatus(source, "Copy unavailable in this browser. Select the preview text manually.")
+          return
+        }
+
+        if (!text) {
+          setCopyStatus(source, "Nothing is available to copy yet.")
+          return
+        }
+
+        try {
+          await navigator.clipboard.writeText(text)
+          setCopyStatus(source, "Copied preview text.")
+        } catch (error) {
+          setCopyStatus(source, "Copy failed. Select the preview text manually.")
+          console.error(error)
+        }
+      })
+    }
+
     if (!window.__railsTablePreferencesDemoResetInstalled) {
       window.__railsTablePreferencesDemoResetInstalled = true
 
