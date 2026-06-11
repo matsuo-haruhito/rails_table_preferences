@@ -2,17 +2,17 @@
 
 require "spec_helper"
 
-RSpec.describe "manual column editor metadata" do
-  class ManualColumnEditorMetadataAdapter
-    def to_table_cell_editor
-      {
-        type: :rails_fields_kit,
-        method: :status,
-        options: { helper: :enum_select }
-      }
-    end
+class ManualColumnEditorMetadataAdapter
+  def to_table_cell_editor
+    {
+      type: :rails_fields_kit,
+      method: :status,
+      options: { helper: :enum_select }
+    }
   end
+end
 
+RSpec.describe "manual column editor metadata" do
   let(:helper) do
     Class.new do
       include RailsTablePreferences::TablePreferencesHelper
@@ -72,7 +72,7 @@ RSpec.describe "manual column editor metadata" do
   end
 
   it "passes manual editor metadata to the registered editor renderer" do
-    renderer = instance_double("RailsTablePreferences::RendererRegistry")
+    renderer = double("editor renderers")
     allow(renderer).to receive(:call).and_return("rendered editor")
     allow(RailsTablePreferences.configuration).to receive(:editor_renderers).and_return(renderer)
 
