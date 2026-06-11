@@ -157,7 +157,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 
 - [ ] Add a text filter column and confirm the filter button appears.
 - [ ] Open the filter panel.
-- [ ] Confirm only the open filter button exposes `aria-expanded="true`.
+- [ ] Confirm only the open filter button exposes `aria-expanded="true"`.
 - [ ] Confirm focus moves into the filter panel when it opens.
 - [ ] Press `Escape` and confirm the panel closes and focus returns to the triggering filter button.
 - [ ] Re-open the panel and apply a `contains` condition.
