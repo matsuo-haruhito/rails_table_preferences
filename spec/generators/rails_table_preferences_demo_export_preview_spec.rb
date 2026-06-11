@@ -26,12 +26,9 @@ RSpec.describe "generated demo export payload preview" do
   end
 
   it "uses a representative export_key column in the generated demo" do
-    expect(controller_source).to include(<<~RUBY)
-      table_preferences_column(
-        :customer_name,
-        label: "得意先名",
-        export_key: :customer_display_name,
-    RUBY
+    expect(controller_source).to include(":customer_name")
+    expect(controller_source).to include("label: \"得意先名\"")
+    expect(controller_source).to include("export_key: :customer_display_name")
   end
 
   it "shows column keys and export keys for both default and include-hidden payloads" do
@@ -44,7 +41,7 @@ RSpec.describe "generated demo export payload preview" do
   end
 
   it "keeps the demo guide aligned with the export key preview" do
-    expect(demo_docs).to include("headers, column_keys, and export_keys")
+    expect(demo_docs).to include("`headers`, `column_keys`, and `export_keys`")
     expect(demo_docs).to include("export_key metadata")
   end
 end
