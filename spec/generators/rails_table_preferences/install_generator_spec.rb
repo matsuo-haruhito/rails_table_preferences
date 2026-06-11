@@ -197,6 +197,32 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(routes).not_to include(demo_route)
   end
 
+  it "can add the optional engine route without duplicating it" do
+    prepare_routes_file
+
+    run_generator %w[--with-engine-route]
+    run_generator %w[--with-engine-route]
+
+    expect(file("config/routes.rb").read.scan(engine_route).size).to eq(1)
+  end
+
+  it "does not duplicate an existing engine route written with representative syntax differences" do
+    prepare_routes_file(<<~ROUTES)
+      Rails.application.routes.draw do
+        mount(
+          RailsTablePreferences::Engine,
+          at: '/rails_table_preferences'
+        )
+      end
+    ROUTES
+
+    run_generator %w[--with-engine-route]
+
+    routes = file("config/routes.rb").read
+    expect(routes).to include("at: '/rails_table_preferences'")
+    expect(routes).not_to include(engine_route)
+  end
+
   it "describes the demo route as configured when it was already present" do
     prepare_routes_file("Rails.application.routes.draw do\n  #{demo_route}\nend\n")
 
@@ -289,5 +315,9 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
 
   def demo_route
     'get "/rails_table_preferences_demo/orders", to: "rails_table_preferences_demo/orders#index"'
+  end
+
+  def engine_route
+    'mount RailsTablePreferences::Engine, at: "/rails_table_preferences"'
   end
 end
