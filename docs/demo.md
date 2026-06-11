@@ -41,7 +41,7 @@ The sample rows are intentionally a little more practical than a three-row place
 
 The same screen now includes a lightweight hidden fields preview for the generated search form. It shows the escaped hidden inputs produced by `table_preferences_hidden_fields(...)`, so you can confirm how saved filter and sort state will roundtrip through an existing GET search form without adding host-app search code to the demo.
 
-The same screen now includes a lightweight export payload preview. It shows the ordered `headers` and `column_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion and saved order without wiring a real CSV action first.
+The same screen now includes a lightweight export payload preview. It shows the ordered `headers`, `column_keys`, and `export_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion, saved order, and `export_key` metadata without wiring a real CSV action first.
 
 The demo table also keeps `受注番号` pinned inside a dedicated horizontal scroll wrapper and renders a grouped header row (`受注情報` / `得意先情報` / `配送情報`). This gives you one narrow place to verify both fixed-column and column-group behavior before adding custom host-app table markup. Apply and table-header drag update the leaf headers and body cells live; the demo-only grouped header row is server-rendered and should be verified after save/reload, when it follows the current visible columns again.
 
@@ -177,7 +177,8 @@ The generated demo screen includes:
 - ignored column metadata
 - existing search form hidden fields
 - hidden fields preview for existing search form roundtrip checks
-- export payload preview for ordered `headers` and `column_keys`
+- export payload preview for ordered `headers`, `column_keys`, and `export_keys`
+- representative `export_key` metadata so export value keys can differ from display/preference keys
 
 For the accessibility-side contract behind these checks, see [Accessibility baseline](accessibility.md).
 
@@ -231,7 +232,8 @@ On the demo screen, confirm:
 - [ ] If an async preset request fails, the bundled status region shows the generic failure state and the controls recover.
 - [ ] Retrying the same preset action after the one-shot failure succeeds normally.
 - [ ] The export payload preview excludes hidden columns by default.
-- [ ] After saving a new visible-column order, the export payload preview shows the same header order and column key order.
+- [ ] After saving a new visible-column order, the export payload preview shows the same header order, column key order, and export key order.
+- [ ] The export payload preview shows `customer_name` in `column_keys` and `customer_display_name` in `export_keys`, confirming the demo's representative `export_key` metadata.
 
 ## Use Demo state reset before scoped checks
 
