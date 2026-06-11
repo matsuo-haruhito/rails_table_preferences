@@ -206,7 +206,7 @@ module RailsTablePreferences
       value.deep_stringify_keys.compact.tap do |attributes|
         attributes["type"] = attributes["type"].to_s if attributes["type"].present?
         attributes["method"] = attributes["method"].to_s if attributes["method"].present?
-        attributes["options"] = public_send(option_normalizer, attributes["options"]) if option_normalizer && attributes.key?("options")
+        attributes["options"] = send(option_normalizer, attributes["options"]) if option_normalizer && attributes.key?("options")
       end
     end
 
