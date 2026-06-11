@@ -63,6 +63,20 @@ RSpec.describe "package entrypoint controller source" do
     expect(base_controller_source).not_to include("syncEditorSearchResults")
   end
 
+  it "keeps editor search clear control explicit and wired to the existing clear path" do
+    expect(controller_source).to include('editorSearchClearLabel: { type: String, default: "検索をクリア" }')
+    expect(controller_source).to include('clearButton.type = "button"')
+    expect(controller_source).to include('clearButton.dataset.railsTablePreferencesEditorSearchClear = "true"')
+    expect(controller_source).to include('clearButton.setAttribute("aria-label", this.editorSearchClearLabelValue)')
+    expect(controller_source).to include("clearButton.title = this.editorSearchClearLabelValue")
+    expect(controller_source).to include('clearButton.addEventListener("click", (event) => {')
+    expect(controller_source).to include("this.clearEditorSearchQuery()")
+    expect(controller_source).to include("this.editorSearchInput?.focus()")
+    expect(controller_source).to include("if (this.editorSearchClearButton) this.editorSearchClearButton.disabled = !query")
+    expect(controller_source).to include("get editorSearchClearButton()")
+    expect(base_controller_source).not_to include("railsTablePreferencesEditorSearchClear")
+  end
+
   it "keeps editor search group metadata explicit and avoids object string leakage" do
     expect(controller_source).to include("row.dataset.railsTablePreferencesEditorSearchText = this.editorSearchTextForColumn(column)")
     expect(controller_source).to include("editorSearchTextForColumn(column) {")
