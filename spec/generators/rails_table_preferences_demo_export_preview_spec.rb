@@ -42,6 +42,6 @@ RSpec.describe "generated demo export payload preview" do
 
   it "keeps the demo guide aligned with the export key preview" do
     expect(demo_docs).to include("`headers`, `column_keys`, and `export_keys`")
-    expect(demo_docs).to include("export_key metadata")
+    expect(demo_docs).to include("`export_key` metadata")
   end
 end
