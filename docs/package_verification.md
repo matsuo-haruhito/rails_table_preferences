@@ -37,6 +37,14 @@ Package verification summary: 4 issue(s) (required files: 1, package export targ
 
 Use the summary line in PR bodies, the pull request template's release/package evidence field, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, unresolved declaration import, or package metadata error. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
 
+## RubyGems publish boundary
+
+`bundle exec rake package:verify` is a package-content gate, not a RubyGems publish approval. A passing result means the built gem contains the expected files, package metadata, JavaScript export wiring, and declaration re-exports; it does not decide the publishing account, MFA or trusted-publishing posture, checksum/provenance handling, selected artifact, or final release command.
+
+Keep those release-time decisions in the [RubyGems publish boundary checks](release_checklist.md#rubygems-publish-boundary-checks). The release owner should confirm that the `.gem` artifact being published is the same build output that passed package verification, or record why a fresh artifact was built and re-verified.
+
+Do not add repository secrets, change RubyGems settings, create a tag, publish the gem, or introduce release automation from package verification docs work.
+
 ## Manual inspection
 
 The automated task is the normal gate. Manual inspection is still useful before tagging a release.
