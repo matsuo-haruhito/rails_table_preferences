@@ -22,7 +22,7 @@ RSpec.describe "visual overview documentation assets" do
         svg: [/editor/i, /scoped preset/i, /export preview/i]
       },
       "images/visual-overview-filter-and-pinned-columns.svg" => {
-        overview: [/grouped/i, /fixed-column/i, /demo-aligned/i],
+        overview: [/grouped/i, /fixed leading order column/i, /demo-aligned/i],
         svg: [/grouped header/i, /fixed column/i, /generated demo/i]
       }
     }
