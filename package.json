@@ -11,7 +11,7 @@
     },
     "./controller": {
       "types": "./app/javascript/rails_table_preferences/controller.d.ts",
-      "default": "./app/javascript/rails_table_preferences/controller.js"
+      "default": "./app/javascript/rails_table_preferences/controller_with_preset_search.js"
     }
   }
 }
