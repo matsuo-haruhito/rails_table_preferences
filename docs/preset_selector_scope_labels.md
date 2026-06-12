@@ -23,6 +23,8 @@ The search is only a navigation affordance for the package entrypoint selector. 
 
 When a query has no matches, the selector is disabled and the package entrypoint shows a no-results message. That state should not load, save, delete, or infer another preset. Users can clear or change the query to return to the complete selector.
 
+When a query still has matches but filters out the currently applied preset, the selector keeps the visible matches available for an intentional load but leaves the native select unselected. That prevents the first visible match from looking like the active preset while the editor and table still reflect the previously applied state.
+
 The copied/base controller does not get this search field automatically. Host apps that copied the base controller can keep their compact selector, copy the package-entrypoint pattern intentionally, or provide a host-owned preset search UI around their own admin surface.
 
 ## What does not change
