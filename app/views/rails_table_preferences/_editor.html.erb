@@ -43,7 +43,6 @@
      aria-labelledby="<%= editor_title_id %>"
      data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
-     data-rails-table-preferences-editor-id-prefix-value="<%= editor_id_prefix %>"
      data-rails-table-preferences-name-value="<%= name %>"
      data-rails-table-preferences-url-value="<%= preference_url %>"
      data-rails-table-preferences-collection-url-value="<%= collection_url %>"
@@ -66,8 +65,6 @@
      data-rails-table-preferences-filter-operator-label-value="<%= t("rails_table_preferences.editor.filter_operator", default: "条件") %>"
      data-rails-table-preferences-filter-operator-labels-value="<%= filter_operator_labels.to_json %>"
      data-rails-table-preferences-filter-value-label-value="<%= t("rails_table_preferences.editor.filter_value", default: "値") %>"
-     data-rails-table-preferences-select-filter-option-search-label-value="<%= t("rails_table_preferences.editor.select_filter_option_search_label", default: "候補を絞り込み") %>"
-     data-rails-table-preferences-select-filter-option-search-placeholder-value="<%= t("rails_table_preferences.editor.select_filter_option_search_placeholder", default: "候補を絞り込み") %>"
      data-rails-table-preferences-filter-from-label-value="<%= t("rails_table_preferences.editor.filter_from", default: "開始") %>"
      data-rails-table-preferences-filter-to-label-value="<%= t("rails_table_preferences.editor.filter_to", default: "終了") %>"
      data-rails-table-preferences-sort-asc-label-value="<%= t("rails_table_preferences.editor.sort_asc", default: "昇順") %>"
@@ -92,6 +89,7 @@
      data-rails-table-preferences-deleted-status-label-value="<%= t("rails_table_preferences.editor.deleted_status", default: "設定を削除しました。") %>"
      data-rails-table-preferences-deleting-failed-status-label-value="<%= t("rails_table_preferences.editor.deleting_failed_status", default: "設定の削除を完了できませんでした。") %>"
      data-rails-table-preferences-operation-failed-status-label-value="<%= t("rails_table_preferences.editor.operation_failed_status", default: "設定の操作を完了できませんでした。") %>"
+     data-rails-table-preferences-reset-status-label-value="<%= t("rails_table_preferences.editor.reset_status", default: "テーブル初期設定に戻しました。") %>"
      class="rails-table-preferences-editor">
   <h2 id="<%= editor_title_id %>" class="rails-table-preferences-editor__title"><%= title %></h2>
 
