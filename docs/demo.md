@@ -39,6 +39,8 @@ The same demo controller also seeds one organization preset named `東京組織�
 
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, true/false confirmation states, varied amounts, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
+Delivery-date samples are relative to the day the generated demo runs. When collecting manual evidence, record the visible sort/filter behavior and relative row order instead of treating the exact calendar dates as stable release evidence.
+
 The same screen now includes a lightweight hidden fields preview for the generated search form. It shows the escaped hidden inputs produced by `table_preferences_hidden_fields(...)`, so you can confirm how saved filter and sort state will roundtrip through an existing GET search form without adding host-app search code to the demo.
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers`, `column_keys`, and `export_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion, saved order, and `export_key` metadata without wiring a real CSV action first.
@@ -210,7 +212,7 @@ On the demo screen, confirm:
 - [ ] `金額` exposes number filter operators with a number input, and saving `金額 >= 50000` narrows the rows to the larger sample amounts after reload.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
-- [ ] Sorting by `納品日` or `金額` makes the row order visibly change.
+- [ ] Sorting by `納品日` or `金額` makes the row order visibly change; for `納品日`, compare relative order instead of exact calendar dates because demo delivery dates are seeded from the current day.
 - [ ] Save persists settings.
 - [ ] Reload restores saved settings.
 - [ ] The search form hidden fields preview updates after reload to show saved filter/sort inputs separately from the export payload preview.
