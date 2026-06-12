@@ -12,6 +12,7 @@ module RailsTablePreferencesDemo
     ORGANIZATION_PRESET_NAME = "東京組織ビュー"
     DEMO_ROLE_KEY = "operations"
     DEMO_ORGANIZATION_KEY = "tokyo-hq"
+    DEMO_REFERENCE_DATE = Date.new(2024, 1, 15)
     DEMO_SCOPE_CONTEXT_PARAM = "demo_scope_context"
     DEMO_SCOPE_CONTEXT_HOST_MODE = "host"
     DEMO_SCOPE_CONTEXT_MODE_CONFIGS = {
@@ -396,7 +397,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A001",
           customer_name: "山田商事 東京本店",
-          delivery_date: Date.current,
+          delivery_date: DEMO_REFERENCE_DATE,
           status: "未出荷",
           confirmed: true,
           amount: 12_000,
@@ -408,7 +409,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A002",
           customer_name: "田中物流 関西センター",
-          delivery_date: Date.current + 1.day,
+          delivery_date: DEMO_REFERENCE_DATE + 1.day,
           status: "出荷済",
           confirmed: false,
           amount: 34_000,
@@ -420,7 +421,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A003",
           customer_name: "佐藤食品 冷凍倉庫",
-          delivery_date: Date.current + 2.days,
+          delivery_date: DEMO_REFERENCE_DATE + 2.days,
           status: "保留",
           confirmed: true,
           amount: 56_000,
@@ -432,7 +433,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A004",
           customer_name: "東京医療機器",
-          delivery_date: Date.current + 3.days,
+          delivery_date: DEMO_REFERENCE_DATE + 3.days,
           status: "未出荷",
           confirmed: true,
           amount: 89_000,
@@ -444,7 +445,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A005",
           customer_name: "東京製菓",
-          delivery_date: Date.current + 5.days,
+          delivery_date: DEMO_REFERENCE_DATE + 5.days,
           status: "出荷済",
           confirmed: false,
           amount: 21_500,
@@ -456,7 +457,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A006",
           customer_name: "北星化学",
-          delivery_date: Date.current + 7.days,
+          delivery_date: DEMO_REFERENCE_DATE + 7.days,
           status: "保留",
           confirmed: false,
           amount: 104_000,
