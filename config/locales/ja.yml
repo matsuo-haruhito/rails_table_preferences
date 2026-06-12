@@ -47,6 +47,7 @@ ja:
       deleted_status: 設定を削除しました。
       deleting_failed_status: 設定の削除を完了できませんでした。
       operation_failed_status: 設定の操作を完了できませんでした。
+      reset_status: テーブル初期設定に戻しました。
       reset: テーブル初期設定に戻す
       reset_hint: 保存前の表示設定の変更を破棄し、読み込んだ保存済み設定ではなくテーブルの初期表示設定に戻します。
       reset_visible_hint: テーブル初期設定に戻すと、保存前の変更は破棄されます。読み込んだ保存済み設定へ戻す操作ではありません。
