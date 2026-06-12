@@ -12,6 +12,7 @@ module RailsTablePreferencesDemo
     ORGANIZATION_PRESET_NAME = "東京組織ビュー"
     DEMO_ROLE_KEY = "operations"
     DEMO_ORGANIZATION_KEY = "tokyo-hq"
+    DEMO_REFERENCE_DATE = Date.new(2024, 1, 15)
     DEMO_SCOPE_CONTEXT_PARAM = "demo_scope_context"
     DEMO_SCOPE_CONTEXT_HOST_MODE = "host"
     DEMO_SCOPE_CONTEXT_MODE_CONFIGS = {
@@ -37,6 +38,7 @@ module RailsTablePreferencesDemo
     }.freeze
     DEMO_OWNER_PARAM = "demo_owner"
     DEMO_OWNER_SWITCH_LABELS = ["Demo owner A", "Demo owner B"].freeze
+    DEMO_BASELINE_QUERY_PARAMS = [DEMO_OWNER_PARAM, DEMO_SCOPE_CONTEXT_PARAM].freeze
 
     owner_method_name = RailsTablePreferences.configuration.current_user_method.to_s.presence || "current_user"
     define_method(owner_method_name) do
@@ -273,11 +275,15 @@ module RailsTablePreferencesDemo
     end
 
     def demo_owner_switch_path(owner, index)
-      query_params = request.query_parameters.except(DEMO_OWNER_PARAM)
+      query_params = demo_baseline_query_params.except(DEMO_OWNER_PARAM)
       query_params = query_params.merge(DEMO_OWNER_PARAM => demo_owner_switch_key(owner)) unless index.zero?
       return request.path if query_params.empty?
 
       "#{request.path}?#{query_params.to_query}"
+    end
+
+    def demo_baseline_query_params
+      request.query_parameters.slice(*DEMO_BASELINE_QUERY_PARAMS)
     end
 
     def table_columns
@@ -293,6 +299,7 @@ module RailsTablePreferencesDemo
         table_preferences_column(
           :customer_name,
           label: "得意先名",
+          export_key: :customer_display_name,
           default_width: 240,
           default_truncate: 24,
           group: { key: :customer, label: "得意先情報" },
@@ -390,7 +397,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A001",
           customer_name: "山田商事 東京本店",
-          delivery_date: Date.current,
+          delivery_date: DEMO_REFERENCE_DATE,
           status: "未出荷",
           confirmed: true,
           amount: 12_000,
@@ -402,7 +409,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A002",
           customer_name: "田中物流 関西センター",
-          delivery_date: Date.current + 1.day,
+          delivery_date: DEMO_REFERENCE_DATE + 1.day,
           status: "出荷済",
           confirmed: false,
           amount: 34_000,
@@ -414,7 +421,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A003",
           customer_name: "佐藤食品 冷凍倉庫",
-          delivery_date: Date.current + 2.days,
+          delivery_date: DEMO_REFERENCE_DATE + 2.days,
           status: "保留",
           confirmed: true,
           amount: 56_000,
@@ -426,7 +433,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A004",
           customer_name: "東京医療機器",
-          delivery_date: Date.current + 3.days,
+          delivery_date: DEMO_REFERENCE_DATE + 3.days,
           status: "未出荷",
           confirmed: true,
           amount: 89_000,
@@ -438,7 +445,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A005",
           customer_name: "東京製菓",
-          delivery_date: Date.current + 5.days,
+          delivery_date: DEMO_REFERENCE_DATE + 5.days,
           status: "出荷済",
           confirmed: false,
           amount: 21_500,
@@ -450,7 +457,7 @@ module RailsTablePreferencesDemo
         {
           order_no: "A006",
           customer_name: "北星化学",
-          delivery_date: Date.current + 7.days,
+          delivery_date: DEMO_REFERENCE_DATE + 7.days,
           status: "保留",
           confirmed: false,
           amount: 104_000,
@@ -572,7 +579,7 @@ module RailsTablePreferencesDemo
     end
 
     def demo_scope_context_switch_path(mode)
-      query_params = request.query_parameters.except(DEMO_SCOPE_CONTEXT_PARAM)
+      query_params = demo_baseline_query_params.except(DEMO_SCOPE_CONTEXT_PARAM)
       query_params = query_params.merge(DEMO_SCOPE_CONTEXT_PARAM => mode) unless mode == DEMO_SCOPE_CONTEXT_HOST_MODE
       return request.path if query_params.empty?
 

@@ -4,6 +4,20 @@ This directory contains focused documentation for Rails Table Preferences.
 
 ## Start here
 
+### Choose your first path
+
+Use this short map before the full catalog when you are opening the docs for the first time.
+
+- New install or smallest working UI: start with [Quick start](quick_start.md), then use [Install path options](install_paths.md) if the host app uses Vite, skipped copied assets, or demo generator options.
+- Japanese business-app orientation: start with [日本語 quick start](quick_start_ja.md), then follow its links to the English source-of-truth guides for detailed steps.
+- Browser preview before a real host-app screen: generate the [Demo screen](demo.md), then use [Sandbox Rails app verification](sandbox.md) if you want a clean end-to-end install check.
+- Convention-first Active Record table: start with [Resource table adapters](resource_tables.md), then move to the [Production integration checklist](production_integration_checklist.md) for real index-screen owner, route, query, layout, and export checks.
+- Existing custom or hand-written table: use [Quick start](quick_start.md) for the minimum editor/table wiring and [Decision guide](decision_guide.md) when choosing helpers, hidden fields, controller params, exports, or customization paths.
+- Real host-app screen already wired but failing: use [Production troubleshooting notes](production_troubleshooting.md) before changing implementation, especially for auth redirects, CSRF, owner lookup, stable `table_key`, or preset persistence issues.
+- Release or package-readiness review: use [Release checklist](release_checklist.md), [Package verification](package_verification.md), and [Manual QA checklist](manual_qa.md) after the integration path is working.
+
+## Full catalog
+
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Production integration checklist](production_integration_checklist.md): the short path from a working demo or quick start to a real host-app index screen.
 - [Production troubleshooting notes](production_troubleshooting.md): symptom-driven checks for CSRF 422s, auth redirects, owner lookup failures, unstable `table_key` values, duplicate preset names, and saved presets that do not return on real host-app screens.
@@ -26,6 +40,8 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
 - [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, browser QA handoff, and copied-controller boundary.
+- [Editor reorder accessibility note](editor_reorder_accessibility.md): package-entrypoint visual-only row drag handle, keyboard reorder controls, and copied-controller boundary.
+- [Header drag reorder](header_drag_reorder.md): package-entrypoint table-header drag reorder, `draggable: false` opt-out, and host-app interactive header boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
 - [Editor root HTML options](editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
@@ -36,6 +52,7 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Helper-free controller root URLs](helper_free_controller_root_urls.md): collection/member URL ownership when an existing table partial mounts `data-controller="rails-table-preferences"` manually.
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, legacy import, and customization issues.
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar or label/value select options, option-search threshold cues, and host-app query ownership when select filters do not affect results.
+- [Select filter option search threshold](select_filter_option_search_threshold.md): package-entrypoint-only threshold controls for static select option search, empty-result feedback, and the host-owned boundary for remote or async option search.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
 - [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md): focused evidence guidance for old `page` params when saved filter/sort hidden fields roundtrip through existing search forms.
@@ -68,23 +85,24 @@ This directory contains focused documentation for Rails Table Preferences.
 10. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
 11. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
 12. Add `filter:` and `sortable: true` metadata where needed.
-13. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
-14. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
-15. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-16. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-17. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-18. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-19. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-20. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-21. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
-22. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-23. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-24. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-25. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-26. Verify the feature in a sandbox Rails app.
-27. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-28. Run the manual QA checklist before asking real users to try the feature.
-29. Before release, run the release checklist and package verification guide.
+13. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
+14. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
+15. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
+16. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+17. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+18. Configure `scope_context_method` only if shared, role, or organization presets are needed.
+19. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+20. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+21. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+22. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
+23. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+24. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+25. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+26. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+27. Verify the feature in a sandbox Rails app.
+28. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+29. Run the manual QA checklist before asking real users to try the feature.
+30. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 

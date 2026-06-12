@@ -265,6 +265,8 @@ If the host app also needs per-screen wording, different markup, or a custom sta
 
 The bundled CSS intentionally relies on lightweight system-friendly values such as `currentColor`, `canvas`, and `canvastext`. That keeps the default surface adaptable, but host applications should still verify the final rendered table in the application's high contrast or forced-colors mode.
 
+Use [Forced-colors manual QA note](forced_colors_manual_qa.md) when a design or accessibility review needs a focused browser handoff checklist for active filters, sorted headers, resize focus, filter panel boundaries, and pinned or fixed column backgrounds.
+
 When checking a release candidate or host-app rollout, confirm the representative table still exposes these states without relying on color alone:
 
 - active filter buttons remain distinguishable from inactive filter buttons through the accessible name, pressed state, and visible affordance

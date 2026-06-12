@@ -44,6 +44,7 @@ module RailsTablePreferences
       "lib/rails_table_preferences/column_definition.rb",
       "lib/rails_table_preferences/configuration.rb",
       "lib/rails_table_preferences/export_payload.rb",
+      "lib/rails_table_preferences/legacy_column_adjustment_importer.rb",
       "lib/rails_table_preferences/package_verifier.rb",
       "lib/rails_table_preferences/renderer_registry.rb",
       "lib/rails_table_preferences/settings_normalizer.rb",
@@ -73,6 +74,7 @@ module RailsTablePreferences
       "docs/accessibility.md",
       "docs/editor_i18n.md",
       "docs/editor_entrypoint_affordances.md",
+      "docs/header_drag_reorder.md",
       "docs/editor_root_options.md",
       "docs/helper_free_controller_root_urls.md",
       "docs/non_goals.md",
@@ -92,6 +94,7 @@ module RailsTablePreferences
       "docs/filter_metadata.md",
       "docs/filter_adapters.md",
       "docs/select_filter_troubleshooting.md",
+      "docs/select_filter_option_search_threshold.md",
       "docs/javascript_entrypoints.md",
       "docs/javascript_controller.md"
     ].freeze
