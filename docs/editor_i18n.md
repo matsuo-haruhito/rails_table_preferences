@@ -22,9 +22,9 @@ In the current bundled editor, the preset selector is the source for loading or 
 
 When the selected preset is read-only, the bundled save action does not overwrite that scoped preset. It creates or updates an owner preset instead, using the current preset name input as the owner preset name. The selected read-only preset name is loaded into that input first, so users can keep the same visible name or change the input before saving a personal copy. If an owner preset with that name already exists, the bundled editor keeps the existing API failure path; host apps that need detailed duplicate-name guidance should customize the failure copy or controller behavior separately.
 
-## Actions and reset copy
+## Actions, grouping, and reset copy
 
-These keys drive the bundled action buttons, button context, delete confirmation, and reset helper copy:
+These keys drive the bundled action buttons, button context, delete confirmation, reset helper copy, and action grouping labels:
 
 - `rails_table_preferences.editor.apply`
 - `rails_table_preferences.editor.apply_context`
@@ -38,8 +38,19 @@ These keys drive the bundled action buttons, button context, delete confirmation
 - `rails_table_preferences.editor.reset`
 - `rails_table_preferences.editor.reset_hint`
 - `rails_table_preferences.editor.reset_visible_hint`
+- `rails_table_preferences.editor.show_all_columns`
+- `rails_table_preferences.editor.show_all_columns_hint`
+- `rails_table_preferences.editor.hide_all_columns`
+- `rails_table_preferences.editor.visibility_bulk_hint`
+- `rails_table_preferences.editor.visibility_bulk_action_group`
+- `rails_table_preferences.editor.primary_action_group`
+- `rails_table_preferences.editor.save_action_group`
+- `rails_table_preferences.editor.maintenance_action_group`
+- `rails_table_preferences.editor.maintenance_hint`
 
-The context keys are used in `title` / `aria-label` text so users can tell whether an action applies the current view, saves to the current preset name, or creates a new preset.
+The context keys are used in `title` / `aria-label` text so users can tell whether an action applies the current view, saves to the current preset name, or creates a new preset. The action group labels feed the `role="group"` containers around visibility, apply, save, and maintenance actions; override them when the wording needs to change, but copy the ERB partial if the host app needs to regroup, hide, or move those controls.
+
+The visibility bulk keys label the package entrypoint's bundled all-visible and all-hidden buttons. Those buttons toggle editor visibility checkboxes in bulk and still require apply or save before users persist or reflect the change. Keep that boundary in host-app copy so wording-only overrides do not imply a separate group-level visibility feature or an automatic save.
 
 `delete_confirm` provides the base confirmation sentence. The bundled controller appends the selected preset display name from the preset selector, including any scope label already present in the option text, to the native confirmation message and the delete button's `title` / `aria-label`. Override the locale key for wording, and copy the controller only when the host app needs a different delete-confirmation composition or custom modal.
 
@@ -81,6 +92,8 @@ The bundled editor passes these values to the controller root so the Stimulus co
 - `rails_table_preferences.editor.filter_operator`
 - `rails_table_preferences.editor.filter_operator_labels.*`
 - `rails_table_preferences.editor.filter_value`
+- `rails_table_preferences.editor.select_filter_option_search_label`
+- `rails_table_preferences.editor.select_filter_option_search_placeholder`
 - `rails_table_preferences.editor.filter_from`
 - `rails_table_preferences.editor.filter_to`
 - `rails_table_preferences.editor.sort_asc`
@@ -88,6 +101,8 @@ The bundled editor passes these values to the controller root so the Stimulus co
 - `rails_table_preferences.editor.sort_clear`
 
 Host apps can also override the generated controller-root attributes for a single mounted table, such as `data-rails-table-preferences-filter-label-value` or `data-rails-table-preferences-sort-asc-label-value`, when one screen needs wording that differs from the global locale.
+
+`select_filter_option_search_label` and `select_filter_option_search_placeholder` feed the package entrypoint's static select-option search field when a select filter crosses the option-search threshold. They are wording-only override points for the packaged controller path. Host apps that need remote option loading, async search, different threshold behavior, or copied/base-controller support should use copied or replacement JavaScript instead of treating those labels as a full search feature.
 
 Filter operator option text such as `contains`, `equals`, or range-specific summaries is controller vocabulary. The bundled editor now emits `rails_table_preferences.editor.filter_operator_labels` as `data-rails-table-preferences-filter-operator-labels-value`, so packaged-controller tables can change operator wording through locale overrides without copying the controller:
 
@@ -156,12 +171,17 @@ ja:
       save: この設定を保存
       save_as_new: 新しい設定として保存
       action_hint: 画面に反映は現在の表示だけを更新し、保存は入力欄の設定名へ反映します。
+      show_all_columns: 全列表示
+      hide_all_columns: 全列非表示
+      visibility_bulk_action_group: 列の表示をまとめて切り替える操作
       search_columns: 表示列を検索
       search_columns_placeholder: 列名・キー・グループで絞り込み
       no_search_results: 一致する列がありません。
       move_up: 1つ上へ移動
       move_down: 1つ下へ移動
       filter: 条件で絞り込む
+      select_filter_option_search_label: 候補を絞り込み
+      select_filter_option_search_placeholder: 候補名で検索
       filter_operator_labels:
         contains: 含める
         equals: 完全一致
@@ -179,10 +199,10 @@ Keep overrides close to the host app's normal locale files so copied ERB and cop
 Use the lightest path that matches the change:
 
 1. Locale keys for global wording changes across every bundled editor.
-2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, or resize auto-fit status wording.
+2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, select option search, resize auto-fit status, or action-group wording.
 3. Package entrypoint `data-rails-table-preferences-filter-operator-labels-value` when a packaged-controller table only needs different filter operator display text.
-4. Package entrypoint editor search / move label values when the packaged-controller table only needs different search or move button copy.
-5. Copied ERB when markup, helper-text placement, or status-region structure needs to change.
-6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, row movement, or resize auto-fit status handling needs to change.
+4. Package entrypoint editor search / move / select-option-search label values when the packaged-controller table only needs different search or move button copy.
+5. Copied ERB when markup, helper-text placement, action grouping, or status-region structure needs to change.
+6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, select option search behavior, row movement, or resize auto-fit status handling needs to change.
 
 See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, [Editor entrypoint affordances](editor_entrypoint_affordances.md) for the package-only browser QA surface, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.
