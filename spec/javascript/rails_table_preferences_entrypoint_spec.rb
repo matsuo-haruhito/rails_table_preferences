@@ -30,6 +30,10 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
         File.read(File.join(repo_root, "app/javascript/rails_table_preferences/controller.js"))
           .gsub('"../controllers/rails_table_preferences_controller"', '"../controllers/rails_table_preferences_controller.js"')
       )
+      File.write(
+        File.join(package_dir, "preset_select_recovery.js"),
+        File.read(File.join(repo_root, "app/javascript/rails_table_preferences/preset_select_recovery.js"))
+      )
       FileUtils.cp(
         File.join(repo_root, "app/javascript/controllers/rails_table_preferences_controller.js"),
         File.join(controller_dir, "rails_table_preferences_controller.js")
@@ -65,7 +69,7 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
 
   it "loads the documented controller entrypoint as a module" do
     build_entrypoint_sandbox do |tmpdir|
-      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/preset_select_recovery.js")
 
       script = <<~JS
         import { pathToFileURL } from "node:url"
@@ -85,7 +89,7 @@ RSpec.describe "rails_table_preferences JavaScript entrypoints" do
   it "loads the package root entrypoint and keeps the documented named export wired to the controller export" do
     build_entrypoint_sandbox do |tmpdir|
       index_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/index.js")
-      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/controller.js")
+      controller_entrypoint_path = File.join(tmpdir, "app/javascript/rails_table_preferences/preset_select_recovery.js")
 
       script = <<~JS
         import { pathToFileURL } from "node:url"
