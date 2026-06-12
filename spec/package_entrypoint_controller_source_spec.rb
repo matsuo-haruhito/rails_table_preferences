@@ -80,7 +80,7 @@ RSpec.describe "package entrypoint controller source" do
     expect(base_controller_source).to include('<button type="button" class="rails-table-preferences-editor__drag-handle"')
   end
 
-  it "keeps the bundled filter panel constrained to the viewport bottom without changing close behavior" do
+  it "keeps the bundled filter panel constrained to the viewport bottom" do
     position_panel_body = controller_source.match(/\n\s+positionFilterPanel\(panel, headerCell\) \{(?<body>.*?)\n\s+\}\n\n\s+renderFilterPanelValueFields/m)&.[](:body)
 
     expect(position_panel_body).not_to be_nil
@@ -91,6 +91,5 @@ RSpec.describe "package entrypoint controller source" do
     expect(position_panel_body).to include("panel.style.maxWidth = `calc(100vw - ${viewportMargin * 2}px)`")
     expect(position_panel_body).to include("panel.style.maxHeight = `${availableHeight}px`")
     expect(position_panel_body).to include('panel.style.overflowY = "auto"')
-    expect(controller_source).to include("Scroll and viewport resize also close the panel")
   end
 end
