@@ -18,12 +18,12 @@ Choose the relationship intentionally and remove unused lines.
 
 - Automated checks, specs, or docs-only review:
 - Release/package evidence or package verification summary:
-- Manual QA applicability:
-- UI / visual evidence:
+- Manual QA applicability and selected matrix category:
+- UI / visual evidence status, or why not applicable:
 
 ## Current Review State
 
-Record the current GitHub state used for review or merge decisions. Do not rely on older PR-body CI notes without refreshing these fields.
+Record the current GitHub state used for review or merge decisions. Do not rely on older PR-body CI notes without refreshing these fields. Keep CI/check status separate from UI or visual approval; a green workflow does not prove a rendered browser state.
 
 - Head SHA or compare head:
 - Workflow run or checks summary:
@@ -32,13 +32,15 @@ Record the current GitHub state used for review or merge decisions. Do not rely 
 
 ## Focused Manual QA
 
-Use `docs/manual_qa_pr_smoke_matrix.md` as the category guide when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance. This template is the per-PR record: copy the closest matrix category here, then record what was checked, what was skipped, what evidence was used, and any browser-capable handoff.
+Use `docs/manual_qa_pr_smoke_matrix.md` as the source-of-truth category and evidence-boundary guide when this PR changes browser-visible behavior, generated demo output, helper-rendered markup, JavaScript interactions, or release-facing QA guidance. This template is the per-PR record: copy the closest matrix category here, then record what was checked, what was skipped, what evidence status applies, and any browser-capable handoff.
 
 - PR category:
-- Review state or handoff reason:
+- Evidence status, for example `not applicable`, `source review`, `rendered/browser checked`, or `browser-capable handoff`:
+- Environment or state, including source-only, rendered artifact, browser, viewport, or forced-colors context when relevant:
+- Evidence used:
+- Remaining browser-capable check, if any:
 - Screen or artifact checked:
 - Viewports or states checked:
-- Evidence:
 - Skipped full-checklist areas and reason:
 - Follow-up needed:
 
@@ -48,7 +50,7 @@ For docs-only or spec-only changes, it is fine to write `not applicable` when th
 
 Use this section only when the PR changes visible UI, layout, copy that affects a control, or a visual reference. Docs-only API wording and non-visual code changes can mark this as not applicable.
 
-For static visual docs or docs image changes, use the `Static visual docs or docs image` category in `docs/manual_qa_pr_smoke_matrix.md` to decide the evidence boundary, then record here whether source diff, rendered visual confirmation, or a browser-capable handoff was used. This does not replace browser evidence for runtime UI, layout, or control-copy changes.
+For static visual docs or docs image changes, use the `Static visual docs or docs image` category in `docs/manual_qa_pr_smoke_matrix.md` to decide the evidence boundary, then record here whether source diff, rendered visual confirmation, or a browser-capable handoff was used. Use the same evidence-status wording as the focused manual QA section. This does not replace browser evidence for runtime UI, layout, or control-copy changes.
 
 - Screenshot or visual evidence attached, or not applicable because:
 - Representative surface checked:
