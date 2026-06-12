@@ -25,6 +25,10 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
     columns.map { |column| column.fetch("key") }
   end
 
+  def filters_by_key(columns)
+    columns.to_h { |column| [column.fetch("key"), column.fetch("filter")] }
+  end
+
   it "infers belongs_to association columns by default" do
     columns = described_class.call(model: model)
 
@@ -53,5 +57,39 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
     columns = described_class.call(model: model, only: %i[customer_id], include_associations: false)
 
     expect(column_keys(columns)).to eq(%w[customer_id])
+  end
+
+  it "keeps date, datetime, and time attributes on the date filter baseline" do
+    attribute_type = Struct.new(:type)
+    attribute_types = {
+      "placed_on" => attribute_type.new(:date),
+      "shipped_at" => attribute_type.new(:datetime),
+      "dispatch_time" => attribute_type.new(:time),
+      "active" => attribute_type.new(:boolean),
+      "total" => attribute_type.new(:decimal),
+      "status" => attribute_type.new(:string),
+      "notes" => attribute_type.new(:text)
+    }
+
+    typed_model = Object.new.tap do |model|
+      model.define_singleton_method(:attribute_names) do
+        %w[placed_on shipped_at dispatch_time active total status notes]
+      end
+      model.define_singleton_method(:defined_enums) { { "status" => { "draft" => 0, "shipped" => 1 } } }
+      model.define_singleton_method(:reflect_on_all_associations) { [] }
+      model.define_singleton_method(:type_for_attribute) { |name| attribute_types.fetch(name) }
+    end
+
+    columns = described_class.call(model: typed_model)
+
+    expect(filters_by_key(columns)).to include(
+      "placed_on" => { "type" => "date" },
+      "shipped_at" => { "type" => "date" },
+      "dispatch_time" => { "type" => "date" },
+      "active" => { "type" => "boolean" },
+      "total" => { "type" => "number" },
+      "status" => { "type" => "select", "options" => %w[draft shipped] },
+      "notes" => { "type" => "text" }
+    )
   end
 end
