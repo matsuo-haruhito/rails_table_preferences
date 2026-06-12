@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe RailsTablePreferences::TablePreferencesHelper, type: :helper do
+  before do
+    RailsTablePreferences.configuration.unresolved_label_behavior = :humanize
+  end
+
   describe "#table_preferences_params namespace" do
     it "keeps the existing flat controller params output when namespace is omitted" do
       params = helper.table_preferences_params(
