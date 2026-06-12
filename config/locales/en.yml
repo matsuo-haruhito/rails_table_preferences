@@ -5,7 +5,7 @@ en:
       all_columns_hidden: All columns are hidden
     editor:
       preset_select: Saved presets
-      preset_select_hint: Choose which saved settings to load. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
+      preset_select_hint: Choose which saved settings to load. On first run, or when no saved presets exist yet, the selector shows only the current preset name; that does not mean a saved preset already exists. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
       preset: Preset
       preset_name_hint: Enter the preset name used when saving or saving as new.
       default_preset: Use as default

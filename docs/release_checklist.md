@@ -11,6 +11,7 @@ The goal is to catch packaging, generator, documentation, and host-application i
 - [ ] Move `CHANGELOG.md` entries from `[Unreleased]` to the target version section.
 - [ ] For the v0.1.0 release-prep or tag PR, keep a fresh empty `[Unreleased]` section for post-release work and rename `[0.1.0] - Unreleased` to `[0.1.0] - YYYY-MM-DD` with the actual release date.
 - [ ] Do not describe open pull requests, proposal issues, or unmerged roadmap items as released in `[0.1.0]`; leave them in `[Unreleased]` or out of the release entry until they land.
+- [ ] Before moving `Added`, `Changed`, or `Fixed` wording into a dated release entry, cross-check complete-sounding changelog lines against open pull requests, open issues, and `agent:planned` items. If a line depends on an open item, such as numeric-settings normalization work like #1313, leave it out of the dated release entry or rewrite it as non-release context until the implementation lands.
 - [ ] Confirm the README release-readiness summary still matches the changelog cutover state before tagging.
 - [ ] Confirm `CHANGELOG.md` covers user-facing changes, migration changes, generator changes, JavaScript/CSS changes, and known limitations.
 - [ ] Confirm `CHANGELOG.md`, README current scope, and `Product Profile.md` release posture describe the same current `main` product surface.
@@ -24,12 +25,12 @@ Run the minimum local checks:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
-node --check app/javascript/rails_table_preferences/controller.js
-node --check app/javascript/rails_table_preferences/index.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
+
+The JavaScript syntax script checks the copied controller plus the JavaScript targets declared by `package.json` exports, keeping the release checklist aligned when package entrypoints change.
 
 Representative Rails compatibility checks are also useful before a release:
 
@@ -45,7 +46,7 @@ These Rails 7.0 / 7.1 / 7.2 / 8.0 checks match the current representative compat
 Confirm:
 
 - [ ] RSpec passes.
-- [ ] JavaScript syntax checks pass for the copied controller and package entrypoints.
+- [ ] JavaScript syntax script passes for the copied controller and package entrypoints.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
@@ -135,7 +136,9 @@ For frontend integration, confirm:
 - [ ] `app/javascript/controllers/rails_table_preferences_controller.js` is packaged for copy-based `stimulus-rails` use.
 - [ ] `app/javascript/rails_table_preferences/controller.js` is packaged for `rails_table_preferences/controller` imports.
 - [ ] `app/javascript/rails_table_preferences/index.js` is packaged for package-root imports.
-- [ ] `package.json` is packaged and exposes `.` and `./controller` exports.
+- [ ] `app/javascript/rails_table_preferences/controller.d.ts` and `app/javascript/rails_table_preferences/index.d.ts` are packaged for TypeScript host-app imports.
+- [ ] `package.json` is packaged and exposes `.` and `./controller` exports, including the top-level `types` target and each `exports.*.types` declaration target.
+- [ ] Package verification confirms the declaration targets and their relative `.d.ts` re-exports resolve inside the built gem; keep any real TypeScript resolver or compiler smoke as host-app evidence rather than runtime JavaScript syntax evidence.
 - [ ] Treat Node.js 20 as the repository CI runtime for JavaScript syntax and package-entrypoint checks, not as a package consumer `engines` requirement; if that policy changes, update `package.json`, Support matrix, JavaScript entrypoints, and package verification together.
 - [ ] A Vite / `app/frontend/entrypoints/application.js` host app can register `rails_table_preferences/controller` as `rails-table-preferences`.
 - [ ] A default `stimulus-rails` host app still works with the copied controller.

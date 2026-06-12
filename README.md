@@ -98,6 +98,14 @@ Mount the engine when using the bundled JSON API:
 mount RailsTablePreferences::Engine, at: "/rails_table_preferences"
 ```
 
+If the host app wants the generator to add that default mount route, use `--with-engine-route`:
+
+```bash
+bin/rails generate rails_table_preferences:install --with-engine-route
+```
+
+Keep the manual route path when the app reviews routes by hand or uses a custom `config.mount_path`. See [Install path options](docs/install_paths.md) for the route option boundary and custom mount-path note.
+
 For Vite / `app/frontend/entrypoints/application.js`, register the packaged Stimulus controller explicitly:
 
 ```js
@@ -846,17 +854,17 @@ Run the Ruby test suite:
 bundle exec rspec
 ```
 
-Check the bundled Stimulus controller for JavaScript syntax errors:
+Check the copied controller and packaged JavaScript export targets for syntax errors:
 
 ```bash
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 ```
 
 The current minimum local verification before pushing changes is:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 ```
 
@@ -866,7 +874,7 @@ Before tagging or publishing a release, also inspect the built package with [Pac
 
 ## Development status
 
-This gem is in active initial development. The current test suite is expected to pass locally, and the bundled Stimulus controller should pass `node --check`.
+This gem is in active initial development. The current test suite is expected to pass locally, and the copied controller plus packaged JavaScript export targets should pass `node script/check_javascript_syntax.mjs`.
 
 ## License
 

@@ -51,6 +51,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const wasBusy = this.busy
     const result = super.resetEditor(event)
     if (!wasBusy) {
+      this.clearEditorSearchQuery()
       this.clearSuccessfulStatus()
       this.dispatchPreferenceEvent("applied", { action: "reset" })
     }
@@ -66,11 +67,25 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   buildEditorRow(column) {
     const row = super.buildEditorRow(column)
+    this.replaceEditorDragHandle(row)
     row.addEventListener("input", () => this.clearSuccessfulStatus())
     row.addEventListener("change", () => this.clearSuccessfulStatus())
     row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  replaceEditorDragHandle(row) {
+    const handle = row.querySelector(".rails-table-preferences-editor__drag-handle")
+    if (!handle) return
+
+    const visualHandle = document.createElement("span")
+    visualHandle.className = handle.className
+    visualHandle.dataset.railsTablePreferencesEditorDragHandle = "visual"
+    visualHandle.draggable = false
+    visualHandle.setAttribute("aria-hidden", "true")
+    visualHandle.textContent = handle.textContent || "↕"
+    handle.replaceWith(visualHandle)
   }
 
   showAllEditorColumns(event) {
@@ -160,6 +175,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     wrapper.append(label, empty)
     this.editorRowsTarget.before(wrapper)
+  }
+
+  clearEditorSearchQuery() {
+    const input = this.editorSearchInput
+    if (input) input.value = ""
+    this.syncEditorSearchResults()
   }
 
   syncEditorSearchResults() {
@@ -253,6 +274,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   endTableColumnDrag(event) {
     super.endTableColumnDrag(event)
     this.clearSuccessfulStatus()
+    this.syncEditorMoveButtons()
   }
 
   toggleSortFromHeader(event, cell, column) {
@@ -325,7 +347,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.busy) return null
 
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("loaded", { action: "load" })
+    if (result !== null && this.statusState === "success") {
+      this.clearEditorSearchQuery()
+      this.dispatchPreferenceEvent("loaded", { action: "load" })
+    }
     return result
   }
 
@@ -350,6 +375,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         this.settingsValue = this.defaultSettings
         this.closeFilterPanel()
         this.renderEditor()
+        this.clearEditorSearchQuery()
         this.apply()
         this.syncPresetEditingState()
         await this.refreshPresetOptions()
@@ -404,6 +430,39 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       settings: this.settingsValue,
       ...detail
     }
+  }
+
+  installTableColumnDragHandles() {
+    this.headerCells.forEach((cell) => {
+      if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") return
+      if (!this.tableColumnDraggable(cell)) {
+        cell.draggable = false
+        cell.dataset.railsTablePreferencesTableDragDisabled = "true"
+        return
+      }
+
+      cell.draggable = true
+      cell.dataset.railsTablePreferencesTableDragInstalled = "true"
+      cell.classList.add("rails-table-preferences-table-column-draggable")
+      cell.addEventListener("dragstart", this.startTableColumnDrag.bind(this))
+      cell.addEventListener("dragover", this.dragTableColumnOver.bind(this))
+      cell.addEventListener("drop", this.dropTableColumn.bind(this))
+      cell.addEventListener("dragend", this.endTableColumnDrag.bind(this))
+    })
+  }
+
+  startTableColumnDrag(event) {
+    if (!this.tableColumnDraggable(event.currentTarget)) {
+      event.preventDefault()
+      return
+    }
+
+    super.startTableColumnDrag(event)
+  }
+
+  tableColumnDraggable(cell) {
+    const key = cell?.dataset?.railsTablePreferencesColumnKey
+    return this.columnDefinitionByKey(key)?.draggable !== false
   }
 
   installSortControls() {

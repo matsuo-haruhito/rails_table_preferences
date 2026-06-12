@@ -80,6 +80,7 @@ module RailsTablePreferences
 
         copy_file "demo/orders_controller.rb", "app/controllers/rails_table_preferences_demo/orders_controller.rb"
         copy_file "demo/index.html.erb", "app/views/rails_table_preferences_demo/orders/index.html.erb"
+        inject_demo_preview_copy_script
       end
 
       def add_engine_route
@@ -210,6 +211,102 @@ module RailsTablePreferences
 
       def demo_route_present?(routes_source)
         routes_source.match?(DEMO_ROUTE_PATTERN)
+      end
+
+      def inject_demo_preview_copy_script
+        inject_into_file(
+          "app/views/rails_table_preferences_demo/orders/index.html.erb",
+          demo_preview_copy_script,
+          after: "  (() => {\n"
+        )
+      end
+
+      def demo_preview_copy_script
+        <<~JAVASCRIPT
+              if (!window.__railsTablePreferencesDemoPreviewCopyInstalled) {
+                window.__railsTablePreferencesDemoPreviewCopyInstalled = true
+
+                const demoPreviewCopySections = [
+                  {
+                    title: "Search form hidden fields preview",
+                    label: "Copy hidden fields evidence",
+                    success: "Hidden fields evidence copied.",
+                    evidence: (section) => section.querySelector(".rails-table-preferences-demo-hidden-fields-preview")?.textContent?.trim() || ""
+                  },
+                  {
+                    title: "Export payload preview",
+                    label: "Copy export payload evidence",
+                    success: "Export payload evidence copied.",
+                    evidence: (section) => Array.from(section.querySelectorAll("dl div")).map((item) => {
+                      const name = item.querySelector("dt")?.textContent?.trim()
+                      const value = item.querySelector("dd")?.textContent?.trim()
+                      return name && value ? `${name}: ${value}` : ""
+                    }).filter(Boolean).join("\\n")
+                  }
+                ]
+                const demoClipboardUnavailable = "Copy is unavailable because this browser does not expose the Clipboard API. The preview remains readable for manual selection."
+                const demoClipboardFailure = "Copy failed. Select the preview evidence manually."
+
+                const demoPreviewSection = (title) => Array.from(document.querySelectorAll(".rails-table-preferences-demo-summary")).find((section) => (
+                  section.querySelector("h2")?.textContent?.trim() === title
+                ))
+                const demoClipboardSupported = () => Boolean(navigator.clipboard?.writeText)
+                const setDemoPreviewCopyStatus = (status, message) => { status.textContent = message }
+
+                const installDemoPreviewCopyControl = ({ title, label, success, evidence }) => {
+                  const section = demoPreviewSection(title)
+                  const heading = section?.querySelector("h2")
+                  if (!section || !heading || section.querySelector("[data-rails-table-preferences-demo-copy-trigger]")) return
+
+                  const trigger = document.createElement("button")
+                  trigger.type = "button"
+                  trigger.className = "rails-table-preferences-demo-reset-trigger"
+                  trigger.setAttribute("data-rails-table-preferences-demo-copy-trigger", label)
+                  trigger.textContent = label
+
+                  const status = document.createElement("p")
+                  status.className = "rails-table-preferences-demo-reset-status"
+                  status.setAttribute("role", "status")
+                  status.setAttribute("aria-live", "polite")
+                  status.setAttribute("data-rails-table-preferences-demo-copy-status", label)
+
+                  if (!demoClipboardSupported()) {
+                    trigger.disabled = true
+                    setDemoPreviewCopyStatus(status, demoClipboardUnavailable)
+                  }
+
+                  trigger.addEventListener("click", async () => {
+                    const text = evidence(section)
+                    if (!text) {
+                      setDemoPreviewCopyStatus(status, "No preview evidence is available yet.")
+                      return
+                    }
+
+                    try {
+                      await navigator.clipboard.writeText(text)
+                      setDemoPreviewCopyStatus(status, success)
+                    } catch (error) {
+                      setDemoPreviewCopyStatus(status, demoClipboardFailure)
+                      console.error(error)
+                    }
+                  })
+
+                  heading.insertAdjacentElement("afterend", status)
+                  heading.insertAdjacentElement("afterend", trigger)
+                }
+
+                const installDemoPreviewCopyControls = () => {
+                  demoPreviewCopySections.forEach(installDemoPreviewCopyControl)
+                }
+
+                if (document.readyState === "loading") {
+                  document.addEventListener("DOMContentLoaded", installDemoPreviewCopyControls, { once: true })
+                } else {
+                  installDemoPreviewCopyControls()
+                }
+              }
+
+        JAVASCRIPT
       end
     end
   end

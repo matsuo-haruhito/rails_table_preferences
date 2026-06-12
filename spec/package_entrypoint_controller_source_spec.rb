@@ -69,4 +69,14 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("return visibleRows.length > 0 ? visibleRows : this.editorRows")
     expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : index === rows.length - 1)")
   end
+
+  it "keeps the package editor drag handle visual-only while real reorder controls stay keyboard reachable" do
+    expect(controller_source).to include("this.replaceEditorDragHandle(row)")
+    expect(controller_source).to include("replaceEditorDragHandle(row)")
+    expect(controller_source).to include('visualHandle.dataset.railsTablePreferencesEditorDragHandle = "visual"')
+    expect(controller_source).to include('visualHandle.setAttribute("aria-hidden", "true")')
+    expect(controller_source).to include("handle.replaceWith(visualHandle)")
+    expect(controller_source).to include("this.buildEditorMoveControls()")
+    expect(base_controller_source).to include('<button type="button" class="rails-table-preferences-editor__drag-handle"')
+  end
 end

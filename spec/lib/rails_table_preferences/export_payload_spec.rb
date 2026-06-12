@@ -22,17 +22,28 @@ RSpec.describe RailsTablePreferences::ExportPayload do
     expect(payload["headers"]).to eq(%w[得意先名 受注番号])
   end
 
-  it "can include hidden columns" do
+  it "uses include_hidden only as a display visibility switch" do
     columns = [
-      { key: :order_no, label: "受注番号" },
-      { key: :internal_cost, label: "内部原価" }
+      { key: :order_no, label: "受注番号", export_key: :number_for_export },
+      { key: :internal_cost, label: "内部原価", export_key: :cost_cents }
     ]
-    settings = { columns: [{ key: :internal_cost, visible: false, order: 10 }] }
+    settings = {
+      columns: [
+        { key: :internal_cost, visible: false, order: 10 },
+        { key: :order_no, visible: true, order: 20 }
+      ]
+    }
 
-    payload = described_class.call(settings: settings, columns: columns, include_hidden: true)
+    visible_payload = described_class.call(settings: settings, columns: columns)
+    full_payload = described_class.call(settings: settings, columns: columns, include_hidden: true)
 
-    expect(payload["column_keys"]).to include("internal_cost")
-    expect(payload["export_keys"]).to include("internal_cost")
+    expect(visible_payload["column_keys"]).to eq(%w[order_no])
+    expect(visible_payload["export_keys"]).to eq(%i[number_for_export])
+    expect(visible_payload["headers"]).to eq(%w[受注番号])
+
+    expect(full_payload["column_keys"]).to eq(%w[internal_cost order_no])
+    expect(full_payload["export_keys"]).to eq(%i[cost_cents number_for_export])
+    expect(full_payload["headers"]).to eq(%w[内部原価 受注番号])
   end
 
   it "keeps direct payload settings normalized while export columns come from current column definitions" do
