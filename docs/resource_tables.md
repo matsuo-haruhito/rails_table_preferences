@@ -51,6 +51,23 @@ If the same management page also includes a search form, pagination, a create fo
 <%= resource_table_for @orders, include_id: true %>
 ```
 
+### Date, datetime, and time inference
+
+Active Record column inference intentionally uses a conservative browser-control baseline. Attribute types `:date`, `:datetime`, and `:time` all become `filter: { type: "date" }` when they are inferred from `resource_table_for` or `tree_resource_table_for`.
+
+Use this default when the convention-first table should expose a simple date filter and leave datetime or time interpretation to the surrounding host-app search code. When a screen needs the package entrypoint's native `datetime-local` or `time` input, override the inferred metadata in a profile instead of expecting the adapter to choose that finer input automatically:
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  filter :shipped_at, type: "datetime", from_param: :from_shipped_at, to_param: :to_shipped_at
+  filter :dispatch_time, type: "time", param: :dispatch_time
+end
+```
+
+Manual metadata can still use `date`, `datetime`, `datetime-local`, or `time` filter types. The inference default only decides the starting point for Active Record-backed resource tables; it does not change saved filter settings, adapter params, timezone conversion, validation, or query execution. See [Filter metadata](filter_metadata.md) for the browser input and host-app responsibility boundary.
+
 ### Association columns
 
 By default, `resource_table_for` also infers `belongs_to` associations whose foreign key is present on the model. For example, an `Order` with `belongs_to :customer` and a `customer_id` attribute can receive an inferred `customer` column in addition to the attribute columns.
