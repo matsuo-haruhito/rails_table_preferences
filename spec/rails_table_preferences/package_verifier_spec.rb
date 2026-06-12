@@ -18,8 +18,9 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(documented_paths).to eq(described_class::REQUIRED_PATHS)
     end
 
-    it "guards JavaScript entrypoints and their packaged declarations" do
+    it "guards JavaScript entrypoints, their packaged declarations, and the stylesheet export target" do
       expect(described_class::REQUIRED_PATHS).to include(
+        "app/assets/stylesheets/rails_table_preferences.css",
         "app/javascript/rails_table_preferences/controller.js",
         "app/javascript/rails_table_preferences/controller.d.ts",
         "app/javascript/rails_table_preferences/index.js",
@@ -133,6 +134,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         }
       )
 
+      expect(result[:missing_package_export_targets]).to eq([])
       expect(result[:missing_package_internal_imports]).to eq([])
       expect(result[:missing_package_declaration_imports]).to eq([])
       expect(result[:ok]).to be(true)
@@ -240,6 +242,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
   def package_entrypoint_files
     [
       "package.json",
+      "app/assets/stylesheets/rails_table_preferences.css",
       "app/javascript/controllers/rails_table_preferences_controller.js",
       "app/javascript/rails_table_preferences/controller.js",
       "app/javascript/rails_table_preferences/controller.d.ts",
@@ -265,7 +268,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
             "./controller" => {
               "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
               "default" => "./app/javascript/rails_table_preferences/controller.js"
-            }
+            },
+            "./styles.css" => "./app/assets/stylesheets/rails_table_preferences.css"
           }
         )
       else
