@@ -12,6 +12,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
+    resetStatusLabel: { type: String, default: "テーブル初期設定に戻しました。" },
     selectFilterOptionSearchThreshold: { type: Number, default: 8 }
   }
 
@@ -35,6 +36,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   connect() {
     this.statusState = "idle"
     super.connect()
+    this.syncResetButtonState()
   }
 
   applyFromEditor(event) {
@@ -42,6 +44,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const result = super.applyFromEditor(event)
     if (!wasBusy) {
       this.clearSuccessfulStatus()
+      this.syncResetButtonState()
       this.dispatchPreferenceEvent("applied", { action: "apply" })
     }
     return result
@@ -52,7 +55,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const result = super.resetEditor(event)
     if (!wasBusy) {
       this.clearEditorSearchQuery()
-      this.clearSuccessfulStatus()
+      this.setStatus(this.resetStatusLabelValue, "success")
+      this.syncResetButtonState()
       this.dispatchPreferenceEvent("applied", { action: "reset" })
     }
     return result
@@ -63,13 +67,18 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.ensureEditorSearchControl()
     this.syncEditorSearchResults()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   buildEditorRow(column) {
     const row = super.buildEditorRow(column)
     this.replaceEditorDragHandle(row)
-    row.addEventListener("input", () => this.clearSuccessfulStatus())
-    row.addEventListener("change", () => this.clearSuccessfulStatus())
+    const syncEditorDraftState = () => {
+      this.clearSuccessfulStatus()
+      this.syncResetButtonState()
+    }
+    row.addEventListener("input", syncEditorDraftState)
+    row.addEventListener("change", syncEditorDraftState)
     row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
@@ -104,6 +113,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       if (visibleInput) visibleInput.checked = visible === true
     })
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   buildEditorMoveControls() {
@@ -146,6 +156,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.refreshEditorOrderInputs()
     this.syncEditorMoveButtons()
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   ensureEditorSearchControl() {
@@ -197,6 +208,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   syncEditorMoveButtons() {
@@ -213,6 +225,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   setEditorRowsBusyState(busy) {
     super.setEditorRowsBusyState(busy)
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   get editorRowsForMovement() {
@@ -235,61 +248,72 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   dragEditorRowOver(event) {
     super.dragEditorRowOver(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   dropEditorRow(event) {
     super.dropEditorRow(event)
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   dragEditorRowEnd(event) {
     super.dragEditorRowEnd(event)
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   resizeColumn(event) {
     super.resizeColumn(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   autoFitColumnFromHandle(event) {
     const wasBusy = this.busy
     const result = super.autoFitColumnFromHandle(event)
     if (!wasBusy) this.setStatus(this.resizeAutoFitStatusLabelValue, "success")
+    this.syncResetButtonState()
     return result
   }
 
   dragTableColumnOver(event) {
     super.dragTableColumnOver(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   dropTableColumn(event) {
     super.dropTableColumn(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   endTableColumnDrag(event) {
     super.endTableColumnDrag(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
     this.syncEditorMoveButtons()
   }
 
   toggleSortFromHeader(event, cell, column) {
     super.toggleSortFromHeader(event, cell, column)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   applyFilterPanel(key, panel) {
     super.applyFilterPanel(key, panel)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   clearFilter(key) {
     super.clearFilter(key)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   setStatus(message, state = "idle") {
@@ -309,6 +333,41 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.statusState === "success") this.setStatus("")
   }
 
+  syncResetButtonState() {
+    const button = this.resetEditorButton
+    if (!button) return
+    button.disabled = this.busy || this.editorMatchesDefaultSettings()
+  }
+
+  editorMatchesDefaultSettings() {
+    try {
+      return this.normalizedSettingsFingerprint(this.settingsFromEditor()) === this.normalizedSettingsFingerprint(this.defaultSettings)
+    } catch (_error) {
+      return false
+    }
+  }
+
+  normalizedSettingsFingerprint(settings = {}) {
+    const columns = Array.isArray(settings.columns) ? settings.columns.map((column) => ({
+      key: String(column.key || ""),
+      visible: column.visible === false ? false : true,
+      order: Number.isFinite(Number(column.order)) ? Number(column.order) : null,
+      width: Number.isFinite(Number(column.width)) ? Number(column.width) : null,
+      truncate: Number.isFinite(Number(column.truncate)) ? Number(column.truncate) : null,
+      pinned: column.pinned === true
+    })) : []
+
+    return JSON.stringify({
+      columns,
+      filters: settings.filters || {},
+      sorts: Array.isArray(settings.sorts) ? settings.sorts : []
+    })
+  }
+
+  get resetEditorButton() {
+    return this.element?.querySelector("[data-action~='rails-table-preferences#resetEditor']")
+  }
+
   async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
     if (this.busy) return null
     this.setBusyState(true)
@@ -323,6 +382,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return null
     } finally {
       this.setBusyState(false)
+      this.syncResetButtonState()
     }
   }
 
@@ -518,6 +578,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.syncResetButtonState()
   }
 
   clearFiltersAndSorts(event) {
@@ -526,6 +587,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
     this.closeFilterPanel()
     this.apply()
+    this.syncResetButtonState()
   }
 
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
