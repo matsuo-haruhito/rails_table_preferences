@@ -79,4 +79,15 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("this.buildEditorMoveControls()")
     expect(base_controller_source).to include('<button type="button" class="rails-table-preferences-editor__drag-handle"')
   end
+
+  it "keeps the status-state hook scoped to packaged status feedback" do
+    expect(controller_source).to include('this.statusState = "idle"')
+    expect(controller_source).to include('target.setAttribute("data-rails-table-preferences-status-state", state || "idle")')
+    expect(controller_source).to include('if (busyLabel) this.setStatus(busyLabel, "busy")')
+    expect(controller_source).to include('if (successLabel) this.setStatus(successLabel, "success")')
+    expect(controller_source).to include('if (this.statusState === "success") this.setStatus("")')
+    expect(controller_source).to include('this.statusState = "error"')
+    expect(controller_source).to include('this.syncStatusStateHook("error")')
+    expect(base_controller_source).not_to include("data-rails-table-preferences-status-state")
+  end
 end
