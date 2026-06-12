@@ -19,13 +19,17 @@ module RailsTablePreferences
       }
     end
 
-    def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], scroll_wrapper: false, wrapper_options: {}, **options, &block)
+    def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], caption: nil, scroll_wrapper: false, wrapper_options: {}, **options, &block)
       options[:data] = table_preferences_merge_data_attributes(
         options[:data],
         table_preferences_data_attributes(table_key: table_key, name: name, settings: settings, columns: columns, ignored_columns: ignored_columns)
       )
 
-      table = tag.table(**options, &block)
+      table_contents = []
+      table_contents << tag.caption(caption) if caption.present?
+      table_contents << capture(&block) if block
+
+      table = tag.table(safe_join(table_contents), **options)
       return table unless scroll_wrapper
 
       tag.div(table, **table_preferences_scroll_wrapper_options(wrapper_options))
