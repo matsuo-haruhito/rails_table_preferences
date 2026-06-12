@@ -66,8 +66,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   syncPresetSelectValue(visiblePresets) {
-    if (visiblePresets.some((preset) => (preset.name || "default") === this.currentPresetName)) {
+    const currentPresetVisible = visiblePresets.some((preset) => (preset.name || "default") === this.currentPresetName)
+    if (currentPresetVisible) {
       this.presetSelectTarget.value = this.currentPresetName
+      return
+    }
+
+    if (this.presetSelectTarget.options.length > 0) {
+      this.presetSelectTarget.selectedIndex = -1
     }
   }
 
