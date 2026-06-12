@@ -39,7 +39,7 @@ The same demo controller also seeds one organization preset named `東京組織�
 
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, true/false confirmation states, varied amounts, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
-Delivery-date samples are relative to the day the generated demo runs. When collecting manual evidence, record the visible sort/filter behavior and relative row order instead of treating the exact calendar dates as stable release evidence.
+Delivery-date samples use a demo-only fixed baseline of `2024-01-15`. When collecting manual evidence, you can record the visible date values as stable sample data while still treating sort and filter behavior as the actual verification target.
 
 The same screen now includes a lightweight hidden fields preview for the generated search form. It shows the escaped hidden inputs produced by `table_preferences_hidden_fields(...)`, so you can confirm how saved filter and sort state will roundtrip through an existing GET search form without adding host-app search code to the demo.
 
@@ -212,7 +212,7 @@ On the demo screen, confirm:
 - [ ] `金額` exposes number filter operators with a number input, and saving `金額 >= 50000` narrows the rows to the larger sample amounts after reload.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
-- [ ] Sorting by `納品日` or `金額` makes the row order visibly change; for `納品日`, compare relative order instead of exact calendar dates because demo delivery dates are seeded from the current day.
+- [ ] Sorting by `納品日` or `金額` makes the row order visibly change; for `納品日`, the fixed `2024-01-15` sample baseline keeps the visible date evidence stable across runs.
 - [ ] Save persists settings.
 - [ ] Reload restores saved settings.
 - [ ] The search form hidden fields preview updates after reload to show saved filter/sort inputs separately from the export payload preview.
