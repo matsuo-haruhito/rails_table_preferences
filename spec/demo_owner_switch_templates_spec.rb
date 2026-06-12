@@ -16,10 +16,11 @@ RSpec.describe "demo owner switch templates" do
 
     expect(template).to include('DEMO_OWNER_PARAM = "demo_owner"')
     expect(template).to include('DEMO_OWNER_SWITCH_LABELS = ["Demo owner A", "Demo owner B"].freeze')
+    expect(template).to include('DEMO_BASELINE_QUERY_PARAMS = [DEMO_OWNER_PARAM, DEMO_SCOPE_CONTEXT_PARAM].freeze')
     expect(template).to include('define_method(owner_method_name) do')
     expect(template).to include('demo_owner_override')
     expect(template).to include('demo_available_owner_records.each_with_index')
-    expect(template).to include('request.query_parameters.except(DEMO_OWNER_PARAM)')
+    expect(template).to include('demo_baseline_query_params.except(DEMO_OWNER_PARAM)')
   end
 
   it "renders the generated owner switch surface in the demo view" do
