@@ -57,4 +57,10 @@ RSpec.describe "package entrypoint preset selector search source" do
     expect(package_controller).to include("if (this.presetSearchEmptyMessage) this.presetSearchEmptyMessage.hidden = !enabled || !query || visibleCount > 0")
     expect(package_controller).not_to include("this.applyPreferencePayload(")
   end
+
+  it "does not show another visible preset as selected when the current preset is filtered out" do
+    expect(package_controller).to include("const currentPresetVisible = visiblePresets.some((preset) => (preset.name || \"default\") === this.currentPresetName)")
+    expect(package_controller).to include("this.presetSelectTarget.value = this.currentPresetName")
+    expect(package_controller).to include("this.presetSelectTarget.selectedIndex = -1")
+  end
 end
