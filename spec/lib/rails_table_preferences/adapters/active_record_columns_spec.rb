@@ -76,7 +76,7 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
         %w[placed_on shipped_at dispatch_time active total status notes]
       end
       model.define_singleton_method(:defined_enums) { { "status" => { "draft" => 0, "shipped" => 1 } } }
-      model.define_singleton_method(:reflect_on_all_associations) { [] }
+      model.define_singleton_method(:reflect_on_all_associations) { |_type = nil| [] }
       model.define_singleton_method(:type_for_attribute) { |name| attribute_types.fetch(name) }
     end
 
