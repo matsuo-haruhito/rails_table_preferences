@@ -210,8 +210,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         docs/resize_auto_fit.md
         docs/export_integration.md
         docs/accessibility.md
-        docs/active_filter_button_cue.md
         docs/editor_entrypoint_affordances.md
+        docs/header_drag_reorder.md
         docs/editor_root_options.md
         docs/helper_free_controller_root_urls.md
         docs/visual_overview.md

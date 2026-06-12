@@ -4,6 +4,20 @@ This directory contains focused documentation for Rails Table Preferences.
 
 ## Start here
 
+### Choose your first path
+
+Use this short map before the full catalog when you are opening the docs for the first time.
+
+- New install or smallest working UI: start with [Quick start](quick_start.md), then use [Install path options](install_paths.md) if the host app uses Vite, skipped copied assets, or demo generator options.
+- Japanese business-app orientation: start with [日本語 quick start](quick_start_ja.md), then follow its links to the English source-of-truth guides for detailed steps.
+- Browser preview before a real host-app screen: generate the [Demo screen](demo.md), then use [Sandbox Rails app verification](sandbox.md) if you want a clean end-to-end install check.
+- Convention-first Active Record table: start with [Resource table adapters](resource_tables.md), then move to the [Production integration checklist](production_integration_checklist.md) for real index-screen owner, route, query, layout, and export checks.
+- Existing custom or hand-written table: use [Quick start](quick_start.md) for the minimum editor/table wiring and [Decision guide](decision_guide.md) when choosing helpers, hidden fields, controller params, exports, or customization paths.
+- Real host-app screen already wired but failing: use [Production troubleshooting notes](production_troubleshooting.md) before changing implementation, especially for auth redirects, CSRF, owner lookup, stable `table_key`, or preset persistence issues.
+- Release or package-readiness review: use [Release checklist](release_checklist.md), [Package verification](package_verification.md), and [Manual QA checklist](manual_qa.md) after the integration path is working.
+
+## Full catalog
+
 - [Quick start](quick_start.md): the shortest path from installation to a working table preference UI.
 - [Production integration checklist](production_integration_checklist.md): the short path from a working demo or quick start to a real host-app index screen.
 - [Production troubleshooting notes](production_troubleshooting.md): symptom-driven checks for CSRF 422s, auth redirects, owner lookup failures, unstable `table_key` values, duplicate preset names, and saved presets that do not return on real host-app screens.
@@ -25,8 +39,9 @@ This directory contains focused documentation for Rails Table Preferences.
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
-- [Active filter button cue](active_filter_button_cue.md): default active-filter visual cue, host-app styling boundary, and manual QA checks.
 - [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, browser QA handoff, and copied-controller boundary.
+- [Editor reorder accessibility note](editor_reorder_accessibility.md): package-entrypoint visual-only row drag handle, keyboard reorder controls, and copied-controller boundary.
+- [Header drag reorder](header_drag_reorder.md): package-entrypoint table-header drag reorder, `draggable: false` opt-out, and host-app interactive header boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
 - [Editor root HTML options](editor_root_options.md): add host-app root `id`, class, generic `data-*`, and `aria-*` attributes without copying the bundled editor partial.
 - [Non-goals and deferred directions](non_goals.md): intentionally deferred areas such as query builder behavior, CSV/Excel generation, full admin UI, heavy browser tests, and complex sticky layouts.
@@ -81,14 +96,13 @@ This directory contains focused documentation for Rails Table Preferences.
 21. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
 22. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
 23. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-24. Review [Active filter button cue](active_filter_button_cue.md) when validating the default active-filter visual affordance in a host-app theme.
-25. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-26. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-27. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-28. Verify the feature in a sandbox Rails app.
-29. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-30. Run the manual QA checklist before asking real users to try the feature.
-31. Before release, run the release checklist and package verification guide.
+24. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+25. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+26. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+27. Verify the feature in a sandbox Rails app.
+28. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+29. Run the manual QA checklist before asking real users to try the feature.
+30. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 

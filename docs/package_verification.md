@@ -37,6 +37,14 @@ Package verification summary: 4 issue(s) (required files: 1, package export targ
 
 Use the summary line in PR bodies, the pull request template's release/package evidence field, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, unresolved declaration import, or package metadata error. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
 
+## RubyGems publish boundary
+
+`bundle exec rake package:verify` is a package-content gate, not a RubyGems publish approval. A passing result means the built gem contains the expected files, package metadata, JavaScript export wiring, and declaration re-exports; it does not decide the publishing account, MFA or trusted-publishing posture, checksum/provenance handling, selected artifact, or final release command.
+
+Keep those release-time decisions in the [RubyGems publish boundary checks](release_checklist.md#rubygems-publish-boundary-checks). The release owner should confirm that the `.gem` artifact being published is the same build output that passed package verification, or record why a fresh artifact was built and re-verified.
+
+Do not add repository secrets, change RubyGems settings, create a tag, publish the gem, or introduce release automation from package verification docs work.
+
 ## Manual inspection
 
 The automated task is the normal gate. Manual inspection is still useful before tagging a release.
@@ -124,9 +132,9 @@ docs/column_overflow.md
 docs/resize_auto_fit.md
 docs/export_integration.md
 docs/accessibility.md
-docs/active_filter_button_cue.md
 docs/editor_i18n.md
 docs/editor_entrypoint_affordances.md
+docs/header_drag_reorder.md
 docs/editor_root_options.md
 docs/helper_free_controller_root_urls.md
 docs/non_goals.md
@@ -163,11 +171,11 @@ Use these criteria when adding or reviewing required paths:
 - JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
 - Default locale files that shipped views and docs use as the I18n override baseline. `config/locales/en.yml` and `config/locales/ja.yml` are required for this reason; they are not a full `config/` inventory and do not freeze locale wording or key policy.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
-- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, active filter button cue, editor entrypoint affordances, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, select filter option search threshold, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
+- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, header drag reorder, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, select filter option search threshold, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
 
-Do not add every repository file just because it exists. In particular, avoid requiring all docs, all examples, temporary/generated intermediate files, test files, mockups, or future proposal notes unless they are promoted to a packaged public entry point. A docs page that is only linked from a nearby guide can stay outside `REQUIRED_PATHS` when the package remains usable without treating that page as a primary entrance. For a new docs guide, first decide whether README or `docs/index.md` should make it a primary package entrance; if not, leave the fixed list unchanged and document the narrower link from the nearby guide instead.
+Do not add every repository file just because it exists. In particular, avoid requiring all docs, all examples, temporary/generated intermediate files, test files, mockups, focused PR smoke notes, or future proposal notes unless they are promoted to a packaged public entry point. A docs page that is only linked from a nearby guide or from the PR smoke matrix can stay outside `REQUIRED_PATHS` when the package remains usable without treating that page as a primary entrance. For example, `docs/editor_row_long_label_narrow_smoke.md` remains a focused PR-evidence aid reached from `docs/manual_qa_pr_smoke_matrix.md`; do not require it unless it becomes a README or docs-index primary guide. For a new docs guide, first decide whether README or `docs/index.md` should make it a primary package entrance; if not, leave the fixed list unchanged and document the narrower link from the nearby guide instead.
 
 When a new public helper, partial, package export, packaged declaration, default locale file, README-linked guide, docs-index primary guide, or required visual asset is added, update `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`, the package verifier spec, and this guide together. If the choice is unclear, leave the fixed list unchanged and document the follow-up question in the relevant Issue or PR instead of broadening the guardrail by default.
 
@@ -204,14 +212,12 @@ CI runs:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
-node --check app/javascript/rails_table_preferences/controller.js
-node --check app/javascript/rails_table_preferences/index.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The JavaScript syntax step checks the copied controller, the package controller entrypoint, and the package root entrypoint. Keep this snippet synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
+The JavaScript syntax step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets. Keep this command synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
 The package verification task also follows the documented package root and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax check by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior to the release checklist's manual Vite integration check.
 
