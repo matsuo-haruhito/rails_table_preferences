@@ -1,6 +1,6 @@
 # JavaScript entrypoints
 
-Rails Table Preferences ships two JavaScript integration paths for the bundled Stimulus controller.
+Rails Table Preferences ships JavaScript integration paths for the bundled Stimulus controller and a stylesheet package subpath for bundler-based host apps.
 
 ## Default stimulus-rails path
 
@@ -46,17 +46,23 @@ Use the package entrypoint when the host app should not depend on a copied contr
 
 ### Package metadata boundary
 
-The import specifiers above are backed by the `package.json` file that is packaged inside the Ruby gem. That file currently uses `private: true` and `version: "0.0.0"` because it is resolver metadata for gem-packaged JavaScript entrypoints, not a promise that Rails Table Preferences is published as a separate npm package.
+The import specifiers above are backed by the `package.json` file that is packaged inside the Ruby gem. That file currently uses `private: true` and `version: "0.0.0"` because it is resolver metadata for gem-packaged JavaScript and stylesheet entrypoints, not a promise that Rails Table Preferences is published as a separate npm package.
 
-Host apps should rely on the documented `exports` specifiers, `rails_table_preferences` and `rails_table_preferences/controller`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
+Host apps should rely on the documented `exports` specifiers, `rails_table_preferences`, `rails_table_preferences/controller`, and `rails_table_preferences/styles.css`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
 
 ### Stylesheet boundary
 
-The package entrypoint controls JavaScript registration only. The packaged `package.json` currently exports `rails_table_preferences` and `rails_table_preferences/controller`; it does not export a CSS subpath such as `rails_table_preferences/styles.css`.
+The package metadata now exports `rails_table_preferences/styles.css` for host apps that want a bundler import alongside `rails_table_preferences/controller`:
 
-If the host app uses `rails_table_preferences/controller` and keeps the generated stylesheet, load the copied `app/assets/stylesheets/rails_table_preferences.css` through the host app's normal asset path. If the host app also uses `--skip-stylesheets`, Rails Table Preferences will not provide a bundler CSS import for that screen; the host app owns equivalent CSS for the editor, table state cues, resize handles, fixed-column hooks, and any local theme integration.
+```js
+import "rails_table_preferences/styles.css"
+```
 
-Treat a future CSS subpath export as a separate feature decision. It would need `package.json` exports, package verification evidence, release checklist wording, and host-app bundler smoke coverage to move together instead of being inferred from the JavaScript entrypoint.
+That subpath points at the same packaged default stylesheet that the install generator can copy to `app/assets/stylesheets/rails_table_preferences.css`. It is a resolver-friendly way to load the shipped baseline CSS from Vite or another bundler; it is not a new theme system, CSS Modules contract, Sass pipeline, or npm distribution policy.
+
+If the host app keeps the generated stylesheet, load the copied `app/assets/stylesheets/rails_table_preferences.css` through the host app's normal asset path. If the host app uses `--skip-stylesheets`, it can either import `rails_table_preferences/styles.css` through the package resolver or provide equivalent host-owned CSS for the editor, table state cues, resize handles, fixed-column hooks, and any local theme integration.
+
+The stylesheet and controller decisions remain independent. A conventional `stimulus-rails` app can keep copied JavaScript and copied CSS. A Vite app can use the package controller and package stylesheet. A host app with custom layout or branding can use the package controller while owning CSS locally.
 
 ### Package-only controller boundary
 
@@ -90,7 +96,7 @@ When future package-entrypoint behavior is added, update this list and re-run th
 
 ### Resolve the gem entrypoint explicitly
 
-Vite does not automatically resolve `app/javascript` files that live inside a Ruby gem. When the host app imports `rails_table_preferences` or `rails_table_preferences/controller`, add an alias or an equivalent bundler resolver that points those specifiers at the installed gem.
+Vite does not automatically resolve `app/javascript` or `app/assets` files that live inside a Ruby gem. When the host app imports `rails_table_preferences`, `rails_table_preferences/controller`, or `rails_table_preferences/styles.css`, add aliases or an equivalent bundler resolver that points those specifiers at the installed gem.
 
 A minimal `vite.config.ts` example looks like this:
 
@@ -103,21 +109,22 @@ function gemPath(name: string) {
   return execSync(`bundle show ${name}`, { encoding: "utf-8" }).trim()
 }
 
-function gemJavaScriptPath(name: string, entrypoint: string) {
-  return fileURLToPath(new URL(`app/javascript/${entrypoint}`, `file://${gemPath(name)}/`))
+function gemFilePath(name: string, entrypoint: string) {
+  return fileURLToPath(new URL(entrypoint, `file://${gemPath(name)}/`))
 }
 
 export default defineConfig({
   resolve: {
     alias: [
-      { find: /^rails_table_preferences$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/index.js") },
-      { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/controller.js") }
+      { find: /^rails_table_preferences$/, replacement: gemFilePath("rails_table_preferences", "app/javascript/rails_table_preferences/index.js") },
+      { find: /^rails_table_preferences\/controller$/, replacement: gemFilePath("rails_table_preferences", "app/javascript/rails_table_preferences/controller.js") },
+      { find: /^rails_table_preferences\/styles\.css$/, replacement: gemFilePath("rails_table_preferences", "app/assets/stylesheets/rails_table_preferences.css") }
     ]
   }
 })
 ```
 
-Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files.
+Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` and `app/assets/stylesheets/rails_table_preferences.css` files.
 
 ### TypeScript module declarations
 
@@ -138,23 +145,23 @@ If the host app uses an older gem version without packaged declarations, or if i
 
 ## Choosing between copied assets and the package entrypoint
 
-Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, already depends on copied JavaScript for behavior changes that are not exposed through controller-root values, or needs the generated controller and package entrypoint to have exactly the same behavior until a parity follow-up is implemented.
+Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, already depends on copied JavaScript or CSS for behavior or layout changes that are not exposed through packaged entrypoints, or needs the generated assets and package entrypoints to have exactly the same behavior until a parity follow-up is implemented.
 
-Prefer the package entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. Use `--skip-javascript` for this path so the generator still creates the migration and initializer while leaving controller registration to the host app entrypoint.
+Prefer the package controller entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. Use `--skip-javascript` for this path so the generator still creates the migration and initializer while leaving controller registration to the host app entrypoint.
 
-This path is also the lighter choice for wording and label changes that can stay in Rails locale files or controller-root values such as `data-rails-table-preferences-filter-operator-labels-value`.
+Prefer the package stylesheet entrypoint when the host app wants the shipped baseline CSS through the same bundler/resolver path as the controller. Use `--skip-stylesheets` only when the app either imports `rails_table_preferences/styles.css` or intentionally owns equivalent CSS.
 
-Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass.
+The package controller path is also the lighter choice for wording and label changes that can stay in Rails locale files or controller-root values such as `data-rails-table-preferences-filter-operator-labels-value`.
 
-The stylesheet decision remains separate from the controller decision. Keeping the copied stylesheet is the current default even when JavaScript registration moves to the package entrypoint. If the host app skips the stylesheet, it owns CSS parity evidence for editor layout, table state cues, resize handles, fixed-column hooks, and any local theme overrides.
+Do not treat package entrypoints as replacements for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass. Host apps still need local CSS when they want product-specific density, branding, sticky-layout polish, or theme integration beyond the shipped baseline.
 
 ## Moving from a copied controller to the package entrypoint
 
 When an existing host app moves from the copied controller to `rails_table_preferences/controller`, check these items before removing the copied file from active registration:
 
 - The host app has exactly one Stimulus application registration for `rails-table-preferences`.
-- The bundler resolves both `rails_table_preferences/controller` and, if used, `rails_table_preferences`.
-- The host app still loads either the generated stylesheet or equivalent host-app CSS; package entrypoint imports do not load CSS for the screen.
+- The bundler resolves `rails_table_preferences/controller`, `rails_table_preferences`, and `rails_table_preferences/styles.css` if those package specifiers are used.
+- The host app still loads either the generated stylesheet, the package stylesheet export, or equivalent host-app CSS.
 - Any local changes in `app/javascript/controllers/rails_table_preferences_controller.js` have been classified as wording, markup, or behavior changes.
 - Wording-only changes have moved to Rails locale keys or controller-root label values where possible.
 - Markup changes remain in copied ERB, not in the package entrypoint import.
