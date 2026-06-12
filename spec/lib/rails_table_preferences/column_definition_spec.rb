@@ -37,16 +37,26 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
     expect(column.to_h).not_to have_key("export_key")
   end
 
-  it "normalizes draggable metadata when provided" do
-    column = described_class.new(key: :help_link, label: "Help", draggable: "false")
+  it "normalizes column width boundary metadata" do
+    column = described_class.new(
+      key: :memo,
+      label: "備考",
+      min_width: "80",
+      max_width: "320"
+    )
 
-    expect(column.to_h["draggable"]).to eq(false)
+    expect(column.to_h).to include(
+      "min_width" => 80,
+      "max_width" => 320
+    )
   end
 
-  it "omits draggable metadata when it is not provided" do
-    column = described_class.new(key: :order_no, label: "受注番号")
+  it "omits non-positive column width boundary metadata" do
+    min_column = described_class.new(key: :memo, label: "備考", min_width: 0)
+    max_column = described_class.new(key: :memo, label: "備考", max_width: -1)
 
-    expect(column.to_h).not_to have_key("draggable")
+    expect(min_column.to_h).not_to have_key("min_width")
+    expect(max_column.to_h).not_to have_key("max_width")
   end
 
   it "normalizes hash group metadata" do
