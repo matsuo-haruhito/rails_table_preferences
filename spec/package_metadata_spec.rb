@@ -26,7 +26,7 @@ RSpec.describe "rails_table_preferences package metadata" do
     )
   end
 
-  it "publishes stable JavaScript entrypoints and declarations for bundlers" do
+  it "publishes stable JavaScript entrypoints, declarations, and stylesheet export for bundlers" do
     expect(package_metadata.fetch("exports")).to eq(
       "." => {
         "types" => "./app/javascript/rails_table_preferences/index.d.ts",
@@ -35,16 +35,18 @@ RSpec.describe "rails_table_preferences package metadata" do
       "./controller" => {
         "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
         "default" => "./app/javascript/rails_table_preferences/controller.js"
-      }
+      },
+      "./styles.css" => "./app/assets/stylesheets/rails_table_preferences.css"
     )
   end
 
-  it "keeps documented JavaScript import specifiers aligned with package exports" do
+  it "keeps documented JavaScript and stylesheet import specifiers aligned with package exports" do
     exports = package_metadata.fetch("exports")
 
-    expect(exports.keys).to contain_exactly(".", "./controller")
+    expect(exports.keys).to contain_exactly(".", "./controller", "./styles.css")
     expect(javascript_entrypoints_doc).to include('from "rails_table_preferences"')
     expect(javascript_entrypoints_doc).to include('from "rails_table_preferences/controller"')
+    expect(javascript_entrypoints_doc).to include('import "rails_table_preferences/styles.css"')
     expect(javascript_entrypoints_doc).to include("RailsTablePreferencesController")
     expect(package_metadata.fetch("types")).to eq(exports.fetch(".").fetch("types"))
   end
