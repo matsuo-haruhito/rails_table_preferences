@@ -30,9 +30,18 @@ RSpec.describe "rails_table_preferences resize auto-fit status feedback" do
   it "keeps manual drag resize as success-status clearing rather than saved-state feedback" do
     resize_column_source = package_controller_source[/resizeColumn\(event\) \{.*?\n  \}/m]
 
-    expect(resize_column_source).to include("super.resizeColumn(event)")
     expect(resize_column_source).to include("this.clearSuccessfulStatus()")
+    expect(resize_column_source).not_to include("this.setStatus(")
     expect(resize_column_source).not_to include("resizeAutoFitStatusLabelValue")
+  end
+
+  it "keeps current column metadata when editor width values are rebuilt" do
+    settings_from_editor_source = package_controller_source[/settingsFromEditor\(\) \{.*?\n  \}/m]
+
+    expect(settings_from_editor_source).to include("const current = this.columnByKey(key) || {}")
+    expect(settings_from_editor_source).to include("...current")
+    expect(settings_from_editor_source).to include("width: this.clampColumnWidth(key")
+    expect(settings_from_editor_source).to include("pinned: current.pinned === true")
   end
 
   it "documents the package-entrypoint-only feedback boundary" do
