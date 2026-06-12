@@ -7,10 +7,52 @@ export type RailsTablePreferencesSuccessAction = "apply" | "reset" | "save" | "c
 export type RailsTablePreferencesErrorAction = RailsTablePreferencesSuccessAction | "load-presets" | "operation"
 export type RailsTablePreferencesLifecycleAction = RailsTablePreferencesSuccessAction | RailsTablePreferencesErrorAction
 
+export interface RailsTablePreferencesColumnGroupSnapshot {
+  key?: string | number | null
+  label?: string | null
+  [key: string]: unknown
+}
+
+export interface RailsTablePreferencesFilterSnapshot {
+  type?: string
+  param?: string
+  from_param?: string
+  to_param?: string
+  operator?: string
+  value?: unknown
+  values?: unknown[]
+  options?: unknown[]
+  [key: string]: unknown
+}
+
+export interface RailsTablePreferencesSortSnapshot {
+  key: string
+  direction?: string
+  [key: string]: unknown
+}
+
+export interface RailsTablePreferencesColumnSnapshot {
+  key: string
+  export_key?: string
+  label?: string
+  visible?: boolean
+  order?: number
+  width?: number
+  truncate?: number | boolean
+  overflow?: string
+  pinned?: boolean
+  group?: string | RailsTablePreferencesColumnGroupSnapshot | null
+  ignored?: boolean
+  filter?: RailsTablePreferencesFilterSnapshot | null
+  sortable?: boolean
+  sort_param?: string
+  [key: string]: unknown
+}
+
 export interface RailsTablePreferencesSettingsSnapshot {
-  columns?: Array<Record<string, unknown>>
-  filters?: Record<string, unknown>
-  sorts?: Array<Record<string, unknown>>
+  columns?: RailsTablePreferencesColumnSnapshot[]
+  filters?: Record<string, RailsTablePreferencesFilterSnapshot | unknown>
+  sorts?: RailsTablePreferencesSortSnapshot[]
   [key: string]: unknown
 }
 
