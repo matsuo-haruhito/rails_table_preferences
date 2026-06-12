@@ -44,7 +44,7 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include('const DATE_TIME_FILTER_BROWSER_ATTRIBUTES = ["min", "max", "step"]')
     expect(controller_source).to include("filterBrowserAttributes(filter)")
     expect(controller_source).to include("if (!DATE_TIME_FILTER_TYPES.has(String(filter?.type))) return \"\"")
-    expect(controller_source).to include('return ` ${name}=\"${this.escapeHtml(text)}\"`')
+    expect(controller_source).to include('return ` ${name}="${this.escapeHtml(text)}"`')
     expect(controller_source).to include("DATE_TIME_FILTER_TYPES.has(String(filter.type)) && !VALUELESS_FILTER_OPERATORS.includes(selectedOperator)")
     expect(controller_source).to include('data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${browserAttributes}')
     expect(controller_source).to include('data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${browserAttributes}')
