@@ -37,6 +37,7 @@ module RailsTablePreferencesDemo
     }.freeze
     DEMO_OWNER_PARAM = "demo_owner"
     DEMO_OWNER_SWITCH_LABELS = ["Demo owner A", "Demo owner B"].freeze
+    DEMO_BASELINE_QUERY_PARAMS = [DEMO_OWNER_PARAM, DEMO_SCOPE_CONTEXT_PARAM].freeze
 
     owner_method_name = RailsTablePreferences.configuration.current_user_method.to_s.presence || "current_user"
     define_method(owner_method_name) do
@@ -273,11 +274,15 @@ module RailsTablePreferencesDemo
     end
 
     def demo_owner_switch_path(owner, index)
-      query_params = request.query_parameters.except(DEMO_OWNER_PARAM)
+      query_params = demo_baseline_query_params.except(DEMO_OWNER_PARAM)
       query_params = query_params.merge(DEMO_OWNER_PARAM => demo_owner_switch_key(owner)) unless index.zero?
       return request.path if query_params.empty?
 
       "#{request.path}?#{query_params.to_query}"
+    end
+
+    def demo_baseline_query_params
+      request.query_parameters.slice(*DEMO_BASELINE_QUERY_PARAMS)
     end
 
     def table_columns
@@ -573,7 +578,7 @@ module RailsTablePreferencesDemo
     end
 
     def demo_scope_context_switch_path(mode)
-      query_params = request.query_parameters.except(DEMO_SCOPE_CONTEXT_PARAM)
+      query_params = demo_baseline_query_params.except(DEMO_SCOPE_CONTEXT_PARAM)
       query_params = query_params.merge(DEMO_SCOPE_CONTEXT_PARAM => mode) unless mode == DEMO_SCOPE_CONTEXT_HOST_MODE
       return request.path if query_params.empty?
 
