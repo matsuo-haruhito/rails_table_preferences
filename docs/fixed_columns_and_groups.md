@@ -107,6 +107,27 @@ If the host app already owns the `<table>` markup, keep the same idea:
 </div>
 ```
 
+For manual tables, `table_preferences_table_tag(...)` adds controller wiring to the `<table>` but leaves the block content to the host app. That means `<thead>`, `<tbody>`, grouped headers, and any `<colgroup>` are host-owned table structure, not generated helper output.
+
+If first-paint width hints are important for a dense table, render them in the block or in host-app CSS:
+
+```erb
+<%= table_preferences_table_tag(
+  table_key: :orders,
+  columns: columns,
+  class: "orders-table"
+) do %>
+  <colgroup>
+    <col style="width: 120px">
+    <col style="width: 240px">
+    <col style="width: 120px">
+  </colgroup>
+  ...
+<% end %>
+```
+
+`table_preferences_column(..., default_width:)` still feeds the controller/default settings path. It does not automatically emit `<col>` elements, and saved widths or later resize changes remain normal Rails Table Preferences settings.
+
 Minimal CSS baseline:
 
 ```css
@@ -135,6 +156,7 @@ This example is intentionally small:
 
 - the wrapper owns horizontal scrolling
 - the table keeps a stable minimum width
+- optional `<colgroup>` or CSS width hints are owned by the host app
 - pinned cells get an opaque background so scrolled content does not bleed through
 - final shadows, borders, and responsive polish stay in the host app
 
@@ -277,6 +299,7 @@ Rails Table Preferences owns:
 Host applications own:
 
 - table scroll container design
+- manual table structure, including `<colgroup>`, grouped headers, `<thead>`, and `<tbody>` markup
 - final sticky offset policy, including RTL-specific overrides, right-pinned, or multi-scroll-container layouts
 - focus outline, z-index, and background checks for the app's real table content
 - grouped table header markup
