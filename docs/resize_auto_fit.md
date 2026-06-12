@@ -29,6 +29,25 @@ Example manual override:
 
 Keep these values layout-focused. They tune the bundled handle and auto-fit measurements; they do not change saved preference semantics, filter/sort behavior, pinned-column offset logic, or host-app search execution.
 
+## Initial width markup in manual tables
+
+`table_preferences_column(..., default_width:)` is column metadata for the controller and default settings. It is not a server-rendered `<colgroup>` contract, and `table_preferences_table_tag(...)` does not generate initial width markup inside the table body.
+
+For manual table screens, the host app still owns structural table markup such as `<colgroup>`, `<thead>`, and `<tbody>`. If a dense table needs stable first-paint widths before JavaScript applies saved settings, render that markup in the helper block or table CSS owned by the host app:
+
+```erb
+<%= table_preferences_table_tag(table_key: :orders, columns: columns) do %>
+  <colgroup>
+    <col style="width: 120px">
+    <col style="width: 240px">
+    <col style="width: 140px">
+  </colgroup>
+  ...
+<% end %>
+```
+
+After the controller connects, saved widths, editor changes, resize drag, and auto-fit continue to use the normal Rails Table Preferences settings path. Treat host-owned `<colgroup>` or CSS widths as initial layout hints, not as a replacement for saved width settings.
+
 ## Column width boundaries
 
 Columns can define positive integer `min_width` and `max_width` metadata when one column needs a different width boundary from the table-wide auto-fit defaults.
@@ -56,4 +75,4 @@ Use the [Manual QA checklist](manual_qa.md) as the release and host-app sign-off
 - confirm hover and keyboard focus affordances do not shift header text, filter buttons, or sort indicators
 - check narrow desktop widths, long labels, long values, horizontal scroll, and fixed/pinned columns
 
-If the host app uses custom table CSS or scroll containers, record the chosen root values and any column-specific boundaries in host-app documentation so future UI changes can keep the same assumptions.
+If the host app uses custom table CSS or scroll containers, record the chosen root values, any column-specific boundaries, and any host-owned initial width markup in host-app documentation so future UI changes can keep the same assumptions.
