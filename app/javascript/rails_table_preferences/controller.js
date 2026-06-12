@@ -1,6 +1,8 @@
 import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
 
 const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])
+const DATE_TIME_FILTER_BROWSER_ATTRIBUTES = ["min", "max", "step"]
+const VALUELESS_FILTER_OPERATORS = ["blank", "present", "true", "false"]
 
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
@@ -49,6 +51,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const text = String(value ?? "").trim()
     if (!text) return ""
     return ` placeholder="${this.escapeHtml(text)}"`
+  }
+
+  filterBrowserAttributes(filter) {
+    if (!DATE_TIME_FILTER_TYPES.has(String(filter?.type))) return ""
+
+    return DATE_TIME_FILTER_BROWSER_ATTRIBUTES.map((name) => {
+      const text = String(filter?.[name] ?? "").trim()
+      if (!text) return ""
+      return ` ${name}="${this.escapeHtml(text)}"`
+    }).join("")
   }
 
   connect() {
@@ -590,7 +602,19 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   filterValueHtml(filter, condition, selectedOperator) {
-    if (filter.type === "select" && Array.isArray(filter.options) && !["blank", "present", "true", "false"].includes(selectedOperator)) {
+    if (DATE_TIME_FILTER_TYPES.has(String(filter.type)) && !VALUELESS_FILTER_OPERATORS.includes(selectedOperator)) {
+      const browserAttributes = this.filterBrowserAttributes(filter)
+      if (selectedOperator === "between") {
+        return `
+        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${this.filterInputType(filter)}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${browserAttributes}></label>
+        <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${this.filterInputType(filter)}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${browserAttributes}></label>
+      `
+      }
+
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${browserAttributes}></label>`
+    }
+
+    if (filter.type === "select" && Array.isArray(filter.options) && !VALUELESS_FILTER_OPERATORS.includes(selectedOperator)) {
       const values = new Set(Array(condition.values || condition.value || []).map(String))
       const optionsHtml = filter.options.map((option) => {
         const value = this.selectFilterOptionValue(option)
