@@ -48,7 +48,9 @@ Use the package entrypoint when the host app should not depend on a copied contr
 
 The import specifiers above are backed by the `package.json` file that is packaged inside the Ruby gem. That file currently uses `private: true` and `version: "0.0.0"` because it is resolver metadata for gem-packaged JavaScript entrypoints, not a promise that Rails Table Preferences is published as a separate npm package.
 
-Host apps should rely on the documented `exports` specifiers, `rails_table_preferences` and `rails_table_preferences/controller`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
+The packaged metadata intentionally does not declare a `package.json` `engines` requirement. Node.js 20 is the repository CI runtime used for JavaScript syntax and package-entrypoint checks; it is not a consumer Node version requirement for every host app bundler. If that policy changes, update `package.json`, [Support matrix](support_matrix.md), [Package verification](package_verification.md), and [Release checklist](release_checklist.md) together so CI evidence and consumer guidance do not drift.
+
+Host apps should rely on the documented `exports` specifiers, `rails_table_preferences` and `rails_table_preferences/controller`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, a JavaScript package release policy, or a package consumer Node support matrix from the packaged `package.json`; the gem release version remains the Ruby gem version.
 
 ### Stylesheet boundary
 
