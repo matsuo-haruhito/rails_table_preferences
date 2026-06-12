@@ -14,16 +14,18 @@ RSpec.describe "generated demo preview copy affordance", type: :generator do
 
     view = file("app/views/rails_table_preferences_demo/orders/index.html.erb").read
 
-    expect(view).to include("railsTablePreferencesDemoPreviewCopyInstalled")
-    expect(view).to include("Copy hidden fields evidence")
-    expect(view).to include("Copy export payload evidence")
+    expect(view).to include("railsTablePreferencesDemoCopyInstalled")
+    expect(view).to include("Copy hidden fields preview")
+    expect(view).to include("Copy export payload preview")
     expect(view).to include("data-rails-table-preferences-demo-copy-trigger")
     expect(view).to include("data-rails-table-preferences-demo-copy-status")
-    expect(view).to include("navigator.clipboard?.writeText")
-    expect(view).to include("Copy is unavailable because this browser does not expose the Clipboard API")
-    expect(view).to include("The preview remains readable for manual selection")
+    expect(view).to include("navigator.clipboard.writeText")
+    expect(view).to include("Copy unavailable in this browser. Select the preview text manually.")
+    expect(view).to include("Copy failed. Select the preview text manually.")
     expect(view).to include("Default headers")
     expect(view).to include("Include-hidden export keys")
+    expect(view).not_to include("railsTablePreferencesDemoPreviewCopyInstalled")
+    expect(view).not_to include("demoPreviewCopySections")
   end
 
   def destination_root
