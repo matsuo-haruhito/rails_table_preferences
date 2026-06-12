@@ -83,6 +83,8 @@ ja:
         "true": はい
         "false": いいえ
       filter_value: 値
+      select_filter_option_search_label: 候補を絞り込み
+      select_filter_option_search_placeholder: 候補を絞り込み
       filter_from: 開始
       filter_to: 終了
       filter_clear: クリア
