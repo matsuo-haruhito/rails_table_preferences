@@ -163,7 +163,7 @@ RSpec.describe RailsTablePreferences::Controller do
 
       expect(controller.rails_table_preference_params(table_key: :orders, columns: columns, fallback: fallback)).to eq(
         "search_word" => "Saved",
-        "sort" => "delivery_on"
+        "sort" => :delivery_on
       )
     end
 
