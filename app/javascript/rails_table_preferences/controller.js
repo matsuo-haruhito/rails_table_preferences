@@ -12,6 +12,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
+    visibilityBulkHiddenStatusLabel: { type: String, default: "すべての列を非表示にしました。全列表示で戻せます。" },
+    visibilityBulkShownStatusLabel: { type: String, default: "すべての列を表示しました。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
@@ -153,7 +155,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const visibleInput = row.querySelector('[data-field="visible"]')
       if (visibleInput) visibleInput.checked = visible === true
     })
-    this.clearSuccessfulStatus()
+    this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, "success")
   }
 
   buildEditorMoveControls() {
@@ -677,16 +679,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   filterSelectOptionsBySearch(input, select, emptyMessage = null) {
     const query = String(input?.value || "").trim().toLocaleLowerCase()
-    let matchingUnselectedOptions = 0
+    let matchingOptions = 0
 
     Array.from(select?.options || []).forEach((option) => {
       const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
       const matchesQuery = searchableText.includes(query)
-      if (matchesQuery && !option.selected) matchingUnselectedOptions += 1
+      if (matchesQuery) matchingOptions += 1
       option.hidden = Boolean(query) && !option.selected && !matchesQuery
     })
 
-    if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0
+    if (emptyMessage) emptyMessage.hidden = !query || matchingOptions > 0
   }
 
   selectFilterOptionValue(option) {
