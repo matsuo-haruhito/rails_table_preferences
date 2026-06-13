@@ -42,6 +42,46 @@ Check:
 
 Do not disable CSRF protection to make the request pass. Fix the host-app layout or shell so Rails can expose the normal token to the browser.
 
+## Parent controller setting cannot be resolved or uses the wrong base
+
+Symptoms:
+
+- The mounted JSON API fails before it reaches the normal preset action, and logs mention `parent_controller_class_name`, `constantize`, `uninitialized constant`, or an unexpected controller superclass.
+- Save, Load, or Delete behaves differently from the surrounding host-app page because authentication, CSRF, tenant, locale, or other callbacks are not running on the mounted API request.
+- The configured current-owner or scope-context method exists in the host app, but the mounted API cannot call it from the inherited controller stack.
+- These failures can look like a `401`, redirect, missing owner, `403`, or boot/loading error depending on when Rails resolves the configured class.
+
+Check:
+
+1. Confirm the configured class name is spelled exactly as a constant Rails can load.
+
+   ```ruby
+   RailsTablePreferences.configure do |config|
+     config.parent_controller_class_name = "Admin::BaseController"
+   end
+   ```
+
+   Use the real host-app base controller name. A typo or class that is not loaded in the current environment can fail during engine controller loading, before the request reaches Rails Table Preferences preference logic.
+
+2. Confirm that controller is the boundary that should own mounted API callbacks.
+
+   The mounted engine controller inherits `RailsTablePreferences.config.parent_controller_class_name`. Point it at `ApplicationController` or an authenticated base controller that already owns the host app's authentication, CSRF, tenant, locale, and request-wide setup. Do not point it at a narrow page controller just because that page renders the table.
+
+3. Confirm `current_user_method` and `scope_context_method` are available from the same inherited controller stack.
+
+   Rails Table Preferences calls those methods on the mounted API controller, including private methods. If the method only exists in a page-specific controller or helper, move the host-app method to the configured base controller or choose a different `parent_controller_class_name`.
+
+4. Separate this from neighboring failures:
+
+   - `404 Not Found` usually means the engine route or `config.mount_path` is wrong.
+   - `422` with authenticity-token logs usually means the layout or CSRF token header is missing.
+   - `401`, login redirects, wrong tenant/locale setup, or nil owner after the controller loads usually mean the configured base controller is valid but not the right host-app boundary.
+   - boot-time `uninitialized constant` or `constantize` errors usually mean the configured class name is missing, typoed, or not loadable where the engine controller is loaded.
+
+Keep this as host-app configuration work. Do not add authentication policy, tenant lookup, or controller auto-detection to Rails Table Preferences just to mask a parent-controller mismatch.
+
+For the setup boundary, see [Parent controller and mounted API boundary](install_paths.md#parent-controller-and-mounted-api-boundary) and [Confirm the owner and engine contract](production_integration_checklist.md#1-confirm-the-owner-and-engine-contract).
+
 ## Save, load, or delete returns 401, redirects, or has no owner
 
 Symptoms:
@@ -49,7 +89,7 @@ Symptoms:
 - Save, Load, or Delete redirects to the login page or returns `401 Unauthorized` / `403 Forbidden` from the mounted JSON API.
 - The host-app page renders, but the JSON request misses authentication, tenant, locale, or CSRF callbacks that the surrounding page depends on.
 - Logs mention `current_user` is nil, no owner can be resolved, or the configured owner method returns the wrong model.
-- These failures can look similar to the CSRF-specific `422` case above, a `404` mount-path mismatch, or a duplicate preset-name validation failure.
+- These failures can look similar to the CSRF-specific `422` case above, a `404` mount-path mismatch, a parent-controller class mismatch, or a duplicate preset-name validation failure.
 
 Check:
 
@@ -65,6 +105,7 @@ Check:
 
    - `422` with authenticity-token logs usually points to missing CSRF meta tags or token headers.
    - `404 Not Found` usually points to the engine route or `config.mount_path`.
+   - parent-controller `constantize` or `uninitialized constant` errors point to `parent_controller_class_name` spelling, load order, or an unavailable base controller.
    - duplicate-name failures usually happen after a read-only scoped preset loaded successfully and the owner fallback tries to save an existing preset name.
    - `401`, login redirects, wrong callbacks, or nil owner logs usually point to the host-app controller boundary or owner lookup setup.
 
