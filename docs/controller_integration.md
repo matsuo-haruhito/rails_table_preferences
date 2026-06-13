@@ -13,7 +13,7 @@ Available controller helpers:
 ```ruby
 rails_table_preference(table_key:, name: nil, owner: nil, scope_context: nil)
 rails_table_preference_settings(table_key:, name: nil, owner: nil, scope_context: nil, fallback: {})
-rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort")
+rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", fallback: {})
 rails_table_preference_export_payload(table_key:, columns:, name: nil, owner: nil, scope_context: nil, include_hidden: false, fallback: {})
 rails_table_preference_merged_params(params_source = params, **options)
 ```
@@ -22,7 +22,7 @@ Available view helpers:
 
 ```ruby
 table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort")
-table_preferences_hidden_fields(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
+table_preferences_hidden_fields(settings:, columns: columns, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
 ```
 
 ## Preference resolution
@@ -116,6 +116,25 @@ preference_params = rails_table_preference_params(
 )
 ```
 
+Use `fallback:` when the first request for a list should start from default settings before any saved preference exists. The fallback uses the same settings shape as `rails_table_preference_settings(...)`; when no preference is resolved, Rails Table Preferences normalizes that settings hash and converts its filters and sorts through the selected adapter.
+
+```ruby
+preference_params = rails_table_preference_params(
+  table_key: :warehouse_stocks,
+  columns: columns,
+  fallback: {
+    filters: {
+      status: { operator: :in, value: ["pending"] }
+    },
+    sorts: [
+      { key: :delivery_date, direction: :desc }
+    ]
+  }
+)
+```
+
+A resolved saved preference always wins over `fallback:`. The fallback only covers the missing-preference case; it does not change current request precedence, saved preference precedence, query adapter semantics, or the saved settings schema.
+
 ## Hidden fields for existing search forms
 
 Use `table_preferences_hidden_fields` when a normal search form should submit saved preference filters/sorts alongside user-entered search params.
@@ -183,6 +202,8 @@ merged_params = rails_table_preference_merged_params(
 
 Saved preference params override existing params when keys overlap. The helper is equivalent to converting the current params to a hash and then applying `base_params.merge(rails_table_preference_params(...))`.
 
+`rails_table_preference_merged_params` accepts the same options as `rails_table_preference_params`, including `fallback:`. If no preference is resolved, fallback-derived params are merged over the base params in the same way saved preference params would be.
+
 Use the helper when the selected preset should be authoritative for filter/sort keys. When the current request should stay authoritative, build the hash explicitly instead, for example by merging in the opposite order or deleting the saved keys that the search form owns before calling the host application's search method.
 
 ## Pagination and page params
@@ -207,6 +228,8 @@ ransack_params = rails_table_preference_params(
 @q = Order.ransack(params.fetch(:q, {}).to_unsafe_h.merge(ransack_params))
 @orders = @q.result
 ```
+
+`fallback:` works with `adapter: :ransack` as well. When no saved preference is resolved, fallback filters and sorts are converted into the same Ransack-compatible keys as saved settings.
 
 ## Explicit owner
 
@@ -286,7 +309,7 @@ Rails Table Preferences is responsible for:
 
 - resolving the saved preference
 - normalizing settings
-- converting saved filter/sort settings to params
+- converting saved or fallback filter/sort settings to params
 - returning an ordered export payload from saved display settings
 - rendering optional hidden fields for existing forms
 
@@ -298,6 +321,6 @@ The host application remains responsible for:
 - validating searchable fields
 - business-specific search behavior
 - deciding whether saved filter/sort changes should clear or clamp pagination params
-- deciding whether saved filter/sort params or user-entered request params win when the same key appears from both sources
+- deciding whether saved, fallback, or user-entered request params win when the same key appears from multiple sources
 - CSV, Excel, or report file generation
 - admin UI and permission checks for shared, role, or organization presets
