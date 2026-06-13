@@ -7,7 +7,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   static values = {
     ...RailsTablePreferencesBaseController.values,
+    editorIdPrefix: String,
     filterOperatorLabels: { type: Object, default: {} },
+    selectFilterOptionSearchLabel: { type: String, default: "候補を絞り込み" },
+    selectFilterOptionSearchPlaceholder: { type: String, default: "候補を絞り込み" },
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
@@ -27,6 +30,22 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const scopeMark = scopeLabel ? ` [${scopeLabel}]` : ""
     option.textContent = `${name}${scopeMark}${defaultMark}`
     return option
+  }
+
+  settingsFromEditor() {
+    const editorSettings = super.settingsFromEditor()
+    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+  }
+
+  filterPanelId(columnKey) {
+    const namespace = this.filterPanelIdNamespace
+    const normalizedColumnKey = String(columnKey || "column").replace(/[^a-zA-Z0-9_-]+/g, "-")
+    return `rails-table-preferences-filter-panel-${namespace}-${normalizedColumnKey}`
+  }
+
+  get filterPanelIdNamespace() {
+    const namespace = this.editorIdPrefixValue || this.tableKeyValue || "table"
+    return String(namespace).replace(/[^a-zA-Z0-9_-]+/g, "-")
   }
 
   filterPlaceholderAttribute(value) {
@@ -545,6 +564,39 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     }
   }
 
+  installTableColumnDragHandles() {
+    this.headerCells.forEach((cell) => {
+      if (cell.dataset.railsTablePreferencesTableDragInstalled === "true") return
+      if (!this.tableColumnDraggable(cell)) {
+        cell.draggable = false
+        cell.dataset.railsTablePreferencesTableDragDisabled = "true"
+        return
+      }
+
+      cell.draggable = true
+      cell.dataset.railsTablePreferencesTableDragInstalled = "true"
+      cell.classList.add("rails-table-preferences-table-column-draggable")
+      cell.addEventListener("dragstart", this.startTableColumnDrag.bind(this))
+      cell.addEventListener("dragover", this.dragTableColumnOver.bind(this))
+      cell.addEventListener("drop", this.dropTableColumn.bind(this))
+      cell.addEventListener("dragend", this.endTableColumnDrag.bind(this))
+    })
+  }
+
+  startTableColumnDrag(event) {
+    if (!this.tableColumnDraggable(event.currentTarget)) {
+      event.preventDefault()
+      return
+    }
+
+    super.startTableColumnDrag(event)
+  }
+
+  tableColumnDraggable(cell) {
+    const key = cell?.dataset?.railsTablePreferencesColumnKey
+    return this.columnDefinitionByKey(key)?.draggable !== false
+  }
+
   installSortControls() {
     this.headerCells.forEach((cell) => {
       if (cell.dataset.railsTablePreferencesSortInstalled === "true") return
@@ -608,6 +660,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.closeFilterPanel()
     this.apply()
     this.updateDirtyStateFromEditor()
+    this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })
   }
 
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
@@ -668,9 +721,11 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   selectFilterOptionSearchHtml(options) {
     if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
 
-    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
+    const searchLabel = this.selectFilterOptionSearchLabelValue || "候補を絞り込み"
+    const searchPlaceholder = this.selectFilterOptionSearchPlaceholderValue || "候補を絞り込み"
+    const label = `${this.filterValueLabelValue}: ${searchLabel}`
     const emptyLabel = "一致する候補はありません。選択済みの候補は表示したままです。"
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
   }
 
   installSelectFilterOptionSearch(panel) {
