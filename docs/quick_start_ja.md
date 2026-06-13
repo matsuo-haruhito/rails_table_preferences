@@ -52,6 +52,8 @@ Vite / `app/frontend` など package entrypoint を使う場合は、copied cont
 <% end %>
 ```
 
+この既定の helper 構成では、editor helper と table helper はそれぞれ別の `rails-table-preferences` controller root を描画します。同じ `table_key` を使っていても、editor の Apply は sibling table root の DOM を自動更新しません。即時反映が必要な画面では、Save 後の reload / navigation、helper-free same-root table、または host app 側の lifecycle event handling を検討し、詳細は [Quick start](quick_start.md#5-render-the-editor-and-table) と [JavaScript controller notes](javascript_controller.md#host-app-lifecycle-events) を正本にしてください。
+
 Active Record metadata から convention-first に始めたい場合は、`resource_table_for` / `tree_resource_table_for` と [Resource table adapters](resource_tables.md) を先に確認します。
 
 ## 3. preset save / load の責務を確認する
@@ -112,13 +114,15 @@ quick start で最小 UI が表示できたら、次は [Production integration 
 
 このページでは詳細を重複させず、症状から英語正本 docs へ移動する入口だけを置きます。
 
-- controller が動かない、Save が 404 / 401 になる、`current_user` や configured owner が nil になる: [Troubleshooting](troubleshooting.md) の install / Stimulus / engine mount / current owner sections を確認します。
-- Save / Delete / Save as new が 422 になる、または保存した preset が同じ本番画面で戻ってこない: [Production troubleshooting notes](production_troubleshooting.md) の CSRF meta tag と stable `table_key` sections を確認します。詳細手順は英語 docs を正本にします。
+- controller が動かない、Save が 404 になる、engine route や mount path が合っているか分からない: [Troubleshooting](troubleshooting.md) の install / Stimulus / engine mount sections を確認します。
+- Save / Load / Delete が 401 になる、login page へ redirect される、`current_user` や configured owner が nil になる: [Production troubleshooting notes](production_troubleshooting.md#save-load-or-delete-returns-401-redirects-or-has-no-owner) と [Production integration checklist](production_integration_checklist.md#1-confirm-the-owner-and-engine-contract) で parent controller、authentication callbacks、owner lookup を確認します。
+- Save / Delete / Save as new が 422 になる: [Production troubleshooting notes](production_troubleshooting.md#save-delete-or-save-as-new-returns-422) の CSRF meta tag / `X-CSRF-Token` checks を確認します。詳細手順は英語 docs を正本にします。
+- 保存は成功して見えるが、同じ本番画面で preset や列設定が戻ってこない: [Production troubleshooting notes](production_troubleshooting.md#saved-presets-do-not-come-back-on-the-same-screen) で stable `table_key`、editor / table / hidden fields / controller params helpers の key 一致、Turbo frame での同一 screen 判定を確認します。
+- shared / role / organization preset が selector に出ない、または read-only scoped preset から保存すると duplicate name で失敗する: [Troubleshooting](troubleshooting.md#scoped-preset-exists-but-does-not-appear-in-the-selector)、[Scoped presets](scoped_presets.md)、[Production troubleshooting notes](production_troubleshooting.md#saving-from-a-read-only-scoped-preset-fails-with-a-duplicate-name) を確認します。`scope_context_method` が返す runtime value と保存済み `scope_key` が同じ stable identifier か、regular editor が scoped preset を直接上書きする前提になっていないかを分けて見ます。
 - filter や sort の UI は変わるが検索結果に反映されない: [Troubleshooting](troubleshooting.md#filter-or-sort-ui-changes-do-not-change-database-results)、[Controller integration](controller_integration.md)、[Filter adapters](filter_adapters.md) を確認します。Rails Table Preferences は UI state と adapter params を扱い、database query は host app 側が適用します。
 - 既存の検索フォームに保存済み filter/sort を渡したい、または hidden fields が期待どおり roundtrip しない: [Controller integration の hidden fields section](controller_integration.md#hidden-fields-for-existing-search-forms)、[Demo screen generator](demo.md)、[Manual QA checklist](manual_qa.md#13-existing-search-form-integration) を確認します。hidden field の描画、blank value omission、array params、host-app search execution を分けて見ます。
 - select filter が表示されるが値が効かない、複数選択の保存値が想定と違う: [Select filter troubleshooting](select_filter_troubleshooting.md) を確認します。一般的な filter/sort params ではなく、`values_param`、scalar `options:`、host-app query ownership を切り分けます。
 - export payload の列順や見出しは合っているが、CSV / Excel / report の値、認可、検索条件、出力形式が期待と違う: [Export integration](export_integration.md)、[Production integration checklist](production_integration_checklist.md)、[Manual QA checklist](manual_qa.md) を確認します。Rails Table Preferences は payload を渡し、file generation と value extraction は host app 側が所有します。
-- shared / role / organization preset が selector に出ない: [Troubleshooting](troubleshooting.md#scoped-preset-exists-but-does-not-appear-in-the-selector) と [Scoped presets](scoped_presets.md) を確認します。`scope_context_method` が返す runtime value と保存済み `scope_key` が同じ stable identifier かを見ます。
 - CSS、dense table layout、fixed / pinned columns、resize handles、accessibility state cues が崩れる: [Troubleshooting](troubleshooting.md)、[Resize and auto-fit guidance](resize_auto_fit.md)、[Fixed columns and column groups](fixed_columns_and_groups.md)、[Accessibility baseline](accessibility.md) を確認します。
 - どの helper や adapter を使うか迷う: [Decision guide](decision_guide.md) を確認します。
 - 対応 Ruby / Rails と CI coverage: [Support matrix](support_matrix.md) を確認します。
