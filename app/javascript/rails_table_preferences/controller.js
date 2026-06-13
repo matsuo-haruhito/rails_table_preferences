@@ -25,7 +25,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const name = preset.name || "default"
     const scopeType = preset.scope_type || "owner"
     const scopeLabel = preset.scope_label || this.scopeFallbackLabel(scopeType)
-    const defaultMark = preset.default === true ? " *" : ""
+    const defaultMark = preset.default === true ? " *"
+      : ""
     const scopeMark = scopeLabel ? ` [${scopeLabel}]` : ""
     option.textContent = `${name}${scopeMark}${defaultMark}`
     return option
@@ -55,7 +56,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   filterInputAffordanceAttributes(filter, placeholder) {
     const attributes = [this.filterPlaceholderAttribute(placeholder)]
-    if (["number", "date"].includes(this.filterInputType(filter))) {
+    if (["number", "date"].includes(this.filterInputType(filter)) || DATE_TIME_FILTER_TYPES.has(String(filter.type))) {
       attributes.push(this.filterInputAttribute("min", filter.min))
       attributes.push(this.filterInputAttribute("max", filter.max))
       attributes.push(this.filterInputAttribute("step", filter.step))
@@ -636,10 +637,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
-    if (["text", "number", "date"].includes(this.filterInputType(filter))) {
+    const inputType = this.filterInputType(filter)
+    if (["text", "number", "date", "datetime-local", "time"].includes(inputType)) {
       if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
       if (selectedOperator === "between") {
-        const inputType = this.filterInputType(filter)
         const fromAttributes = this.filterInputAffordanceAttributes(filter, filter.from_placeholder)
         const toAttributes = this.filterInputAffordanceAttributes(filter, filter.to_placeholder)
         return `
@@ -649,7 +650,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       }
 
       const attributes = this.filterInputAffordanceAttributes(filter, filter.placeholder)
-      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${inputType}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
     }
 
     return super.filterValueHtml(filter, condition, selectedOperator)

@@ -49,6 +49,19 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).not_to include("matchingUnselectedOptions")
   end
 
+  it "keeps datetime and time browser attributes scoped to packaged filter inputs" do
+    expect(controller_source).to include('const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])')
+    expect(controller_source).to include("if ([\"number\", \"date\"].includes(this.filterInputType(filter)) || DATE_TIME_FILTER_TYPES.has(String(filter.type)))")
+    expect(controller_source).to include('attributes.push(this.filterInputAttribute("min", filter.min))')
+    expect(controller_source).to include('attributes.push(this.filterInputAttribute("max", filter.max))')
+    expect(controller_source).to include('attributes.push(this.filterInputAttribute("step", filter.step))')
+    expect(controller_source).to include('["text", "number", "date", "datetime-local", "time"].includes(inputType)')
+    expect(controller_source).to include('data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromAttributes}')
+    expect(controller_source).to include('data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toAttributes}')
+    expect(controller_source).to include('data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}')
+    expect(base_controller_source).not_to include("DATE_TIME_FILTER_TYPES")
+  end
+
   it "keeps visibility bulk actions scoped to all editor rows" do
     bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.[](:body)
 
