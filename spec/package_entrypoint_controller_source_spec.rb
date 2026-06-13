@@ -34,6 +34,8 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("const label = this.selectFilterOptionLabel(option, value)")
     expect(controller_source).to include("${this.selectFilterOptionSearchHtml(filter.options)}<select data-field=\"values\" multiple>")
     expect(controller_source).to include("selectFilterOptionSearchThreshold: { type: Number, default: 8 }")
+    expect(controller_source).to include("if (!Array.isArray(options) || options.length === 0 || options.length < this.selectFilterOptionSearchThreshold) return \"\"")
+    expect(controller_source).to include('data-rails-table-preferences-option-search-empty role="status" aria-live="polite" aria-atomic="true" hidden')
     expect(controller_source).to include("const threshold = Number(this.selectFilterOptionSearchThresholdValue)")
     expect(controller_source).to include("if (!Number.isFinite(threshold)) return 8")
     expect(controller_source).to include("return Math.floor(threshold)")
@@ -63,6 +65,22 @@ RSpec.describe "package entrypoint controller source" do
     expect(base_controller_source).not_to include("syncEditorSearchResults")
   end
 
+  it "keeps editor search group metadata explicit and avoids object string leakage" do
+    expect(controller_source).to include("row.dataset.railsTablePreferencesEditorSearchText = this.editorSearchTextForColumn(column)")
+    expect(controller_source).to include("editorSearchTextForColumn(column) {")
+    expect(controller_source).to include("...this.editorSearchGroupTokens(column.group)")
+    expect(controller_source).to include("editorSearchGroupTokens(group) {")
+    expect(controller_source).to include("if (typeof group === \"object\") return [group.key, group.label].filter(Boolean)")
+    expect(controller_source).not_to include("[column.label, column.key, column.group].filter(Boolean).join")
+  end
+
+  it "keeps editor search no-results as a polite status cue" do
+    expect(controller_source).to include('empty.setAttribute("role", "status")')
+    expect(controller_source).to include('empty.setAttribute("aria-live", "polite")')
+    expect(controller_source).to include('empty.setAttribute("aria-atomic", "true")')
+    expect(controller_source).to include("empty.hidden = true")
+  end
+
   it "keeps hidden editor rows in apply/save settings while moves use visible rows" do
     expect(base_controller_source).to include("const columns = this.editorRows.map((row, index) => {")
     expect(controller_source).to include("const visibleRows = this.editorRows.filter((row) => !row.hidden)")
@@ -78,5 +96,16 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("handle.replaceWith(visualHandle)")
     expect(controller_source).to include("this.buildEditorMoveControls()")
     expect(base_controller_source).to include('<button type="button" class="rails-table-preferences-editor__drag-handle"')
+  end
+
+  it "keeps the status-state hook scoped to packaged status feedback" do
+    expect(controller_source).to include('this.statusState = "idle"')
+    expect(controller_source).to include('target.setAttribute("data-rails-table-preferences-status-state", state || "idle")')
+    expect(controller_source).to include('if (busyLabel) this.setStatus(busyLabel, "busy")')
+    expect(controller_source).to include('if (successLabel) this.setStatus(successLabel, "success")')
+    expect(controller_source).to include('if (this.statusState === "success") this.setStatus("")')
+    expect(controller_source).to include('this.statusState = "error"')
+    expect(controller_source).to include('this.syncStatusStateHook("error")')
+    expect(base_controller_source).not_to include("data-rails-table-preferences-status-state")
   end
 end

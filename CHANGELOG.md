@@ -41,7 +41,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Copy-based JavaScript, stylesheet, view, and install generators.
 - Optional `--with-demo` install generator mode for local browser verification.
 - Optional `--with-demo-route` install generator mode for copying the demo screen and adding its route in one explicit opt-in step.
-- Generated demo verification includes owner, role, organization, export payload, existing search form hidden fields preview, fixed/grouped column, async failure recovery, and demo-state reset checks.
+- Generated demo verification includes owner, role, organization, export payload preview, existing search form hidden fields preview, preview evidence copy controls, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
 - Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, manual QA PR smoke matrix, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.

@@ -82,6 +82,8 @@ en:
         "true": Yes
         "false": No
       filter_value: Value
+      select_filter_option_search_label: Filter options
+      select_filter_option_search_placeholder: Filter options
       filter_from: From
       filter_to: To
       filter_clear: Clear

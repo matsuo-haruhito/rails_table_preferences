@@ -29,6 +29,8 @@ There is no separate boolean disable flag. If a host app wants to hide the searc
 
 When the search input is visible and the query matches no unselected option, the package entrypoint shows a small no-results message next to the input. Selected options remain visible even if they do not match the query, so users can still see and clear the current selection.
 
+The message is exposed as a polite status cue for assistive technology when the empty state becomes visible.
+
 The message is a package default copy and does not change option rendering, submitted values, saved settings, or query execution.
 
 ## Boundary
