@@ -116,8 +116,15 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         packaged_files: package_entrypoint_files,
         javascript_files: {
           "app/javascript/rails_table_preferences/index.js" => <<~JS,
-            export { default } from "./controller"
-            export { default as RailsTablePreferencesController } from "./controller"
+            import RailsTablePreferencesController from "./preset_select_recovery.js"
+
+            export default RailsTablePreferencesController
+            export { RailsTablePreferencesController }
+          JS
+          "app/javascript/rails_table_preferences/preset_select_recovery.js" => <<~JS,
+            import RailsTablePreferencesController from "./controller.js"
+
+            export default class RailsTablePreferencesPresetSelectRecoveryController extends RailsTablePreferencesController {}
           JS
           "app/javascript/rails_table_preferences/controller.js" => <<~JS,
             import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
@@ -142,13 +149,13 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
     it "reports packaged JavaScript entrypoints whose internal relative imports are missing" do
       result = package_verification_result(
-        packaged_files: package_entrypoint_files - ["app/javascript/controllers/rails_table_preferences_controller.js"],
+        packaged_files: package_entrypoint_files - ["app/javascript/rails_table_preferences/controller.js"],
         javascript_files: {
           "app/javascript/rails_table_preferences/index.js" => "export { default } from \"./controller\"\n",
-          "app/javascript/rails_table_preferences/controller.js" => <<~JS,
-            import RailsTablePreferencesBaseController from "../controllers/rails_table_preferences_controller"
+          "app/javascript/rails_table_preferences/preset_select_recovery.js" => <<~JS,
+            import RailsTablePreferencesController from "./controller.js"
 
-            export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {}
+            export default class RailsTablePreferencesPresetSelectRecoveryController extends RailsTablePreferencesController {}
           JS
           "app/javascript/rails_table_preferences/index.d.ts" => "export { default } from \"./controller\"\n",
           "app/javascript/rails_table_preferences/controller.d.ts" => "export default class RailsTablePreferencesController {}\n"
@@ -157,10 +164,16 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
       expect(result[:missing_package_internal_imports]).to contain_exactly(
         {
+          export: ".",
+          entrypoint: "app/javascript/rails_table_preferences/index.js",
+          import: "./controller",
+          target: "app/javascript/rails_table_preferences/controller"
+        },
+        {
           export: "./controller",
-          entrypoint: "app/javascript/rails_table_preferences/controller.js",
-          import: "../controllers/rails_table_preferences_controller",
-          target: "app/javascript/controllers/rails_table_preferences_controller"
+          entrypoint: "app/javascript/rails_table_preferences/preset_select_recovery.js",
+          import: "./controller.js",
+          target: "app/javascript/rails_table_preferences/controller.js"
         }
       )
       expect(result[:missing_package_declaration_imports]).to eq([])
@@ -247,7 +260,8 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       "app/javascript/rails_table_preferences/controller.js",
       "app/javascript/rails_table_preferences/controller.d.ts",
       "app/javascript/rails_table_preferences/index.js",
-      "app/javascript/rails_table_preferences/index.d.ts"
+      "app/javascript/rails_table_preferences/index.d.ts",
+      "app/javascript/rails_table_preferences/preset_select_recovery.js"
     ]
   end
 
