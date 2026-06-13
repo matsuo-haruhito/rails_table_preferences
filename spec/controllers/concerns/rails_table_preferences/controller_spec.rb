@@ -108,6 +108,65 @@ RSpec.describe RailsTablePreferences::Controller do
       )
     end
 
+    it "uses fallback settings when no preference is resolved" do
+      columns = [
+        { key: :customer_name, filter: { param: :search_word } },
+        { key: :status, filter: { values_param: :statuses } },
+        { key: :delivery_date, sort_param: :delivery_on }
+      ]
+      fallback = {
+        filters: {
+          customer_name: { operator: :contains, value: "Yamada" },
+          status: { operator: :in, value: ["pending", false] }
+        },
+        sorts: [{ key: :delivery_date, direction: :desc }]
+      }
+      allow(RailsTablePreferences::Preference).to receive(:default_for).and_return(nil)
+
+      expect(controller.rails_table_preference_params(table_key: :orders, columns: columns, fallback: fallback)).to eq(
+        "search_word" => "Yamada",
+        "statuses" => ["pending", false],
+        "sort" => "-delivery_on"
+      )
+    end
+
+    it "passes fallback settings through the Ransack adapter" do
+      fallback = {
+        filters: { customer_name: { operator: :contains, value: "Yamada" } },
+        sorts: [{ key: :delivery_date, direction: :desc }]
+      }
+      allow(RailsTablePreferences::Preference).to receive(:default_for).and_return(nil)
+
+      expect(controller.rails_table_preference_params(table_key: :orders, columns: [], adapter: :ransack, fallback: fallback)).to eq(
+        "customer_name_cont" => "Yamada",
+        "s" => ["delivery_date desc"]
+      )
+    end
+
+    it "prefers saved settings over fallback settings" do
+      preference = instance_double(
+        RailsTablePreferences::Preference,
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "Saved" } },
+          sorts: [{ key: :delivery_date, direction: :asc }]
+        }
+      )
+      columns = [
+        { key: :customer_name, filter: { param: :search_word } },
+        { key: :delivery_date, sort_param: :delivery_on }
+      ]
+      fallback = {
+        filters: { customer_name: { operator: :contains, value: "Fallback" } },
+        sorts: [{ key: :delivery_date, direction: :desc }]
+      }
+      allow(RailsTablePreferences::Preference).to receive(:default_for).and_return(preference)
+
+      expect(controller.rails_table_preference_params(table_key: :orders, columns: columns, fallback: fallback)).to eq(
+        "search_word" => "Saved",
+        "sort" => "delivery_on"
+      )
+    end
+
     it "supports the Ransack adapter" do
       preference = instance_double(
         RailsTablePreferences::Preference,
@@ -121,6 +180,34 @@ RSpec.describe RailsTablePreferences::Controller do
       expect(controller.rails_table_preference_params(table_key: :orders, name: :inspection, columns: [], adapter: :ransack)).to eq(
         "customer_name_cont" => "Yamada",
         "s" => ["delivery_date desc"]
+      )
+    end
+  end
+
+  describe "#rails_table_preference_merged_params" do
+    it "merges fallback-derived params over the base params" do
+      columns = [
+        { key: :customer_name, filter: { param: :search_word } },
+        { key: :delivery_date, sort_param: :delivery_on }
+      ]
+      fallback = {
+        filters: { customer_name: { operator: :contains, value: "Fallback" } },
+        sorts: [{ key: :delivery_date, direction: :desc }]
+      }
+      allow(RailsTablePreferences::Preference).to receive(:default_for).and_return(nil)
+
+      expect(
+        controller.rails_table_preference_merged_params(
+          { page: "3", search_word: "Request" },
+          table_key: :orders,
+          columns: columns,
+          fallback: fallback,
+          sort_param: :order
+        )
+      ).to eq(
+        "page" => "3",
+        "search_word" => "Fallback",
+        "order" => "-delivery_on"
       )
     end
   end
