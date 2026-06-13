@@ -52,6 +52,8 @@ Vite / `app/frontend` など package entrypoint を使う場合は、copied cont
 <% end %>
 ```
 
+この既定の helper 構成では、editor helper と table helper はそれぞれ別の `rails-table-preferences` controller root を描画します。同じ `table_key` を使っていても、editor の Apply は sibling table root の DOM を自動更新しません。即時反映が必要な画面では、Save 後の reload / navigation、helper-free same-root table、または host app 側の lifecycle event handling を検討し、詳細は [Quick start](quick_start.md#5-render-the-editor-and-table) と [JavaScript controller notes](javascript_controller.md#host-app-lifecycle-events) を正本にしてください。
+
 Active Record metadata から convention-first に始めたい場合は、`resource_table_for` / `tree_resource_table_for` と [Resource table adapters](resource_tables.md) を先に確認します。
 
 ## 3. preset save / load の責務を確認する
