@@ -14,6 +14,12 @@ The manual root values must point at the mounted JSON API endpoint that serves t
 
 Rails Table Preferences does not add a helper-free-only URL helper. If the host app bypasses the table helper, the host app owns how those two strings are built.
 
+## Label value responsibility
+
+Helper-free or hand-assembled package-entrypoint roots also own their visible-copy root values. The bundled editor partial normally emits filter, sort, scope, editor search, row move, select option search, and status labels from Rails I18n before the packaged controller runs. A manually rendered root should pass those `data-rails-table-preferences-*-label-value` attributes explicitly when the screen needs locale-specific or screen-specific wording.
+
+The package entrypoint keeps Japanese JavaScript defaults for its package-only labels as a last-resort fallback. Those defaults keep the controller usable when a root value is missing, but they are not a substitute for locale-aware helper-free markup. See [Bundled editor i18n keys](editor_i18n.md#bundled-erb-and-helper-free-roots) for the copy boundary and use this page for the URL boundary.
+
 ## Default mount path example
 
 The examples that use raw strings assume the default engine mount path:
@@ -49,6 +55,7 @@ For helper-free controller root changes, record these checks in the PR body or c
 - The editor and helper-free table root receive the same `table_key`, preset `name`, columns, and settings.
 - The collection URL and member URL use the actual mounted engine path for the host app.
 - The member URL URL-encodes the preset name and the collection URL URL-encodes the table key.
+- Locale-specific or screen-specific label root values are passed explicitly when the helper-free root relies on packaged-controller copy surfaces.
 - Managed headers and body cells still expose matching `data-rails-table-preferences-column-key` values.
 - Any mismatch with `config.mount_path` is handled as routing/troubleshooting work, not as a controller rewrite.
 
