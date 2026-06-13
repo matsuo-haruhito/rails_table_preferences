@@ -74,6 +74,8 @@ By default, `resource_table_for` also infers `belongs_to` associations whose for
 
 The association column reads through the association reader. Without a profile formatter, that means Rails Table Preferences passes the associated object through the default value fallback rather than deciding how a customer should be labeled, linked, redacted, or preloaded.
 
+If the first-run table shows an object-like value for an association column, such as a raw `#<Customer ...>` string or a model `to_s` that is not useful for the screen, treat that as a profile responsibility rather than as missing automatic label inference. Add a `display` formatter for the association key and keep business-facing labels, links, badges, and redaction in the host app.
+
 Use profile overrides when the screen needs a human-facing association value:
 
 ```ruby
@@ -90,6 +92,20 @@ class OrdersTableProfile < RailsTablePreferences::TableProfile
   end
 end
 ```
+
+For a plain text label, the formatter can stay smaller while still making the boundary explicit:
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  display :customer do |order|
+    order.customer&.name
+  end
+end
+```
+
+Rails Table Preferences does not look for `name`, `title`, `code`, or `to_s` as association label conventions. Those choices are business-specific, so keeping them in `display :customer` makes the first-run table easy to improve without changing attribute columns, manual columns, or the default value fallback.
 
 Choose the column key by the behavior the host app wants:
 
@@ -370,13 +386,6 @@ end
 ```
 
 Custom partials can then call:
-
-```erb
-<%= table_preferences_filter_input(form: form, column: column) %>
-<%= table_preferences_cell_editor(form: form, record: order, column: column) %>
-```
-
-When a column has no filter/editor metadata, or when the metadata type has no registered renderer, the helper returns the `fallback:` value. Use that to keep custom partials explicit about the empty state they want:
 
 ```erb
 <%= table_preferences_filter_input(
