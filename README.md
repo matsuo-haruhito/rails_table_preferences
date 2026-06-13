@@ -143,7 +143,7 @@ function gemJavaScriptPath(name: string, entrypoint: string) {
 resolve: {
   alias: [
     { find: /^rails_table_preferences$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/index.js") },
-    { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/controller.js") }
+    { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/preset_select_recovery.js") }
   ]
 }
 ```
