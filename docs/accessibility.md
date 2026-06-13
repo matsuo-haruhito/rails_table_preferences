@@ -147,6 +147,17 @@ The default markup uses a native live region:
 </div>
 ```
 
+When the host app imports the packaged `rails_table_preferences/controller` entrypoint, that same status target also receives `data-rails-table-preferences-status-state`. Treat this as a light styling and QA hook for the packaged controller path, not as a separate notification framework or lifecycle-event payload.
+
+The packaged controller uses these values:
+
+- `idle`: no current status message is shown, including after a successful message is cleared by a local editor change.
+- `busy`: a bundled async preset action is loading, saving, saving as new, or deleting.
+- `success`: a bundled async action completed successfully, or package-entrypoint resize auto-fit reported success.
+- `error`: load, save, save as new, delete, or initial preset-list loading failed; the error status stays visible until a later successful status or explicit clear.
+
+The copied/base controller path should not rely on this data hook unless the host app ports the packaged status-state behavior into its copied or replacement controller. Host applications that need richer inline messaging, toast notifications, or custom state names should keep that behavior in their copied ERB, copied JavaScript, or host-app notification layer.
+
 While those bundled async actions are in flight, the preset select, preset name, default checkbox, action buttons, generated editor row inputs, and bundled header buttons are temporarily disabled.
 
 The controller also ignores bundled row drag, header drag, sort, filter, and resize interactions while the async request is still in flight. This keeps the visible table state from drifting away from the payload that is currently being loaded, saved, created, or deleted.
