@@ -16,6 +16,8 @@ The Show all columns and Hide all columns bulk actions keep their all-row scope 
 
 Reset, preset load, and preset delete replace the editor state with another settings snapshot, so the package entrypoint clears the search query after those operations. Apply, save, and save as new keep the current query because they operate within the same editing context. Clearing the query restores all editor rows, hides the no-results message, and recalculates the row move buttons for the full visible list.
 
+The package entrypoint renders an explicit clear button beside the search input. It uses the same `clearEditorSearchQuery()` and search sync path as reset, preset load, and preset delete, so browser-native search clear UI is not the only way back to the full row list. The button stays disabled while the query is empty, is labelled for assistive technology, and returns focus to the search input after clearing.
+
 Use the bundled column search field when checking a table with many columns:
 
 - search by a visible column label and confirm only matching rows remain visible
@@ -23,7 +25,8 @@ Use the bundled column search field when checking a table with many columns:
 - search by a hash group key and label, and confirm object group metadata is not exposed as `[object Object]`
 - enter a query with no matches and confirm the no-results message appears as the only search status cue, without dropping rows from apply/save settings
 - use Show all columns or Hide all columns while search is active and confirm hidden search rows are included in the bulk checkbox change
-- clear the search and confirm every editor row returns and the no-results message is hidden
+- clear the search with the explicit clear control and confirm every editor row returns, the no-results message is hidden, and row move buttons recalculate for the full visible list
+- confirm the explicit clear control is keyboard reachable, labelled, and disabled while the query is empty
 - reset, preset load, or preset delete while a search is active and confirm the search field clears, every editor row returns, the no-results message is hidden, and row move buttons recalculate for the full list
 - apply, save, or save as new while a search is active and confirm the search query stays in place because the same editing context remains active
 - apply or save while a search is active and confirm columns hidden by the search are not removed from the saved settings

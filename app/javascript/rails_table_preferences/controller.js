@@ -8,6 +8,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     filterOperatorLabels: { type: Object, default: {} },
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
+    editorSearchClearLabel: { type: String, default: "検索をクリア" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
@@ -180,7 +181,21 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     input.setAttribute("aria-label", this.editorSearchLabelValue)
     input.dataset.railsTablePreferencesEditorSearchInput = "true"
     input.addEventListener("input", () => this.syncEditorSearchResults())
-    label.append(labelText, input)
+
+    const clearButton = document.createElement("button")
+    clearButton.type = "button"
+    clearButton.className = "rails-table-preferences-editor__search-clear"
+    clearButton.dataset.railsTablePreferencesEditorSearchClear = "true"
+    clearButton.setAttribute("aria-label", this.editorSearchClearLabelValue)
+    clearButton.title = this.editorSearchClearLabelValue
+    clearButton.textContent = "×"
+    clearButton.disabled = true
+    clearButton.addEventListener("click", (event) => {
+      event.preventDefault()
+      this.clearEditorSearchQuery()
+      this.editorSearchInput?.focus()
+    })
+    label.append(labelText, input, clearButton)
 
     const empty = document.createElement("p")
     empty.className = "rails-table-preferences-editor__search-empty"
@@ -214,6 +229,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     })
 
     if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0
+    if (this.editorSearchClearButton) this.editorSearchClearButton.disabled = !query
     this.syncEditorMoveButtons()
   }
 
@@ -244,6 +260,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   get editorSearchInput() {
     return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-input]")
+  }
+
+  get editorSearchClearButton() {
+    return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-clear]")
   }
 
   get editorSearchEmptyMessage() {
