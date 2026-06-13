@@ -27,7 +27,9 @@ There is no separate boolean disable flag. If a host app wants to hide the searc
 
 ## Empty Results
 
-When the search input is visible and the query matches no unselected option, the package entrypoint shows a small no-results message next to the input. Selected options remain visible even if they do not match the query, so users can still see and clear the current selection.
+When the search input is visible and the query matches no option, the package entrypoint shows a small no-results message next to the input. Selected options remain visible even if they do not match the query, so users can still see and clear the current selection.
+
+If the query matches only the current selected option, the no-results message stays hidden because the visible selected option is a real match. If the query matches neither selected nor unselected options, the message can appear while the selected option remains visible as preserved context.
 
 The message is exposed as a polite status cue for assistive technology when the empty state becomes visible.
 
