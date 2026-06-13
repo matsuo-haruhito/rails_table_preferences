@@ -267,7 +267,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
             },
             "./controller" => {
               "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
-              "default" => "./app/javascript/rails_table_preferences/controller.js"
+              "default" => "./app/javascript/rails_table_preferences/preset_select_recovery.js"
             },
             "./styles.css" => "./app/assets/stylesheets/rails_table_preferences.css"
           }

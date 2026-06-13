@@ -48,11 +48,13 @@ Use the package entrypoint when the host app should not depend on a copied contr
 
 The import specifiers above are backed by the `package.json` file that is packaged inside the Ruby gem. That file currently uses `private: true` and `version: "0.0.0"` because it is resolver metadata for gem-packaged JavaScript and stylesheet entrypoints, not a promise that Rails Table Preferences is published as a separate npm package.
 
-Host apps should rely on the documented `exports` specifiers, `rails_table_preferences`, `rails_table_preferences/controller`, and `rails_table_preferences/styles.css`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, or a JavaScript package release policy from the packaged `package.json`; the gem release version remains the Ruby gem version.
+The packaged metadata intentionally does not declare a `package.json` `engines` requirement. Node.js 20 is the repository CI runtime used for JavaScript syntax and package-entrypoint checks; it is not a consumer Node version requirement for every host app bundler. If that policy changes, update `package.json`, [Support matrix](support_matrix.md), [Package verification](package_verification.md), and [Release checklist](release_checklist.md) together so CI evidence and consumer guidance do not drift.
+
+Host apps should rely on the documented `exports` specifiers, `rails_table_preferences`, `rails_table_preferences/controller`, and `rails_table_preferences/styles.css`, plus their bundler alias or resolver configuration. Do not infer npm distribution, npm semver, a JavaScript package release policy, or a package consumer Node support matrix from the packaged `package.json`; the gem release version remains the Ruby gem version.
 
 ### Stylesheet boundary
 
-The package metadata now exports `rails_table_preferences/styles.css` for host apps that want a bundler import alongside `rails_table_preferences/controller`:
+The package metadata exports `rails_table_preferences/styles.css` for host apps that want a bundler import alongside `rails_table_preferences/controller`:
 
 ```js
 import "rails_table_preferences/styles.css"
@@ -66,7 +68,7 @@ The stylesheet and controller decisions remain independent. A conventional `stim
 
 ### Package-only controller boundary
 
-The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`.
+The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`. The public `rails_table_preferences/controller` specifier currently resolves through `package.json` to `app/javascript/rails_table_preferences/preset_select_recovery.js`, which subclasses `controller.js` and is the behavior entrypoint that manual bundler aliases should preserve.
 
 Current package-only behavior is intentionally small:
 
@@ -83,7 +85,7 @@ The current contract boundary is:
 
 | Surface | Copied controller path | Package entrypoint path | Host-app guidance |
 | --- | --- | --- | --- |
-| Source ownership | Host app owns the generated `app/javascript/controllers/rails_table_preferences_controller.js` copy after install. | Gem owns `app/javascript/rails_table_preferences/controller.js`, which subclasses the copied-controller source shipped in the gem. | Use the copied path when local patches are expected. Use the package entrypoint when the app wants packaged behavior updates through the gem. |
+| Source ownership | Host app owns the generated `app/javascript/controllers/rails_table_preferences_controller.js` copy after install. | Gem owns `app/javascript/rails_table_preferences/controller.js`, which subclasses the copied-controller source shipped in the gem. The public `rails_table_preferences/controller` export resolves to `preset_select_recovery.js`, which subclasses that package controller. | Use the copied path when local patches are expected. Use the package entrypoint when the app wants packaged behavior updates through the gem, and point manual aliases at the current package export target. |
 | Filter operator labels | Uses the base controller defaults. A copied or replacement controller is needed for controller-side operator vocabulary changes not exposed by base values. | Adds `filterOperatorLabelsValue` so packaged-controller tables can override operator text through a root JSON value. | Use locale/root values for wording-only operator labels on the package path; use copied JavaScript for copied-controller or behavior changes. |
 | Sortable header `title` attributes | Base sort setup may replace generated title text while it manages sort hints. | Preserves host-provided nonblank `title` values and restores them after sort state sync. | Prefer the package entrypoint when host-rendered header titles must survive packaged sort controls. Validate copied-controller screens separately. |
 | Resize handle keyboard auto-fit | Base resize handles are generated and pointer-oriented. | Adds keyboard auto-fit on resize handles for `Enter`, Space, and legacy `Spacebar`. | Treat this as package-entrypoint-only unless a future issue deliberately moves the keyboard affordance into the base controller. |
@@ -117,14 +119,14 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^rails_table_preferences$/, replacement: gemFilePath("rails_table_preferences", "app/javascript/rails_table_preferences/index.js") },
-      { find: /^rails_table_preferences\/controller$/, replacement: gemFilePath("rails_table_preferences", "app/javascript/rails_table_preferences/controller.js") },
+      { find: /^rails_table_preferences\/controller$/, replacement: gemFilePath("rails_table_preferences", "app/javascript/rails_table_preferences/preset_select_recovery.js") },
       { find: /^rails_table_preferences\/styles\.css$/, replacement: gemFilePath("rails_table_preferences", "app/assets/stylesheets/rails_table_preferences.css") }
     ]
   }
 })
 ```
 
-Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` and `app/assets/stylesheets/rails_table_preferences.css` files.
+Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` and `app/assets/stylesheets/rails_table_preferences.css` files while preserving the same behavior entrypoint exposed by `package.json`. Do not point `rails_table_preferences/controller` directly at `controller.js` unless the host app intentionally wants to bypass the current recovery subclass and owns that divergence.
 
 ### TypeScript module declarations
 
@@ -170,7 +172,7 @@ When an existing host app moves from the copied controller to `rails_table_prefe
 - Host-app listeners that depend on Rails Table Preferences lifecycle events have been checked against the package entrypoint, not only a copied controller registration.
 - Screens that rely on package-only sortable-title preservation or resize-handle keyboard auto-fit have manual checks covering those behaviors after the registration switch.
 
-After switching registration, re-run the manual checks for editor load, preset save/load/delete, lifecycle event listeners, filter panels, sort controls, resize handles, Turbo reconnects, and any screen-specific label overrides.
+After switching registration, re-run the manual checks for editor load, preset save/load/delete, lifecycle event listeners, filter panels, sort controls, resize handles, Turbo reconnects, stylesheet loading, and any screen-specific label overrides.
 
 ## Turbo Drive and Turbo Frame checks
 

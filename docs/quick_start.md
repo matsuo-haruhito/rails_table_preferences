@@ -257,6 +257,10 @@ end
 
 The `data-rails-table-preferences-column-key` values must match the keys passed to `table_preferences_column`.
 
+The editor helper and the table helper each render their own `rails-table-preferences` controller root. With this default helper composition, the table root applies the settings it receives when the page loads, while the editor root owns the Apply, Save, Load, and Delete controls. Applying changes from the editor does not automatically reach a sibling table root unless the host app adds its own synchronization or renders the target table inside the same controller root. Use Save plus reload/navigation, a helper-free same-root table, or host-owned lifecycle event handling when the screen needs immediate table DOM updates after an editor action.
+
+For the exact controller-root and target-table rules, see [JavaScript controller notes](javascript_controller.md#minimal-dom-contract-for-helper-free-tables). When moving a `resource_table_for` or `tree_resource_table_for` editor with `render_editor: false`, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to confirm the separated editor and table still receive the same `table_key`, `name`, `settings`, and `columns`.
+
 ### When one page renders multiple editors
 
 The current bundled partial already generates unique preset select/name ids per render, so you can place more than one `table_preferences_editor` on the same page without passing an extra helper keyword.
