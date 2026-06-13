@@ -16,11 +16,10 @@ RSpec.describe "rails_table_preferences filter panel accessibility wiring" do
   end
 
   it "keeps the title id derived from the shared panel id helper" do
-    expect(controller_source).to include(<<~JS.strip)
-      filterPanelTitleId(key) {
-        return `${this.filterPanelId(key)}-title`
-      }
-    JS
+    expect(controller_source).to include(
+      "filterPanelTitleId(key) {",
+      "return `${this.filterPanelId(key)}-title`"
+    )
   end
 
   it "keeps rendered title id injection tied to the package filter panel title" do
