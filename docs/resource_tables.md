@@ -388,6 +388,13 @@ end
 Custom partials can then call:
 
 ```erb
+<%= table_preferences_filter_input(form: form, column: column) %>
+<%= table_preferences_cell_editor(form: form, record: order, column: column) %>
+```
+
+When a column has no filter/editor metadata, or when the metadata type has no registered renderer, the helper returns the `fallback:` value. Use that to keep custom partials explicit about the empty state they want:
+
+```erb
 <%= table_preferences_filter_input(
   form: form,
   column: column,
