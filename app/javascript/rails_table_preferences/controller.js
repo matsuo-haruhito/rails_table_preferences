@@ -5,10 +5,15 @@ const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
   static values = {
     ...RailsTablePreferencesBaseController.values,
+    editorIdPrefix: String,
     filterOperatorLabels: { type: Object, default: {} },
+    selectFilterOptionSearchLabel: { type: String, default: "候補を絞り込み" },
+    selectFilterOptionSearchPlaceholder: { type: String, default: "候補を絞り込み" },
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
+    visibilityBulkHiddenStatusLabel: { type: String, default: "すべての列を非表示にしました。全列表示で戻せます。" },
+    visibilityBulkShownStatusLabel: { type: String, default: "すべての列を表示しました。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
@@ -26,10 +31,42 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return option
   }
 
+  settingsFromEditor() {
+    const editorSettings = super.settingsFromEditor()
+    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+  }
+
+  filterPanelId(columnKey) {
+    const namespace = this.filterPanelIdNamespace
+    const normalizedColumnKey = String(columnKey || "column").replace(/[^a-zA-Z0-9_-]+/g, "-")
+    return `rails-table-preferences-filter-panel-${namespace}-${normalizedColumnKey}`
+  }
+
+  get filterPanelIdNamespace() {
+    const namespace = this.editorIdPrefixValue || this.tableKeyValue || "table"
+    return String(namespace).replace(/[^a-zA-Z0-9_-]+/g, "-")
+  }
+
   filterPlaceholderAttribute(value) {
     const text = String(value ?? "").trim()
     if (!text) return ""
     return ` placeholder="${this.escapeHtml(text)}"`
+  }
+
+  filterInputAffordanceAttributes(filter, placeholder) {
+    const attributes = [this.filterPlaceholderAttribute(placeholder)]
+    if (["number", "date"].includes(this.filterInputType(filter))) {
+      attributes.push(this.filterInputAttribute("min", filter.min))
+      attributes.push(this.filterInputAttribute("max", filter.max))
+      attributes.push(this.filterInputAttribute("step", filter.step))
+    }
+    return attributes.join("")
+  }
+
+  filterInputAttribute(name, value) {
+    const text = String(value ?? "").trim()
+    if (!text) return ""
+    return ` ${name}="${this.escapeHtml(text)}"`
   }
 
   connect() {
@@ -70,9 +107,24 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.replaceEditorDragHandle(row)
     row.addEventListener("input", () => this.clearSuccessfulStatus())
     row.addEventListener("change", () => this.clearSuccessfulStatus())
-    row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
+    row.dataset.railsTablePreferencesEditorSearchText = this.editorSearchTextForColumn(column)
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  editorSearchTextForColumn(column) {
+    return [
+      column.label,
+      column.key,
+      ...this.editorSearchGroupTokens(column.group)
+    ].filter(Boolean).map((token) => String(token).toLowerCase()).join(" ")
+  }
+
+  editorSearchGroupTokens(group) {
+    if (!group) return []
+    if (Array.isArray(group)) return group.flatMap((item) => this.editorSearchGroupTokens(item))
+    if (typeof group === "object") return [group.key, group.label].filter(Boolean)
+    return [group]
   }
 
   replaceEditorDragHandle(row) {
@@ -103,7 +155,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const visibleInput = row.querySelector('[data-field="visible"]')
       if (visibleInput) visibleInput.checked = visible === true
     })
-    this.clearSuccessfulStatus()
+    this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, "success")
   }
 
   buildEditorMoveControls() {
@@ -170,6 +222,9 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const empty = document.createElement("p")
     empty.className = "rails-table-preferences-editor__search-empty"
     empty.dataset.railsTablePreferencesEditorSearchEmpty = "true"
+    empty.setAttribute("role", "status")
+    empty.setAttribute("aria-live", "polite")
+    empty.setAttribute("aria-atomic", "true")
     empty.hidden = true
     empty.textContent = this.editorNoSearchResultsLabelValue
 
@@ -526,6 +581,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
     this.closeFilterPanel()
     this.apply()
+    this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })
   }
 
   openFilterPanel(headerCell, column, button = headerCell.querySelector("[data-rails-table-preferences-filter-button]")) {
@@ -585,15 +641,33 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
+    if (["text", "number", "date"].includes(this.filterInputType(filter))) {
+      if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
+      if (selectedOperator === "between") {
+        const inputType = this.filterInputType(filter)
+        const fromAttributes = this.filterInputAffordanceAttributes(filter, filter.from_placeholder)
+        const toAttributes = this.filterInputAffordanceAttributes(filter, filter.to_placeholder)
+        return `
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromAttributes}></label>
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toAttributes}></label>
+        `
+      }
+
+      const attributes = this.filterInputAffordanceAttributes(filter, filter.placeholder)
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
+    }
+
     return super.filterValueHtml(filter, condition, selectedOperator)
   }
 
   selectFilterOptionSearchHtml(options) {
-    if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
+    if (!Array.isArray(options) || options.length === 0 || options.length < this.selectFilterOptionSearchThreshold) return ""
 
-    const label = `${this.filterValueLabelValue}: 候補を絞り込み`
+    const searchLabel = this.selectFilterOptionSearchLabelValue || "候補を絞り込み"
+    const searchPlaceholder = this.selectFilterOptionSearchPlaceholderValue || "候補を絞り込み"
+    const label = `${this.filterValueLabelValue}: ${searchLabel}`
     const emptyLabel = "一致する候補はありません。選択済みの候補は表示したままです。"
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml("候補を絞り込み")}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty role="status" aria-live="polite" aria-atomic="true" hidden>${this.escapeHtml(emptyLabel)}</p>`
   }
 
   installSelectFilterOptionSearch(panel) {
@@ -610,16 +684,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   filterSelectOptionsBySearch(input, select, emptyMessage = null) {
     const query = String(input?.value || "").trim().toLocaleLowerCase()
-    let matchingUnselectedOptions = 0
+    let matchingOptions = 0
 
     Array.from(select?.options || []).forEach((option) => {
       const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
       const matchesQuery = searchableText.includes(query)
-      if (matchesQuery && !option.selected) matchingUnselectedOptions += 1
+      if (matchesQuery) matchingOptions += 1
       option.hidden = Boolean(query) && !option.selected && !matchesQuery
     })
 
-    if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0
+    if (emptyMessage) emptyMessage.hidden = !query || matchingOptions > 0
   }
 
   selectFilterOptionValue(option) {

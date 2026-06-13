@@ -299,6 +299,7 @@ Use the [Release checklist](docs/release_checklist.md) as the detailed release-r
 - Inspect package contents with [Package verification](docs/package_verification.md)
 - Move `CHANGELOG.md` entries from `[Unreleased]` to `0.1.0` when tagging
 - Review README/docs consistency against the released behavior
+- Cross-check open pull requests, proposal issues, and `agent:planned` items before treating README or changelog wording as released behavior
 
 ### Later candidates
 

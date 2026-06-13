@@ -160,7 +160,7 @@ docs/javascript_entrypoints.md
 docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, rake task dependency, and resource table files rather than a complete freeze of every file under `lib/`. The legacy column adjustment importer is included because the packaged `lib/tasks/rails_table_preferences.rake` entrypoint loads it directly. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entries guard the shipped English and Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, rake task dependency, and resource table files rather than a complete freeze of every file under `lib/`. The legacy column adjustment importer is included because the packaged `lib/tasks/rails_table_preferences.rake` entrypoint loads it directly. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The fixed list keeps the shared package controller implementation (`app/javascript/rails_table_preferences/controller.js`), while the package export-target check below follows the current `./controller` default export to the package-entrypoint recovery subclass. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entries guard the shipped English and Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
 
 ## Required path selection criteria
 
@@ -188,8 +188,10 @@ The package verification task reads the packaged `package.json` and confirms eve
 . types -> app/javascript/rails_table_preferences/index.d.ts
 . default -> app/javascript/rails_table_preferences/index.js
 ./controller types -> app/javascript/rails_table_preferences/controller.d.ts
-./controller default -> app/javascript/rails_table_preferences/controller.js
+./controller default -> app/javascript/rails_table_preferences/preset_select_recovery.js
 ```
+
+The `./controller` default export is the package entrypoint host apps import as `rails_table_preferences/controller`. It currently points at `preset_select_recovery.js`, which subclasses the shared `controller.js` implementation; manual bundler aliases for the package specifier should preserve that same behavior entrypoint instead of bypassing the recovery subclass.
 
 After confirming those export target files exist, the verifier scans JavaScript export targets' static relative `import ... from`, side-effect `import`, and `export ... from` references. Extensionless references such as `./controller` and `../controllers/rails_table_preferences_controller` must resolve to packaged JavaScript files, so package verification catches drift where an exported entrypoint ships but one of its internal package files does not.
 
