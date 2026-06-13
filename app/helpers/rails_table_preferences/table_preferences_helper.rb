@@ -19,13 +19,17 @@ module RailsTablePreferences
       }
     end
 
-    def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], **options, &block)
+    def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], caption: nil, **options, &block)
       options[:data] = table_preferences_merge_data_attributes(
         options[:data],
         table_preferences_data_attributes(table_key: table_key, name: name, settings: settings, columns: columns, ignored_columns: ignored_columns)
       )
 
-      tag.table(**options, &block)
+      table_contents = []
+      table_contents << tag.caption(caption) if caption.present?
+      table_contents << capture(&block) if block
+
+      tag.table(safe_join(table_contents), **options)
     end
 
     def table_preferences_editor(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], title: nil, partial: nil, editor_instance_key: nil)
