@@ -31,11 +31,11 @@ RSpec.describe "package entrypoint lifecycle error source" do
 
   it "keeps named preference operations attached to stable error actions" do
     expected_action_sources = {
-      "save" => "return this.withPreferenceAction(\"save\", () => super.save(event))",
-      "create" => "return this.withPreferenceAction(\"create\", () => super.createPresetFromEditor(event))",
-      "load" => "return this.withPreferenceAction(\"load\", () => super.selectPreset(event))",
-      "delete" => "const result = await this.withPreferenceAction(\"delete\", async () => {",
-      "load-presets" => "return this.withPreferenceAction(\"load-presets\", () => super.refreshPresetOptionsOnConnect())"
+      "save" => "this.withPreferenceAction(\"save\", () => super.save(event))",
+      "create" => "this.withPreferenceAction(\"create\", () => super.createPresetFromEditor(event))",
+      "load" => "this.withPreferenceAction(\"load\", () => super.selectPreset(event))",
+      "delete" => "this.withPreferenceAction(\"delete\", async () => {",
+      "load-presets" => "this.withPreferenceAction(\"load-presets\", () => super.refreshPresetOptionsOnConnect())"
     }
 
     expected_action_sources.each_value do |source_signal|
