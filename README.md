@@ -124,6 +124,8 @@ The package root also exposes a named export:
 import { RailsTablePreferencesController } from "rails_table_preferences"
 ```
 
+The packaged `package.json` behind those import specifiers is Ruby gem resolver metadata. Its `private: true` and `version: "0.0.0"` values do not mean Rails Table Preferences is published as a separate npm package or that JavaScript semver tracks the Ruby gem version; see [JavaScript entrypoints](docs/javascript_entrypoints.md#package-metadata-boundary) and [Package verification](docs/package_verification.md#package-export-targets) for that boundary.
+
 When using Vite or another JS bundler, make sure the host app can resolve the gem's packaged `app/javascript/rails_table_preferences/*` files. A minimal Vite alias looks like this:
 
 ```ts
@@ -297,6 +299,7 @@ Use the [Release checklist](docs/release_checklist.md) as the detailed release-r
 - Inspect package contents with [Package verification](docs/package_verification.md)
 - Move `CHANGELOG.md` entries from `[Unreleased]` to `0.1.0` when tagging
 - Review README/docs consistency against the released behavior
+- Cross-check open pull requests, proposal issues, and `agent:planned` items before treating README or changelog wording as released behavior
 
 ### Later candidates
 

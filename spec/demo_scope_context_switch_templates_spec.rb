@@ -20,7 +20,7 @@ RSpec.describe "demo scope context switch templates" do
     expect(template).to include('"label" => "Role preset lane"')
     expect(template).to include('"label" => "Organization preset lane"')
     expect(template).to include('return super if defined?(super)')
-    expect(template).to include('request.query_parameters.except(DEMO_SCOPE_CONTEXT_PARAM)')
+    expect(template).to include('demo_baseline_query_params.except(DEMO_SCOPE_CONTEXT_PARAM)')
   end
 
   it "renders the generated demo scope switch surface" do

@@ -39,6 +39,8 @@ The same demo controller also seeds one organization preset named `東京組織�
 
 The sample rows are intentionally a little more practical than a three-row placeholder. They mix repeated customer prefixes (`東京...`), multiple statuses, true/false confirmation states, varied amounts, varied delivery dates, long shipping codes, long delivery notes, and memo lengths so sort, filter, width, auto-fit, and overflow checks are easier to judge at a glance.
 
+Delivery-date samples use a demo-only fixed baseline of `2024-01-15`. When collecting manual evidence, you can record the visible date values as stable sample data while still treating sort and filter behavior as the actual verification target.
+
 The same screen now includes a lightweight hidden fields preview for the generated search form. It shows the escaped hidden inputs produced by `table_preferences_hidden_fields(...)`, so you can confirm how saved filter and sort state will roundtrip through an existing GET search form without adding host-app search code to the demo.
 
 The same screen now includes a lightweight export payload preview. It shows the ordered `headers`, `column_keys`, and `export_keys` that the current saved table settings would pass into `rails_table_preference_export_payload(...)`, so you can confirm hidden-column exclusion, saved order, and `export_key` metadata without wiring a real CSV action first.
@@ -110,6 +112,8 @@ The generated screen also adds demo-only owner links near the top of the page:
 
 Use those links to save once as one owner, switch to another owner, and confirm presets do not leak between owner records without editing authentication code between requests.
 
+When you follow an owner link, the generated demo keeps only the demo scope context query parameter and drops search, filter, and sort query parameters. That makes each owner comparison start from the same baseline rows instead of carrying over a previous search or filter state.
+
 ## Optional scoped demo context
 
 To activate the generated role and organization preset examples, configure `scope_context_method` once and point it at the generated demo controller method:
@@ -128,6 +132,8 @@ After that one-time setup, the generated demo gives you four small links near th
 - `Organization preset lane`
 
 Use those links to move between the shared baseline, the representative role scope, and the representative organization scope without editing `ApplicationController` between requests.
+
+When you follow a scope context link, the generated demo keeps only the demo owner query parameter and drops search, filter, and sort query parameters. That makes role and organization default-resolution checks easier to compare from the same baseline rows.
 
 The generated screen also shows a lightweight `Current scope context` summary near the top. Use it to confirm whether the current request is still `owner-only` or already includes representative `roles` / `organization` keys before reading the preset selector.
 
@@ -206,7 +212,7 @@ On the demo screen, confirm:
 - [ ] `金額` exposes number filter operators with a number input, and saving `金額 >= 50000` narrows the rows to the larger sample amounts after reload.
 - [ ] Searching for `東京` narrows the list to multiple matching rows.
 - [ ] Header click cycles sort state.
-- [ ] Sorting by `納品日` or `金額` makes the row order visibly change.
+- [ ] Sorting by `納品日` or `金額` makes the row order visibly change; for `納品日`, the fixed `2024-01-15` sample baseline keeps the visible date evidence stable across runs.
 - [ ] Save persists settings.
 - [ ] Reload restores saved settings.
 - [ ] The search form hidden fields preview updates after reload to show saved filter/sort inputs separately from the export payload preview.
@@ -218,11 +224,13 @@ On the demo screen, confirm:
 - [ ] While `共有ビュー [shared]` is selected, delete stays disabled for the normal user-facing editor.
 - [ ] The `Current owner` summary matches the owner record that shared-preset fallback saves back into.
 - [ ] `Host app owner`, `Demo owner A`, and `Demo owner B` switch the owner context without editing application code.
+- [ ] Owner links reset search, filter, and sort query parameters while preserving the active scope context, so owner-to-owner comparisons return to the same baseline rows.
 - [ ] After switching owners, the `Current owner` summary follows the active owner link.
 - [ ] Saving under `Demo owner A`, then switching to `Demo owner B`, makes it easy to confirm those presets do not leak across owners.
 - [ ] Saving after selecting `共有ビュー [shared]` creates or updates an owner preset instead of overwriting the shared preset.
 - [ ] The `Demo state reset` section's `Reset demo verification state` button removes owner-scoped presets for the current owner and table, then reloads with `共有ビュー`, `担当ビュー`, and `東京組織ビュー` still available.
 - [ ] After enabling `scope_context_method = :table_preference_scope_context`, the `Host app context`, `Owner-only baseline`, `Role preset lane`, and `Organization preset lane` links switch the current scope without editing application code.
+- [ ] Scope context links reset search, filter, and sort query parameters while preserving the active demo owner, so scoped precedence checks return to the same baseline rows.
 - [ ] The `Current scope context` summary matches whichever scope link is active.
 - [ ] `Owner-only baseline` returns the summary to `owner-only` and makes it easy to compare the shared baseline again.
 - [ ] `Role preset lane` makes `担当ビュー [role:operations]` appear in the selector.
@@ -248,7 +256,7 @@ Use the generated `Demo state reset` section when previous save testing left own
 2. Click `Reset demo verification state` in the `Demo state reset` section.
 3. Wait for the success message and reload.
 4. Confirm owner-scoped presets for the current table are gone while `共有ビュー [shared]`, `担当ビュー [role:operations]`, and `東京組織ビュー [organization:tokyo-hq]` remain available when their scopes match.
-5. Use `Owner-only baseline`, `Role preset lane`, or `Organization preset lane` to repeat the scoped precedence checks without manually unchecking `標準設定にする` or deleting temporary owner presets one by one.
+5. Use `Owner-only baseline`, `Role preset lane`, or `Organization preset lane` to repeat the scoped precedence checks without manually unchecking `標準設定にする` or deleting temporary owner presets one by one. These scope links also drop search, filter, and sort query parameters so previous row narrowing does not hide the seeded baseline comparison.
 
 ## Reproduce one async failure quickly
 

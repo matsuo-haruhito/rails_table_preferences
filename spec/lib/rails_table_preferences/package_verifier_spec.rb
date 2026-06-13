@@ -190,6 +190,15 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     end
   end
 
+  describe "required packaged runtime files" do
+    it "keeps the legacy import task dependency in the package guard" do
+      expect(described_class::REQUIRED_PATHS).to include(
+        "lib/tasks/rails_table_preferences.rake",
+        "lib/rails_table_preferences/legacy_column_adjustment_importer.rb"
+      )
+    end
+  end
+
   describe "required packaged docs" do
     it "keeps the main README/docs index entrypoints in the package guard" do
       expected_docs = %w[

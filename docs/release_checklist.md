@@ -231,6 +231,8 @@ Check the main user paths:
 - [ ] README links directly to the primary start-here paths: Quick start, Japanese quick start, Production integration checklist, Install path options, Support matrix, Decision guide, Demo screen generator, and Troubleshooting.
 - [ ] README links to Product Profile, AGENTS.md, and CHANGELOG.md for maintainer orientation.
 - [ ] `docs/index.md` remains the detailed hub for focused guides that do not need a direct README link.
+- [ ] When a new focused guide is added, confirm it is reachable from `docs/index.md` or from the most relevant neighboring guide. Add a README link only when the guide becomes a primary start-here path, not just because the file exists.
+- [ ] For a new focused guide, confirm whether `docs/quick_start_ja.md` needs only a low-drift link or short summary update. Do not copy detailed English guide steps into the Japanese quick start unless the first-run Japanese orientation actually changed.
 - [ ] `docs/index.md` links to the current start-here guides, core topic guides, manual QA, release checklist, package verification, JavaScript entrypoints, mounted JSON API, controller integration, filter docs, and maintainer entry docs.
 - [ ] Focused docs that README mentions only through the docs index, such as Scoped presets, Fixed columns and column groups, Export integration, Accessibility baseline, Sandbox verification, Manual QA, Release checklist, Package verification, and JavaScript entrypoints, remain reachable from `docs/index.md`.
 - [ ] README, `CHANGELOG.md`, and `Product Profile.md` stay synchronized on initial release posture, support matrix, current scope, responsibility boundary, and docs entrypoints.
