@@ -6,9 +6,13 @@ This note covers small browser checks for the packaged `rails_table_preferences/
 
 The package entrypoint adds a lightweight column search field before the generated editor rows. It filters the rendered editor row list by column label, key, or group text. Hidden rows remain in the DOM so applying or saving settings does not drop columns that are temporarily filtered out of view.
 
+For grouped columns, scalar group text and hash-style group `key` / `label` values are included in the search text. Object group metadata should not appear as `[object Object]` in the searchable text, and visual group badges or headings remain a separate design choice.
+
+When a query has no matching rows, the no-results message is a polite status cue for the editor search surface. It announces that the current query hides every editor row, but it does not change the settings payload and it clears again when the query is removed or matches rows.
+
 Search is an editor navigation affordance, not a column visibility filter. A no-results search only means every editor row is temporarily hidden in the editor surface; applying, saving, or saving as new should still assemble settings from all editor rows. Clear the search before reviewing the visible row list, but do not treat the no-results state as a request to save a zero-column table.
 
-The Show all columns and Hide all columns bulk actions keep their all-row scope while a search is active. They toggle every editor row's visibility checkbox, including rows temporarily hidden by the search, and do not create a search-results-only visibility mode.
+The Show all columns and Hide all columns bulk actions keep their all-row scope while a search is active. They toggle every editor row's visibility checkbox, including rows temporarily hidden by the search, and do not create a search-results-only visibility mode. After either bulk action, the package entrypoint writes a short success message to the existing editor status region. The hide-all message intentionally treats the all-hidden state as allowed and points users back to Show all columns as the recovery path.
 
 Reset, preset load, and preset delete replace the editor state with another settings snapshot, so the package entrypoint clears the search query after those operations. Apply, save, and save as new keep the current query because they operate within the same editing context. Clearing the query restores all editor rows, hides the no-results message, and recalculates the row move buttons for the full visible list.
 
@@ -16,8 +20,12 @@ Use the bundled column search field when checking a table with many columns:
 
 - search by a visible column label and confirm only matching rows remain visible
 - search by a column key or group word when labels are similar
+- search by a hash group key and label, and confirm object group metadata is not exposed as `[object Object]`
+- enter a query with no matches and confirm the no-results message appears as the only search status cue, without dropping rows from apply/save settings
 - use Show all columns or Hide all columns while search is active and confirm hidden search rows are included in the bulk checkbox change
-- clear the search and confirm every editor row returns
+- use Hide all columns and confirm the status region announces that all columns are hidden and Show all columns is the recovery path
+- use Show all columns after a hide-all action and confirm the status region announces that all columns are visible again
+- clear the search and confirm every editor row returns and the no-results message is hidden
 - reset, preset load, or preset delete while a search is active and confirm the search field clears, every editor row returns, the no-results message is hidden, and row move buttons recalculate for the full list
 - apply, save, or save as new while a search is active and confirm the search query stays in place because the same editing context remains active
 - apply or save while a search is active and confirm columns hidden by the search are not removed from the saved settings
