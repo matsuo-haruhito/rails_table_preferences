@@ -604,13 +604,13 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   selectFilterOptionSearchHtml(options) {
-    if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
+    if (!Array.isArray(options) || options.length === 0 || options.length < this.selectFilterOptionSearchThreshold) return ""
 
     const searchLabel = this.selectFilterOptionSearchLabelValue || "候補を絞り込み"
     const searchPlaceholder = this.selectFilterOptionSearchPlaceholderValue || "候補を絞り込み"
     const label = `${this.filterValueLabelValue}: ${searchLabel}`
     const emptyLabel = "一致する候補はありません。選択済みの候補は表示したままです。"
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty role="status" aria-live="polite" aria-atomic="true" hidden>${this.escapeHtml(emptyLabel)}</p>`
   }
 
   installSelectFilterOptionSearch(panel) {

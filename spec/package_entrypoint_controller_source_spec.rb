@@ -34,6 +34,8 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("const label = this.selectFilterOptionLabel(option, value)")
     expect(controller_source).to include("${this.selectFilterOptionSearchHtml(filter.options)}<select data-field=\"values\" multiple>")
     expect(controller_source).to include("selectFilterOptionSearchThreshold: { type: Number, default: 8 }")
+    expect(controller_source).to include("if (!Array.isArray(options) || options.length === 0 || options.length < this.selectFilterOptionSearchThreshold) return \"\"")
+    expect(controller_source).to include('data-rails-table-preferences-option-search-empty role="status" aria-live="polite" aria-atomic="true" hidden')
     expect(controller_source).to include("const threshold = Number(this.selectFilterOptionSearchThresholdValue)")
     expect(controller_source).to include("if (!Number.isFinite(threshold)) return 8")
     expect(controller_source).to include("return Math.floor(threshold)")
