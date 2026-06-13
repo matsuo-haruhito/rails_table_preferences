@@ -576,11 +576,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const maxLeft = window.scrollX + window.innerWidth - panelWidth - viewportMargin
     const desiredLeft = window.scrollX + rect.left
     const left = panelWidth > 0 ? Math.max(minLeft, Math.min(desiredLeft, maxLeft)) : desiredLeft
+    const top = window.scrollY + rect.bottom + 4
+    const viewportBottom = window.scrollY + window.innerHeight - viewportMargin
+    const availableHeight = Math.max(120, viewportBottom - top)
 
     panel.style.position = "absolute"
-    panel.style.top = `${window.scrollY + rect.bottom + 4}px`
+    panel.style.top = `${top}px`
     panel.style.left = `${left}px`
     panel.style.maxWidth = `calc(100vw - ${viewportMargin * 2}px)`
+    panel.style.maxHeight = `${availableHeight}px`
+    panel.style.overflowY = "auto"
     panel.style.zIndex = "1000"
   }
 
