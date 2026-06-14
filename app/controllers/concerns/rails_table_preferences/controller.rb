@@ -46,8 +46,14 @@ module RailsTablePreferences
     # adapter: :controller_params returns a plain params hash suitable for existing
     #   search(params) / order_by(params[:sort]) style controllers.
     # adapter: :ransack returns Ransack-compatible params.
-    def rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort")
-      settings = rails_table_preference_settings(table_key: table_key, name: name, owner: owner, scope_context: scope_context)
+    def rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", fallback: {})
+      settings = rails_table_preference_settings(
+        table_key: table_key,
+        name: name,
+        owner: owner,
+        scope_context: scope_context,
+        fallback: fallback
+      )
       rails_table_preference_adapter_params(
         adapter: adapter,
         settings: settings,
