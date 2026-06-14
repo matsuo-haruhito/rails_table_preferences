@@ -16,6 +16,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
 - [ ] Switch to another owner or demo owner link and confirm saved presets do not leak between owners.
 - [ ] When the generated demo is the smoke surface, check the support sections that match the changed area: `Current owner`, `Current scope context`, `Demo state reset`, `Async failure check`, hidden fields preview, or export payload preview. Use [Demo screen generator](demo.md) as the detailed source of truth and record any sections intentionally handed off.
+- [ ] For hidden fields preview or export payload preview evidence, record whether the copy control succeeded. If the copy button is disabled or reports a copy failure, select the visible preview text manually and record that text as the evidence instead.
 - [ ] Open one filter panel or preset action with keyboard focus and confirm focus, labels, and status copy remain understandable.
 - [ ] Check one narrow desktop width and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable.
 
