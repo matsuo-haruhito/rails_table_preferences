@@ -48,7 +48,7 @@ The packaged controller entrypoint dispatches a small set of bubbling Stimulus e
 
 These lifecycle events are a package-entrypoint surface. Host applications that register the generated copied controller directly from `app/javascript/controllers/rails_table_preferences_controller.js` should not assume these events are present unless they port the same behavior into the copied or replacement controller. Use [Package-only controller boundary](javascript_entrypoints.md#package-only-controller-boundary) when deciding which registration path owns event listener QA.
 
-- `rails-table-preferences:applied` after editor settings are applied to the current table without saving, including reset-to-defaults actions
+- `rails-table-preferences:applied` after editor settings are applied to the current table without saving, or after the bundled clear-filters-and-sorts action clears filter/sort state
 - `rails-table-preferences:saved` after an existing preset save or save-as-new request succeeds
 - `rails-table-preferences:loaded` after a selected preset is loaded and applied
 - `rails-table-preferences:deleted` after an editable preset is deleted and the controller returns to the default preset
@@ -75,11 +75,13 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
-Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `reset`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
+Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `clear-filters-and-sorts`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
 
 The `rails-table-preferences:error` `action` values are stable operation labels for package-entrypoint diagnostics and UI sync. Current values are `load-presets` for initial preset-list loading, `load` for selected preset loading, `save` for updating an editable preset, `create` for save-as-new or owner fallback creation, `delete` for editable preset deletion, and fallback `operation` when an error is reported outside a named preference operation. When a future package-entrypoint operation adds another public error action, update this list and the source-level lifecycle event specs with that action.
 
-Apply and reset both use `rails-table-preferences:applied`; distinguish them through `event.detail.action` (`apply` vs `reset`). Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
+Save-as-new and update-save both use `rails-table-preferences:saved`; distinguish them through `event.detail.action` (`create` vs `save`). Success events are dispatched only after the corresponding operation succeeds. Failure paths keep using the existing status region and busy-state behavior, and they dispatch only `rails-table-preferences:error`.
+
+The bundled `clearFiltersAndSorts` action uses `rails-table-preferences:applied` with `event.detail.action === "clear-filters-and-sorts"` after it sets `settings.filters` to `{}` and `settings.sorts` to `[]`. It follows the existing busy guard and does not dispatch while busy. Button placement and action grouping remain outside this lifecycle surface; handle them through #560/#989 or host-owned UI work.
 
 Host apps can keep adoption code small by choosing one surrounding concern and reading only the existing detail fields. For example, an analytics integration can record successful preset saves without coupling to controller internals or changing the payload contract:
 
@@ -285,13 +287,19 @@ Avoid keys that change per request or per row, because saved presets, column ord
 
 ## Saved column metadata rule
 
-Current column definitions from the host application should remain authoritative for labels, filter metadata, and sortable metadata. Saved preference records may contain old column settings, so merge logic should preserve current definitions for:
+Current column definitions from the host application should remain authoritative for labels, filter metadata, sortable metadata, and column identity metadata. Saved preference records may contain old column settings, so merge logic should start from the current column definitions and then overlay user-owned state from saved settings. This keeps columns added after a preset was saved in the merged settings with their current default visibility, order, label, and metadata.
+
+Current definitions remain authoritative for:
 
 - `label`
 - `filter`
 - `sortable`
+- `overflow`
+- `pinned`
 
-Saved settings should only override user-owned state such as visibility, order, width, truncation, filters, and sorts.
+Saved settings should only override user-owned state such as visibility, order, width, truncation, filters, and sorts. If a host app wants a newly added column to start hidden for existing presets, set that default in the current column definition, for example `visible: false`, instead of treating saved presets as a migration target.
+
+Column rename or removal cleanup is a separate compatibility decision; do not use the normal merge path as a saved preference migration framework.
 
 ## Filter and sort behavior
 
@@ -317,6 +325,7 @@ Important invariants include:
 - filters and sorts are preserved by editor actions
 - filter operator label overrides fall back to bundled defaults
 - package-entrypoint lifecycle events expose stable event names and detail payloads without leaking raw `Error` objects
+- clear filters/sorts lifecycle actions report the neutral filter/sort snapshot and keep the busy guard silent
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
 - resize pointer move/up/cancel listeners are installed and cleaned up without falling back to mouse-only document listeners
