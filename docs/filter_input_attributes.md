@@ -4,6 +4,8 @@ Rails Table Preferences can render a few browser input attributes from neutral f
 
 This is a browser-affordance slice only. These values do not change saved filter settings, ControllerParams output, Ransack output, server-side validation, query execution, summaries, or authorization.
 
+Use this guide as a focused companion to [Filter metadata](filter_metadata.md) when a screen needs `number` or `date` input affordances beyond placeholder text. Keep it linked from the nearby filter metadata guidance instead of promoting it to a docs-index primary package entrance or `PackageVerifier::REQUIRED_PATHS` entry unless the release/package policy later decides it should become a required packaged doc.
+
 ## Supported metadata
 
 For bundled `number` and `date` filters, the package entrypoint controller passes these metadata keys through to generated value inputs:
