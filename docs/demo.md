@@ -110,6 +110,8 @@ The generated screen also adds demo-only owner links near the top of the page:
 - `Demo owner A`
 - `Demo owner B`
 
+The demo owner links are local verification helpers. The generated controller first reuses the active host-app owner and existing owner records when possible, but it may create sample owner records such as `Demo owner A` or `Demo owner B` in the configured owner model when it needs extra owners for isolation checks. Use this in a local sandbox or disposable verification database, not as a production preset-management surface.
+
 Use those links to save once as one owner, switch to another owner, and confirm presets do not leak between owner records without editing authentication code between requests.
 
 When you follow an owner link, the generated demo keeps only the demo scope context query parameter and drops search, filter, and sort query parameters. That makes each owner comparison start from the same baseline rows instead of carrying over a previous search or filter state.
