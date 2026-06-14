@@ -87,12 +87,26 @@ RSpec.describe "rails_table_preferences_controller.js" do
     expect(source).to include('target.closest("textarea")')
   end
 
-  it "supports column resize with a widened hit area" do
+  it "supports column resize with a widened pointer hit area" do
     expect(source).to include("resizeHandleWidth: { type: Number, default: 10 }")
     expect(source).to include("applyResizeHandleHitArea(cell, handle)")
     expect(source).to include("handle.style.width = `${this.normalizedResizeHandleWidth}px`")
+    expect(source).to include('handle.style.touchAction = "none"')
+    expect(source).to include('handle.addEventListener("pointerdown", this.startColumnResize.bind(this))')
     expect(source).to include("startColumnResize(event)")
     expect(source).to include("resizeColumn(event)")
+    expect(source).not_to include('handle.addEventListener("mousedown", this.startColumnResize.bind(this))')
+  end
+
+  it "cleans up pointer resize listeners on completion, cancel, and disconnect" do
+    expect(source).to include('document.addEventListener("pointermove", this.boundResizeColumn)')
+    expect(source).to include('document.addEventListener("pointerup", this.boundStopColumnResize)')
+    expect(source).to include('document.addEventListener("pointercancel", this.boundStopColumnResize)')
+    expect(source).to include('document.removeEventListener("pointermove", this.boundResizeColumn)')
+    expect(source).to include('document.removeEventListener("pointerup", this.boundStopColumnResize)')
+    expect(source).to include('document.removeEventListener("pointercancel", this.boundStopColumnResize)')
+    expect(source).not_to include('document.addEventListener("mousemove", this.boundResizeColumn)')
+    expect(source).not_to include('document.addEventListener("mouseup", this.boundStopColumnResize)')
   end
 
   it "prefers user-facing column labels for resize handle accessible names" do
@@ -257,7 +271,7 @@ RSpec.describe "rails_table_preferences_controller.js" do
   it "ignores bundled drag, filter, sort, and resize interactions while busy" do
     expect(source).to include("dragEditorRowStart(event) {\n    if (this.busy) {\n      event.preventDefault()\n      return\n    }")
     expect(source).to include("startTableColumnDrag(event) {\n    if (this.busy) {\n      event.preventDefault()\n      return\n    }")
-    expect(source).to include("startColumnResize(event) {\n    event.preventDefault()\n    event.stopPropagation()\n    if (this.busy) return")
+    expect(source).to include("startColumnResize(event) {\n    if (event.button !== undefined && event.button !== 0) return\n    event.preventDefault()\n    event.stopPropagation()\n    if (this.busy) return")
     expect(source).to include("if (this.busy || !this.resizingColumn) return")
     expect(source).to include("toggleFilterPanel(event, headerCell, column) {\n    if (this.busy) return")
     expect(source).to include("applyFilterPanel(key, panel) {\n    if (this.busy) return")

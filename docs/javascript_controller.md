@@ -40,6 +40,8 @@ The controller keeps these separate through `shouldIgnoreHeaderAction(target)`. 
 
 The sort handler also ignores active drag and resize operations.
 
+Column resizing uses Pointer Events for the right-edge handle (`pointerdown`, `pointermove`, `pointerup`, and `pointercancel`) so mouse, touch, and pen input share the same width update path. The handle sets `touch-action: none` on its hit area to keep touch resizing from turning into page scroll or header drag, while double-click auto-fit stays on the separate `dblclick` path.
+
 ## Host app lifecycle events
 
 The packaged controller entrypoint dispatches a small set of bubbling Stimulus events from the controller root after user-facing preference operations finish:
@@ -326,5 +328,6 @@ Important invariants include:
 - clear filters/sorts lifecycle actions report the neutral filter/sort snapshot and keep the busy guard silent
 - header controls do not accidentally trigger sort or drag
 - sortable behavior is limited to `sortable: true` columns
+- resize pointer move/up/cancel listeners are installed and cleaned up without falling back to mouse-only document listeners
 - document listeners and detached filter panels are cleaned up
 - `rails_table_preferences/controller` continues to export the bundled controller for Vite and other JS bundlers
