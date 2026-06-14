@@ -101,10 +101,10 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   resetEditor(event) {
     const wasBusy = this.busy
     const result = super.resetEditor(event)
+    if (!wasBusy) this.markEditorClean()
     if (!wasBusy) {
       this.clearEditorSearchQuery()
       this.setStatus(this.resetStatusLabelValue, "success")
-      this.markEditorClean()
       this.syncResetButtonState()
       this.dispatchPreferenceEvent("applied", { action: "reset" })
     } else {
@@ -523,7 +523,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   get resetEditorButton() {
-    return this.element?.querySelector("[data-action~='rails-table-preferences#resetEditor']")
+    if (typeof this.element?.querySelector !== "function") return null
+    return this.element.querySelector("[data-action~='rails-table-preferences#resetEditor']")
   }
 
   async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
