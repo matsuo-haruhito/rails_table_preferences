@@ -10,8 +10,8 @@ When the host app uses the bundled table helper, the default values are enough f
 | --- | ---: | --- |
 | `data-rails-table-preferences-resize-handle-width-value` | `10` | Width in pixels for the generated right-edge resize hit area. Increase it if users struggle to grab the handle in dense headers. |
 | `data-rails-table-preferences-resize-auto-fit-padding-value` | `24` | Extra pixels added around measured content when double-click auto-fit calculates a column width. |
-| `data-rails-table-preferences-resize-auto-fit-min-width-value` | `40` | Lower bound for the auto-fit result. |
-| `data-rails-table-preferences-resize-auto-fit-max-width-value` | `640` | Upper bound for the auto-fit result. |
+| `data-rails-table-preferences-resize-auto-fit-min-width-value` | `40` | Lower bound for the auto-fit result when the column does not define `min_width`. |
+| `data-rails-table-preferences-resize-auto-fit-max-width-value` | `640` | Upper bound for the auto-fit result when the column does not define `max_width`. |
 
 Example manual override:
 
@@ -48,6 +48,23 @@ For manual table screens, the host app still owns structural table markup such a
 
 After the controller connects, saved widths, editor changes, resize drag, and auto-fit continue to use the normal Rails Table Preferences settings path. Treat host-owned `<colgroup>` or CSS widths as initial layout hints, not as a replacement for saved width settings.
 
+## Column width boundaries
+
+Columns can define positive integer `min_width` and `max_width` metadata when one column needs a different width boundary from the table-wide auto-fit defaults.
+
+```ruby
+column :memo, label: "Memo", min_width: 120, max_width: 480
+```
+
+Column-specific boundaries are authoritative for that column:
+
+- drag resizing clamps to the column boundary, falling back to a `40px` lower bound only when the column does not define `min_width`
+- double-click auto-fit clamps to `min_width` / `max_width` when present, and otherwise falls back to the root auto-fit min/max values
+- editor width input values are normalized through the same column boundary before settings are applied or saved
+- previously saved widths that exceed the column boundary are rendered and pinned-offset-calculated with the clamped width
+
+Only positive integers are emitted as column width boundary metadata. Blank, zero, negative, or non-numeric values are omitted.
+
 ## Manual QA focus
 
 Use the [Manual QA checklist](manual_qa.md) as the release and host-app sign-off source. For resize changes, pay particular attention to these existing checks:
@@ -58,4 +75,4 @@ Use the [Manual QA checklist](manual_qa.md) as the release and host-app sign-off
 - confirm hover and keyboard focus affordances do not shift header text, filter buttons, or sort indicators
 - check narrow desktop widths, long labels, long values, horizontal scroll, and fixed/pinned columns
 
-If the host app uses custom table CSS or scroll containers, record the chosen root values and any host-owned initial width markup in host-app documentation so future UI changes can keep the same assumptions.
+If the host app uses custom table CSS or scroll containers, record the chosen root values, any column-specific boundaries, and any host-owned initial width markup in host-app documentation so future UI changes can keep the same assumptions.
