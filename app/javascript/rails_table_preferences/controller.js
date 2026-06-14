@@ -12,6 +12,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
+    visibilityBulkHiddenStatusLabel: { type: String, default: "すべての列を非表示にしました。全列表示で戻せます。" },
+    visibilityBulkShownStatusLabel: { type: String, default: "すべての列を表示しました。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
@@ -49,6 +51,22 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const text = String(value ?? "").trim()
     if (!text) return ""
     return ` placeholder="${this.escapeHtml(text)}"`
+  }
+
+  filterInputAffordanceAttributes(filter, placeholder) {
+    const attributes = [this.filterPlaceholderAttribute(placeholder)]
+    if (["number", "date"].includes(this.filterInputType(filter))) {
+      attributes.push(this.filterInputAttribute("min", filter.min))
+      attributes.push(this.filterInputAttribute("max", filter.max))
+      attributes.push(this.filterInputAttribute("step", filter.step))
+    }
+    return attributes.join("")
+  }
+
+  filterInputAttribute(name, value) {
+    const text = String(value ?? "").trim()
+    if (!text) return ""
+    return ` ${name}="${this.escapeHtml(text)}"`
   }
 
   connect() {
@@ -137,7 +155,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const visibleInput = row.querySelector('[data-field="visible"]')
       if (visibleInput) visibleInput.checked = visible === true
     })
-    this.clearSuccessfulStatus()
+    this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, "success")
   }
 
   buildEditorMoveControls() {
@@ -618,6 +636,22 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
+    if (["text", "number", "date"].includes(this.filterInputType(filter))) {
+      if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
+      if (selectedOperator === "between") {
+        const inputType = this.filterInputType(filter)
+        const fromAttributes = this.filterInputAffordanceAttributes(filter, filter.from_placeholder)
+        const toAttributes = this.filterInputAffordanceAttributes(filter, filter.to_placeholder)
+        return `
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromAttributes}></label>
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toAttributes}></label>
+        `
+      }
+
+      const attributes = this.filterInputAffordanceAttributes(filter, filter.placeholder)
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
+    }
+
     return super.filterValueHtml(filter, condition, selectedOperator)
   }
 
@@ -645,16 +679,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   filterSelectOptionsBySearch(input, select, emptyMessage = null) {
     const query = String(input?.value || "").trim().toLocaleLowerCase()
-    let matchingUnselectedOptions = 0
+    let matchingOptions = 0
 
     Array.from(select?.options || []).forEach((option) => {
       const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
       const matchesQuery = searchableText.includes(query)
-      if (matchesQuery && !option.selected) matchingUnselectedOptions += 1
+      if (matchesQuery) matchingOptions += 1
       option.hidden = Boolean(query) && !option.selected && !matchesQuery
     })
 
-    if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0
+    if (emptyMessage) emptyMessage.hidden = !query || matchingOptions > 0
   }
 
   selectFilterOptionValue(option) {
