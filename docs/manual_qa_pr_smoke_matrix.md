@@ -6,16 +6,29 @@ Use this matrix when a PR is too small for the full manual QA checklist but stil
 
 1. Choose the closest PR category below.
 2. Run the focused smoke items for that category.
-3. Record the selected category, what was checked, what was skipped, the evidence used, and any browser-capable handoff in the PR body or a PR comment.
+3. Record the selected category, what was checked, what was skipped, the evidence used, the evidence status, and any browser-capable handoff in the PR body or a PR comment.
 4. Escalate to the full `manual_qa.md` checklist when the PR touches multiple categories, changes runtime UI behavior, changes public helper contracts, or reveals visual/accessibility concerns.
 
 When browser capture is not available, use the strongest available substitute: focused system spec, DOM assertion, static visual reference check, source-level invariant, or a clear `needs-human` handoff. Record the substitute and the browser-capable check that remains in the PR template or comment. Do not describe source inspection as visual evidence when the acceptance criteria require rendered UI proof.
+
+## Browser-capable evidence note
+
+Use this note when a PR body or review comment says a browser-capable reviewer must confirm the final rendered behavior. The goal is a short, repeatable handoff, not a screenshot requirement for every PR.
+
+Record these four items whenever rendered evidence matters:
+
+- `Evidence status`: `checked`, `substituted`, `handed off`, or `not applicable`.
+- `Environment or state`: browser, viewport, input mode, forced-colors/high-contrast mode, or screen/workflow that matters.
+- `Evidence used`: screenshot, browser notes, focused system spec, DOM/static assertion, source-level invariant, or source inspection.
+- `Remaining browser-capable check`: the exact state a human should still verify, or `none` when the rendered check was completed.
+
+Keep evidence proportional to the change. Pointer/touch changes should name the pointer mode and action tried. Narrow viewport or filter panel reachability should name the viewport height/width and the action that remained reachable. Forced-colors or high-contrast claims should name the mode and representative controls checked. Live region changes should record whether a real screen reader/browser announcement was checked, or explicitly leave that announcement behavior for human review. CI success, source-level specs, and DOM/static assertions can support a claim, but they do not replace rendered browser evidence for contrast, overlap, focus visibility, scroll reachability, or announcement timing.
 
 ## PR category matrix
 
 | PR category | Focused smoke | Evidence to record | Escalate when |
 | --- | --- | --- | --- |
-| Docs-only | Confirm links, commands, option names, and issue/PR references match current source. When README, docs index, English quick start, or focused guide entrypoints change, compare `docs/quick_start_ja.md` links and short summaries for low-drift alignment without requiring a full translation. No browser smoke is required unless the doc claims a rendered state. | Docs paths checked, source-of-truth files consulted, and any intentionally skipped browser checks. For Japanese quick start drift checks, record which README/docs index/focused English docs entrypoints were compared and whether only links/short summaries changed. | The doc changes visible UI promises, public API guarantees, release sign-off wording, or asks for a full bilingual docs rewrite instead of a low-drift entrypoint check. |
+| Docs-only | Confirm links, commands, option names, and issue/PR references match current source. When a PR adds a new focused guide, record whether it should be discoverable from `docs/index.md`, a neighboring guide only, README, or quick start. README should stay a short newcomer-facing map, while `docs/index.md` remains the full catalog for focused guides. Compare `docs/quick_start_ja.md` links and short summaries only when the new guide changes first-run Japanese orientation; do not require a full translation. No browser smoke is required unless the doc claims a rendered state. | Docs paths checked, source-of-truth files consulted, entrypoint decision for any new focused guide, and any intentionally skipped browser checks. For Japanese quick start drift checks, record which README/docs index/focused English docs entrypoints were compared and whether only links/short summaries changed. | The doc changes visible UI promises, public API guarantees, release sign-off wording, asks for a full bilingual docs rewrite instead of a low-drift entrypoint check, or requires a package-verifier required-path decision that docs-only review cannot settle. |
 | Static visual docs or docs image | Confirm the changed SVG, screenshot, or docs image still matches the surrounding caption and source-of-truth docs. If the visual file changed, render or open the artifact when available; otherwise record source inspection and leave browser-capable review for the rendered view. | Changed visual/doc paths, source-of-truth docs consulted, whether rendered visual confirmation or source-only inspection was used, and any browser-capable handoff. | The PR claims production UI behavior, changes a runtime surface, requires screenshot approval, or the rendered visual cannot be checked despite acceptance criteria requiring it. |
 | Turbo Drive or Turbo Frame reconnect | After Turbo navigation or frame replacement, confirm the editor and matching table still point at the same logical screen: `data-controller="rails-table-preferences"`, the same table key, current settings and columns values, collection/member URL values, and matching managed header/cell column keys. Prefer replacing the editor and table together, or passing the same settings and columns to both pieces. | Screen or frame checked, whether the editor/table were replaced together, DOM/root values or rendered source snippets confirmed, and links to the [Turbo checks](javascript_entrypoints.md#turbo-drive-and-turbo-frame-checks) and [table data attribute boundary](table_data_attributes.md) when frame data is involved. | The PR needs host-app Turbo routing, Turbo Stream response, or query execution changes; the editor and table render from different responses; or the reconnected DOM is incomplete or inconsistent. |
 | Helper-free table or manual controller root | For host-owned table markup that bypasses `table_preferences_table_tag(...)`, inspect the rendered controller root and table. Confirm `table_key`, `name` when an editor or preset select is present, `columns`, `settings`, collection/member URL values, and managed header/cell column keys all describe the same logical table screen. | Rendered DOM snippet, source-level assertion, or browser notes showing the manual root values, editor/preset partial used if any, collection/member URL values, and representative managed column keys. Note whether the same values are passed into separate table and editor partials. | The PR adds a helper API, changes generated table markup, introduces custom partial contracts, changes Turbo split-render behavior, or cannot show that the editor and table share one root-value contract. |
@@ -50,9 +63,11 @@ Use this section when the PR is blocked by review state rather than by another b
 
 - PR category:
 - Review state or handoff reason:
+- Evidence status: checked / substituted / handed off / not applicable
 - Screen or artifact checked:
 - Viewports or states checked:
-- Evidence:
+- Evidence used:
+- Remaining browser-capable check:
 - Skipped full-checklist areas and reason:
 - Follow-up needed:
 ```

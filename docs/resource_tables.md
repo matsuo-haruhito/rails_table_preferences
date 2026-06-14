@@ -51,11 +51,30 @@ If the same management page also includes a search form, pagination, a create fo
 <%= resource_table_for @orders, include_id: true %>
 ```
 
+### Date, datetime, and time inference
+
+Active Record column inference intentionally uses a conservative browser-control baseline. Attribute types `:date`, `:datetime`, and `:time` all become `filter: { type: "date" }` when they are inferred from `resource_table_for` or `tree_resource_table_for`.
+
+Use this default when the convention-first table should expose a simple date filter and leave datetime or time interpretation to the surrounding host-app search code. When a screen needs the package entrypoint's native `datetime-local` or `time` input, override the inferred metadata in a profile instead of expecting the adapter to choose that finer input automatically:
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  filter :shipped_at, type: "datetime", from_param: :from_shipped_at, to_param: :to_shipped_at
+  filter :dispatch_time, type: "time", param: :dispatch_time
+end
+```
+
+Manual metadata can still use `date`, `datetime`, `datetime-local`, or `time` filter types. The inference default only decides the starting point for Active Record-backed resource tables; it does not change saved filter settings, adapter params, timezone conversion, validation, or query execution. See [Filter metadata](filter_metadata.md) for the browser input and host-app responsibility boundary.
+
 ### Association columns
 
 By default, `resource_table_for` also infers `belongs_to` associations whose foreign key is present on the model. For example, an `Order` with `belongs_to :customer` and a `customer_id` attribute can receive an inferred `customer` column in addition to the attribute columns.
 
 The association column reads through the association reader. Without a profile formatter, that means Rails Table Preferences passes the associated object through the default value fallback rather than deciding how a customer should be labeled, linked, redacted, or preloaded.
+
+If the first-run table shows an object-like value for an association column, such as a raw `#<Customer ...>` string or a model `to_s` that is not useful for the screen, treat that as a profile responsibility rather than as missing automatic label inference. Add a `display` formatter for the association key and keep business-facing labels, links, badges, and redaction in the host app.
 
 Use profile overrides when the screen needs a human-facing association value:
 
@@ -73,6 +92,20 @@ class OrdersTableProfile < RailsTablePreferences::TableProfile
   end
 end
 ```
+
+For a plain text label, the formatter can stay smaller while still making the boundary explicit:
+
+```ruby
+class OrdersTableProfile < RailsTablePreferences::TableProfile
+  model Order
+
+  display :customer do |order|
+    order.customer&.name
+  end
+end
+```
+
+Rails Table Preferences does not look for `name`, `title`, `code`, or `to_s` as association label conventions. Those choices are business-specific, so keeping them in `display :customer` makes the first-run table easy to improve without changing attribute columns, manual columns, or the default value fallback.
 
 Choose the column key by the behavior the host app wants:
 
@@ -110,7 +143,7 @@ The default resource table partials pass basic table HTML options through to `ta
 
 ### Horizontal scroll wrapper
 
-`resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
+`resource_table_for` and `tree_resource_table_for` can render a small opt-in wrapper around only the table when a convention-first screen needs a basic horizontal overflow container:
 
 ```erb
 <%= resource_table_for(
@@ -125,11 +158,19 @@ The default resource table partials pass basic table HTML options through to `ta
 ) %>
 ```
 
-`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>`. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
+```erb
+<%= tree_resource_table_for(
+  @projects,
+  parent_id_method: :parent_project_id,
+  scroll_wrapper: true,
+  wrapper_options: { class: "projects-tree-scroll" },
+  class: "projects-tree-table"
+) %>
+```
 
-Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
+`scroll_wrapper:` defaults to `false`, so existing markup stays unchanged until the screen asks for the wrapper. Table HTML options such as `id`, `class`, `data`, and `aria` still belong to the `<table>` for both flat and tree resource tables. `wrapper_options:` belongs only to the surrounding `<div>` and its class is appended to the default `rails-table-preferences-resource-table-scroll` class.
 
-`tree_resource_table_for` does not receive this option yet. If a tree table needs a wrapper, keep it in host markup or a custom partial until the tree path is planned separately.
+Use this option for simple `overflow-x: auto` containers or design-system hooks around the flat or tree resource table. More involved sticky columns, scroll shadows, multiple scroll containers, grouped headers, and host-app visual polish remain the host application's responsibility. The generated demo's `.rails-table-preferences-demo-scroll` wrapper is demo-specific; this helper option is the resource table entrypoint for application screens.
 
 ### Captions
 

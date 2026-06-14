@@ -22,7 +22,7 @@
 <% show_all_hint = t("rails_table_preferences.editor.show_all_columns_hint", default: "列の並び、幅、絞り込み、並び替えは維持したまま、非表示の列だけを再表示します。保存は別操作です。") %>
 <% maintenance_hint = t("rails_table_preferences.editor.maintenance_hint", default: "削除とリセットは保存済み設定や現在の編集内容に強く影響する操作です。内容を確認してから実行してください。") %>
 <% visibility_bulk_hint = t("rails_table_preferences.editor.visibility_bulk_hint", default: "全列表示と全列非表示は、各列の表示チェックボックスをまとめて切り替えます。反映するには適用または保存を実行してください。グループ単位の切り替えはこの操作では行いません。") %>
-<% preset_select_hint = t("rails_table_preferences.editor.preset_select_hint", default: "読み込む保存済み設定を選びます。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。") %>
+<% preset_select_hint = t("rails_table_preferences.editor.preset_select_hint", default: "読み込む保存済み設定を選びます。初回など保存済み設定がまだない場合は現在の設定名だけを表示しますが、保存済み設定が存在するという意味ではありません。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。") %>
 <% preset_name_hint = t("rails_table_preferences.editor.preset_name_hint", default: "保存または別名保存で使う設定名を入力します。") %>
 <% default_preset_hint = t("rails_table_preferences.editor.default_preset_hint", default: "保存または別名保存すると、この設定を標準設定として登録します。") %>
 <% read_only_preset_hint = t("rails_table_preferences.editor.read_only_preset_hint", default: "選択中の保存済み設定は直接上書きできません。設定名とスコープは保存済み設定リストで確認できます。保存すると個人用設定として作成または更新されます。") %>
@@ -43,6 +43,7 @@
      aria-labelledby="<%= editor_title_id %>"
      data-controller="rails-table-preferences"
      data-rails-table-preferences-table-key-value="<%= table_key %>"
+     data-rails-table-preferences-editor-id-prefix-value="<%= editor_id_prefix %>"
      data-rails-table-preferences-name-value="<%= name %>"
      data-rails-table-preferences-url-value="<%= preference_url %>"
      data-rails-table-preferences-collection-url-value="<%= collection_url %>"
@@ -65,6 +66,8 @@
      data-rails-table-preferences-filter-operator-label-value="<%= t("rails_table_preferences.editor.filter_operator", default: "条件") %>"
      data-rails-table-preferences-filter-operator-labels-value="<%= filter_operator_labels.to_json %>"
      data-rails-table-preferences-filter-value-label-value="<%= t("rails_table_preferences.editor.filter_value", default: "値") %>"
+     data-rails-table-preferences-select-filter-option-search-label-value="<%= t("rails_table_preferences.editor.select_filter_option_search_label", default: "候補を絞り込み") %>"
+     data-rails-table-preferences-select-filter-option-search-placeholder-value="<%= t("rails_table_preferences.editor.select_filter_option_search_placeholder", default: "候補を絞り込み") %>"
      data-rails-table-preferences-filter-from-label-value="<%= t("rails_table_preferences.editor.filter_from", default: "開始") %>"
      data-rails-table-preferences-filter-to-label-value="<%= t("rails_table_preferences.editor.filter_to", default: "終了") %>"
      data-rails-table-preferences-sort-asc-label-value="<%= t("rails_table_preferences.editor.sort_asc", default: "昇順") %>"
@@ -89,6 +92,7 @@
      data-rails-table-preferences-deleted-status-label-value="<%= t("rails_table_preferences.editor.deleted_status", default: "設定を削除しました。") %>"
      data-rails-table-preferences-deleting-failed-status-label-value="<%= t("rails_table_preferences.editor.deleting_failed_status", default: "設定の削除を完了できませんでした。") %>"
      data-rails-table-preferences-operation-failed-status-label-value="<%= t("rails_table_preferences.editor.operation_failed_status", default: "設定の操作を完了できませんでした。") %>"
+     data-rails-table-preferences-reset-status-label-value="<%= t("rails_table_preferences.editor.reset_status", default: "テーブル初期設定に戻しました。") %>"
      class="rails-table-preferences-editor">
   <h2 id="<%= editor_title_id %>" class="rails-table-preferences-editor__title"><%= title %></h2>
 

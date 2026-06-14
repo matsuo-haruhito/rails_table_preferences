@@ -5,7 +5,7 @@ ja:
       all_columns_hidden: すべての列が非表示です
     editor:
       preset_select: 保存済み設定
-      preset_select_hint: 読み込む保存済み設定を選びます。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。
+      preset_select_hint: 読み込む保存済み設定を選びます。初回など保存済み設定がまだない場合は現在の設定名だけを表示しますが、保存済み設定が存在するという意味ではありません。一覧の読み込みに失敗した場合は現在の設定名だけが残るため、通信状態を確認してページを再読み込みしてください。
       preset: 設定名
       preset_name_hint: 保存または別名保存で使う設定名を入力します。
       default_preset: 標準設定にする
@@ -47,6 +47,7 @@ ja:
       deleted_status: 設定を削除しました。
       deleting_failed_status: 設定の削除を完了できませんでした。
       operation_failed_status: 設定の操作を完了できませんでした。
+      reset_status: テーブル初期設定に戻しました。
       reset: テーブル初期設定に戻す
       reset_hint: 保存前の表示設定の変更を破棄し、読み込んだ保存済み設定ではなくテーブルの初期表示設定に戻します。
       reset_visible_hint: テーブル初期設定に戻すと、保存前の変更は破棄されます。読み込んだ保存済み設定へ戻す操作ではありません。
@@ -82,6 +83,8 @@ ja:
         "true": はい
         "false": いいえ
       filter_value: 値
+      select_filter_option_search_label: 候補を絞り込み
+      select_filter_option_search_placeholder: 候補を絞り込み
       filter_from: 開始
       filter_to: 終了
       filter_clear: クリア

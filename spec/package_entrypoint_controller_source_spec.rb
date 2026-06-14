@@ -34,9 +34,19 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("const label = this.selectFilterOptionLabel(option, value)")
     expect(controller_source).to include("${this.selectFilterOptionSearchHtml(filter.options)}<select data-field=\"values\" multiple>")
     expect(controller_source).to include("selectFilterOptionSearchThreshold: { type: Number, default: 8 }")
+    expect(controller_source).to include("if (!Array.isArray(options) || options.length === 0 || options.length < this.selectFilterOptionSearchThreshold) return \"\"")
+    expect(controller_source).to include('data-rails-table-preferences-option-search-empty role="status" aria-live="polite" aria-atomic="true" hidden')
     expect(controller_source).to include("const threshold = Number(this.selectFilterOptionSearchThresholdValue)")
     expect(controller_source).to include("if (!Number.isFinite(threshold)) return 8")
     expect(controller_source).to include("return Math.floor(threshold)")
+  end
+
+  it "keeps select option search empty state tied to all matching options" do
+    expect(controller_source).to include("let matchingOptions = 0")
+    expect(controller_source).to include("if (matchesQuery) matchingOptions += 1")
+    expect(controller_source).to include("option.hidden = Boolean(query) && !option.selected && !matchesQuery")
+    expect(controller_source).to include("emptyMessage.hidden = !query || matchingOptions > 0")
+    expect(controller_source).not_to include("matchingUnselectedOptions")
   end
 
   it "keeps visibility bulk actions scoped to all editor rows" do
@@ -46,6 +56,15 @@ RSpec.describe "package entrypoint controller source" do
     expect(bulk_visibility_body).to include("this.editorRows.forEach((row) => {")
     expect(bulk_visibility_body).not_to include("this.editorRowsForMovement")
     expect(bulk_visibility_body).not_to include("!row.hidden")
+  end
+
+  it "keeps visibility bulk actions on the existing status feedback surface" do
+    bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.[](:body)
+
+    expect(bulk_visibility_body).not_to be_nil
+    expect(controller_source).to include("visibilityBulkHiddenStatusLabel: { type: String")
+    expect(controller_source).to include("visibilityBulkShownStatusLabel: { type: String")
+    expect(bulk_visibility_body).to include("this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, \"success\")")
   end
 
   it "keeps reset as a packaged success lifecycle action" do
@@ -63,11 +82,35 @@ RSpec.describe "package entrypoint controller source" do
     expect(base_controller_source).not_to include("syncEditorSearchResults")
   end
 
+  it "keeps editor search group metadata explicit and avoids object string leakage" do
+    expect(controller_source).to include("row.dataset.railsTablePreferencesEditorSearchText = this.editorSearchTextForColumn(column)")
+    expect(controller_source).to include("editorSearchTextForColumn(column) {")
+    expect(controller_source).to include("...this.editorSearchGroupTokens(column.group)")
+    expect(controller_source).to include("editorSearchGroupTokens(group) {")
+    expect(controller_source).to include("if (typeof group === \"object\") return [group.key, group.label].filter(Boolean)")
+    expect(controller_source).not_to include("[column.label, column.key, column.group].filter(Boolean).join")
+  end
+
+  it "keeps editor search no-results as a polite status cue" do
+    expect(controller_source).to include('empty.setAttribute("role", "status")')
+    expect(controller_source).to include('empty.setAttribute("aria-live", "polite")')
+    expect(controller_source).to include('empty.setAttribute("aria-atomic", "true")')
+    expect(controller_source).to include("empty.hidden = true")
+  end
+
   it "keeps hidden editor rows in apply/save settings while moves use visible rows" do
     expect(base_controller_source).to include("const columns = this.editorRows.map((row, index) => {")
     expect(controller_source).to include("const visibleRows = this.editorRows.filter((row) => !row.hidden)")
     expect(controller_source).to include("return visibleRows.length > 0 ? visibleRows : this.editorRows")
     expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : index === rows.length - 1)")
+  end
+
+  it "keeps saved presets merged on top of current column definitions" do
+    expect(base_controller_source).to include("columns: this.columnsValue.map((column, index) => ({ key: column.key, label: column.label || column.key, visible: column.visible !== false, order: column.order ?? (index + 1) * 10, width: column.width, truncate: column.truncate, overflow: column.overflow, pinned: column.pinned === true, filter: column.filter, sortable: column.sortable }))")
+    expect(base_controller_source).to include("const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))")
+    expect(base_controller_source).to include("const columns = defaultSettings.columns.map((defaultColumn, index) => {")
+    expect(base_controller_source).to include("const savedColumn = savedColumns.get(defaultColumn.key) || {}")
+    expect(base_controller_source).to include("return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, overflow: defaultColumn.overflow, pinned: defaultColumn.pinned, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }")
   end
 
   it "keeps the package editor drag handle visual-only while real reorder controls stay keyboard reachable" do
@@ -78,5 +121,16 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("handle.replaceWith(visualHandle)")
     expect(controller_source).to include("this.buildEditorMoveControls()")
     expect(base_controller_source).to include('<button type="button" class="rails-table-preferences-editor__drag-handle"')
+  end
+
+  it "keeps the status-state hook scoped to packaged status feedback" do
+    expect(controller_source).to include('this.statusState = "idle"')
+    expect(controller_source).to include('target.setAttribute("data-rails-table-preferences-status-state", state || "idle")')
+    expect(controller_source).to include('if (busyLabel) this.setStatus(busyLabel, "busy")')
+    expect(controller_source).to include('if (successLabel) this.setStatus(successLabel, "success")')
+    expect(controller_source).to include('if (this.statusState === "success") this.setStatus("")')
+    expect(controller_source).to include('this.statusState = "error"')
+    expect(controller_source).to include('this.syncStatusStateHook("error")')
+    expect(base_controller_source).not_to include("data-rails-table-preferences-status-state")
   end
 end

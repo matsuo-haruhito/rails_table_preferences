@@ -5,7 +5,7 @@ en:
       all_columns_hidden: All columns are hidden
     editor:
       preset_select: Saved presets
-      preset_select_hint: Choose which saved settings to load. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
+      preset_select_hint: Choose which saved settings to load. On first run, or when no saved presets exist yet, the selector shows only the current preset name; that does not mean a saved preset already exists. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
       preset: Preset
       preset_name_hint: Enter the preset name used when saving or saving as new.
       default_preset: Use as default
@@ -47,6 +47,7 @@ en:
       deleted_status: Saved settings deleted.
       deleting_failed_status: Could not finish deleting the saved preset.
       operation_failed_status: Could not complete the table preference action.
+      reset_status: Table defaults restored.
       reset: Reset to table defaults
       reset_hint: Discard unsaved display changes and return to the table's default column settings, not the loaded preset.
       reset_visible_hint: Resetting returns to the table defaults and discards unsaved changes. It does not roll back to the loaded preset.
@@ -82,6 +83,8 @@ en:
         "true": Yes
         "false": No
       filter_value: Value
+      select_filter_option_search_label: Filter options
+      select_filter_option_search_placeholder: Filter options
       filter_from: From
       filter_to: To
       filter_clear: Clear

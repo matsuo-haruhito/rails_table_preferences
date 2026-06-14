@@ -19,13 +19,17 @@ module RailsTablePreferences
       }
     end
 
-    def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], **options, &block)
+    def table_preferences_table_tag(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], caption: nil, **options, &block)
       options[:data] = table_preferences_merge_data_attributes(
         options[:data],
         table_preferences_data_attributes(table_key: table_key, name: name, settings: settings, columns: columns, ignored_columns: ignored_columns)
       )
 
-      tag.table(**options, &block)
+      table_contents = []
+      table_contents << tag.caption(caption) if caption.present?
+      table_contents << capture(&block) if block
+
+      tag.table(safe_join(table_contents), **options)
     end
 
     def table_preferences_editor(table_key:, name: "default", settings: nil, columns: [], ignored_columns: [], title: nil, partial: nil, editor_instance_key: nil)
@@ -174,7 +178,7 @@ module RailsTablePreferences
       "#{mount_path}/preferences/#{encoded_table_key}"
     end
 
-    def table_preferences_column(key, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil)
+    def table_preferences_column(key, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil, draggable: nil)
       ColumnDefinition.new(
         key: key,
         export_key: export_key,
@@ -195,7 +199,8 @@ module RailsTablePreferences
         ignore: ignore,
         filter: filter,
         sortable: sortable,
-        sort_param: sort_param
+        sort_param: sort_param,
+        draggable: draggable
       ).to_h
     end
 

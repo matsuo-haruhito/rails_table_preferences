@@ -124,6 +124,8 @@ The package root also exposes a named export:
 import { RailsTablePreferencesController } from "rails_table_preferences"
 ```
 
+The packaged `package.json` behind those import specifiers is Ruby gem resolver metadata. Its `private: true` and `version: "0.0.0"` values do not mean Rails Table Preferences is published as a separate npm package or that JavaScript semver tracks the Ruby gem version; see [JavaScript entrypoints](docs/javascript_entrypoints.md#package-metadata-boundary) and [Package verification](docs/package_verification.md#package-export-targets) for that boundary.
+
 When using Vite or another JS bundler, make sure the host app can resolve the gem's packaged `app/javascript/rails_table_preferences/*` files. A minimal Vite alias looks like this:
 
 ```ts
@@ -141,7 +143,7 @@ function gemJavaScriptPath(name: string, entrypoint: string) {
 resolve: {
   alias: [
     { find: /^rails_table_preferences$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/index.js") },
-    { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/controller.js") }
+    { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/preset_select_recovery.js") }
   ]
 }
 ```
@@ -297,6 +299,7 @@ Use the [Release checklist](docs/release_checklist.md) as the detailed release-r
 - Inspect package contents with [Package verification](docs/package_verification.md)
 - Move `CHANGELOG.md` entries from `[Unreleased]` to `0.1.0` when tagging
 - Review README/docs consistency against the released behavior
+- Cross-check open pull requests, proposal issues, and `agent:planned` items before treating README or changelog wording as released behavior
 
 ### Later candidates
 
@@ -854,17 +857,17 @@ Run the Ruby test suite:
 bundle exec rspec
 ```
 
-Check the bundled Stimulus controller for JavaScript syntax errors:
+Check the copied controller and packaged JavaScript export targets for syntax errors:
 
 ```bash
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 ```
 
 The current minimum local verification before pushing changes is:
 
 ```bash
 bundle exec rspec
-node --check app/javascript/controllers/rails_table_preferences_controller.js
+node script/check_javascript_syntax.mjs
 bundle exec rake build
 ```
 
@@ -874,7 +877,7 @@ Before tagging or publishing a release, also inspect the built package with [Pac
 
 ## Development status
 
-This gem is in active initial development. The current test suite is expected to pass locally, and the bundled Stimulus controller should pass `node --check`.
+This gem is in active initial development. The current test suite is expected to pass locally, and the copied controller plus packaged JavaScript export targets should pass `node script/check_javascript_syntax.mjs`.
 
 ## License
 

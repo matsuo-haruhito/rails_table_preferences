@@ -41,7 +41,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Copy-based JavaScript, stylesheet, view, and install generators.
 - Optional `--with-demo` install generator mode for local browser verification.
 - Optional `--with-demo-route` install generator mode for copying the demo screen and adding its route in one explicit opt-in step.
-- Generated demo verification includes owner, role, organization, export payload, existing search form hidden fields preview, fixed/grouped column, async failure recovery, and demo-state reset checks.
+- Generated demo verification includes owner, role, organization, export payload preview, existing search form hidden fields preview, preview evidence copy controls, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
 - Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, manual QA PR smoke matrix, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
@@ -56,12 +56,14 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Generated migrations use nullable owner references and `scope_type` / `scope_key` to support owner, shared, role, and organization presets.
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
 - Preset list loading failure copy now explains the current-name-only fallback and asks users to check the connection and reload before retrying the editor flow.
+- The package entrypoint controller now reports Show all columns and Hide all columns bulk actions through the existing editor status region, including the all-hidden recovery path.
 - The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
 - The package verification path now resolves documented package root and controller export targets, then checks their packaged JavaScript relative import/export references.
 - Documentation now states the bundled sort UI single-sort boundary and leaves multi-sort composition to host apps.
 - Filter adapter documentation now distinguishes ordered neutral `sorts` arrays that Ransack or host-owned adapters can preserve from plain controller params that intentionally reduce to the first valid sort for existing `order_by(params[:sort])` compatibility.
 - Documentation now keeps richer filter widgets, date pickers, autocomplete, and external helper widgets as host-app-owned renderer or custom-partial responsibilities instead of bundled filter UI dependencies.
+- Export integration documentation now clarifies that spreadsheet formula-like value neutralization belongs to the host app exporter or serializer, not to `export_keys`, `column_keys`, or `headers` metadata.
 - Production integration guidance now calls out association preloading when resource table formatters read related records, including quick host-app smoke checks for query logs or existing N+1 guards.
 - Resource table formatter docs and specs now make formatter exceptions a host-app formatter responsibility and keep that separate from the default no-formatter fallback.
 - Pull request template guidance now has a single canonical `.github/pull_request_template.md` source that keeps manual QA, UI/visual evidence, compatibility, and risk sections together.
@@ -77,6 +79,8 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Ignored columns are filtered out of editor payloads and saved settings.
 - Boolean `false` filter values are preserved through hidden-field and controller-params round trips while `nil`, empty strings, and blank array items remain omitted.
 - Saved column numeric settings now drop non-positive or malformed `width`, `truncate`, and `order` values while preserving positive numeric values and numeric strings.
+- The package entrypoint controller restores the preset selector to the applied preset after a failed preset load instead of leaving the failed selection visible.
+- Select filter option search no longer shows the no-results message when the current selected option is the only match, while still preserving selected options as visible context for non-matching queries.
 
 ## [0.1.0] - Unreleased
 
