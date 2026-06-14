@@ -285,13 +285,19 @@ Avoid keys that change per request or per row, because saved presets, column ord
 
 ## Saved column metadata rule
 
-Current column definitions from the host application should remain authoritative for labels, filter metadata, and sortable metadata. Saved preference records may contain old column settings, so merge logic should preserve current definitions for:
+Current column definitions from the host application should remain authoritative for labels, filter metadata, sortable metadata, and column identity metadata. Saved preference records may contain old column settings, so merge logic should start from the current column definitions and then overlay user-owned state from saved settings. This keeps columns added after a preset was saved in the merged settings with their current default visibility, order, label, and metadata.
+
+Current definitions remain authoritative for:
 
 - `label`
 - `filter`
 - `sortable`
+- `overflow`
+- `pinned`
 
-Saved settings should only override user-owned state such as visibility, order, width, truncation, filters, and sorts.
+Saved settings should only override user-owned state such as visibility, order, width, truncation, filters, and sorts. If a host app wants a newly added column to start hidden for existing presets, set that default in the current column definition, for example `visible: false`, instead of treating saved presets as a migration target.
+
+Column rename or removal cleanup is a separate compatibility decision; do not use the normal merge path as a saved preference migration framework.
 
 ## Filter and sort behavior
 
