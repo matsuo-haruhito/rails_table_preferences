@@ -73,6 +73,29 @@ RSpec.describe "package entrypoint controller source" do
     expect(index_declaration).to include("RailsTablePreferencesSuccessAction")
   end
 
+  it "keeps lifecycle success events on the current settings snapshot" do
+    expect(controller_source).to include("preferenceEventDetail(detail = {}) {")
+    expect(controller_source).to include("tableKey: this.tableKeyValue")
+    expect(controller_source).to include("name: this.currentPresetName")
+    expect(controller_source).to include("settings: this.settingsValue")
+    expect(controller_source).to include('this.dispatchPreferenceEvent("saved", { action: "save" })')
+    expect(controller_source).to include('this.dispatchPreferenceEvent("saved", { action: "create" })')
+    expect(controller_source).to include('this.dispatchPreferenceEvent("loaded", { action: "load" })')
+    expect(controller_source).to include('this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })')
+  end
+
+  it "keeps deleted lifecycle events on the deleted name and post-delete default settings" do
+    delete_body = controller_source.match(/\n\s+async deletePreset\(event\) \{(?<body>.*?)\n\s+\}\n\n\s+async refreshPresetOptionsOnConnect/m)&.[](:body)
+
+    expect(delete_body).not_to be_nil
+    expect(delete_body).to include("const deletedName = this.currentPresetName")
+    expect(delete_body).to include('this.nameValue = "default"')
+    expect(delete_body).to include('this.urlValue = this.preferenceUrl("default")')
+    expect(delete_body).to include("this.settingsValue = this.defaultSettings")
+    expect(delete_body).to include("this.apply()")
+    expect(delete_body).to include('this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })')
+  end
+
   it "keeps editor search as a package entrypoint-only visibility filter" do
     expect(controller_source).to include("this.ensureEditorSearchControl()")
     expect(controller_source).to include("this.syncEditorSearchResults()")
