@@ -61,6 +61,21 @@ Use resize auto-fit during browser QA:
 
 This feedback is intentionally coarse. It only confirms that auto-fit ran; it does not distinguish clamp, unchanged width, min/max metadata, or step-based width editing. Full keyboard resizing remains outside the package entrypoint first slice.
 
+## Dirty-state helper
+
+The package entrypoint adds a separate dirty-state helper when the current editor settings differ from the last clean preset snapshot. It is inserted near, but does not write into, the existing async status region. Treat it as a persistent unsaved-change cue, while the `role="status"` region remains reserved for save, load, delete, and auto-fit progress or result messages.
+
+Use dirty-state checks during browser QA:
+
+- change an editor input and confirm the dirty-state helper appears without replacing the async status message
+- use keyboard focus and a screen reader, or equivalent accessibility inspection, to confirm the helper is exposed as a polite atomic live update
+- apply a change and confirm the helper remains visible because apply updates the table but does not save the preset
+- save the current preset and confirm the helper clears after success
+- save as new and confirm the helper clears after success
+- load a preset and confirm the helper clears after success
+- save from a read-only scoped preset and confirm the owner-preset fallback success clears the helper rather than implying the shared preset was overwritten
+- reset or delete the current preset and confirm the helper clears when the editor returns to the clean snapshot
+
 ## Existing checklist routing
 
 Use this note together with the existing checklist entries rather than as a replacement for them:
@@ -74,6 +89,8 @@ Use this note together with the existing checklist entries rather than as a repl
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
 
 `spec/javascript/rails_table_preferences_resize_auto_fit_status_spec.rb` guards the package entrypoint resize auto-fit feedback surface: the editor root exposes the localized status copy, auto-fit writes to the existing status region, pointer and keyboard auto-fit share the same path, and manual drag resize keeps clearing previous success feedback.
+
+`spec/javascript/rails_table_preferences_dirty_state_spec.rb` guards the package entrypoint dirty-state surface: package-only target/value exposure, separation from the async status region, and representative clean transitions after save, save as new, preset load, read-only save fallback, and preset delete.
 
 When this package entrypoint is changed, record in the PR comment or sign-off note which of those checklist areas were actually run. If browser access is not available, say that explicitly and rely on behavior-level entrypoint specs plus source-level guards until a human or browser-capable environment can complete the visual check.
 
