@@ -35,6 +35,44 @@ RSpec.describe RailsTablePreferences::ColumnDefinition do
       )
     end
 
+    it "includes normalized draggable metadata when explicitly configured" do
+      definition = described_class.new(key: :help_link, label: "Help", draggable: "false")
+
+      expect(definition.to_h["draggable"]).to eq(false)
+    end
+
+    it "omits draggable metadata when it is not configured" do
+      definition = described_class.new(key: :customer_code, label: "Customer Code")
+
+      expect(definition.to_h).not_to have_key("draggable")
+    end
+
+    it "includes normalized column width boundary metadata" do
+      definition = described_class.new(
+        key: :memo,
+        label: "Memo",
+        min_width: "80",
+        max_width: "320"
+      )
+
+      expect(definition.to_h).to include(
+        "min_width" => 80,
+        "max_width" => 320
+      )
+    end
+
+    it "omits non-positive column width boundary metadata" do
+      definition = described_class.new(
+        key: :memo,
+        label: "Memo",
+        min_width: 0,
+        max_width: -1
+      )
+
+      expect(definition.to_h).not_to have_key("min_width")
+      expect(definition.to_h).not_to have_key("max_width")
+    end
+
     it "marks ignored columns" do
       definition = described_class.new(key: :internal_cost, ignored: true)
 
