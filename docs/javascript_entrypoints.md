@@ -2,6 +2,12 @@
 
 Rails Table Preferences ships two JavaScript integration paths for the bundled Stimulus controller.
 
+## Source-of-truth role
+
+This guide is the reader-facing source of truth for the JavaScript public surface that host apps import or copy. Keep package-root imports, the `rails_table_preferences/controller` direct import, the copied `app/javascript/controllers/rails_table_preferences_controller.js` path, and the package-only controller boundary synchronized here before downstream apps use a new gem revision as evidence.
+
+Rails Table Preferences does not currently maintain a TreeView-style machine-readable public API manifest. The first guard family is this guide plus `package.json`, the JavaScript entrypoint smoke specs, and package verification. Consider a manifest only if helper option sets, lifecycle event details, or additional JavaScript exports grow beyond what this guide and the existing package checks can keep clear.
+
 ## Default stimulus-rails path
 
 The install generator copies the bundled controller into the host application:
@@ -62,7 +68,7 @@ Treat a future CSS subpath export as a separate feature decision. It would need 
 
 ### Package-only controller boundary
 
-The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`.
+The package entrypoint subclasses the copied controller. Shared editor behavior belongs in `app/javascript/controllers/rails_table_preferences_controller.js`; package-import adapter behavior belongs in `app/javascript/rails_table_preferences/controller.js`. The public `rails_table_preferences/controller` specifier currently resolves through `package.json` to `app/javascript/rails_table_preferences/preset_select_recovery.js`, which subclasses `controller.js` and is the behavior entrypoint that manual bundler aliases should preserve.
 
 Current package-only behavior is intentionally small:
 
@@ -79,7 +85,7 @@ The current contract boundary is:
 
 | Surface | Copied controller path | Package entrypoint path | Host-app guidance |
 | --- | --- | --- | --- |
-| Source ownership | Host app owns the generated `app/javascript/controllers/rails_table_preferences_controller.js` copy after install. | Gem owns `app/javascript/rails_table_preferences/controller.js`, which subclasses the copied-controller source shipped in the gem. | Use the copied path when local patches are expected. Use the package entrypoint when the app wants packaged behavior updates through the gem. |
+| Source ownership | Host app owns the generated `app/javascript/controllers/rails_table_preferences_controller.js` copy after install. | Gem owns `app/javascript/rails_table_preferences/controller.js`, which subclasses the copied-controller source shipped in the gem. The public `rails_table_preferences/controller` export resolves to `preset_select_recovery.js`, which subclasses that package controller. | Use the copied path when local patches are expected. Use the package entrypoint when the app wants packaged behavior updates through the gem, and point manual aliases at the current package export target. |
 | Filter operator labels | Uses the base controller defaults. A copied or replacement controller is needed for controller-side operator vocabulary changes not exposed by base values. | Adds `filterOperatorLabelsValue` so packaged-controller tables can override operator text through a root JSON value. | Use locale/root values for wording-only operator labels on the package path; use copied JavaScript for copied-controller or behavior changes. |
 | Sortable header `title` attributes | Base sort setup may replace generated title text while it manages sort hints. | Preserves host-provided nonblank `title` values and restores them after sort state sync. | Prefer the package entrypoint when host-rendered header titles must survive packaged sort controls. Validate copied-controller screens separately. |
 | Resize handle keyboard auto-fit | Base resize handles are generated and pointer-oriented. | Adds keyboard auto-fit on resize handles for `Enter`, Space, and legacy `Spacebar`. | Treat this as package-entrypoint-only unless a future issue deliberately moves the keyboard affordance into the base controller. |
@@ -113,13 +119,13 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^rails_table_preferences$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/index.js") },
-      { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/controller.js") }
+      { find: /^rails_table_preferences\/controller$/, replacement: gemJavaScriptPath("rails_table_preferences", "rails_table_preferences/preset_select_recovery.js") }
     ]
   }
 })
 ```
 
-Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files.
+Any equivalent resolver is fine. The important part is that the host app's bundler can find the gem's packaged `app/javascript/rails_table_preferences/*` files while preserving the same behavior entrypoint exposed by `package.json`. Do not point `rails_table_preferences/controller` directly at `controller.js` unless the host app intentionally wants to bypass the current recovery subclass and owns that divergence.
 
 ### TypeScript module declarations
 

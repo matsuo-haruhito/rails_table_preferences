@@ -10,11 +10,12 @@ RSpec.describe "rails_table_preferences select filter option search source" do
     )&.[](:body)
 
     expect(method_source).to include("const query = String(input?.value || \"\").trim().toLocaleLowerCase()")
-    expect(method_source).to include("let matchingUnselectedOptions = 0")
+    expect(method_source).to include("let matchingOptions = 0")
     expect(method_source).to include("const searchableText = `${option.textContent || \"\"} ${option.value || \"\"}`.toLocaleLowerCase()")
     expect(method_source).to include("const matchesQuery = searchableText.includes(query)")
-    expect(method_source).to include("if (matchesQuery && !option.selected) matchingUnselectedOptions += 1")
+    expect(method_source).to include("if (matchesQuery) matchingOptions += 1")
     expect(method_source).to include("option.hidden = Boolean(query) && !option.selected && !matchesQuery")
-    expect(method_source).to include("if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0")
+    expect(method_source).to include("if (emptyMessage) emptyMessage.hidden = !query || matchingOptions > 0")
+    expect(method_source).not_to include("matchingUnselectedOptions")
   end
 end

@@ -18,7 +18,7 @@ Run the package verification task:
 bundle exec rake package:verify
 ```
 
-The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, task dependency, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, default locale, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, checks that declaration targets' relative import/export references resolve to packaged `.d.ts` files, and verifies that the packaged `package.json` remains private resolver metadata (`private: true`, `version: "0.0.0"`).
+The task checks the newest built gem under `pkg/` and fails if required runtime, generator, asset, task, task dependency, changelog, package metadata, JavaScript entrypoint, packaged declaration, resource table partial, default locale, or documentation files are missing. It also reads the packaged `package.json`, verifies that documented `exports` targets point at files that are present in the same built gem, checks that those JavaScript export targets' relative import/export references resolve to packaged `.js` files, checks that declaration targets' relative import/export references resolve to packaged `.d.ts` files, verifies that the packaged `package.json` remains private resolver metadata (`private: true`, `version: "0.0.0"`), and verifies that gemspec release metadata URLs still point at the expected repository, changelog, and documentation pages.
 
 A successful run prints a message like:
 
@@ -26,20 +26,20 @@ A successful run prints a message like:
 Package verification passed: rails_table_preferences-0.1.0.alpha.gem
 ```
 
-If required files, package export targets, package-internal JavaScript imports, package-internal declaration imports, or packaged metadata are missing or invalid, the task prints the missing paths and exits with failure.
+If required files, package export targets, package-internal JavaScript imports, package-internal declaration imports, packaged metadata, or gemspec release metadata are missing or invalid, the task prints the missing paths and exits with failure.
 
 Failure output starts with a compact summary line before the detailed lists:
 
 ```text
 Package verification failed: rails_table_preferences-0.1.0.alpha.gem
-Package verification summary: 4 issue(s) (required files: 1, package export targets: 1, package internal JavaScript imports: 1, package internal declaration imports: 1, package metadata errors: 0)
+Package verification summary: 4 issue(s) (required files: 1, package export targets: 1, package internal JavaScript imports: 1, package internal declaration imports: 1, package metadata errors: 0, gemspec metadata errors: 0)
 ```
 
-Use the summary line in PR bodies, the pull request template's release/package evidence field, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, unresolved declaration import, or package metadata error. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
+Use the summary line in PR bodies, the pull request template's release/package evidence field, release checklist notes, or CI triage comments when you need to share the failure quickly. Then use the detailed lists below it to find the exact missing file, export target, unresolved JavaScript import, unresolved declaration import, package metadata error, or gemspec metadata error. `package metadata errors` cover the packaged `package.json` resolver metadata boundary such as `private: true` and `version: "0.0.0"`; `gemspec metadata errors` cover release metadata URLs such as homepage, source, changelog, and documentation links. The summary is a human-readable wrapper around the existing verifier result; it does not replace the structured `PackageVerifier.call` hash.
 
 ## RubyGems publish boundary
 
-`bundle exec rake package:verify` is a package-content gate, not a RubyGems publish approval. A passing result means the built gem contains the expected files, package metadata, JavaScript export wiring, and declaration re-exports; it does not decide the publishing account, MFA or trusted-publishing posture, checksum/provenance handling, selected artifact, or final release command.
+`bundle exec rake package:verify` is a package-content gate, not a RubyGems publish approval. A passing result means the built gem contains the expected files, package metadata, gemspec release metadata, JavaScript export wiring, and declaration re-exports; it does not decide the publishing account, MFA or trusted-publishing posture, checksum/provenance handling, selected artifact, or final release command.
 
 Keep those release-time decisions in the [RubyGems publish boundary checks](release_checklist.md#rubygems-publish-boundary-checks). The release owner should confirm that the `.gem` artifact being published is the same build output that passed package verification, or record why a fresh artifact was built and re-verified.
 
@@ -147,6 +147,7 @@ docs/sandbox.md
 docs/examples.md
 docs/troubleshooting.md
 docs/manual_qa.md
+docs/manual_qa_pr_smoke_matrix.md
 docs/release_checklist.md
 docs/package_verification.md
 docs/support_matrix.md
@@ -160,7 +161,7 @@ docs/javascript_entrypoints.md
 docs/javascript_controller.md
 ```
 
-Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, rake task dependency, and resource table files rather than a complete freeze of every file under `lib/`. The legacy column adjustment importer is included because the packaged `lib/tasks/rails_table_preferences.rake` entrypoint loads it directly. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entries guard the shipped English and Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`.
+Keep this list synchronized with `RailsTablePreferences::PackageVerifier::REQUIRED_PATHS`. The runtime entries are representative helper, adapter, registry, formatter, rake task dependency, and resource table files rather than a complete freeze of every file under `lib/`. The legacy column adjustment importer is included because the packaged `lib/tasks/rails_table_preferences.rake` entrypoint loads it directly. The JavaScript entrypoint entries include the packaged `.d.ts` files because TypeScript host apps use them to resolve the public package imports. The fixed list keeps the shared package controller implementation (`app/javascript/rails_table_preferences/controller.js`), while the package export-target check below follows the current `./controller` default export to the package-entrypoint recovery subclass. The resource table partial entries guard the default `resource_table_for` and `tree_resource_table_for` rendering paths that a host app uses without custom partial configuration. The default locale entries guard the shipped English and Japanese copy and the I18n override baseline used by the bundled editor and resource table surfaces. The documentation entries are package entrances from the README and docs index rather than a complete freeze of every file under `docs/`; the PR smoke matrix is required because it is the docs-index primary entry for focused release and review evidence boundaries.
 
 ## Required path selection criteria
 
@@ -172,7 +173,7 @@ Use these criteria when adding or reviewing required paths:
 - JavaScript package entrypoints, their minimal TypeScript declaration files, and any file named by `package.json` `exports`. The export-target check also verifies these paths from packaged metadata and follows their static relative import/export references to packaged JavaScript and declaration files.
 - Default locale files that shipped views and docs use as the I18n override baseline. `config/locales/en.yml` and `config/locales/ja.yml` are required for this reason; they are not a full `config/` inventory and do not freeze locale wording or key policy.
 - Package metadata and release-facing files that should always ship, including `package.json`, `README.md`, `CHANGELOG.md`, `LICENSE`, and this verification guide.
-- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, header drag reorder, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, select filter troubleshooting, select filter option search threshold, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior.
+- Focused docs that are directly linked from README or the docs index as user-facing setup, integration, customization, troubleshooting, support, release, or QA entry points. Current required focused docs include resource table cell hooks, table data attributes, resize auto-fit, editor entrypoint affordances, header drag reorder, preset selector scope labels, virtual column query boundary, editor root options, helper-free controller root URL guide, manual QA PR smoke matrix, select filter troubleshooting, select filter option search threshold, and the JavaScript entrypoint/controller guides because they are primary docs-index entrances for shipped behavior or release/review evidence.
 - Scope-boundary docs that keep the packaged release from being mistaken for a broader product surface. `docs/non_goals.md` is required for that reason: it records intentionally deferred query builder, export generation, admin UI, heavy browser test, and complex sticky layout directions that are linked from the docs index and should ship with the release package.
 - Visual or other static assets that a required doc directly references, such as the visual overview SVGs.
 
@@ -188,8 +189,10 @@ The package verification task reads the packaged `package.json` and confirms eve
 . types -> app/javascript/rails_table_preferences/index.d.ts
 . default -> app/javascript/rails_table_preferences/index.js
 ./controller types -> app/javascript/rails_table_preferences/controller.d.ts
-./controller default -> app/javascript/rails_table_preferences/controller.js
+./controller default -> app/javascript/rails_table_preferences/preset_select_recovery.js
 ```
+
+The `./controller` default export is the package entrypoint host apps import as `rails_table_preferences/controller`. It currently points at `preset_select_recovery.js`, which subclasses the shared `controller.js` implementation; manual bundler aliases for the package specifier should preserve that same behavior entrypoint instead of bypassing the recovery subclass.
 
 After confirming those export target files exist, the verifier scans JavaScript export targets' static relative `import ... from`, side-effect `import`, and `export ... from` references. Extensionless references such as `./controller` and `../controllers/rails_table_preferences_controller` must resolve to packaged JavaScript files, so package verification catches drift where an exported entrypoint ships but one of its internal package files does not.
 
@@ -205,7 +208,7 @@ The packaged `package.json` is resolver metadata for these gem-packaged JavaScri
 
 ## Why this matters
 
-The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, rake tasks, rake task dependencies, changelog, default locale files, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
+The test suite can pass even if package contents are incomplete. Missing generator templates, copied JavaScript, copied CSS, package entrypoints, packaged declarations, package metadata, gemspec release metadata, rake tasks, rake task dependencies, changelog, default locale files, visual overview assets, README-linked docs, or resource table runtime files usually appear only when the gem is installed into a host Rails app.
 
 ## Current CI gate
 

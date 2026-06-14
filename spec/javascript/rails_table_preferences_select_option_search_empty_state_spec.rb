@@ -10,10 +10,11 @@ RSpec.describe "RailsTablePreferences package select option search empty state" 
     expect(source).to include("aria-live=\"polite\"")
   end
 
-  it "shows the no-results message only when no unselected option matches the query" do
-    expect(source).to include("let matchingUnselectedOptions = 0")
-    expect(source).to include("if (matchesQuery && !option.selected) matchingUnselectedOptions += 1")
-    expect(source).to include("if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0")
+  it "shows the no-results message only when no option matches the query" do
+    expect(source).to include("let matchingOptions = 0")
+    expect(source).to include("if (matchesQuery) matchingOptions += 1")
+    expect(source).to include("if (emptyMessage) emptyMessage.hidden = !query || matchingOptions > 0")
+    expect(source).not_to include("matchingUnselectedOptions")
   end
 
   it "keeps selected options visible even when they do not match the query" do

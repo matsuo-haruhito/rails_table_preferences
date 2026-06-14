@@ -4,6 +4,16 @@ The bundled editor reads most visible copy through Rails I18n before the Stimulu
 
 This guide lists the main keys that are useful during host-app integration. It is not a replacement for checking `config/locales/*.yml` and `app/views/rails_table_preferences/_editor.html.erb` when changing the gem itself.
 
+## Bundled ERB and helper-free roots
+
+The bundled `table_preferences_editor` partial emits the controller-root label values in this guide from Rails I18n before the packaged controller runs. That path is the normal way to keep visible labels, filter/sort copy, scope fallback labels, editor search labels, row move labels, and status copy aligned with the host app locale without copying JavaScript.
+
+When a host app bypasses the bundled editor partial or hand-builds a helper-free root for the package entrypoint, those `data-rails-table-preferences-*-label-value` attributes become host-owned markup. The package entrypoint still has Japanese JavaScript defaults for values such as `editorSearchLabel`, `selectFilterOptionSearchLabel`, `moveUpLabel`, `moveDownLabel`, and `resizeAutoFitStatusLabel`, but those defaults are only last-resort fallback copy. Do not treat them as English, neutral, or locale-aware text for direct package-entrypoint roots.
+
+If a helper-free or directly assembled package-entrypoint screen should match the bundled editor copy, pass the same root label values that the partial would have emitted. Keep URL, table key, settings, and columns root values separate from this copy surface; the helper-free URL contract is documented in [Helper-free controller root URLs](helper_free_controller_root_urls.md).
+
+Changing the JavaScript fallback language itself is a code and source-guard decision. Wording-only host-app changes should stay in locale entries or explicit controller-root values.
+
 ## Preset controls
 
 These keys label the saved preset selector, preset name input, and default preset checkbox:

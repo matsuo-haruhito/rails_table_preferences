@@ -38,10 +38,20 @@ What this view highlights:
 - a visible boundary after the fixed `受注番号` column, so the static overview shows where host-app scroll polish may need a separator or shadow
 - the same dense list-screen posture used across the quick-start and maintenance docs
 
+## Evidence boundary
+
+Use this page as an evidence boundary for the README first visual, the SVG captions, and the generated demo source of truth. The SVGs do not need to reproduce every current demo support section. They should keep the first-screen orientation clear and intentionally leave detailed owner, scope, export, reset, and async-failure behavior to the generated demo page.
+
+Source-only inspection is enough when a PR only changes evidence wording, caption wording, checklist text, or a docs note that keeps the SVGs in their current compact orientation role. Record the source files compared and list any current-demo cues that remain intentionally outside the SVGs.
+
+Rendered visual confirmation is needed when a PR replaces either SVG, changes the README first visual promise, changes generated demo layout or first-screen ordering, or claims that spacing, overlap, clipping, or visual hierarchy still works in the rendered artifact. If rendered confirmation is unavailable, record the source-only substitute and the browser-capable check left for review; do not describe source inspection as rendered proof.
+
 ## Notes
 
 - The generated demo screen remains the best place to verify actual behavior in a browser.
 - Package verification confirms that these SVG files ship with the gem; it does not render the images or prove that the rendered view still matches the captions above.
+- 2026-06-13 source-only drift check: the current captions and SVG text still describe the generated demo's landed orientation cues, including the folded intro copy, editor/search/table first-screen path, owner and scope summaries, shared/role/organization preset examples, export payload preview, reset support, async failure support, `東京` search cue, `納品日` sort cue, and fixed `受注番号` boundary. The SVG files were not replaced in that check because the lightweight illustration role still matches the README and docs index promise.
+- Recheck this page whenever the demo generator, seeded demo presets, support sections, README first visual copy, or either `visual-overview-*.svg` file changes. If the images stay unchanged, record whether the comparison was source-only or rendered, and list any current-demo cues that were intentionally left out of the compact overview.
 - When a PR or release note changes these images, the surrounding captions, or the README first-visual promise, record the changed visual/doc paths, whether the README image and this page's captions or highlighted points were compared, and whether you used rendered visual confirmation or source-only inspection. Use [Manual QA smoke matrix for PRs](manual_qa_pr_smoke_matrix.md#pr-category-matrix) and its static visual docs row for the evidence boundary.
 - Use [Demo support section smoke boundary](demo_support_section_smoke.md) when a PR or release-prep check mentions the `Demo state reset`, `Async failure check`, or visual overview support-section cues, so rendered evidence, source-only inspection, and browser-capable handoff stay separate.
 - Keep that demo support smoke note as a focused evidence aid reached from this visual overview page. Do not list it as a full-catalog docs index entry or add it to package verification required paths unless it is promoted from PR/release-prep evidence guidance into a primary packaged documentation entrance.
