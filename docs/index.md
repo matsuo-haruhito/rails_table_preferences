@@ -84,36 +84,49 @@ Do not add a TreeView-style public API manifest as the default first response to
 
 ## Recommended integration order
 
+Use this as a navigation map after choosing a starting path above. The first group gets a new reader to a working screen; later groups are follow-up checks for table behavior, data flow, and release readiness.
+
+### First working screen
+
 1. Install the gem and run the generated migration.
 2. Use the production integration checklist when moving from the quick start or demo screen to a real host-app index screen.
 3. Mount the engine if you use the bundled JSON API.
 4. Confirm the Stimulus controller registration path for the host app. Use the default manifest for `stimulus-rails`, or the package entrypoint for Vite / `app/frontend` apps.
 5. For convention-first tables, try `resource_table_for @records` and review [Resource table adapters](resource_tables.md).
-6. If the inferred resource table only needs light cell styling, use [Resource table cell hooks](resource_table_cell_hooks.md) before copying the default partial.
-7. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use the renderer registry context examples from [Resource table adapters](resource_tables.md) before copying a custom partial.
-8. For manually controlled tables, define table columns with `table_preferences_column`.
-9. Render `table_preferences_editor` and `table_preferences_table_tag`.
-10. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
-11. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
-12. Add `filter:` and `sortable: true` metadata where needed.
-13. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
-14. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
-15. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
-16. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-17. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-18. Configure `scope_context_method` only if shared, role, or organization presets are needed.
-19. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
-20. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
-21. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-22. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
-23. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-24. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-25. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
-26. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
-27. Verify the feature in a sandbox Rails app.
-28. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
-29. Run the manual QA checklist before asking real users to try the feature.
-30. Before release, run the release checklist and package verification guide.
+6. For manually controlled tables, define table columns with `table_preferences_column`.
+7. Render `table_preferences_editor` and `table_preferences_table_tag`.
+8. Optionally generate the demo screen with `--with-demo`, or `--with-demo-route` when the route should be added at the same time, after confirming the configured current-owner method returns a persisted owner record.
+
+### Adapt the table surface
+
+1. If the inferred resource table only needs light cell styling, use [Resource table cell hooks](resource_table_cell_hooks.md) before copying the default partial.
+2. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use the renderer registry context examples from [Resource table adapters](resource_tables.md) before copying a custom partial.
+3. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
+4. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
+5. Add `filter:` and `sortable: true` metadata where needed.
+6. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
+7. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
+8. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
+9. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+10. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+11. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+12. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+13. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+
+### Wire data, presets, and exports
+
+1. Configure `scope_context_method` only if shared, role, or organization presets are needed.
+2. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
+3. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
+4. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
+5. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
+
+### Verify before release or user handoff
+
+1. Verify the feature in a sandbox Rails app.
+2. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
+3. Run the manual QA checklist before asking real users to try the feature.
+4. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
