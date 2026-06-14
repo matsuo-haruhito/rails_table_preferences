@@ -4,6 +4,19 @@ Use this guide when the quick start or demo works, but a real host-app index scr
 
 Keep the checks small and symptom-driven. Rails Table Preferences owns the editor UI, saved settings payload, mounted JSON API calls, and helper-generated metadata; the host application still owns layouts, authentication, CSRF setup, route mounting, owner lookup, search execution, and final screen wiring.
 
+Use [Troubleshooting](troubleshooting.md) for installation, Stimulus registration, engine mount setup, owner model configuration, helper-free root values, CSS, filter/sort integration, scoped preset visibility, and customization issues. This production guide is the primary symptom map for real screens where those setup pieces mostly exist but Save/Load/Delete, preset persistence, or host-app request boundaries still fail.
+
+## Production symptom map
+
+Use this map before adding diagnostics or changing JSON API behavior:
+
+- `422 Unprocessable Entity` with authenticity-token logs: start with [Save, delete, or save-as-new returns 422](#save-delete-or-save-as-new-returns-422). This is usually host-app layout or CSRF-token wiring.
+- Parent controller constant, load-order, missing callback, tenant, locale, or unexpected superclass failures: start with [Parent controller setting cannot be resolved or uses the wrong base](#parent-controller-setting-cannot-be-resolved-or-uses-the-wrong-base).
+- `401`, `403`, login redirects, nil owner, or wrong owner model on real screens: start with [Save, load, or delete returns 401, redirects, or has no owner](#save-load-or-delete-returns-401-redirects-or-has-no-owner), then use the linked setup sections in [Troubleshooting](troubleshooting.md).
+- `404 Not Found`: confirm the route and `config.mount_path` in [Save returns 404](troubleshooting.md#save-returns-404), then return here only if the real screen uses a different host-app route shell or mounted API boundary.
+- Read-only scoped preset duplicate-name failures: start with [Saving from a read-only scoped preset fails with a duplicate name](#saving-from-a-read-only-scoped-preset-fails-with-a-duplicate-name). If the preset never appears, use [Scoped preset exists but does not appear in the selector](troubleshooting.md#scoped-preset-exists-but-does-not-appear-in-the-selector).
+- Saved presets that do not return after reload, filtering, pagination, Turbo navigation, or alternate routes: start with [Saved presets do not come back on the same screen](#saved-presets-do-not-come-back-on-the-same-screen) and keep stable `table_key` ownership in host-app code.
+
 ## Save, delete, or save-as-new returns 422
 
 Symptoms:

@@ -2,6 +2,19 @@
 
 This guide lists common issues when installing or integrating Rails Table Preferences into a host Rails application.
 
+Use this general troubleshooting guide for setup, controller registration, engine mount paths, owner lookup, migrations, helper-free roots, CSS, filter/sort integration, scoped presets, and customization boundaries. If the quick start or demo works but a real host-app index screen fails during save, reload, authentication, CSRF, duplicate-name, or `table_key` persistence flows, start with [Production troubleshooting notes](production_troubleshooting.md) and use this guide for the linked setup details.
+
+## Choosing between troubleshooting guides
+
+Use this map before changing runtime code:
+
+- `404 Not Found` from Save/Load/Delete: start here with [Save returns 404](#save-returns-404), then confirm the production screen uses the same mount path and `config.mount_path`.
+- `401`, `403`, or login redirects: start with [Production troubleshooting notes](production_troubleshooting.md#save-load-or-delete-returns-401-redirects-or-has-no-owner), then use [Save returns 401 or redirects to login](#save-returns-401-or-redirects-to-login) and [Save, Load, or Delete uses the wrong controller boundary](#save-load-or-delete-uses-the-wrong-controller-boundary) for the setup checks.
+- `422 Unprocessable Entity` with authenticity-token logs: use [Production troubleshooting notes](production_troubleshooting.md#save-delete-or-save-as-new-returns-422) as the primary guide. This usually points to host-app layout or CSRF-token wiring, not a new Rails Table Preferences status-copy contract.
+- Missing or nil owner: use [current_user is nil](#current_user-is-nil) for owner configuration and [Production troubleshooting notes](production_troubleshooting.md#save-load-or-delete-returns-401-redirects-or-has-no-owner) for real-screen symptom separation.
+- Read-only scoped preset duplicate-name failures: use [Production troubleshooting notes](production_troubleshooting.md#saving-from-a-read-only-scoped-preset-fails-with-a-duplicate-name) as the primary guide, then use [Scoped preset exists but does not appear in the selector](#scoped-preset-exists-but-does-not-appear-in-the-selector) only if the preset never appears.
+- Saved presets do not return on the same logical screen: use [Production troubleshooting notes](production_troubleshooting.md#saved-presets-do-not-come-back-on-the-same-screen) as the primary guide, then use [JavaScript controller notes](javascript_controller.md#stable-table_key-guideline) for the stable `table_key` source of truth.
+
 ## Stimulus controller does not run
 
 Symptoms:
@@ -140,6 +153,8 @@ RailsTablePreferences.configure do |config|
 end
 ```
 
+For real host-app index screens where the page renders but the mounted JSON API redirects, returns `401` / `403`, or has no owner, use [Production troubleshooting notes](production_troubleshooting.md#save-load-or-delete-returns-401-redirects-or-has-no-owner) to separate authentication, parent-controller, CSRF, and owner lookup failures before changing runtime behavior.
+
 ## Save, Load, or Delete uses the wrong controller boundary
 
 Symptoms:
@@ -191,6 +206,8 @@ end
 ```
 
 The copied demo screen uses the same configured current-owner method as the normal editor flow. `--with-demo` does not seed `User`, `Customer`, or another owner model automatically.
+
+For production screens, nil-owner symptoms often appear together with authentication redirects, parent-controller mismatches, or CSRF failures. Use [Production troubleshooting notes](production_troubleshooting.md#save-load-or-delete-returns-401-redirects-or-has-no-owner) as the symptom-driven checklist after confirming the owner configuration here.
 
 ## Migration references the wrong owner model
 
