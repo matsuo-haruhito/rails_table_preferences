@@ -125,4 +125,17 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include('this.syncStatusStateHook("error")')
     expect(base_controller_source).not_to include("data-rails-table-preferences-status-state")
   end
+
+  it "keeps the bundled filter panel constrained to the viewport bottom" do
+    position_panel_body = controller_source.match(/\n\s+positionFilterPanel\(panel, headerCell\) \{(?<body>.*?)\n\s+\}\n\n\s+renderFilterPanelValueFields/m)&.[](:body)
+
+    expect(position_panel_body).not_to be_nil
+    expect(position_panel_body).to include("const top = window.scrollY + rect.bottom + 4")
+    expect(position_panel_body).to include("const viewportBottom = window.scrollY + window.innerHeight - viewportMargin")
+    expect(position_panel_body).to include("const availableHeight = Math.max(120, viewportBottom - top)")
+    expect(position_panel_body).to include("panel.style.top = `${top}px`")
+    expect(position_panel_body).to include("panel.style.maxWidth = `calc(100vw - ${viewportMargin * 2}px)`")
+    expect(position_panel_body).to include("panel.style.maxHeight = `${availableHeight}px`")
+    expect(position_panel_body).to include('panel.style.overflowY = "auto"')
+  end
 end
