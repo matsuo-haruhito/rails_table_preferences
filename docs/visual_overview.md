@@ -38,6 +38,14 @@ What this view highlights:
 - a visible boundary after the fixed `受注番号` column, so the static overview shows where host-app scroll polish may need a separator or shadow
 - the same dense list-screen posture used across the quick-start and maintenance docs
 
+## Evidence boundary
+
+Use this page as an evidence boundary for the README first visual, the SVG captions, and the generated demo source of truth. The SVGs do not need to reproduce every current demo support section. They should keep the first-screen orientation clear and intentionally leave detailed owner, scope, export, reset, and async-failure behavior to the generated demo page.
+
+Source-only inspection is enough when a PR only changes evidence wording, caption wording, checklist text, or a docs note that keeps the SVGs in their current compact orientation role. Record the source files compared and list any current-demo cues that remain intentionally outside the SVGs.
+
+Rendered visual confirmation is needed when a PR replaces either SVG, changes the README first visual promise, changes generated demo layout or first-screen ordering, or claims that spacing, overlap, clipping, or visual hierarchy still works in the rendered artifact. If rendered confirmation is unavailable, record the source-only substitute and the browser-capable check left for review; do not describe source inspection as rendered proof.
+
 ## Notes
 
 - The generated demo screen remains the best place to verify actual behavior in a browser.
