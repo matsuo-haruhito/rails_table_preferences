@@ -80,6 +80,8 @@ application.register("rails-table-preferences", RailsTablePreferencesController)
 
 For Vite and similar bundlers, also add a resolver for `rails_table_preferences` and `rails_table_preferences/controller`. Keep [JavaScript entrypoints](javascript_entrypoints.md) as the source of truth for the full resolver example, TypeScript declaration note, and the package-only controller behavior boundary.
 
+The packaged `package.json` behind those import specifiers is Ruby gem resolver metadata. Its `private: true` and `version: "0.0.0"` values do not mean there is a separate npm package, JavaScript semver stream, or package publish policy to follow during host-app install work; use [JavaScript entrypoints](javascript_entrypoints.md#package-metadata-boundary) and [Package verification](package_verification.md#package-export-targets) for the detailed boundary.
+
 This JavaScript entrypoint choice does not decide how the stylesheet is loaded. If `--skip-stylesheets` is not used, the generated stylesheet remains the default CSS path. If `--skip-stylesheets` is used, the host app owns equivalent CSS and should verify the editor layout, table state cues, resize handles, and fixed-column hooks. Do not treat `rails_table_preferences/controller` as a CSS import path.
 
 When choosing between the copied controller, the package entrypoint, and a host-owned controller, verify any screen-specific controller-root values against that boundary. Package-only values such as `data-rails-table-preferences-filter-operator-labels-value` are available only when the registered controller comes from `rails_table_preferences/controller`; host-owned or copied controller paths need their own JavaScript for equivalent behavior.
