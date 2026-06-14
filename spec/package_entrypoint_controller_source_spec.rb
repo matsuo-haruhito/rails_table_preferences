@@ -41,6 +41,14 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("return Math.floor(threshold)")
   end
 
+  it "keeps select option search empty state tied to all matching options" do
+    expect(controller_source).to include("let matchingOptions = 0")
+    expect(controller_source).to include("if (matchesQuery) matchingOptions += 1")
+    expect(controller_source).to include("option.hidden = Boolean(query) && !option.selected && !matchesQuery")
+    expect(controller_source).to include("emptyMessage.hidden = !query || matchingOptions > 0")
+    expect(controller_source).not_to include("matchingUnselectedOptions")
+  end
+
   it "keeps visibility bulk actions scoped to all editor rows" do
     bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.[](:body)
 
@@ -48,6 +56,15 @@ RSpec.describe "package entrypoint controller source" do
     expect(bulk_visibility_body).to include("this.editorRows.forEach((row) => {")
     expect(bulk_visibility_body).not_to include("this.editorRowsForMovement")
     expect(bulk_visibility_body).not_to include("!row.hidden")
+  end
+
+  it "keeps visibility bulk actions on the existing status feedback surface" do
+    bulk_visibility_body = controller_source.match(/\n\s+setEditorColumnVisibility\(event, visible\) \{(?<body>.*?)\n\s+\}\n\n\s+buildEditorMoveControls/m)&.[](:body)
+
+    expect(bulk_visibility_body).not_to be_nil
+    expect(controller_source).to include("visibilityBulkHiddenStatusLabel: { type: String")
+    expect(controller_source).to include("visibilityBulkShownStatusLabel: { type: String")
+    expect(bulk_visibility_body).to include("this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, \"success\")")
   end
 
   it "keeps reset as a packaged success lifecycle action" do
