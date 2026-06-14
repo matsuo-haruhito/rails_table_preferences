@@ -105,6 +105,14 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : index === rows.length - 1)")
   end
 
+  it "keeps saved presets merged on top of current column definitions" do
+    expect(base_controller_source).to include("columns: this.columnsValue.map((column, index) => ({ key: column.key, label: column.label || column.key, visible: column.visible !== false, order: column.order ?? (index + 1) * 10, width: column.width, truncate: column.truncate, overflow: column.overflow, pinned: column.pinned === true, filter: column.filter, sortable: column.sortable }))")
+    expect(base_controller_source).to include("const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))")
+    expect(base_controller_source).to include("const columns = defaultSettings.columns.map((defaultColumn, index) => {")
+    expect(base_controller_source).to include("const savedColumn = savedColumns.get(defaultColumn.key) || {}")
+    expect(base_controller_source).to include("return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, overflow: defaultColumn.overflow, pinned: defaultColumn.pinned, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }")
+  end
+
   it "keeps the package editor drag handle visual-only while real reorder controls stay keyboard reachable" do
     expect(controller_source).to include("this.replaceEditorDragHandle(row)")
     expect(controller_source).to include("replaceEditorDragHandle(row)")
