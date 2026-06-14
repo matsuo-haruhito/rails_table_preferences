@@ -61,9 +61,20 @@ Use resize auto-fit during browser QA:
 
 This feedback is intentionally coarse. It only confirms that auto-fit ran; it does not distinguish clamp, unchanged width, min/max metadata, or step-based width editing. Full keyboard resizing remains outside the package entrypoint first slice.
 
+## Reset affordance
+
+The package entrypoint keeps the bundled reset action tied to the existing editor status region. When the current editor draft already matches the table default settings, the reset button is disabled so the control does not look like a meaningful no-op. After a successful local reset, the status region announces the reset result with `rails_table_preferences.editor.reset_status` copy.
+
+Use the reset action during browser QA:
+
+- open an editor in its default state and confirm the reset button is disabled
+- change visibility, order, width, truncate, filter, or sort state and confirm reset becomes available
+- reset the editor and confirm the table returns to default settings, the reset button disables again, and the status region announces the reset result
+- confirm the existing visible reset helper still explains that unsaved editor changes are discarded and defaults are restored
+
 ## Dirty-state helper
 
-The package entrypoint adds a separate dirty-state helper when the current editor settings differ from the last clean preset snapshot. It is inserted near, but does not write into, the existing async status region. Treat it as a persistent unsaved-change cue, while the `role="status"` region remains reserved for save, load, delete, and auto-fit progress or result messages.
+The package entrypoint adds a separate dirty-state helper when the current editor settings differ from the last clean preset snapshot. It is inserted near, but does not write into, the existing async status region. Treat it as a persistent unsaved-change cue, while the `role="status"` region remains reserved for save, load, delete, reset, and auto-fit progress or result messages.
 
 Use dirty-state checks during browser QA:
 
@@ -89,6 +100,8 @@ Use this note together with the existing checklist entries rather than as a repl
 `spec/javascript/rails_table_preferences_entrypoint_spec.rb` also includes a behavior-level Node check for the package entrypoint. It verifies that search hides rows without removing them from editor settings, row movement is constrained to visible filtered rows, numeric order inputs are refreshed after a move, existing filters/sorts are preserved, and busy state disables every generated move button.
 
 `spec/javascript/rails_table_preferences_resize_auto_fit_status_spec.rb` guards the package entrypoint resize auto-fit feedback surface: the editor root exposes the localized status copy, auto-fit writes to the existing status region, pointer and keyboard auto-fit share the same path, and manual drag resize keeps clearing previous success feedback.
+
+`spec/javascript/rails_table_preferences_reset_feedback_spec.rb` guards the package entrypoint reset feedback surface: the editor root exposes reset result copy, reset completion uses the bundled status region, and the reset affordance is synchronized with the current default-state draft.
 
 `spec/javascript/rails_table_preferences_dirty_state_spec.rb` guards the package entrypoint dirty-state surface: package-only target/value exposure, separation from the async status region, and representative clean transitions after save, save as new, preset load, read-only save fallback, and preset delete.
 
