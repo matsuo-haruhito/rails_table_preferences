@@ -21,7 +21,7 @@ rails_table_preference_merged_params(params_source = params, **options)
 Available view helpers:
 
 ```ruby
-table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort")
+table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
 table_preferences_hidden_fields(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
 ```
 
@@ -164,7 +164,24 @@ Example output:
 <input type="hidden" name="q[s][]" value="delivery_date desc">
 ```
 
-`table_preferences_params` returns the same converted params as a Ruby hash when hidden fields are not needed.
+`table_preferences_params` returns the same converted params as a Ruby hash when hidden fields are not needed. Pass `namespace:` when a link, redirect, export URL, or custom query object needs Rails-style nested params instead of bracketed field names:
+
+```ruby
+table_preferences_params(
+  settings: @table_preference_settings,
+  columns: columns,
+  adapter: :ransack,
+  namespace: :q
+)
+# => {
+#   "q" => {
+#     "customer_name_cont" => "山田",
+#     "s" => ["delivery_date desc"]
+#   }
+# }
+```
+
+Leave `namespace:` unset when the existing search layer expects flat params. The nested form is only a wrapper around the adapter output; it does not change filter, sort, Ransack, or custom `sort_param:` semantics.
 
 ## Merging helper
 
@@ -207,6 +224,8 @@ ransack_params = rails_table_preference_params(
 @q = Order.ransack(params.fetch(:q, {}).to_unsafe_h.merge(ransack_params))
 @orders = @q.result
 ```
+
+For view-level helpers that build export links or redirects from already-resolved settings, `table_preferences_params(adapter: :ransack, namespace: :q)` can return the nested `{"q" => ...}` shape directly. Controller helpers keep returning the adapter params hash so the action can choose how to merge saved state with the current request.
 
 ## Explicit owner
 

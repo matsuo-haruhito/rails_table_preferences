@@ -35,6 +35,29 @@ RSpec.describe "rails_table_preferences TypeScript declarations" do
     )
   end
 
+  it "exports settings snapshot helper types from package declarations" do
+    controller_declaration = read_declaration("controller.d.ts")
+    index_declaration = read_declaration("index.d.ts")
+
+    expect(controller_declaration).to include(
+      "export interface RailsTablePreferencesColumnSnapshot",
+      "export interface RailsTablePreferencesColumnGroupSnapshot",
+      "export interface RailsTablePreferencesFilterSnapshot",
+      "export interface RailsTablePreferencesSortSnapshot",
+      "columns?: RailsTablePreferencesColumnSnapshot[]",
+      "filters?: Record<string, RailsTablePreferencesFilterSnapshot | unknown>",
+      "sorts?: RailsTablePreferencesSortSnapshot[]"
+    )
+
+    expect(index_declaration).to include(
+      "RailsTablePreferencesColumnSnapshot",
+      "RailsTablePreferencesColumnGroupSnapshot",
+      "RailsTablePreferencesFilterSnapshot",
+      "RailsTablePreferencesSortSnapshot",
+      "RailsTablePreferencesSettingsSnapshot"
+    )
+  end
+
   it "keeps lifecycle declarations focused on package event payloads" do
     controller_declaration = read_declaration("controller.d.ts")
 
