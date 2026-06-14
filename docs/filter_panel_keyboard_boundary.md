@@ -2,6 +2,8 @@
 
 This note covers the bundled filter panel keyboard boundary for the default Stimulus controller.
 
+It supplements `docs/javascript_controller.md` and `docs/manual_qa_pr_smoke_matrix.md` as a focused PR-evidence aid. It is not a package verification required doc. Keep it reachable from the neighboring controller and PR smoke guidance for filter-panel keyboard changes without promoting it into `PackageVerifier::REQUIRED_PATHS` unless it becomes a README or docs-index primary packaged documentation entrance.
+
 ## What the bundled controller provides
 
 The bundled filter panel is a lightweight, body-mounted panel opened from a table header filter button. It is not a modal dialog and does not install a full focus trap.
