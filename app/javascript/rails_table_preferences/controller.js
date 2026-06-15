@@ -36,7 +36,11 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   settingsFromEditor() {
-    if (!this.hasEditorRowsTarget) return this.settingsValue
+    const editorSettings = super.settingsFromEditor()
+    if (!this.hasEditorRowsTarget) {
+      return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+    }
+
     const columns = this.editorRows.map((row, index) => {
       const key = row.dataset.railsTablePreferencesColumnKey
       const current = this.columnByKey(key) || {}
@@ -50,7 +54,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         pinned: current.pinned === true
       })
     })
-    return { ...this.settingsValue, columns, filters: this.settingsValue?.filters || {}, sorts: this.settingsValue?.sorts || [] }
+    const settings = { ...editorSettings, columns, filters: editorSettings?.filters || {}, sorts: editorSettings?.sorts || [] }
+    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, settings) : settings
   }
 
   filterPanelId(columnKey) {
