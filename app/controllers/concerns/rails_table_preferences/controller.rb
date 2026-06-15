@@ -46,20 +46,16 @@ module RailsTablePreferences
     # adapter: :controller_params returns a plain params hash suitable for existing
     #   search(params) / order_by(params[:sort]) style controllers.
     # adapter: :ransack returns Ransack-compatible params.
-    def rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", fallback: {})
-      settings = rails_table_preference_settings(
-        table_key: table_key,
-        name: name,
-        owner: owner,
-        scope_context: scope_context,
-        fallback: fallback
-      )
-      rails_table_preference_adapter_params(
+    # namespace: wraps the converted params in a nested hash such as { "q" => ... }.
+    def rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", namespace: nil, fallback: {})
+      settings = rails_table_preference_settings(table_key: table_key, name: name, owner: owner, scope_context: scope_context, fallback: fallback)
+      adapter_params = rails_table_preference_adapter_params(
         adapter: adapter,
         settings: settings,
         columns: columns,
         sort_param: sort_param
       )
+      rails_table_preferences_namespace_params(adapter_params, namespace: namespace)
     end
 
     # Returns an ordered export payload for CSV, Excel, or report generation.
@@ -108,6 +104,12 @@ module RailsTablePreferences
       else
         raise ArgumentError, "Unsupported table preference adapter: #{adapter.inspect}"
       end
+    end
+
+    def rails_table_preferences_namespace_params(params_hash, namespace: nil)
+      return params_hash if namespace.blank?
+
+      { namespace.to_s => params_hash }
     end
 
     def rails_table_preferences_current_owner

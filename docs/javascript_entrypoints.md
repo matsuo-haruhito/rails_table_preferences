@@ -138,6 +138,8 @@ import { RailsTablePreferencesController as NamedRailsTablePreferencesController
 
 The package root also re-exports lifecycle event detail types such as `RailsTablePreferencesEventDetail` and `RailsTablePreferencesEventName`. When a TypeScript host app listens for package-entrypoint lifecycle events, keep the listener boundary local by narrowing the DOM event to `CustomEvent<RailsTablePreferencesEventDetail>` and use [Host app lifecycle events](javascript_controller.md#host-app-lifecycle-events) for the current typed example, event names, and action meanings.
 
+For settings snapshot helper types such as `RailsTablePreferencesSettingsSnapshot`, `RailsTablePreferencesColumnSnapshot`, `RailsTablePreferencesFilterSnapshot`, and `RailsTablePreferencesSortSnapshot`, use [TypeScript settings snapshot declarations](typescript_settings_snapshots.md). That focused guide is a package-entrypoint typing companion reached from this JavaScript entrypoint guide; it does not by itself make the snapshot guide a package-verifier required docs entrance.
+
 Those lifecycle event types describe the package entrypoint surface only. Host apps that register a copied or replacement controller should not import them as proof that the copied controller dispatches the same events unless that app has ported the package-entrypoint event behavior too.
 
 These packaged declarations intentionally stay narrow. They identify the exported Stimulus controller class and lifecycle event detail surface, but do not type every controller method, private implementation detail, copied-controller customization, or host-app replacement controller API.

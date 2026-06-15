@@ -108,6 +108,36 @@ RSpec.describe RailsTablePreferences::Controller do
       )
     end
 
+    it "can wrap controller params adapter output in a namespace" do
+      preference = instance_double(
+        RailsTablePreferences::Preference,
+        settings: {
+          filters: {
+            customer_name: { operator: :contains, value: "Yamada" },
+            status: { operator: :in, value: ["pending", "shipped"] },
+            archived: { operator: :equals, value: false }
+          },
+          sorts: [{ key: :delivery_date, direction: :asc }]
+        }
+      )
+      columns = [
+        { key: :customer_name, filter: { param: :search_word } },
+        { key: :status, filter: { values_param: :statuses } },
+        { key: :archived, filter: { param: :archived } },
+        { key: :delivery_date, sort_param: :delivery_on }
+      ]
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
+
+      expect(controller.rails_table_preference_params(table_key: :orders, name: :inspection, columns: columns, namespace: :filters)).to eq(
+        "filters" => {
+          "search_word" => "Yamada",
+          "statuses" => ["pending", "shipped"],
+          "archived" => false,
+          "sort" => :delivery_on
+        }
+      )
+    end
+
     it "uses fallback settings when no preference is resolved" do
       columns = [
         { key: :customer_name, filter: { param: :search_word } },
@@ -182,9 +212,55 @@ RSpec.describe RailsTablePreferences::Controller do
         "s" => ["delivery_date desc"]
       )
     end
+
+    it "can wrap Ransack adapter output in a namespace" do
+      preference = instance_double(
+        RailsTablePreferences::Preference,
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "Yamada" } },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        }
+      )
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
+
+      expect(controller.rails_table_preference_params(table_key: :orders, name: :inspection, columns: [], adapter: :ransack, namespace: :q)).to eq(
+        "q" => {
+          "customer_name_cont" => "Yamada",
+          "s" => ["delivery_date desc"]
+        }
+      )
+    end
   end
 
   describe "#rails_table_preference_merged_params" do
+    it "merges namespaced preference params into the provided params source" do
+      preference = instance_double(
+        RailsTablePreferences::Preference,
+        settings: {
+          filters: { customer_name: { operator: :contains, value: "Yamada" } },
+          sorts: [{ key: :delivery_date, direction: :desc }]
+        }
+      )
+      allow(RailsTablePreferences::Preference).to receive(:available_named_preference).and_return(preference)
+
+      expect(
+        controller.rails_table_preference_merged_params(
+          { page: "2", q: { "status_eq" => "pending" } },
+          table_key: :orders,
+          name: :inspection,
+          columns: [],
+          adapter: :ransack,
+          namespace: :q
+        )
+      ).to eq(
+        "page" => "2",
+        "q" => {
+          "customer_name_cont" => "Yamada",
+          "s" => ["delivery_date desc"]
+        }
+      )
+    end
+
     it "merges fallback-derived params over the base params" do
       columns = [
         { key: :customer_name, filter: { param: :search_word } },
