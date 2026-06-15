@@ -139,6 +139,22 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       expect(result[:ok]).to be(true)
     end
 
+    it "reports a missing top-level package types target separately from exports" do
+      result = package_verification_result(
+        packaged_files: package_entrypoint_files - ["app/javascript/rails_table_preferences/index.d.ts"],
+        javascript_files: {
+          "app/javascript/rails_table_preferences/index.js" => "export { default } from \"./controller\"\n",
+          "app/javascript/rails_table_preferences/controller.js" => "export default class RailsTablePreferencesController {}\n",
+          "app/javascript/rails_table_preferences/controller.d.ts" => "export default class RailsTablePreferencesController {}\n"
+        }
+      )
+
+      expect(result[:missing_package_export_targets]).to include(
+        { export: "package.json#types", target: "app/javascript/rails_table_preferences/index.d.ts" }
+      )
+      expect(result[:ok]).to be(false)
+    end
+
     it "reports packaged JavaScript entrypoints whose internal relative imports are missing" do
       result = package_verification_result(
         packaged_files: package_entrypoint_files - ["app/javascript/controllers/rails_table_preferences_controller.js"],
@@ -249,31 +265,36 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
     ]
   end
 
-  def package_verification_result(packaged_files:, javascript_files:)
+  def package_verification_result(packaged_files:, javascript_files:, package_json_metadata: default_package_json_metadata)
     verifier = described_class.new(gem_path: "pkg/rails_table_preferences-test.gem", required_paths: packaged_files)
 
     allow(verifier).to receive(:packaged_files).and_return(packaged_files.sort)
     allow(verifier).to receive(:packaged_file_contents) do |path|
       if path == "package.json"
-        JSON.generate(
-          "private" => true,
-          "version" => "0.0.0",
-          "exports" => {
-            "." => {
-              "types" => "./app/javascript/rails_table_preferences/index.d.ts",
-              "default" => "./app/javascript/rails_table_preferences/index.js"
-            },
-            "./controller" => {
-              "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
-              "default" => "./app/javascript/rails_table_preferences/controller.js"
-            }
-          }
-        )
+        JSON.generate(package_json_metadata)
       else
         javascript_files.fetch(path)
       end
     end
 
     verifier.call
+  end
+
+  def default_package_json_metadata
+    {
+      "private" => true,
+      "version" => "0.0.0",
+      "types" => "./app/javascript/rails_table_preferences/index.d.ts",
+      "exports" => {
+        "." => {
+          "types" => "./app/javascript/rails_table_preferences/index.d.ts",
+          "default" => "./app/javascript/rails_table_preferences/index.js"
+        },
+        "./controller" => {
+          "types" => "./app/javascript/rails_table_preferences/controller.d.ts",
+          "default" => "./app/javascript/rails_table_preferences/controller.js"
+        }
+      }
+    }
   end
 end
