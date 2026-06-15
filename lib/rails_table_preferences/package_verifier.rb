@@ -81,7 +81,6 @@ module RailsTablePreferences
       "docs/visual_overview.md",
       "docs/images/visual-overview-editor-and-table.svg",
       "docs/images/visual-overview-filter-and-pinned-columns.svg",
-      "docs/images/visual-overview-filter-and-pinned-columns.svg",
       "docs/demo.md",
       "docs/sandbox.md",
       "docs/examples.md",
