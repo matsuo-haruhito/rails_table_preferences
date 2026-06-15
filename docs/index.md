@@ -159,4 +159,4 @@ Host applications own:
 - renderer registrations and concrete form-helper HTML for filter/editor metadata
 - CSV, Excel, and report file generation
 - administration UI for shared, role, or organization presets
-- final styling and UI polish for the host app
+- final styling and UI polish

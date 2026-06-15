@@ -12,9 +12,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     editorSearchLabel: { type: String, default: "列を検索" },
     editorSearchPlaceholder: { type: String, default: "列名で絞り込み" },
     editorNoSearchResultsLabel: { type: String, default: "一致する列はありません。検索語を変更してください。" },
+    visibilityBulkHiddenStatusLabel: { type: String, default: "すべての列を非表示にしました。全列表示で戻せます。" },
+    visibilityBulkShownStatusLabel: { type: String, default: "すべての列を表示しました。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
+    resetStatusLabel: { type: String, default: "テーブル初期設定に戻しました。" },
     selectFilterOptionSearchThreshold: { type: Number, default: 8 },
     presetSearchLabel: { type: String, default: "保存済み設定を検索" },
     presetSearchPlaceholder: { type: String, default: "設定名やスコープで絞り込み" },
@@ -189,9 +192,142 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return ` placeholder="${this.escapeHtml(text)}"`
   }
 
+  filterInputAffordanceAttributes(filter, placeholder) {
+    const attributes = [this.filterPlaceholderAttribute(placeholder)]
+    if (["number", "date"].includes(this.filterInputType(filter))) {
+      attributes.push(this.filterInputAttribute("min", filter.min))
+      attributes.push(this.filterInputAttribute("max", filter.max))
+      attributes.push(this.filterInputAttribute("step", filter.step))
+    }
+    return attributes.join("")
+  }
+
+  filterInputAttribute(name, value) {
+    const text = String(value ?? "").trim()
+    if (!text) return ""
+    return ` ${name}="${this.escapeHtml(text)}"`
+  }
+
   connect() {
     this.statusState = "idle"
     super.connect()
+    this.syncResetButtonState()
+  }
+
+  buildDefaultSettings() {
+    const settings = super.buildDefaultSettings()
+    return { ...settings, columns: settings.columns.map((column) => this.withColumnWidthMetadata(column)) }
+  }
+
+  mergeSettings(defaultSettings, savedSettings) {
+    const settings = super.mergeSettings(defaultSettings, savedSettings)
+    return { ...settings, columns: settings.columns.map((column) => this.withColumnWidthMetadata(column)) }
+  }
+
+  settingsFromEditor() {
+    if (!this.hasEditorRowsTarget) return this.settingsValue
+    const columns = this.editorRows.map((row, index) => {
+      const key = row.dataset.railsTablePreferencesColumnKey
+      const current = this.columnByKey(key) || {}
+      return this.withColumnWidthMetadata({
+        ...current,
+        key,
+        visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
+        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? (index + 1) * 10,
+        width: this.clampColumnWidth(key, row.querySelector('[data-field="width"]')?.value),
+        truncate: this.integerValue(row.querySelector('[data-field="truncate"]')?.value),
+        pinned: current.pinned === true
+      })
+    })
+    return { ...this.settingsValue, columns, filters: this.settingsValue?.filters || {}, sorts: this.settingsValue?.sorts || [] }
+  }
+
+  syncEditorWidthInputs() {
+    if (!this.hasEditorRowsTarget) return
+    this.editorRows.forEach((row) => {
+      const column = this.columnByKey(row.dataset.railsTablePreferencesColumnKey)
+      const widthInput = row.querySelector('[data-field="width"]')
+      const width = this.clampColumnWidth(column?.key, column?.width)
+      if (widthInput && width) widthInput.value = String(width)
+    })
+  }
+
+  autoFitWidthForColumn(key) {
+    const cells = Array.from(this.cellsFor(key)).filter((cell) => !cell.hidden && cell.offsetParent !== null)
+    if (cells.length === 0) return null
+    const measured = Math.max(...cells.map((cell) => this.measureAutoFitCellWidth(cell))) + this.normalizedResizeAutoFitPadding
+    return this.clampColumnWidth(key, Math.ceil(measured), {
+      min: this.normalizedResizeAutoFitMinWidth,
+      max: this.normalizedResizeAutoFitMaxWidth
+    })
+  }
+
+  applyColumn(column) {
+    if (!column) return
+    super.applyColumn(this.columnWithClampedWidth(column))
+  }
+
+  syncPinnedColumnOffsets() {
+    let left = 0
+    this.orderedColumnsFromSettings.forEach((column) => {
+      const cells = Array.from(this.cellsFor(column.key))
+      if (column.pinned !== true || column.visible === false) {
+        cells.forEach((cell) => cell.style.removeProperty("--rails-table-preferences-pinned-left"))
+        return
+      }
+      cells.forEach((cell) => cell.style.setProperty("--rails-table-preferences-pinned-left", `${left}px`))
+      const firstVisibleCell = cells.find((cell) => !cell.hidden)
+      left += this.clampColumnWidth(column.key, column.width) || Math.round(firstVisibleCell?.getBoundingClientRect().width || 0)
+    })
+  }
+
+  columnWithClampedWidth(column) {
+    return { ...column, width: this.clampColumnWidth(column.key, column.width) }
+  }
+
+  withColumnWidthMetadata(column) {
+    const definition = this.columnDefinitions.find((candidate) => candidate.key === column.key) || {}
+    const minWidth = this.positiveIntegerValue(definition.min_width)
+    const maxWidth = this.positiveIntegerValue(definition.max_width)
+    const attributes = { ...column }
+
+    if (minWidth) attributes.min_width = minWidth
+    else delete attributes.min_width
+
+    if (maxWidth) attributes.max_width = maxWidth
+    else delete attributes.max_width
+
+    return attributes
+  }
+
+  columnWidthBounds(key, fallbacks = {}) {
+    const definition = this.columnDefinitions.find((column) => column.key === key) || {}
+    return {
+      min: this.positiveIntegerValue(definition.min_width) ?? this.positiveIntegerValue(fallbacks.min),
+      max: this.positiveIntegerValue(definition.max_width) ?? this.positiveIntegerValue(fallbacks.max)
+    }
+  }
+
+  get columnDefinitions() {
+    return Array.isArray(this.columnsValue) ? this.columnsValue : []
+  }
+
+  clampColumnWidth(key, width, fallbacks = {}) {
+    const value = this.positiveIntegerValue(width)
+    if (value === null) return null
+
+    const { min, max } = this.columnWidthBounds(key, fallbacks)
+    if (min !== null && max !== null && min > max) return min
+
+    let clamped = value
+    if (min !== null) clamped = Math.max(min, clamped)
+    if (max !== null) clamped = Math.min(max, clamped)
+    return clamped
+  }
+
+  positiveIntegerValue(value) {
+    const integer = this.integerValue(value)
+    return integer !== null && integer > 0 ? integer : null
   }
 
   applyFromEditor(event) {
@@ -199,6 +335,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const result = super.applyFromEditor(event)
     if (!wasBusy) {
       this.clearSuccessfulStatus()
+      this.syncResetButtonState()
       this.dispatchPreferenceEvent("applied", { action: "apply" })
     }
     return result
@@ -209,7 +346,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const result = super.resetEditor(event)
     if (!wasBusy) {
       this.clearEditorSearchQuery()
-      this.clearSuccessfulStatus()
+      this.setStatus(this.resetStatusLabelValue, "success")
+      this.syncResetButtonState()
       this.dispatchPreferenceEvent("applied", { action: "reset" })
     }
     return result
@@ -220,16 +358,36 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.ensureEditorSearchControl()
     this.syncEditorSearchResults()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   buildEditorRow(column) {
     const row = super.buildEditorRow(column)
     this.replaceEditorDragHandle(row)
-    row.addEventListener("input", () => this.clearSuccessfulStatus())
-    row.addEventListener("change", () => this.clearSuccessfulStatus())
-    row.dataset.railsTablePreferencesEditorSearchText = [column.label, column.key, column.group].filter(Boolean).join(" ").toLowerCase()
+    const syncEditorDraftState = () => {
+      this.clearSuccessfulStatus()
+      this.syncResetButtonState()
+    }
+    row.addEventListener("input", syncEditorDraftState)
+    row.addEventListener("change", syncEditorDraftState)
+    row.dataset.railsTablePreferencesEditorSearchText = this.editorSearchTextForColumn(column)
     row.insertBefore(this.buildEditorMoveControls(), row.querySelector(".rails-table-preferences-editor__visible"))
     return row
+  }
+
+  editorSearchTextForColumn(column) {
+    return [
+      column.label,
+      column.key,
+      ...this.editorSearchGroupTokens(column.group)
+    ].filter(Boolean).map((token) => String(token).toLowerCase()).join(" ")
+  }
+
+  editorSearchGroupTokens(group) {
+    if (!group) return []
+    if (Array.isArray(group)) return group.flatMap((item) => this.editorSearchGroupTokens(item))
+    if (typeof group === "object") return [group.key, group.label].filter(Boolean)
+    return [group]
   }
 
   replaceEditorDragHandle(row) {
@@ -260,7 +418,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const visibleInput = row.querySelector('[data-field="visible"]')
       if (visibleInput) visibleInput.checked = visible === true
     })
-    this.clearSuccessfulStatus()
+    this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, "success")
+    this.syncResetButtonState()
   }
 
   buildEditorMoveControls() {
@@ -303,6 +462,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.refreshEditorOrderInputs()
     this.syncEditorMoveButtons()
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   ensureEditorSearchControl() {
@@ -327,6 +487,9 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const empty = document.createElement("p")
     empty.className = "rails-table-preferences-editor__search-empty"
     empty.dataset.railsTablePreferencesEditorSearchEmpty = "true"
+    empty.setAttribute("role", "status")
+    empty.setAttribute("aria-live", "polite")
+    empty.setAttribute("aria-atomic", "true")
     empty.hidden = true
     empty.textContent = this.editorNoSearchResultsLabelValue
 
@@ -354,6 +517,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
     if (this.editorSearchEmptyMessage) this.editorSearchEmptyMessage.hidden = !query || visibleCount > 0
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   syncEditorMoveButtons() {
@@ -370,6 +534,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   setEditorRowsBusyState(busy) {
     super.setEditorRowsBusyState(busy)
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   get editorRowsForMovement() {
@@ -392,61 +557,78 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   dragEditorRowOver(event) {
     super.dragEditorRowOver(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   dropEditorRow(event) {
     super.dropEditorRow(event)
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   dragEditorRowEnd(event) {
     super.dragEditorRowEnd(event)
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   resizeColumn(event) {
-    super.resizeColumn(event)
+    if (this.busy || !this.resizingColumn) return
+    const measuredWidth = Math.round(this.resizingColumn.startWidth + event.clientX - this.resizingColumn.startX)
+    const width = this.clampColumnWidth(this.resizingColumn.key, measuredWidth, { min: 40 })
+    this.updateColumnSetting(this.resizingColumn.key, { width })
+    this.applyColumn(this.columnByKey(this.resizingColumn.key))
+    this.syncPinnedColumnOffsets()
+    this.syncEditorWidthInputs()
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   autoFitColumnFromHandle(event) {
     const wasBusy = this.busy
     const result = super.autoFitColumnFromHandle(event)
     if (!wasBusy) this.setStatus(this.resizeAutoFitStatusLabelValue, "success")
+    this.syncResetButtonState()
     return result
   }
 
   dragTableColumnOver(event) {
     super.dragTableColumnOver(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   dropTableColumn(event) {
     super.dropTableColumn(event)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   endTableColumnDrag(event) {
     super.endTableColumnDrag(event)
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
+    this.syncResetButtonState()
   }
 
   toggleSortFromHeader(event, cell, column) {
     super.toggleSortFromHeader(event, cell, column)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   applyFilterPanel(key, panel) {
     super.applyFilterPanel(key, panel)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   clearFilter(key) {
     super.clearFilter(key)
     this.clearSuccessfulStatus()
+    this.syncResetButtonState()
   }
 
   setStatus(message, state = "idle") {
@@ -466,6 +648,41 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.statusState === "success") this.setStatus("")
   }
 
+  syncResetButtonState() {
+    const button = this.resetEditorButton
+    if (!button) return
+    button.disabled = this.busy || this.editorMatchesDefaultSettings()
+  }
+
+  editorMatchesDefaultSettings() {
+    try {
+      return this.normalizedSettingsFingerprint(this.settingsFromEditor()) === this.normalizedSettingsFingerprint(this.defaultSettings)
+    } catch (_error) {
+      return false
+    }
+  }
+
+  normalizedSettingsFingerprint(settings = {}) {
+    const columns = Array.isArray(settings.columns) ? settings.columns.map((column) => ({
+      key: String(column.key || ""),
+      visible: column.visible === false ? false : true,
+      order: Number.isFinite(Number(column.order)) ? Number(column.order) : null,
+      width: Number.isFinite(Number(column.width)) ? Number(column.width) : null,
+      truncate: Number.isFinite(Number(column.truncate)) ? Number(column.truncate) : null,
+      pinned: column.pinned === true
+    })) : []
+
+    return JSON.stringify({
+      columns,
+      filters: settings.filters || {},
+      sorts: Array.isArray(settings.sorts) ? settings.sorts : []
+    })
+  }
+
+  get resetEditorButton() {
+    return this.element?.querySelector("[data-action~='rails-table-preferences#resetEditor']")
+  }
+
   async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
     if (this.busy) return null
     this.setBusyState(true)
@@ -480,6 +697,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return null
     } finally {
       this.setBusyState(false)
+      this.syncResetButtonState()
     }
   }
 
@@ -675,6 +893,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.syncResetButtonState()
   }
 
   clearFiltersAndSorts(event) {
@@ -683,6 +902,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
     this.closeFilterPanel()
     this.apply()
+    this.syncResetButtonState()
     this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })
   }
 
@@ -738,17 +958,33 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}${this.selectFilterOptionSearchHtml(filter.options)}<select data-field="values" multiple>${optionsHtml}</select></label>`
     }
 
+    if (["text", "number", "date"].includes(this.filterInputType(filter))) {
+      if (["blank", "present", "true", "false"].includes(selectedOperator)) return ""
+      if (selectedOperator === "between") {
+        const inputType = this.filterInputType(filter)
+        const fromAttributes = this.filterInputAffordanceAttributes(filter, filter.from_placeholder)
+        const toAttributes = this.filterInputAffordanceAttributes(filter, filter.to_placeholder)
+        return `
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterFromLabelValue)}<input type="${inputType}" data-field="from" value="${this.escapeHtml(condition.from ?? "")}"${fromAttributes}></label>
+          <label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterToLabelValue)}<input type="${inputType}" data-field="to" value="${this.escapeHtml(condition.to ?? "")}"${toAttributes}></label>
+        `
+      }
+
+      const attributes = this.filterInputAffordanceAttributes(filter, filter.placeholder)
+      return `<label class="rails-table-preferences-filter-panel__field">${this.escapeHtml(this.filterValueLabelValue)}<input type="${this.filterInputType(filter)}" data-field="value" value="${this.escapeHtml(condition.value ?? "")}"${attributes}></label>`
+    }
+
     return super.filterValueHtml(filter, condition, selectedOperator)
   }
 
   selectFilterOptionSearchHtml(options) {
-    if (!Array.isArray(options) || options.length < this.selectFilterOptionSearchThreshold) return ""
+    if (!Array.isArray(options) || options.length === 0 || options.length < this.selectFilterOptionSearchThreshold) return ""
 
     const searchLabel = this.selectFilterOptionSearchLabelValue || "候補を絞り込み"
     const searchPlaceholder = this.selectFilterOptionSearchPlaceholderValue || "候補を絞り込み"
     const label = `${this.filterValueLabelValue}: ${searchLabel}`
     const emptyLabel = "一致する候補はありません。選択済みの候補は表示したままです。"
-    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty aria-live="polite" hidden>${this.escapeHtml(emptyLabel)}</p>`
+    return `<input type="search" class="rails-table-preferences-filter-panel__option-search" data-field="option-search" aria-label="${this.escapeHtml(label)}" placeholder="${this.escapeHtml(searchPlaceholder)}"><p class="rails-table-preferences-filter-panel__option-search-empty" data-rails-table-preferences-option-search-empty role="status" aria-live="polite" aria-atomic="true" hidden>${this.escapeHtml(emptyLabel)}</p>`
   }
 
   installSelectFilterOptionSearch(panel) {
@@ -765,16 +1001,16 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   filterSelectOptionsBySearch(input, select, emptyMessage = null) {
     const query = String(input?.value || "").trim().toLocaleLowerCase()
-    let matchingUnselectedOptions = 0
+    let matchingOptions = 0
 
     Array.from(select?.options || []).forEach((option) => {
       const searchableText = `${option.textContent || ""} ${option.value || ""}`.toLocaleLowerCase()
       const matchesQuery = searchableText.includes(query)
-      if (matchesQuery && !option.selected) matchingUnselectedOptions += 1
+      if (matchesQuery) matchingOptions += 1
       option.hidden = Boolean(query) && !option.selected && !matchesQuery
     })
 
-    if (emptyMessage) emptyMessage.hidden = !query || matchingUnselectedOptions > 0
+    if (emptyMessage) emptyMessage.hidden = !query || matchingOptions > 0
   }
 
   selectFilterOptionValue(option) {

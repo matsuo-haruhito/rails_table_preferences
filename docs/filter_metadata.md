@@ -114,6 +114,8 @@ table_preferences_column(
 
 Placeholder values are escaped before they are written to the generated input attributes. They are only browser affordances; they do not change saved filter settings, controller params adapter output, validation, query execution, or filter summaries. Select filter prompts, visible hint text, and validation messages remain outside the bundled controller contract for this slice.
 
+For `number` and `date` filters that also need browser `min`, `max`, or `step` affordances, see [Filter input attributes](filter_input_attributes.md). Keep that guide as the companion reference for package-entrypoint input attributes rather than repeating the same browser-affordance boundary in this metadata overview.
+
 ## Richer widget rendering
 
 The bundled filter panel intentionally renders simple browser controls from neutral metadata. If a screen needs a date picker, autocomplete, Select2-style select, Rails Fields Kit helper, or another form-helper widget, keep that widget as host-app-owned HTML instead of treating the bundled filter panel as the widget dependency owner.
