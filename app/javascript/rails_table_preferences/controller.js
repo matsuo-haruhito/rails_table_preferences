@@ -36,8 +36,21 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   settingsFromEditor() {
-    const editorSettings = super.settingsFromEditor()
-    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+    if (!this.hasEditorRowsTarget) return this.settingsValue
+    const columns = this.editorRows.map((row, index) => {
+      const key = row.dataset.railsTablePreferencesColumnKey
+      const current = this.columnByKey(key) || {}
+      return this.withColumnWidthMetadata({
+        ...current,
+        key,
+        visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
+        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? (index + 1) * 10,
+        width: this.clampColumnWidth(key, row.querySelector('[data-field="width"]')?.value),
+        truncate: this.integerValue(row.querySelector('[data-field="truncate"]')?.value),
+        pinned: current.pinned === true
+      })
+    })
+    return { ...this.settingsValue, columns, filters: this.settingsValue?.filters || {}, sorts: this.settingsValue?.sorts || [] }
   }
 
   filterPanelId(columnKey) {
@@ -79,6 +92,104 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.installDirtyStateTracking()
     this.markEditorClean()
     this.syncResetButtonState()
+  }
+
+  buildDefaultSettings() {
+    const settings = super.buildDefaultSettings()
+    return { ...settings, columns: settings.columns.map((column) => this.withColumnWidthMetadata(column)) }
+  }
+
+  mergeSettings(defaultSettings, savedSettings) {
+    const settings = super.mergeSettings(defaultSettings, savedSettings)
+    return { ...settings, columns: settings.columns.map((column) => this.withColumnWidthMetadata(column)) }
+  }
+
+  syncEditorWidthInputs() {
+    if (!this.hasEditorRowsTarget) return
+    this.editorRows.forEach((row) => {
+      const column = this.columnByKey(row.dataset.railsTablePreferencesColumnKey)
+      const widthInput = row.querySelector('[data-field="width"]')
+      const width = this.clampColumnWidth(column?.key, column?.width)
+      if (widthInput && width) widthInput.value = String(width)
+    })
+  }
+
+  autoFitWidthForColumn(key) {
+    const cells = Array.from(this.cellsFor(key)).filter((cell) => !cell.hidden && cell.offsetParent !== null)
+    if (cells.length === 0) return null
+    const measured = Math.max(...cells.map((cell) => this.measureAutoFitCellWidth(cell))) + this.normalizedResizeAutoFitPadding
+    return this.clampColumnWidth(key, Math.ceil(measured), {
+      min: this.normalizedResizeAutoFitMinWidth,
+      max: this.normalizedResizeAutoFitMaxWidth
+    })
+  }
+
+  applyColumn(column) {
+    if (!column) return
+    super.applyColumn(this.columnWithClampedWidth(column))
+  }
+
+  syncPinnedColumnOffsets() {
+    let left = 0
+    this.orderedColumnsFromSettings.forEach((column) => {
+      const cells = Array.from(this.cellsFor(column.key))
+      if (column.pinned !== true || column.visible === false) {
+        cells.forEach((cell) => cell.style.removeProperty("--rails-table-preferences-pinned-left"))
+        return
+      }
+      cells.forEach((cell) => cell.style.setProperty("--rails-table-preferences-pinned-left", `${left}px`))
+      const firstVisibleCell = cells.find((cell) => !cell.hidden)
+      left += this.clampColumnWidth(column.key, column.width) || Math.round(firstVisibleCell?.getBoundingClientRect().width || 0)
+    })
+  }
+
+  columnWithClampedWidth(column) {
+    return { ...column, width: this.clampColumnWidth(column.key, column.width) }
+  }
+
+  withColumnWidthMetadata(column) {
+    const definition = this.columnDefinitions.find((candidate) => candidate.key === column.key) || {}
+    const minWidth = this.positiveIntegerValue(definition.min_width)
+    const maxWidth = this.positiveIntegerValue(definition.max_width)
+    const attributes = { ...column }
+
+    if (minWidth) attributes.min_width = minWidth
+    else delete attributes.min_width
+
+    if (maxWidth) attributes.max_width = maxWidth
+    else delete attributes.max_width
+
+    return attributes
+  }
+
+  columnWidthBounds(key, fallbacks = {}) {
+    const definition = this.columnDefinitions.find((column) => column.key === key) || {}
+    return {
+      min: this.positiveIntegerValue(definition.min_width) ?? this.positiveIntegerValue(fallbacks.min),
+      max: this.positiveIntegerValue(definition.max_width) ?? this.positiveIntegerValue(fallbacks.max)
+    }
+  }
+
+  get columnDefinitions() {
+    return Array.isArray(this.columnsValue) ? this.columnsValue : []
+  }
+
+  clampColumnWidth(key, width, fallbacks = {}) {
+    const value = this.positiveIntegerValue(width)
+    if (value === null) return null
+
+    const { min, max } = this.columnWidthBounds(key, fallbacks)
+    if (min !== null && max !== null && min > max) return min
+
+    let clamped = value
+    if (min !== null) clamped = Math.max(min, clamped)
+    if (max !== null) clamped = Math.min(max, clamped)
+    return clamped
+  }
+
+  positiveIntegerValue(value) {
+    const integer = this.integerValue(value)
+    return integer !== null && integer > 0 ? integer : null
   }
 
   disconnect() {
