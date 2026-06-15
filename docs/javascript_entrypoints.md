@@ -90,7 +90,7 @@ Do not assume those package-only values, overrides, events, or keyboard affordan
 The current contract boundary is:
 
 | Surface | Copied controller path | Package entrypoint path | Host-app guidance |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | Source ownership | Host app owns the generated `app/javascript/controllers/rails_table_preferences_controller.js` copy after install. | Gem owns `app/javascript/rails_table_preferences/controller.js`, which subclasses the copied-controller source shipped in the gem. The public `rails_table_preferences/controller` export resolves to `preset_select_recovery.js`, which subclasses that package controller. | Use the copied path when local patches are expected. Use the package entrypoint when the app wants packaged behavior updates through the gem, and point manual aliases at the current package export target. |
 | Filter operator labels | Uses the base controller defaults. A copied or replacement controller is needed for controller-side operator vocabulary changes not exposed by base values. | Adds `filterOperatorLabelsValue` so packaged-controller tables can override operator text through a root JSON value. | Use locale/root values for wording-only operator labels on the package path; use copied JavaScript for copied-controller or behavior changes. |
 | Sortable header `title` attributes | Base sort setup may replace generated title text while it manages sort hints. | Preserves host-provided nonblank `title` values and restores them after sort state sync. | Prefer the package entrypoint when host-rendered header titles must survive packaged sort controls. Validate copied-controller screens separately. |
