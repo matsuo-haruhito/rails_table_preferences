@@ -81,6 +81,7 @@ module RailsTablePreferences
       "docs/visual_overview.md",
       "docs/images/visual-overview-editor-and-table.svg",
       "docs/images/visual-overview-filter-and-pinned-columns.svg",
+      "docs/images/visual-overview-filter-and-pinned-columns.svg",
       "docs/demo.md",
       "docs/sandbox.md",
       "docs/examples.md",
@@ -148,7 +149,7 @@ module RailsTablePreferences
 
     def call
       missing = required_paths - packaged_files
-      missing_package_export_targets = package_export_targets.reject do |export_target|
+      missing_package_export_targets = package_target_entries.reject do |export_target|
         packaged_files.include?(export_target.fetch(:target))
       end
       missing_package_internal_imports = self.missing_package_internal_imports
@@ -184,6 +185,28 @@ module RailsTablePreferences
       @packaged_files ||= package_spec.files.sort
     end
 
+    def package_target_entries
+      @package_target_entries ||= (package_top_level_targets + package_export_targets).sort_by do |target|
+        [target.fetch(:export), target.fetch(:target)]
+      end
+    end
+
+    def package_top_level_targets
+      @package_top_level_targets ||= begin
+        return [] unless packaged_files.include?("package.json")
+
+        top_level_types_target = package_json["types"]
+        return [] unless top_level_types_target
+
+        unless top_level_types_target.is_a?(String)
+          package_json_errors << "package.json types must point to a string target"
+          return []
+        end
+
+        [{ export: "package.json#types", target: normalize_package_target(top_level_types_target) }]
+      end
+    end
+
     def package_export_targets
       @package_export_targets ||= begin
         return [] unless packaged_files.include?("package.json")
@@ -202,7 +225,7 @@ module RailsTablePreferences
     end
 
     def missing_package_relative_imports(extension:)
-      package_export_targets.flat_map do |export_target|
+      package_target_entries.flat_map do |export_target|
         entrypoint = export_target.fetch(:target)
         next [] unless entrypoint.end_with?(extension) && packaged_files.include?(entrypoint)
 
