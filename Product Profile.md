@@ -104,6 +104,7 @@ Start with these files when orienting yourself. This is a representative maintai
 - `README.md`: newcomer-facing overview, documentation entry points, supported versions, and installation basics.
 - `docs/index.md`: full documentation hub and recommended integration order.
 - `docs/production_integration_checklist.md`: short checklist for moving from a demo or quick start into a real host-app index screen.
+- `docs/production_troubleshooting.md`: symptom-driven checks for real host-app screens where save, reload, auth, CSRF, owner lookup, or stable table keys fail after the demo or quick start works.
 - `docs/install_paths.md`: generator option paths for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, and demo verification.
 - `docs/support_matrix.md`: Ruby/Rails requirements, representative CI coverage, and newer host-app verification guidance.
 - `docs/resource_tables.md`: resource table helper scope, profile overrides, renderer registrations, and TreeView/Rails Fields Kit integration boundaries.
