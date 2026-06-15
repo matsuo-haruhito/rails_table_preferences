@@ -224,7 +224,7 @@ module RailsTablePreferences
     end
 
     def missing_package_relative_imports(extension:)
-      package_target_entries.flat_map do |export_target|
+      package_target_entries.uniq { |export_target| export_target.fetch(:target) }.flat_map do |export_target|
         entrypoint = export_target.fetch(:target)
         next [] unless entrypoint.end_with?(extension) && packaged_files.include?(entrypoint)
 
