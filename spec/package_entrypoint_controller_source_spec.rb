@@ -45,6 +45,7 @@ RSpec.describe "package entrypoint controller source" do
     summary_body = controller_source.match(/\n\s+filterConditionSummary\(filter, condition = \{\}\) \{(?<body>.*?)\n\s+\}\n\n\s+selectFilterSummaryValues/m)&.[](:body)
 
     expect(summary_body).not_to be_nil
+    expect(controller_source).to include("const summary = this.filterConditionSummary(column?.filter || {}, condition)")
     expect(summary_body).to include('filter?.type !== "select" || !Array.isArray(filter.options)')
     expect(summary_body).to include("const values = this.selectFilterSummaryValues(condition)")
     expect(summary_body).to include("const labels = values.map((value) => this.selectFilterOptionSummaryLabel(filter, value))")
