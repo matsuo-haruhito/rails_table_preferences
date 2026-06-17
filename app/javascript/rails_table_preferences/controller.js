@@ -809,6 +809,13 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.installSelectFilterOptionSearch(panel)
   }
 
+  filterButtonLabel(column, condition = {}) {
+    const columnLabel = column?.label || column?.key || this.filterLabelValue
+    const baseLabel = `${this.filterLabelValue}: ${columnLabel}`
+    const summary = this.filterConditionSummary(column?.filter || {}, condition)
+    return summary ? `${baseLabel} (${summary})` : baseLabel
+  }
+
   filterConditionSummary(filter, condition = {}) {
     const summary = super.filterConditionSummary(filter, condition)
     if (filter?.type !== "select" || !Array.isArray(filter.options)) return summary
