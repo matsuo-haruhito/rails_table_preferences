@@ -809,6 +809,34 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.installSelectFilterOptionSearch(panel)
   }
 
+  filterConditionSummary(filter, condition = {}) {
+    const summary = super.filterConditionSummary(filter, condition)
+    if (filter?.type !== "select" || !Array.isArray(filter.options)) return summary
+
+    const operator = String(condition?.operator || "")
+    if (["blank", "present", "true", "false"].includes(operator)) return summary
+
+    const values = this.selectFilterSummaryValues(condition)
+    if (values.length === 0) return summary
+
+    const labels = values.map((value) => this.selectFilterOptionSummaryLabel(filter, value))
+    const operatorText = this.filterOperatorText(operator)
+    return [operatorText, labels.join(", ")].filter(Boolean).join(": ")
+  }
+
+  selectFilterSummaryValues(condition = {}) {
+    if (Array.isArray(condition.values)) return condition.values
+    if (condition.value !== undefined && condition.value !== null && String(condition.value) !== "") return [condition.value]
+    return []
+  }
+
+  selectFilterOptionSummaryLabel(filter, value) {
+    const rawValue = String(value ?? "")
+    const option = (filter.options || []).find((candidate) => this.selectFilterOptionValue(candidate) === rawValue)
+    if (!option) return rawValue
+    return this.selectFilterOptionLabel(option, rawValue)
+  }
+
   filterValueHtml(filter, condition, selectedOperator) {
     if (filter.type === "select" && Array.isArray(filter.options) && !["blank", "present", "true", "false"].includes(selectedOperator)) {
       const values = new Set(Array(condition.values || condition.value || []).map(String))
