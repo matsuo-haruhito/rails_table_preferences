@@ -812,12 +812,15 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   filterButtonLabel(column, condition = {}) {
     const columnLabel = column?.label || column?.key || this.filterLabelValue
     const baseLabel = `${this.filterLabelValue}: ${columnLabel}`
-    const summary = this.filterConditionSummary(column?.filter || {}, condition)
+    const filter = column?.filter || {}
+    const summary = filter.type === "select" && Array.isArray(filter.options)
+      ? this.filterConditionSummary(filter, condition)
+      : super.filterConditionSummary(condition)
     return summary ? `${baseLabel} (${summary})` : baseLabel
   }
 
   filterConditionSummary(filter, condition = {}) {
-    const summary = super.filterConditionSummary(filter, condition)
+    const summary = super.filterConditionSummary(condition)
     if (filter?.type !== "select" || !Array.isArray(filter.options)) return summary
 
     const operator = String(condition?.operator || "")
