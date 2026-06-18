@@ -62,6 +62,8 @@ The context keys are used in `title` / `aria-label` text so users can tell wheth
 
 The visibility bulk keys label the package entrypoint's bundled all-visible and all-hidden buttons. Those buttons toggle editor visibility checkboxes in bulk and still require apply or save before users persist or reflect the change. Keep that boundary in host-app copy so wording-only overrides do not imply a separate group-level visibility feature or an automatic save.
 
+The bundled partial also passes status copy for those buttons through `visibility_bulk_hidden_status` and `visibility_bulk_shown_status`. The packaged controller announces the result in the existing status region after toggling the checkboxes; apply or save remains a separate action.
+
 `delete_confirm` provides the base confirmation sentence. The bundled controller appends the selected preset display name from the preset selector, including any scope label already present in the option text, to the native confirmation message and the delete button's `title` / `aria-label`. Override the locale key for wording, and copy the controller only when the host app needs a different delete-confirmation composition or custom modal.
 
 The bundled reset action keeps its existing behavior: it discards unsaved editor changes and reapplies the table's default column settings from the current column definitions. It does not roll back to the preset that was last loaded from the selector. Host apps that need a "return to loaded preset" affordance should provide separate copy, markup, or controller behavior instead of reusing the bundled reset wording.
@@ -164,7 +166,11 @@ The bundled editor exposes a live status region for async preset actions. These 
 - `rails_table_preferences.editor.deleted_status`
 - `rails_table_preferences.editor.deleting_failed_status`
 - `rails_table_preferences.editor.operation_failed_status`
+- `rails_table_preferences.editor.visibility_bulk_hidden_status`
+- `rails_table_preferences.editor.visibility_bulk_shown_status`
 - `rails_table_preferences.editor.resize_auto_fit_status`
+
+`visibility_bulk_hidden_status` and `visibility_bulk_shown_status` are package-entrypoint-only success messages for the bundled Hide all columns and Show all columns buttons. They feed `data-rails-table-preferences-visibility-bulk-hidden-status-label-value` and `data-rails-table-preferences-visibility-bulk-shown-status-label-value`, and are shown in the same status region after the bulk checkbox update completes.
 
 `resize_auto_fit_status` is package-entrypoint-only success copy for Enter / Space auto-fit on a focused resize handle. It feeds `data-rails-table-preferences-resize-auto-fit-status-label-value` and is shown in the same status region after the one-shot auto-fit shortcut completes.
 
@@ -184,6 +190,8 @@ ja:
       show_all_columns: 全列表示
       hide_all_columns: 全列非表示
       visibility_bulk_action_group: 列の表示をまとめて切り替える操作
+      visibility_bulk_hidden_status: すべての列を非表示にしました。全列表示で戻せます。
+      visibility_bulk_shown_status: すべての列を表示しました。
       search_columns: 表示列を検索
       search_columns_placeholder: 列名・キー・グループで絞り込み
       no_search_results: 一致する列がありません。
