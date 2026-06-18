@@ -46,7 +46,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Legacy `ColumnAdjustment` import rake task.
 - Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, manual QA PR smoke matrix, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
 - Pull request template guidance for automated verification, manual QA, UI/visual evidence, representative surfaces, focused viewport/state checks, and browser-capture handoff.
-- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and Rails 8.0.
+- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 - Package verification now checks the packaged `package.json` top-level `types` target and reports it as `package.json#types` when missing.
 
@@ -73,6 +73,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 
 - Generator task loading works when the gem is used from a host Rails app.
 - Generated migration index names avoid database identifier length issues.
+- Rails 7.0 / Ruby 3.1 pull-request compatibility checks avoid `i18n` 1.15.x because that dependency line requires Fiber storage APIs unavailable on Ruby 3.1.
 - Engine route names avoid duplicate route name conflicts in the test app.
 - Private `current_user` methods are supported.
 - Saved filter/sort state survives editor apply operations.
