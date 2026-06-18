@@ -48,6 +48,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Pull request template guidance for automated verification, manual QA, UI/visual evidence, representative surfaces, focused viewport/state checks, and browser-capture handoff.
 - GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and Rails 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
+- Package verification now checks the packaged `package.json` top-level `types` target and reports it as `package.json#types` when missing.
 
 ### Changed
 

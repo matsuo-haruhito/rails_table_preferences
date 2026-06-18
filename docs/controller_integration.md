@@ -13,7 +13,7 @@ Available controller helpers:
 ```ruby
 rails_table_preference(table_key:, name: nil, owner: nil, scope_context: nil)
 rails_table_preference_settings(table_key:, name: nil, owner: nil, scope_context: nil, fallback: {})
-rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort")
+rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", namespace: nil)
 rails_table_preference_export_payload(table_key:, columns:, name: nil, owner: nil, scope_context: nil, include_hidden: false, fallback: {})
 rails_table_preference_merged_params(params_source = params, **options)
 ```
@@ -21,7 +21,7 @@ rails_table_preference_merged_params(params_source = params, **options)
 Available view helpers:
 
 ```ruby
-table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort")
+table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
 table_preferences_hidden_fields(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
 ```
 
@@ -116,6 +116,30 @@ preference_params = rails_table_preference_params(
 )
 ```
 
+Use `namespace:` when the existing search layer expects nested params such as Ransack's `q` or a custom search object key:
+
+```ruby
+preference_params = rails_table_preference_params(
+  table_key: :warehouse_stocks,
+  columns: columns,
+  adapter: :ransack,
+  namespace: :q
+)
+```
+
+Example output:
+
+```ruby
+{
+  "q" => {
+    "customer_name_cont" => "山田",
+    "s" => ["delivery_date desc"]
+  }
+}
+```
+
+`namespace:` only wraps the converted adapter params in a top-level hash. It does not change filter operators, Ransack predicate expansion, saved settings shape, or export payloads.
+
 ## Hidden fields for existing search forms
 
 Use `table_preferences_hidden_fields` when a normal search form should submit saved preference filters/sorts alongside user-entered search params.
@@ -164,7 +188,24 @@ Example output:
 <input type="hidden" name="q[s][]" value="delivery_date desc">
 ```
 
-`table_preferences_params` returns the same converted params as a Ruby hash when hidden fields are not needed.
+`table_preferences_params` returns the same converted params as a Ruby hash when hidden fields are not needed. Pass `namespace:` when a link, redirect, export URL, or custom query object needs Rails-style nested params instead of bracketed field names:
+
+```ruby
+table_preferences_params(
+  settings: @table_preference_settings,
+  columns: columns,
+  adapter: :ransack,
+  namespace: :q
+)
+# => {
+#   "q" => {
+#     "customer_name_cont" => "山田",
+#     "s" => ["delivery_date desc"]
+#   }
+# }
+```
+
+Leave `namespace:` unset when the existing search layer expects flat params. The nested form is only a wrapper around the adapter output; it does not change filter, sort, Ransack, or custom `sort_param:` semantics.
 
 ## Merging helper
 
@@ -185,6 +226,22 @@ Saved preference params override existing params when keys overlap. The helper i
 
 Use the helper when the selected preset should be authoritative for filter/sort keys. When the current request should stay authoritative, build the hash explicitly instead, for example by merging in the opposite order or deleting the saved keys that the search form owns before calling the host application's search method.
 
+`namespace:` is passed through to `rails_table_preference_params(...)`, so the top-level namespace key also follows the same merge rule:
+
+```ruby
+merged_params = rails_table_preference_merged_params(
+  params,
+  table_key: :orders,
+  columns: columns,
+  adapter: :ransack,
+  namespace: :q
+)
+
+@q = Order.ransack(merged_params.fetch("q", {}))
+```
+
+If the incoming `params[:q]` should be combined with saved preference values instead of replaced by them, build that nested merge explicitly in the host app. Rails Table Preferences keeps the helper predictable by applying one top-level merge.
+
 ## Pagination and page params
 
 Rails Table Preferences does not decide when a paginated list should reset to the first page. If a saved filter or sort changes the effective result set while the request still carries an old `page` param, the host application's paginator can legitimately render an empty page even though matching records exist on earlier pages.
@@ -195,18 +252,36 @@ When the form should keep the current page, submit `page` explicitly as part of 
 
 ## Ransack controllers
 
-Use `adapter: :ransack` when the host application already uses Ransack:
+Use `adapter: :ransack` when the host application already uses Ransack. Pass `namespace: :q` when you want controller helpers to return the same top-level params shape that a Ransack search form submits:
 
 ```ruby
-ransack_params = rails_table_preference_params(
+preference_params = rails_table_preference_params(
   table_key: :orders,
   columns: columns,
-  adapter: :ransack
+  adapter: :ransack,
+  namespace: :q
 )
 
-@q = Order.ransack(params.fetch(:q, {}).to_unsafe_h.merge(ransack_params))
+@q = Order.ransack(preference_params.fetch("q", {}))
 @orders = @q.result
 ```
+
+If the action already has request params that should stay in the result hash, use the merging helper:
+
+```ruby
+merged_params = rails_table_preference_merged_params(
+  params,
+  table_key: :orders,
+  columns: columns,
+  adapter: :ransack,
+  namespace: :q
+)
+
+@q = Order.ransack(merged_params.fetch("q", {}))
+@orders = @q.result
+```
+
+For view-level helpers that build export links or redirects from already-resolved settings, `table_preferences_params(adapter: :ransack, namespace: :q)` can return the nested `{"q" => ...}` shape directly. Controller helpers keep returning the adapter params hash so the action can choose how to merge saved state with the current request.
 
 ## Explicit owner
 
@@ -287,6 +362,7 @@ Rails Table Preferences is responsible for:
 - resolving the saved preference
 - normalizing settings
 - converting saved filter/sort settings to params
+- wrapping converted params in an optional top-level namespace key
 - returning an ordered export payload from saved display settings
 - rendering optional hidden fields for existing forms
 
@@ -299,5 +375,6 @@ The host application remains responsible for:
 - business-specific search behavior
 - deciding whether saved filter/sort changes should clear or clamp pagination params
 - deciding whether saved filter/sort params or user-entered request params win when the same key appears from both sources
+- deciding whether nested search params should be replaced or explicitly deep-merged for a screen
 - CSV, Excel, or report file generation
 - admin UI and permission checks for shared, role, or organization presets

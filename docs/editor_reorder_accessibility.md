@@ -7,6 +7,7 @@ This note documents the package-entrypoint behavior for the column editor reorde
 - Pointer users can still use row drag-and-drop through the editor row behavior.
 - Keyboard users should use the package entrypoint's up/down row buttons or the numeric order field, then apply the editor changes.
 - The row drag handle is a visual affordance in the package entrypoint. It is not exposed as an actionable keyboard control because it does not perform a discrete button action.
+- The up/down move buttons keep their localized `aria-label` and `title` as the accessible name. The visible `↑` / `↓` glyphs are compact visual cues for the same actions, not separate labels or icon-system semantics.
 
 ## Copied-controller boundary
 
@@ -23,6 +24,7 @@ Host applications that expose the copied controller directly should choose one o
 - No new keyboard drag-and-drop shortcut model.
 - No table header drag-and-drop changes.
 - No drag-and-drop library changes.
+- No icon system or row action redesign.
 - No API, persistence, authorization, or server behavior changes.
 
 ## QA notes
@@ -31,3 +33,4 @@ Host applications that expose the copied controller directly should choose one o
 - Up/down buttons move rows with the keyboard and pointer.
 - The numeric order field still supports manual order changes before applying.
 - The visual drag handle is not announced as an actionable control in the package entrypoint.
+- In forced-colors or high-contrast checks, confirm the move button glyphs remain visible enough as compact cues while the control name still comes from the localized label.
