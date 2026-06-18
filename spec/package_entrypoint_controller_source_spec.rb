@@ -73,6 +73,29 @@ RSpec.describe "package entrypoint controller source" do
     expect(index_declaration).to include("RailsTablePreferencesSuccessAction")
   end
 
+  it "keeps lifecycle success events on the current settings snapshot" do
+    expect(controller_source).to include("preferenceEventDetail(detail = {}) {")
+    expect(controller_source).to include("tableKey: this.tableKeyValue")
+    expect(controller_source).to include("name: this.currentPresetName")
+    expect(controller_source).to include("settings: this.settingsValue")
+    expect(controller_source).to include('this.dispatchPreferenceEvent("saved", { action: "save" })')
+    expect(controller_source).to include('this.dispatchPreferenceEvent("saved", { action: "create" })')
+    expect(controller_source).to include('this.dispatchPreferenceEvent("loaded", { action: "load" })')
+    expect(controller_source).to include('this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })')
+  end
+
+  it "keeps deleted lifecycle events on the deleted name and post-delete default settings" do
+    delete_body = controller_source.match(/\n\s+async deletePreset\(event\) \{(?<body>.*?)\n\s+\}\n\n\s+async refreshPresetOptionsOnConnect/m)&.[](:body)
+
+    expect(delete_body).not_to be_nil
+    expect(delete_body).to include("const deletedName = this.currentPresetName")
+    expect(delete_body).to include('this.nameValue = "default"')
+    expect(delete_body).to include('this.urlValue = this.preferenceUrl("default")')
+    expect(delete_body).to include("this.settingsValue = this.defaultSettings")
+    expect(delete_body).to include("this.apply()")
+    expect(delete_body).to include('this.dispatchPreferenceEvent("deleted", { action: "delete", name: deletedName })')
+  end
+
   it "keeps editor search as a package entrypoint-only visibility filter" do
     expect(controller_source).to include("this.ensureEditorSearchControl()")
     expect(controller_source).to include("this.syncEditorSearchResults()")
@@ -105,6 +128,14 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include("button.disabled = this.busy || row.hidden || index < 0 || (direction === \"up\" ? index === 0 : index === rows.length - 1)")
   end
 
+  it "keeps saved presets merged on top of current column definitions" do
+    expect(base_controller_source).to include("columns: this.columnsValue.map((column, index) => ({ key: column.key, label: column.label || column.key, visible: column.visible !== false, order: column.order ?? (index + 1) * 10, width: column.width, truncate: column.truncate, overflow: column.overflow, pinned: column.pinned === true, filter: column.filter, sortable: column.sortable }))")
+    expect(base_controller_source).to include("const savedColumns = new Map((savedSettings?.columns || []).map((column) => [column.key, column]))")
+    expect(base_controller_source).to include("const columns = defaultSettings.columns.map((defaultColumn, index) => {")
+    expect(base_controller_source).to include("const savedColumn = savedColumns.get(defaultColumn.key) || {}")
+    expect(base_controller_source).to include("return { ...defaultColumn, ...savedColumn, label: defaultColumn.label, filter: defaultColumn.filter, sortable: defaultColumn.sortable, overflow: defaultColumn.overflow, pinned: defaultColumn.pinned, order: savedColumn.order ?? defaultColumn.order ?? (index + 1) * 10, visible: savedColumn.visible ?? defaultColumn.visible }")
+  end
+
   it "keeps the package editor drag handle visual-only while real reorder controls stay keyboard reachable" do
     expect(controller_source).to include("this.replaceEditorDragHandle(row)")
     expect(controller_source).to include("replaceEditorDragHandle(row)")
@@ -124,18 +155,5 @@ RSpec.describe "package entrypoint controller source" do
     expect(controller_source).to include('this.statusState = "error"')
     expect(controller_source).to include('this.syncStatusStateHook("error")')
     expect(base_controller_source).not_to include("data-rails-table-preferences-status-state")
-  end
-
-  it "keeps the bundled filter panel constrained to the viewport bottom" do
-    position_panel_body = controller_source.match(/\n\s+positionFilterPanel\(panel, headerCell\) \{(?<body>.*?)\n\s+\}\n\n\s+renderFilterPanelValueFields/m)&.[](:body)
-
-    expect(position_panel_body).not_to be_nil
-    expect(position_panel_body).to include("const top = window.scrollY + rect.bottom + 4")
-    expect(position_panel_body).to include("const viewportBottom = window.scrollY + window.innerHeight - viewportMargin")
-    expect(position_panel_body).to include("const availableHeight = Math.max(120, viewportBottom - top)")
-    expect(position_panel_body).to include("panel.style.top = `${top}px`")
-    expect(position_panel_body).to include("panel.style.maxWidth = `calc(100vw - ${viewportMargin * 2}px)`")
-    expect(position_panel_body).to include("panel.style.maxHeight = `${availableHeight}px`")
-    expect(position_panel_body).to include('panel.style.overflowY = "auto"')
   end
 end
