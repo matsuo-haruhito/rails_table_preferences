@@ -1,10 +1,10 @@
 # JavaScript entrypoints
 
-Rails Table Preferences ships two JavaScript integration paths for the bundled Stimulus controller.
+Rails Table Preferences ships two JavaScript integration paths for the bundled Stimulus controller. Stylesheet loading is intentionally documented here because Vite/package-entrypoint users often choose JavaScript registration and CSS loading at the same time, but the current package entrypoint is still JavaScript-only.
 
 ## Source-of-truth role
 
-This guide is the reader-facing source of truth for the JavaScript public surface that host apps import or copy. Keep package-root imports, the `rails_table_preferences/controller` direct import, the copied `app/javascript/controllers/rails_table_preferences_controller.js` path, and the package-only controller boundary synchronized here before downstream apps use a new gem revision as evidence.
+This guide is the reader-facing source of truth for the JavaScript public surface that host apps import or copy, plus the boundary for stylesheet loading when a host app uses a package entrypoint. Keep package-root imports, the `rails_table_preferences/controller` direct import, the copied `app/javascript/controllers/rails_table_preferences_controller.js` path, and the package-only controller boundary synchronized here before downstream apps use a new gem revision as evidence.
 
 Rails Table Preferences does not currently maintain a TreeView-style machine-readable public API manifest. The first guard family is this guide plus `package.json`, the JavaScript entrypoint smoke specs, and package verification. Consider a manifest only if helper option sets, lifecycle event details, or additional JavaScript exports grow beyond what this guide and the existing package checks can keep clear.
 
@@ -62,9 +62,11 @@ Host apps should rely on the documented `exports` specifiers, `rails_table_prefe
 
 The package entrypoint controls JavaScript registration only. The packaged `package.json` currently exports `rails_table_preferences` and `rails_table_preferences/controller`; it does not export a CSS subpath such as `rails_table_preferences/styles.css`.
 
-If the host app uses `rails_table_preferences/controller` and keeps the generated stylesheet, load the copied `app/assets/stylesheets/rails_table_preferences.css` through the host app's normal asset path. If the host app also uses `--skip-stylesheets`, Rails Table Preferences will not provide a bundler CSS import for that screen; the host app owns equivalent CSS for the editor, table state cues, resize handles, fixed-column hooks, and any local theme integration.
+If the host app uses `rails_table_preferences/controller` and keeps the generated stylesheet, load the copied `app/assets/stylesheets/rails_table_preferences.css` through the host app's normal Rails asset path. Moving JavaScript registration to the package entrypoint does not also move stylesheet loading into a package import.
 
-Treat a future CSS subpath export as a separate feature decision. It would need `package.json` exports, package verification evidence, release checklist wording, and host-app bundler smoke coverage to move together instead of being inferred from the JavaScript entrypoint.
+If the host app also uses `--skip-stylesheets`, Rails Table Preferences does not provide a bundler CSS import for that screen today. The host app should either keep a copied stylesheet, load equivalent app-owned CSS, or consciously own CSS parity for the editor, table state cues, resize handles, fixed-column hooks, and local theme integration.
+
+Do not add a manual resolver alias for `rails_table_preferences/styles.css` as if it were current public API. Treat a future CSS subpath export as a separate feature decision. It would need `package.json` exports, package verification evidence, release checklist wording, and host-app bundler smoke coverage to move together instead of being inferred from the JavaScript entrypoint.
 
 ### Package-only controller boundary
 
@@ -148,15 +150,15 @@ If the host app uses an older gem version without packaged declarations, or if i
 
 ## Choosing between copied assets and the package entrypoint
 
-Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, already depends on copied JavaScript for behavior changes that are not exposed through controller-root values, or needs the generated controller and package entrypoint to have exactly the same behavior until a parity follow-up is implemented.
+Keep the copied controller and stylesheet path when the host app is a conventional `stimulus-rails` app, wants to inspect or patch the generated files locally, already depends on copied JavaScript for behavior changes that are not exposed through controller-root values, already depends on copied CSS for layout/theme changes, or needs the generated controller and package entrypoint to have exactly the same behavior until a parity follow-up is implemented.
 
 Prefer the package entrypoint when the host app starts Stimulus from Vite, `app/frontend`, or another bundled JavaScript entrypoint, or when the app wants to pick up packaged controller improvements without refreshing a copied controller file. Use `--skip-javascript` for this path so the generator still creates the migration and initializer while leaving controller registration to the host app entrypoint.
 
 This path is also the lighter choice for wording and label changes that can stay in Rails locale files or controller-root values such as `data-rails-table-preferences-filter-operator-labels-value`.
 
-Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass.
+Do not treat the package entrypoint as a replacement for every customization. Host apps still need copied ERB when markup, helper-text placement, or status-region structure changes. Host apps still need copied or replacement JavaScript when they change controller behavior, add new operator semantics, or use a registration path that intentionally does not include the packaged subclass. Host apps still need copied or app-owned CSS when they want product-specific density, branding, sticky-layout polish, or theme integration beyond the shipped baseline.
 
-The stylesheet decision remains separate from the controller decision. Keeping the copied stylesheet is the current default even when JavaScript registration moves to the package entrypoint. If the host app skips the stylesheet, it owns CSS parity evidence for editor layout, table state cues, resize handles, fixed-column hooks, and any local theme overrides.
+The stylesheet decision remains separate from the controller decision. Keeping the copied stylesheet is the current default even when JavaScript registration moves to the package entrypoint. If the host app skips the stylesheet, it owns CSS parity evidence for editor layout, table state cues, resize handles, fixed-column hooks, and any local theme overrides. A package CSS subpath may be added later, but it is not part of the current package entrypoint contract.
 
 ## Moving from a copied controller to the package entrypoint
 
@@ -173,7 +175,7 @@ When an existing host app moves from the copied controller to `rails_table_prefe
 - Host-app listeners that depend on Rails Table Preferences lifecycle events have been checked against the package entrypoint, not only a copied controller registration.
 - Screens that rely on package-only sortable-title preservation or resize-handle keyboard auto-fit have manual checks covering those behaviors after the registration switch.
 
-After switching registration, re-run the manual checks for editor load, preset save/load/delete, lifecycle event listeners, filter panels, sort controls, resize handles, Turbo reconnects, and any screen-specific label overrides.
+After switching registration, re-run the manual checks for editor load, preset save/load/delete, lifecycle event listeners, filter panels, sort controls, resize handles, Turbo reconnects, stylesheet loading through the host app's chosen non-package path, and any screen-specific label overrides.
 
 ## Turbo Drive and Turbo Frame checks
 
