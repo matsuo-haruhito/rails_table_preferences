@@ -2,6 +2,12 @@
 
 Rails Table Preferences ships two JavaScript integration paths for the bundled Stimulus controller.
 
+## Source-of-truth role
+
+This guide is the reader-facing source of truth for the JavaScript public surface that host apps import or copy. Keep package-root imports, the `rails_table_preferences/controller` direct import, the copied `app/javascript/controllers/rails_table_preferences_controller.js` path, and the package-only controller boundary synchronized here before downstream apps use a new gem revision as evidence.
+
+Rails Table Preferences does not currently maintain a TreeView-style machine-readable public API manifest. The first guard family is this guide plus `package.json`, the JavaScript entrypoint smoke specs, and package verification. Consider a manifest only if helper option sets, lifecycle event details, or additional JavaScript exports grow beyond what this guide and the existing package checks can keep clear.
+
 ## Default stimulus-rails path
 
 The install generator copies the bundled controller into the host application:
@@ -131,6 +137,8 @@ import { RailsTablePreferencesController as NamedRailsTablePreferencesController
 ```
 
 The package root also re-exports lifecycle event detail types such as `RailsTablePreferencesEventDetail` and `RailsTablePreferencesEventName`. When a TypeScript host app listens for package-entrypoint lifecycle events, keep the listener boundary local by narrowing the DOM event to `CustomEvent<RailsTablePreferencesEventDetail>` and use [Host app lifecycle events](javascript_controller.md#host-app-lifecycle-events) for the current typed example, event names, and action meanings.
+
+For settings snapshot helper types such as `RailsTablePreferencesSettingsSnapshot`, `RailsTablePreferencesColumnSnapshot`, `RailsTablePreferencesFilterSnapshot`, and `RailsTablePreferencesSortSnapshot`, use [TypeScript settings snapshot declarations](typescript_settings_snapshots.md). That focused guide is a package-entrypoint typing companion reached from this JavaScript entrypoint guide; it does not by itself make the snapshot guide a package-verifier required docs entrance.
 
 Those lifecycle event types describe the package entrypoint surface only. Host apps that register a copied or replacement controller should not import them as proof that the copied controller dispatches the same events unless that app has ported the package-entrypoint event behavior too.
 

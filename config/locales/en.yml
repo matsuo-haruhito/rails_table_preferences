@@ -26,6 +26,8 @@ en:
       maintenance_action_group: Actions that delete saved settings or reset to defaults
       visibility_bulk_action_group: Actions that update column visibility in bulk
       visibility_bulk_hint: Show all and hide all toggle every column visibility checkbox, including rows temporarily hidden by column search. Apply or save to use the changes. These actions do not toggle only search results or columns by group.
+      visibility_bulk_hidden_status: All columns are hidden. Use Show all columns to restore them.
+      visibility_bulk_shown_status: All columns are visible again.
       show_all_columns: Show all columns
       hide_all_columns: Hide all columns
       show_all_columns_hint: Show only hidden columns again while keeping column order, widths, filters, and sorts. Saving is a separate action.
@@ -47,6 +49,7 @@ en:
       deleted_status: Saved settings deleted.
       deleting_failed_status: Could not finish deleting the saved preset.
       operation_failed_status: Could not complete the table preference action.
+      reset_status: Table defaults restored.
       reset: Reset to table defaults
       reset_hint: Discard unsaved display changes and return to the table's default column settings, not the loaded preset.
       reset_visible_hint: Resetting returns to the table defaults and discards unsaved changes. It does not roll back to the loaded preset.

@@ -54,6 +54,8 @@ end
 
 `export_keys` is ordered value-extraction metadata, not an authorization allowlist. Keep the extraction map, serializer, policy check, or explicit case statement in the host app so saved display preferences cannot call arbitrary model methods.
 
+`export_keys`, `column_keys`, and `headers` also do not sanitize cell values for spreadsheet software. If a CSV or Excel export can be opened by spreadsheet apps, neutralize formula-like values such as cells beginning with `=`, `+`, `-`, or `@` in the host app's serializer or exporter before writing the file. Keep that escaping near the value formatter so the policy is visible alongside authorization and sensitive-column checks.
+
 The returned payload contains:
 
 ```ruby
@@ -139,6 +141,8 @@ end
 
 This example intentionally keeps file generation, value extraction, and authorization policy in the host app. Rails Table Preferences only provides ordered column metadata and the selected preset name.
 
+The sample writes extracted values directly for clarity. Production CSV or Excel exporters should pass each cell value through the host app's serializer or spreadsheet-safe formatter before `csv << ...` when formula-like user-controlled values are possible.
+
 ## How to use each payload key
 
 - `headers`: write the exported header row in the same order the user sees in the table.
@@ -149,6 +153,8 @@ This example intentionally keeps file generation, value extraction, and authoriz
 When the host app already has a serializer or report object keyed by the displayed table columns, `column_keys` is often the smallest integration surface. When value extraction needs a different method or attribute, use `export_keys` directly or read `export_key` from each `columns` entry when extra metadata is needed.
 
 Do not treat `column_keys` or `export_keys` as permission checks by themselves. Both arrays come from the table preference surface. The host app should still apply an export allowlist, serializer, or policy-aware extractor before reading values.
+
+Likewise, `headers`, `column_keys`, and `export_keys` are not spreadsheet safety controls. They decide which columns and extraction keys are used, while the host app's exporter decides how to escape or neutralize cell values for CSV, Excel, or another report format.
 
 ## Direct object usage
 
@@ -303,6 +309,7 @@ The host application owns:
 - query execution
 - CSV/Excel/report file generation
 - formatting values
+- neutralizing spreadsheet formula-like values before writing CSV or Excel cells
 - deciding whether hidden columns should be exportable
 - maintaining the allowlist or policy for exportable columns
 - deciding whether sensitive columns should ever be selected or rendered
