@@ -3,4 +3,6 @@ source "https://rubygems.org"
 gemspec path: ".."
 
 gem "rails", "~> 7.0.8"
+# i18n 1.15.x uses Fiber storage APIs that are not available in Ruby 3.1.
+gem "i18n", "< 1.15"
 gem "sqlite3", "~> 1.4"
