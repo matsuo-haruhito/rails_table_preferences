@@ -110,6 +110,8 @@ Keep the detailed `vite.config.ts` example in [JavaScript entrypoints](javascrip
 
 The generator still copies `app/javascript/controllers/rails_table_preferences_controller.js` for Rails apps that rely on `stimulus-rails` default manifests. Vite apps can use the package entrypoint above to avoid depending on that copied path from `app/frontend`.
 
+The package entrypoint is currently JavaScript-only. It does not export `rails_table_preferences/styles.css`, so keep loading the generated `app/assets/stylesheets/rails_table_preferences.css` through the host app's Rails asset path, or provide host-owned CSS if you deliberately use `--skip-stylesheets`. See [JavaScript entrypoints](javascript_entrypoints.md#stylesheet-boundary) for the current stylesheet boundary.
+
 ## 3. Mount the engine
 
 Add the JSON API route used by the bundled editor:

@@ -16,6 +16,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
 - [ ] Switch to another owner or demo owner link and confirm saved presets do not leak between owners.
 - [ ] When the generated demo is the smoke surface, check the support sections that match the changed area: `Current owner`, `Current scope context`, `Demo state reset`, `Async failure check`, hidden fields preview, or export payload preview. Use [Demo screen generator](demo.md) as the detailed source of truth and record any sections intentionally handed off.
+- [ ] For hidden fields preview or export payload preview evidence, record whether the copy control succeeded. If the copy button is disabled or reports a copy failure, select the visible preview text manually and record that text as the evidence instead.
 - [ ] Open one filter panel or preset action with keyboard focus and confirm focus, labels, and status copy remain understandable.
 - [ ] Check one narrow desktop width and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable.
 
@@ -89,8 +90,9 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] Apply display changes, save the preset, reload the page, and confirm current column labels, width/truncation values, and overflow modes are still taken from the current column definition where the saved settings do not override them.
 - [ ] With a stale saved preset or fixture, confirm current `label:`, `overflow:` / `default_overflow:`, and fixed/pinned metadata override old saved display metadata instead of keeping obsolete labels or hooks.
 - [ ] In `resource_table_for` and `tree_resource_table_for`, hide every column while records still exist and confirm the default partial shows the all-hidden fallback row instead of an empty `<tr>` or invalid `colspan="0"` markup.
+- [ ] Open the editor in the default display state and confirm the reset button is disabled rather than presenting a meaningful no-op.
 - [ ] Reset settings after a saved display change and confirm labels, pinned/fixed hooks, and overflow behavior return to the current column definition defaults.
-- [ ] Reset settings and confirm the table returns to default display settings.
+- [ ] Reset settings and confirm the table returns to default display settings and the status region announces the reset result.
 - [ ] Confirm the visible reset helper explains that unsaved editor changes are discarded and defaults are restored without relying on hover text.
 - [ ] Hover or focus the reset button and confirm the button hint matches the visible reset helper.
 

@@ -48,6 +48,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Pull request template guidance for automated verification, manual QA, UI/visual evidence, representative surfaces, focused viewport/state checks, and browser-capture handoff.
 - GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and Rails 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
+- Package verification now checks the packaged `package.json` top-level `types` target and reports it as `package.json#types` when missing.
 
 ### Changed
 
@@ -56,12 +57,14 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Generated migrations use nullable owner references and `scope_type` / `scope_key` to support owner, shared, role, and organization presets.
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
 - Preset list loading failure copy now explains the current-name-only fallback and asks users to check the connection and reload before retrying the editor flow.
+- The package entrypoint controller now reports Show all columns and Hide all columns bulk actions through the existing editor status region, including the all-hidden recovery path.
 - The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
 - The package verification path now resolves documented package root and controller export targets, then checks their packaged JavaScript relative import/export references.
 - Documentation now states the bundled sort UI single-sort boundary and leaves multi-sort composition to host apps.
 - Filter adapter documentation now distinguishes ordered neutral `sorts` arrays that Ransack or host-owned adapters can preserve from plain controller params that intentionally reduce to the first valid sort for existing `order_by(params[:sort])` compatibility.
 - Documentation now keeps richer filter widgets, date pickers, autocomplete, and external helper widgets as host-app-owned renderer or custom-partial responsibilities instead of bundled filter UI dependencies.
+- Export integration documentation now clarifies that spreadsheet formula-like value neutralization belongs to the host app exporter or serializer, not to `export_keys`, `column_keys`, or `headers` metadata.
 - Production integration guidance now calls out association preloading when resource table formatters read related records, including quick host-app smoke checks for query logs or existing N+1 guards.
 - Resource table formatter docs and specs now make formatter exceptions a host-app formatter responsibility and keep that separate from the default no-formatter fallback.
 - Pull request template guidance now has a single canonical `.github/pull_request_template.md` source that keeps manual QA, UI/visual evidence, compatibility, and risk sections together.
@@ -70,6 +73,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 
 - Generator task loading works when the gem is used from a host Rails app.
 - Generated migration index names avoid database identifier length issues.
+- Rails 7.0 / Ruby 3.1 pull-request compatibility checks avoid `i18n` 1.15.x because that dependency line requires Fiber storage APIs unavailable on Ruby 3.1.
 - Engine route names avoid duplicate route name conflicts in the test app.
 - Private `current_user` methods are supported.
 - Saved filter/sort state survives editor apply operations.
@@ -77,6 +81,8 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Ignored columns are filtered out of editor payloads and saved settings.
 - Boolean `false` filter values are preserved through hidden-field and controller-params round trips while `nil`, empty strings, and blank array items remain omitted.
 - Saved column numeric settings now drop non-positive or malformed `width`, `truncate`, and `order` values while preserving positive numeric values and numeric strings.
+- The package entrypoint controller restores the preset selector to the applied preset after a failed preset load instead of leaving the failed selection visible.
+- Select filter option search no longer shows the no-results message when the current selected option is the only match, while still preserving selected options as visible context for non-matching queries.
 
 ## [0.1.0] - Unreleased
 
