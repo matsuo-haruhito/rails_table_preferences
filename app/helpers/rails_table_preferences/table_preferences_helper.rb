@@ -231,11 +231,11 @@ module RailsTablePreferences
       )
     end
 
-    def table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort")
+    def table_preferences_params(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
       normalized_columns = table_preferences_columns(columns, ignored_columns: ignored_columns)
       normalized_settings = table_preferences_settings(settings, allowed_columns: normalized_columns)
 
-      case adapter.to_sym
+      params_hash = case adapter.to_sym
       when :controller_params, :plain_params, :params
         RailsTablePreferences::Adapters::ControllerParams.to_params(
           filters: normalized_settings["filters"],
@@ -252,6 +252,8 @@ module RailsTablePreferences
       else
         raise ArgumentError, "Unsupported table preference adapter: #{adapter.inspect}"
       end
+
+      namespace.present? ? { namespace.to_s => params_hash } : params_hash
     end
 
     def table_preferences_hidden_fields(settings:, columns:, ignored_columns: [], adapter: :controller_params, sort_param: "sort", namespace: nil)
