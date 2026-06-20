@@ -24,15 +24,17 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Default preset resolution across owner, role, organization, and shared scopes.
 - JSON API for listing, loading, creating, updating, and deleting presets.
 - Rails controller helpers for resolving saved settings and converting saved filter/sort state into host app params.
+- Rails controller params helpers accept `fallback:` settings so screens can apply default filter/sort params only when no saved preference is resolved.
 - Plain controller params adapter for existing `search(params)` / `order_by(params[:sort])` style controllers.
 - Ransack params adapter.
 - Hidden fields helper for submitting saved filter/sort params through existing search forms.
 - Export payload helper for host app CSV, Excel, or report generation.
-- Column definition helper with labels, locale lookup, visibility, order, width, truncation, filters, sorting, fixed/pinned metadata, groups, ignored columns, and optional `export_key` value-extraction metadata.
+- Column definition helper with labels, locale lookup, visibility, order, width, truncation, filters, sorting, fixed/pinned metadata, groups, ignored columns, optional `export_key` value-extraction metadata, and manual-column `editor:` metadata for renderer registry lookup.
 - Resource table helpers for convention-first Active Record column inference, table profile overrides, optional tree table rendering, and additive table semantics.
 - Resource table helpers can pass table HTML options such as `id`, `class`, `data`, and `aria` through to the rendered table while preserving gem-owned controller data attributes.
 - Resource table helpers support opt-in captions through `caption:` and keep the caption contract separate from table HTML options.
 - Resource table helpers support `render_editor: false` so host apps can render the generated editor separately while keeping the default editor-plus-table behavior unchanged.
+- Table and resource table helpers support an opt-in scroll wrapper so host apps can wrap generated tables in the bundled horizontal scroll container class without changing table semantics.
 - Table profiles can add virtual or computed columns, including formatter-backed values that are not inferred from the Active Record model.
 - Renderer registries for mapping filter and editor metadata to host-app helper libraries such as Rails Fields Kit.
 - Column group helper for host app grouped table headers and grouped export headers.
@@ -44,9 +46,9 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Generated demo verification includes owner, role, organization, export payload preview, existing search form hidden fields preview, preview evidence copy controls, fixed/grouped column, async failure recovery, and demo-state reset checks.
 - Optional `--skip-javascript` and `--skip-stylesheets` install generator modes.
 - Legacy `ColumnAdjustment` import rake task.
-- Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, manual QA, manual QA PR smoke matrix, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
+- Focused documentation for quick start, Japanese quick start, production integration checklist, install paths, support matrix, resource table adapters, resource table cell hooks, table data attribute merge boundaries, resource table formatter contract, manual column editor metadata, decision guide, practical examples, controller integration, filter metadata, filter adapters, scoped presets, fixed columns/groups, column overflow, resize/auto-fit root values, export integration, accessibility baseline, editor i18n, editor root HTML options, visual overview, non-goals, demo, sandbox verification, troubleshooting, select filter troubleshooting, datetime/time filter browser attributes, manual QA, manual QA PR smoke matrix, release checklist, package verification, JavaScript entrypoints, JavaScript controller notes, and Turbo reconnect checks.
 - Pull request template guidance for automated verification, manual QA, UI/visual evidence, representative surfaces, focused viewport/state checks, and browser-capture handoff.
-- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, 7.1, 7.2, and Rails 8.0.
+- GitHub Actions CI for Ruby specs, JavaScript syntax, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 - Package verification now checks the packaged `package.json` top-level `types` target and reports it as `package.json#types` when missing.
 
@@ -58,6 +60,10 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - The bundled JavaScript controller treats non-owner presets as read-only in the normal editor path and falls back to creating an owner preset when saving edits.
 - Preset list loading failure copy now explains the current-name-only fallback and asks users to check the connection and reload before retrying the editor flow.
 - The package entrypoint controller now reports Show all columns and Hide all columns bulk actions through the existing editor status region, including the all-hidden recovery path.
+- The package entrypoint controller adds a lightweight preset selector search for larger preset collections while keeping the native select, scope grouping, and preset payload semantics unchanged.
+- The package entrypoint editor now exposes a separate dirty-state helper for unsaved changes while leaving async operation messages in the existing status region.
+- Datetime and time filters in the package entrypoint render native browser inputs and pass `min`, `max`, and `step` metadata as browser attributes without changing saved filter values or query semantics.
+- Column resize drag handling now uses Pointer Events for mouse, touch, pen, and `pointercancel` cleanup while keeping double-click auto-fit on its separate path.
 - The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
 - The package verification path now resolves documented package root and controller export targets, then checks their packaged JavaScript relative import/export references.
