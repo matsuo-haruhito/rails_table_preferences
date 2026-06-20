@@ -87,6 +87,7 @@ module RailsTablePreferences
       "docs/troubleshooting.md",
       "docs/manual_qa.md",
       "docs/manual_qa_pr_smoke_matrix.md",
+      "docs/filter_panel_viewport_boundary.md",
       "docs/release_checklist.md",
       "docs/package_verification.md",
       "docs/support_matrix.md",
