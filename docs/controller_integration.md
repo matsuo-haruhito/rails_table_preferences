@@ -13,7 +13,7 @@ Available controller helpers:
 ```ruby
 rails_table_preference(table_key:, name: nil, owner: nil, scope_context: nil)
 rails_table_preference_settings(table_key:, name: nil, owner: nil, scope_context: nil, fallback: {})
-rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", namespace: nil)
+rails_table_preference_params(table_key:, columns:, name: nil, owner: nil, scope_context: nil, adapter: :controller_params, sort_param: "sort", namespace: nil, fallback: {})
 rails_table_preference_export_payload(table_key:, columns:, name: nil, owner: nil, scope_context: nil, include_hidden: false, fallback: {})
 rails_table_preference_merged_params(params_source = params, **options)
 ```
@@ -115,6 +115,23 @@ preference_params = rails_table_preference_params(
   sort_param: :order
 )
 ```
+
+Use `fallback:` when the controller should apply default settings only if no saved preference is resolved:
+
+```ruby
+preference_params = rails_table_preference_params(
+  table_key: :warehouse_stocks,
+  columns: columns,
+  fallback: {
+    filters: {
+      customer_name: { operator: :contains, value: "山田" }
+    },
+    sorts: [{ key: :delivery_date, direction: :desc }]
+  }
+)
+```
+
+`fallback:` is normalized through the same settings normalizer as saved preferences. Saved preferences still win when one is resolved, so fallback settings do not override an explicit named preset or the resolved default preset.
 
 Use `namespace:` when the existing search layer expects nested params such as Ransack's `q` or a custom search object key:
 
@@ -224,6 +241,8 @@ merged_params = rails_table_preference_merged_params(
 
 Saved preference params override existing params when keys overlap. The helper is equivalent to converting the current params to a hash and then applying `base_params.merge(rails_table_preference_params(...))`.
 
+`rails_table_preference_merged_params` accepts the same options as `rails_table_preference_params(...)`, including `fallback:`. Fallback-derived params are merged only when no saved preference is resolved.
+
 Use the helper when the selected preset should be authoritative for filter/sort keys. When the current request should stay authoritative, build the hash explicitly instead, for example by merging in the opposite order or deleting the saved keys that the search form owns before calling the host application's search method.
 
 `namespace:` is passed through to `rails_table_preference_params(...)`, so the top-level namespace key also follows the same merge rule:
@@ -265,6 +284,8 @@ preference_params = rails_table_preference_params(
 @q = Order.ransack(preference_params.fetch("q", {}))
 @orders = @q.result
 ```
+
+`fallback:` is applied before adapter conversion, so fallback settings can produce either flat controller params or Ransack params. It does not change the `namespace:` wrapping rule.
 
 If the action already has request params that should stay in the result hash, use the merging helper:
 
@@ -359,7 +380,7 @@ Keep the values in `scope_context:` aligned with the `scope_key` values stored f
 
 Rails Table Preferences is responsible for:
 
-- resolving the saved preference
+- resolving the saved preference or fallback settings
 - normalizing settings
 - converting saved filter/sort settings to params
 - wrapping converted params in an optional top-level namespace key
