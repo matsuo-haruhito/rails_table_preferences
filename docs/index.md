@@ -66,13 +66,14 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Filter metadata](filter_metadata.md): how to declare filterable/sortable columns and how neutral filter/sort settings are stored.
 - [Filter adapters](filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
 - [JavaScript entrypoints](javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, custom JS bundlers, Turbo reconnect checks, and the JavaScript public-surface source-of-truth role.
+- [TypeScript settings snapshot declarations](typescript_settings_snapshots.md): package-root helper types for settings snapshots exposed through package-entrypoint lifecycle events.
 - [JavaScript controller notes](javascript_controller.md): responsibilities, event boundaries, and safety invariants for the bundled Stimulus controller.
 
 ## Public surface source-of-truth family
 
 Rails Table Preferences keeps the first public-surface source of truth in the existing docs and package verification family rather than a dedicated manifest file.
 
-- JavaScript package imports and the copied-controller boundary are defined in [JavaScript entrypoints](javascript_entrypoints.md), then checked by package metadata, entrypoint smoke specs, JavaScript syntax checks, and package verification.
+- JavaScript package imports, TypeScript snapshot helper types, and the copied-controller boundary are defined in [JavaScript entrypoints](javascript_entrypoints.md) and [TypeScript settings snapshot declarations](typescript_settings_snapshots.md), then checked by package metadata, entrypoint smoke specs, JavaScript syntax checks, and package verification.
 - Helper options, rendered table/editor responsibilities, filter/sort metadata, scoped presets, export payloads, and resource-table adapters are defined in the focused guides linked above instead of being mirrored into README.
 - Generator options, copied assets, package contents, and release evidence are guarded by [Install path options](install_paths.md), [Release checklist](release_checklist.md), and [Package verification](package_verification.md).
 - README remains the newcomer-facing entry point. This docs index remains the detailed map. Package verification decides which docs and runtime files must ship in the gem.
@@ -125,7 +126,8 @@ Use this as a navigation map after choosing a starting path above. The first gro
 2. Use `rails_table_preference_params` or `rails_table_preference_merged_params` in controllers.
 3. Use `rails_table_preference_export_payload` when CSV/Excel/report exports should follow saved column settings.
 4. Use `table_preferences_hidden_fields` when saved filter/sort params should be submitted through an existing search form.
-5. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
+5. For package-entrypoint lifecycle event listeners, use [TypeScript settings snapshot declarations](typescript_settings_snapshots.md) when the host app wants compile-time helpers for `event.detail.settings`.
+6. Review [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md) when the existing search form can also submit an old `page` param.
 
 ### Verify before release or user handoff
 

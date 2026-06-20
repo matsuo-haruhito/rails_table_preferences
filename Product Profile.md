@@ -30,7 +30,7 @@ Current repository scope includes:
 - owner/shared/role/organization preset persistence and default resolution
 - controller helpers for merging saved filter/sort state into host-app params
 - export payload helpers for CSV/Excel/report code implemented by the host app
-- a bundled Stimulus controller and lightweight JSON API
+- a bundled Stimulus controller, package entrypoint, lightweight TypeScript helper declarations, and lightweight JSON API
 - install/demo/customization generators and focused operational documentation
 
 ## Responsibility boundary
@@ -107,6 +107,7 @@ Start with these files when orienting yourself. This is a representative maintai
 - `docs/production_troubleshooting.md`: symptom-driven checks for real host-app screens where save, reload, auth, CSRF, owner lookup, or stable table keys fail after the demo or quick start works.
 - `docs/install_paths.md`: generator option paths for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, and demo verification.
 - `docs/javascript_entrypoints.md`: package entrypoint, copied-controller boundary, Vite registration, package metadata, and JavaScript public-surface source-of-truth notes.
+- `docs/typescript_settings_snapshots.md`: package-root helper types for lifecycle event settings snapshots and host-app TypeScript listeners.
 - `docs/controller_integration.md`: controller helper signatures, preference resolution, params merge patterns, and host-app search responsibility boundaries.
 - `docs/filter_metadata.md`: neutral filter/sort metadata, select option value/label handling, and the boundary between saved UI state and query execution.
 - `docs/filter_adapters.md`: adapter responsibilities for Ransack, Datagrid, Filterrific, and host application search objects.
