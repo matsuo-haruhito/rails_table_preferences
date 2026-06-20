@@ -29,6 +29,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Resource table cell hooks](resource_table_cell_hooks.md): stable body-cell data attributes for light host-app styling and the boundary with custom partials.
 - [Table data attribute merge boundary](table_data_attributes.md): host app `data-controller` coexistence and gem-owned `data-rails-table-preferences-*` protection rules for rendered tables.
 - [Resource table formatter contract](resource_table_formatter_contract.md): formatter arity, nil-return fallback, and host-app responsibility boundaries for profile display/cell/column blocks.
+- [Manual column editor metadata](manual_column_editor_metadata.md): `table_preferences_column(..., editor: ...)` metadata for hand-written table columns and the renderer-registry boundary.
 - [Virtual column query boundary](virtual_columns_query_boundary.md): practical virtual/computed column examples that keep joins, preloading, filtering, and sorting in host-app code.
 - [Decision guide](decision_guide.md): choose the right helper, adapter, or option for common use cases.
 - [Scoped presets](scoped_presets.md): owner, shared, role, and organization scoped presets, default resolution, and minimal operating patterns.
@@ -39,7 +40,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
-- [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, browser QA handoff, and copied-controller boundary.
+- [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, dirty-state helper, browser QA handoff, and copied-controller boundary.
 - [Editor reorder accessibility note](editor_reorder_accessibility.md): package-entrypoint visual-only row drag handle, keyboard reorder controls, and copied-controller boundary.
 - [Header drag reorder](header_drag_reorder.md): package-entrypoint table-header drag reorder, `draggable: false` opt-out, and host-app interactive header boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
@@ -53,6 +54,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Troubleshooting](troubleshooting.md): common installation, Stimulus, CSS, API, filter/sort, scoped preset, legacy import, and customization issues.
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar or label/value select options, option-search threshold cues, and host-app query ownership when select filters do not affect results.
 - [Select filter option search threshold](select_filter_option_search_threshold.md): package-entrypoint-only threshold controls for static select option search, empty-result feedback, and the host-owned boundary for remote or async option search.
+- [Datetime and time filter browser attributes](datetime_time_filter_attributes.md): package-entrypoint native datetime/time inputs, `min` / `max` / `step` metadata, and host-owned validation/query boundaries.
 - [Filter panel viewport boundary](filter_panel_viewport_boundary.md): QA and design handoff note for the current body-mounted filter panel, future bottom-edge implementation boundary, and browser-capable evidence expectations.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
@@ -60,7 +62,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Release checklist](release_checklist.md): packaging, generator, CI, documentation, and sandbox checks before tagging or publishing a release.
 - [Package verification](package_verification.md): build and inspect the gem package before tagging or publishing a release.
 - [Mounted JSON API](json_api.md): owner preset endpoints, request/response payloads, and the boundary with non-owner scoped preset administration.
-- [Controller integration](controller_integration.md): how to resolve saved preferences and pass filter/sort params to existing Rails controllers.
+- [Controller integration](controller_integration.md): how to resolve saved preferences, fallback settings, and filter/sort params for existing Rails controllers.
 - [Filter metadata](filter_metadata.md): how to declare filterable/sortable columns and how neutral filter/sort settings are stored.
 - [Filter adapters](filter_adapters.md): adapter strategy for Ransack, Datagrid, Filterrific, and host application search objects.
 - [JavaScript entrypoints](javascript_entrypoints.md): Stimulus registration paths for default `stimulus-rails`, Vite, `app/frontend`, custom JS bundlers, Turbo reconnect checks, and the JavaScript public-surface source-of-truth role.
@@ -102,18 +104,20 @@ Use this as a navigation map after choosing a starting path above. The first gro
 
 1. If the inferred resource table only needs light cell styling, use [Resource table cell hooks](resource_table_cell_hooks.md) before copying the default partial.
 2. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use the renderer registry context examples from [Resource table adapters](resource_tables.md) before copying a custom partial.
-3. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
-4. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
-5. Add `filter:` and `sortable: true` metadata where needed.
-6. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
-7. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when planning bottom-edge panel behavior or reviewing whether future runtime changes need browser-capable evidence.
-8. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
-9. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
-10. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-11. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-12. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-13. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-14. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+3. If a hand-written table column needs cell editor metadata, use [Manual column editor metadata](manual_column_editor_metadata.md) to keep renderer lookup separate from host-owned form submission and persistence.
+4. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
+5. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
+6. Add `filter:` and `sortable: true` metadata where needed.
+7. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
+8. For datetime or time filter metadata, use [Datetime and time filter browser attributes](datetime_time_filter_attributes.md) to check native input attributes without moving validation or query semantics out of the host app.
+9. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when planning bottom-edge panel behavior or reviewing whether future runtime changes need browser-capable evidence.
+10. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
+11. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
+12. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+13. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+14. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+15. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+16. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
 
 ### Wire data, presets, and exports
 
