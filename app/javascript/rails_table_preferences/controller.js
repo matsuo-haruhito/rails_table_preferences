@@ -3,6 +3,8 @@ import RailsTablePreferencesBaseController from "../controllers/rails_table_pref
 const DATE_TIME_FILTER_TYPES = new Set(["datetime", "datetime-local", "time"])
 
 export default class RailsTablePreferencesController extends RailsTablePreferencesBaseController {
+  static targets = [...(RailsTablePreferencesBaseController.targets || []), "dirtyState"]
+
   static values = {
     ...RailsTablePreferencesBaseController.values,
     editorIdPrefix: String,
@@ -16,6 +18,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     visibilityBulkShownStatusLabel: { type: String, default: "すべての列を表示しました。" },
     moveUpLabel: { type: String, default: "上へ移動" },
     moveDownLabel: { type: String, default: "下へ移動" },
+    dirtyStateLabel: { type: String, default: "未保存の変更があります。" },
     resizeAutoFitStatusLabel: { type: String, default: "列幅を自動調整しました。" },
     resetStatusLabel: { type: String, default: "テーブル初期設定に戻しました。" },
     selectFilterOptionSearchThreshold: { type: Number, default: 8 },
@@ -173,7 +176,25 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   settingsFromEditor() {
     const editorSettings = super.settingsFromEditor()
-    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+    if (!this.hasEditorRowsTarget) {
+      return this.defaultSettings ? this.mergeSettings(this.defaultSettings, editorSettings) : editorSettings
+    }
+
+    const columns = this.editorRows.map((row, index) => {
+      const key = row.dataset.railsTablePreferencesColumnKey
+      const current = this.columnByKey(key) || {}
+      return this.withColumnWidthMetadata({
+        ...current,
+        key,
+        visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
+        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? (index + 1) * 10,
+        width: this.clampColumnWidth(key, row.querySelector('[data-field="width"]')?.value),
+        truncate: this.integerValue(row.querySelector('[data-field="truncate"]')?.value),
+        pinned: current.pinned === true
+      })
+    })
+    const settings = { ...editorSettings, columns, filters: editorSettings?.filters || {}, sorts: editorSettings?.sorts || [] }
+    return this.defaultSettings ? this.mergeSettings(this.defaultSettings, settings) : settings
   }
 
   filterPanelId(columnKey) {
@@ -212,6 +233,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   connect() {
     this.statusState = "idle"
     super.connect()
+    this.installDirtyStateTracking()
+    this.markEditorClean()
     this.syncResetButtonState()
   }
 
@@ -223,24 +246,6 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   mergeSettings(defaultSettings, savedSettings) {
     const settings = super.mergeSettings(defaultSettings, savedSettings)
     return { ...settings, columns: settings.columns.map((column) => this.withColumnWidthMetadata(column)) }
-  }
-
-  settingsFromEditor() {
-    if (!this.hasEditorRowsTarget) return this.settingsValue
-    const columns = this.editorRows.map((row, index) => {
-      const key = row.dataset.railsTablePreferencesColumnKey
-      const current = this.columnByKey(key) || {}
-      return this.withColumnWidthMetadata({
-        ...current,
-        key,
-        visible: row.querySelector('[data-field="visible"]')?.checked ?? true,
-        order: this.integerValue(row.querySelector('[data-field="order"]')?.value) ?? current.order ?? (index + 1) * 10,
-        width: this.clampColumnWidth(key, row.querySelector('[data-field="width"]')?.value),
-        truncate: this.integerValue(row.querySelector('[data-field="truncate"]')?.value),
-        pinned: current.pinned === true
-      })
-    })
-    return { ...this.settingsValue, columns, filters: this.settingsValue?.filters || {}, sorts: this.settingsValue?.sorts || [] }
   }
 
   syncEditorWidthInputs() {
@@ -331,9 +336,15 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     return integer !== null && integer > 0 ? integer : null
   }
 
+  disconnect() {
+    this.uninstallDirtyStateTracking()
+    super.disconnect()
+  }
+
   applyFromEditor(event) {
     const wasBusy = this.busy
     const result = super.applyFromEditor(event)
+    this.updateDirtyStateFromEditor()
     if (!wasBusy) {
       this.clearSuccessfulStatus()
       this.syncResetButtonState()
@@ -345,11 +356,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   resetEditor(event) {
     const wasBusy = this.busy
     const result = super.resetEditor(event)
+    if (!wasBusy) this.markEditorClean()
     if (!wasBusy) {
       this.clearEditorSearchQuery()
       this.setStatus(this.resetStatusLabelValue, "success")
       this.syncResetButtonState()
       this.dispatchPreferenceEvent("applied", { action: "reset" })
+    } else {
+      this.updateDirtyStateFromEditor()
     }
     return result
   }
@@ -359,6 +373,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.ensureEditorSearchControl()
     this.syncEditorSearchResults()
     this.syncEditorMoveButtons()
+    this.updateDirtyStateFromEditor()
     this.syncResetButtonState()
   }
 
@@ -419,6 +434,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
       const visibleInput = row.querySelector('[data-field="visible"]')
       if (visibleInput) visibleInput.checked = visible === true
     })
+    this.updateDirtyStateFromEditor()
     this.setStatus(visible ? this.visibilityBulkShownStatusLabelValue : this.visibilityBulkHiddenStatusLabelValue, "success")
     this.syncResetButtonState()
   }
@@ -563,6 +579,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   dropEditorRow(event) {
     super.dropEditorRow(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
     this.syncResetButtonState()
@@ -570,19 +587,15 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   dragEditorRowEnd(event) {
     super.dragEditorRowEnd(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
     this.syncResetButtonState()
   }
 
   resizeColumn(event) {
-    if (this.busy || !this.resizingColumn) return
-    const measuredWidth = Math.round(this.resizingColumn.startWidth + event.clientX - this.resizingColumn.startX)
-    const width = this.clampColumnWidth(this.resizingColumn.key, measuredWidth, { min: 40 })
-    this.updateColumnSetting(this.resizingColumn.key, { width })
-    this.applyColumn(this.columnByKey(this.resizingColumn.key))
-    this.syncPinnedColumnOffsets()
-    this.syncEditorWidthInputs()
+    super.resizeColumn(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncResetButtonState()
   }
@@ -590,6 +603,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   autoFitColumnFromHandle(event) {
     const wasBusy = this.busy
     const result = super.autoFitColumnFromHandle(event)
+    this.updateDirtyStateFromEditor()
     if (!wasBusy) this.setStatus(this.resizeAutoFitStatusLabelValue, "success")
     this.syncResetButtonState()
     return result
@@ -603,12 +617,14 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   dropTableColumn(event) {
     super.dropTableColumn(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncResetButtonState()
   }
 
   endTableColumnDrag(event) {
     super.endTableColumnDrag(event)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncEditorMoveButtons()
     this.syncResetButtonState()
@@ -616,20 +632,101 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
 
   toggleSortFromHeader(event, cell, column) {
     super.toggleSortFromHeader(event, cell, column)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncResetButtonState()
   }
 
   applyFilterPanel(key, panel) {
     super.applyFilterPanel(key, panel)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncResetButtonState()
   }
 
   clearFilter(key) {
     super.clearFilter(key)
+    this.updateDirtyStateFromEditor()
     this.clearSuccessfulStatus()
     this.syncResetButtonState()
+  }
+
+  applyPreferencePayload(payload) {
+    super.applyPreferencePayload(payload)
+    this.markEditorClean()
+    this.syncResetButtonState()
+  }
+
+  refreshEditorOrderInputs() {
+    super.refreshEditorOrderInputs()
+    this.updateDirtyStateFromEditor()
+    this.syncResetButtonState()
+  }
+
+  installDirtyStateTracking() {
+    this.ensureDirtyStateElement()
+    if (this.dirtyStateTrackingInstalled) return
+    if (!this.hasEditorRowsTarget) return
+
+    this.boundUpdateDirtyStateFromEditor = this.updateDirtyStateFromEditor.bind(this)
+    this.editorRowsTarget.addEventListener("input", this.boundUpdateDirtyStateFromEditor)
+    this.editorRowsTarget.addEventListener("change", this.boundUpdateDirtyStateFromEditor)
+    this.dirtyStateTrackingInstalled = true
+  }
+
+  uninstallDirtyStateTracking() {
+    if (!this.dirtyStateTrackingInstalled || !this.hasEditorRowsTarget || !this.boundUpdateDirtyStateFromEditor) return
+
+    this.editorRowsTarget.removeEventListener("input", this.boundUpdateDirtyStateFromEditor)
+    this.editorRowsTarget.removeEventListener("change", this.boundUpdateDirtyStateFromEditor)
+    this.boundUpdateDirtyStateFromEditor = null
+    this.dirtyStateTrackingInstalled = false
+  }
+
+  ensureDirtyStateElement() {
+    if (this.hasDirtyStateTarget) return
+
+    const element = document.createElement("p")
+    element.className = "rails-table-preferences-editor__hint rails-table-preferences-editor__dirty-state"
+    element.dataset.railsTablePreferencesTarget = "dirtyState"
+    element.setAttribute("aria-live", "polite")
+    element.setAttribute("aria-atomic", "true")
+    element.hidden = true
+
+    if (this.hasStatusTarget) {
+      this.statusTarget.parentNode.insertBefore(element, this.statusTarget)
+    } else {
+      this.element.appendChild(element)
+    }
+  }
+
+  markEditorClean() {
+    this.savedSettingsSnapshot = this.normalizedSettingsSignature(this.settingsFromEditor())
+    this.updateDirtyStateFromEditor()
+  }
+
+  updateDirtyStateFromEditor() {
+    if (!this.hasDirtyStateTarget || !this.hasEditorRowsTarget) return
+    if (!this.savedSettingsSnapshot) this.savedSettingsSnapshot = this.normalizedSettingsSignature(this.settingsFromEditor())
+
+    const dirty = this.normalizedSettingsSignature(this.settingsFromEditor()) !== this.savedSettingsSnapshot
+    this.dirtyStateTarget.hidden = !dirty
+    this.dirtyStateTarget.textContent = dirty ? this.dirtyStateLabelValue : ""
+  }
+
+  normalizedSettingsSignature(settings) {
+    return JSON.stringify(this.normalizeSettingsValue(settings))
+  }
+
+  normalizeSettingsValue(value) {
+    if (Array.isArray(value)) return value.map((item) => this.normalizeSettingsValue(item))
+    if (value && typeof value === "object") {
+      return Object.keys(value).sort().reduce((normalized, key) => {
+        normalized[key] = this.normalizeSettingsValue(value[key])
+        return normalized
+      }, {})
+    }
+    return value ?? null
   }
 
   setStatus(message, state = "idle") {
@@ -681,7 +778,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
   }
 
   get resetEditorButton() {
-    return this.element?.querySelector("[data-action~='rails-table-preferences#resetEditor']")
+    if (typeof this.element?.querySelector !== "function") return null
+    return this.element.querySelector("[data-action~='rails-table-preferences#resetEditor']")
   }
 
   async withBusyStatus(callback, { busyLabel, successLabel, errorLabel = this.operationFailedStatusLabelValue } = {}) {
@@ -707,7 +805,13 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (!this.currentPreferenceEditable) return this.createPresetFromEditor(event)
 
     const result = await this.withPreferenceAction("save", () => super.save(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "save" })
+    if (result !== null && this.statusState === "success") {
+      this.markEditorClean()
+      this.dispatchPreferenceEvent("saved", { action: "save" })
+    } else {
+      this.updateDirtyStateFromEditor()
+    }
+    this.syncResetButtonState()
     return result
   }
 
@@ -715,7 +819,13 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     if (this.busy) return null
 
     const result = await this.withPreferenceAction("create", () => super.createPresetFromEditor(event))
-    if (result !== null && this.statusState === "success") this.dispatchPreferenceEvent("saved", { action: "create" })
+    if (result !== null && this.statusState === "success") {
+      this.markEditorClean()
+      this.dispatchPreferenceEvent("saved", { action: "create" })
+    } else {
+      this.updateDirtyStateFromEditor()
+    }
+    this.syncResetButtonState()
     return result
   }
 
@@ -725,8 +835,12 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const result = await this.withPreferenceAction("load", () => super.selectPreset(event))
     if (result !== null && this.statusState === "success") {
       this.clearEditorSearchQuery()
+      this.markEditorClean()
       this.dispatchPreferenceEvent("loaded", { action: "load" })
+    } else {
+      this.updateDirtyStateFromEditor()
     }
+    this.syncResetButtonState()
     return result
   }
 
@@ -754,6 +868,8 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
         this.clearEditorSearchQuery()
         this.apply()
         this.syncPresetEditingState()
+        this.markEditorClean()
+        this.syncResetButtonState()
         await this.refreshPresetOptions()
       }, {
         busyLabel: this.deletingStatusLabelValue,
@@ -894,6 +1010,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.closeFilterPanel()
     this.renderEditor()
     this.apply()
+    this.markEditorClean()
     this.syncResetButtonState()
   }
 
@@ -903,6 +1020,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     this.settingsValue = { ...this.settingsValue, filters: {}, sorts: [] }
     this.closeFilterPanel()
     this.apply()
+    this.updateDirtyStateFromEditor()
     this.syncResetButtonState()
     this.dispatchPreferenceEvent("applied", { action: "clear-filters-and-sorts" })
   }
