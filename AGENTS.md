@@ -14,7 +14,7 @@ The repository currently provides:
 - resource table helpers for convention-first Active Record column inference, table profile overrides, and optional tree table rendering
 - renderer registries for mapping filter/editor metadata to host-app helper libraries without hard dependencies
 - controller helpers and adapters for existing params/search flows
-- a bundled Stimulus controller and lightweight JSON API
+- a bundled Stimulus controller, package entrypoint, lightweight TypeScript helper declarations, and lightweight JSON API
 - generators for install, JavaScript, stylesheets, views, and optional demo setup
 - focused docs under `docs/` for integration, QA, release, and troubleshooting
 
@@ -71,3 +71,4 @@ For repository maintenance changes, check at least these surfaces when relevant:
 - the focused guide being updated
 - `CHANGELOG.md`
 - release/package/manual QA docs when the workflow changes
+- `package.json` and packaged `.d.ts` files when JavaScript entrypoints or TypeScript helper declarations change
