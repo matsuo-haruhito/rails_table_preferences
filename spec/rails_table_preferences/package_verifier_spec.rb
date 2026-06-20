@@ -88,6 +88,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/filter_metadata.md",
         "docs/filter_adapters.md",
         "docs/select_filter_troubleshooting.md",
+        "docs/select_filter_option_search_threshold.md",
         "docs/typescript_settings_snapshots.md",
         "docs/javascript_entrypoints.md",
         "docs/javascript_controller.md"
