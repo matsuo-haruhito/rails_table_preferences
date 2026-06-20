@@ -30,6 +30,7 @@ module RailsTablePreferences
                 :group,
                 :ignored,
                 :filter,
+                :editor,
                 :sortable,
                 :sort_param,
                 :draggable,
@@ -37,7 +38,7 @@ module RailsTablePreferences
                 :model_name,
                 :i18n_key
 
-    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, min_width: nil, max_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, sortable: nil, sort_param: nil, draggable: nil)
+    def initialize(key:, export_key: nil, label: nil, model: nil, model_name: nil, i18n_key: nil, default_visible: true, default_order: nil, default_width: nil, min_width: nil, max_width: nil, default_truncate: nil, default_overflow: nil, overflow: nil, pinned: false, fixed: nil, group: nil, ignored: false, ignore: nil, filter: nil, editor: nil, sortable: nil, sort_param: nil, draggable: nil)
       @key = key.to_s
       @export_key = export_key&.to_s.presence
       @model = model
@@ -55,6 +56,7 @@ module RailsTablePreferences
       @group = normalize_group(group)
       @ignored = ActiveModel::Type::Boolean.new.cast(ignore.nil? ? ignored : ignore) || label_unresolved?
       @filter = normalize_filter(filter)
+      @editor = normalize_editor(editor)
       @sortable = normalize_sortable(sortable)
       @sort_param = sort_param&.to_s
       @draggable = normalize_draggable(draggable)
@@ -76,6 +78,7 @@ module RailsTablePreferences
         "group" => group,
         "ignored" => ignored,
         "filter" => filter,
+        "editor" => editor,
         "sortable" => sortable,
         "sort_param" => sort_param,
         "draggable" => draggable
@@ -183,24 +186,36 @@ module RailsTablePreferences
     end
 
     def normalize_filter(value)
+      normalize_metadata(value, default_type: "text", option_normalizer: :normalize_filter_options)
+    end
+
+    def normalize_editor(value)
+      normalized = value.to_table_cell_editor if value.respond_to?(:to_table_cell_editor)
+      normalized ||= value
+
+      normalize_metadata(normalized, default_type: "text")
+    end
+
+    def normalize_metadata(value, default_type:, option_normalizer: nil)
       case value
       when true
-        { "type" => "text" }
+        { "type" => default_type }
       when false, nil
         nil
       when Symbol, String
         { "type" => value.to_s }
       when Hash
-        normalize_filter_hash(value)
+        normalize_metadata_hash(value, option_normalizer: option_normalizer)
       else
         nil
       end
     end
 
-    def normalize_filter_hash(value)
+    def normalize_metadata_hash(value, option_normalizer: nil)
       value.deep_stringify_keys.compact.tap do |attributes|
         attributes["type"] = attributes["type"].to_s if attributes["type"].present?
-        attributes["options"] = normalize_filter_options(attributes["options"]) if attributes.key?("options")
+        attributes["method"] = attributes["method"].to_s if attributes["method"].present?
+        attributes["options"] = send(option_normalizer, attributes["options"]) if option_normalizer && attributes.key?("options")
       end
     end
 
