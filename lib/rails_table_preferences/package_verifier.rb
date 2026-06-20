@@ -63,6 +63,7 @@ module RailsTablePreferences
       "docs/resource_table_cell_hooks.md",
       "docs/table_data_attributes.md",
       "docs/resource_table_formatter_contract.md",
+      "docs/manual_column_editor_metadata.md",
       "docs/virtual_columns_query_boundary.md",
       "docs/decision_guide.md",
       "docs/scoped_presets.md",
@@ -97,6 +98,7 @@ module RailsTablePreferences
       "docs/filter_adapters.md",
       "docs/select_filter_troubleshooting.md",
       "docs/select_filter_option_search_threshold.md",
+      "docs/typescript_settings_snapshots.md",
       "docs/javascript_entrypoints.md",
       "docs/javascript_controller.md"
     ].freeze
