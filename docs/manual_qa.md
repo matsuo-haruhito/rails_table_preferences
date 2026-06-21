@@ -11,6 +11,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Open the generated demo or a representative host-app list screen and confirm the editor and table both render.
 - [ ] Hide one non-sensitive column, apply the change, and confirm the table updates without hiding required actions or links.
 - [ ] Change one editor order input, apply the change, and confirm the table order updates without using drag and drop.
+- [ ] If the screen uses the package entrypoint, use the editor row search and one row up/down button, then apply and confirm the table order still reflects the full editor settings. If the screen uses the copied/base controller, record that this package-only affordance is unavailable and keep the numeric order input as the fallback check.
 - [ ] Save the preset, reload the page, and confirm the saved visibility/order state returns.
 - [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
@@ -74,6 +75,8 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] Hide a column from the editor and apply it.
 - [ ] Show the column again and apply it.
 - [ ] Reorder columns by dragging editor rows.
+- [ ] If the screen uses the package entrypoint, use the editor row search to narrow the row list, move a visible row with the up/down buttons, apply the change, and confirm columns hidden by the search were not dropped from the table settings.
+- [ ] If the screen uses the copied/base controller, record that package-entrypoint row search and up/down buttons are not expected unless the host app ported them; use the numeric order input plus `適用` as the keyboard-friendly fallback.
 - [ ] Reorder columns by dragging table headers directly.
 - [ ] Using only the keyboard, change a column's numeric order input, move to `適用`, and confirm the table order changes.
 - [ ] At a narrow width or on a touch device, confirm the editor order input remains usable as the fallback when table-header drag is awkward or unavailable.
