@@ -8,7 +8,7 @@ This guide lists the main keys that are useful during host-app integration. It i
 
 The bundled `table_preferences_editor` partial emits the controller-root label values in this guide from Rails I18n before the packaged controller runs. That path is the normal way to keep visible labels, filter/sort copy, scope fallback labels, editor search labels, row move labels, and status copy aligned with the host app locale without copying JavaScript.
 
-When a host app bypasses the bundled editor partial or hand-builds a helper-free root for the package entrypoint, those `data-rails-table-preferences-*-label-value` attributes become host-owned markup. The package entrypoint still has Japanese JavaScript defaults for values such as `editorSearchLabel`, `selectFilterOptionSearchLabel`, `moveUpLabel`, `moveDownLabel`, and `resizeAutoFitStatusLabel`, but those defaults are only last-resort fallback copy. Do not treat them as English, neutral, or locale-aware text for direct package-entrypoint roots.
+When a host app bypasses the bundled editor partial or hand-builds a helper-free root for the package entrypoint, those `data-rails-table-preferences-*-label-value` attributes become host-owned markup. The package entrypoint still has Japanese JavaScript defaults for values such as `editorSearchLabel`, `selectFilterOptionSearchLabel`, `moveUpLabel`, `moveDownLabel`, `resizeAutoFitStatusLabel`, and `resetStatusLabel`, but those defaults are only last-resort fallback copy. Do not treat them as English, neutral, or locale-aware text for direct package-entrypoint roots.
 
 If a helper-free or directly assembled package-entrypoint screen should match the bundled editor copy, pass the same root label values that the partial would have emitted. Keep URL, table key, settings, and columns root values separate from this copy surface; the helper-free URL contract is documented in [Helper-free controller root URLs](helper_free_controller_root_urls.md).
 
@@ -166,15 +166,18 @@ The bundled editor exposes a live status region for async preset actions. These 
 - `rails_table_preferences.editor.deleted_status`
 - `rails_table_preferences.editor.deleting_failed_status`
 - `rails_table_preferences.editor.operation_failed_status`
+- `rails_table_preferences.editor.reset_status`
 - `rails_table_preferences.editor.visibility_bulk_hidden_status`
 - `rails_table_preferences.editor.visibility_bulk_shown_status`
 - `rails_table_preferences.editor.resize_auto_fit_status`
+
+`reset_status` is package-entrypoint success copy for the bundled reset action. It feeds `data-rails-table-preferences-reset-status-label-value` and is shown in the same status region after reset returns the editor and table to the current column-definition defaults. It does not change the reset contract into a return-to-last-loaded-preset action.
 
 `visibility_bulk_hidden_status` and `visibility_bulk_shown_status` are package-entrypoint-only success messages for the bundled Hide all columns and Show all columns buttons. They feed `data-rails-table-preferences-visibility-bulk-hidden-status-label-value` and `data-rails-table-preferences-visibility-bulk-shown-status-label-value`, and are shown in the same status region after the bulk checkbox update completes.
 
 `resize_auto_fit_status` is package-entrypoint-only success copy for Enter / Space auto-fit on a focused resize handle. It feeds `data-rails-table-preferences-resize-auto-fit-status-label-value` and is shown in the same status region after the one-shot auto-fit shortcut completes.
 
-Use locale overrides for message wording. Use copied ERB / JavaScript when the host app wants a different status surface, notification system, busy-state behavior, or copied-controller support for package-entrypoint-only resize auto-fit feedback.
+Use locale overrides for message wording. Use copied ERB / JavaScript when the host app wants a different status surface, notification system, busy-state behavior, or copied-controller support for package-entrypoint-only reset feedback, visibility bulk feedback, or resize auto-fit feedback.
 
 ## Minimal host-app override example
 
@@ -190,6 +193,7 @@ ja:
       show_all_columns: 全列表示
       hide_all_columns: 全列非表示
       visibility_bulk_action_group: 列の表示をまとめて切り替える操作
+      reset_status: テーブル初期設定に戻しました。
       visibility_bulk_hidden_status: すべての列を非表示にしました。全列表示で戻せます。
       visibility_bulk_shown_status: すべての列を表示しました。
       search_columns: 表示列を検索
@@ -217,10 +221,10 @@ Keep overrides close to the host app's normal locale files so copied ERB and cop
 Use the lightest path that matches the change:
 
 1. Locale keys for global wording changes across every bundled editor.
-2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, select option search, resize auto-fit status, or action-group wording.
+2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, select option search, reset status, resize auto-fit status, or action-group wording.
 3. Package entrypoint `data-rails-table-preferences-filter-operator-labels-value` when a packaged-controller table only needs different filter operator display text.
 4. Package entrypoint editor search / move / select-option-search label values when the packaged-controller table only needs different search or move button copy.
 5. Copied ERB when markup, helper-text placement, action grouping, or status-region structure needs to change.
-6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, select option search behavior, row movement, or resize auto-fit status handling needs to change.
+6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, select option search behavior, row movement, reset status feedback, or resize auto-fit status handling needs to change.
 
 See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, [Editor entrypoint affordances](editor_entrypoint_affordances.md) for the package-only browser QA surface, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.
