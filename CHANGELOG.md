@@ -61,6 +61,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Preset list loading failure copy now explains the current-name-only fallback and asks users to check the connection and reload before retrying the editor flow.
 - The package entrypoint controller now reports Show all columns and Hide all columns bulk actions through the existing editor status region, including the all-hidden recovery path.
 - The package entrypoint controller adds a lightweight preset selector search for larger preset collections while keeping the native select, scope grouping, and preset payload semantics unchanged.
+- The package entrypoint filter button active summary now shows `{ value:, label: }` select option labels when a saved value matches a known option, while unknown values still fall back to the raw saved value.
 - The package entrypoint editor now exposes a separate dirty-state helper for unsaved changes while leaving async operation messages in the existing status region.
 - Datetime and time filters in the package entrypoint render native browser inputs and pass `min`, `max`, and `step` metadata as browser attributes without changing saved filter values or query semantics.
 - Column resize drag handling now uses Pointer Events for mouse, touch, pen, and `pointercancel` cleanup while keeping double-click auto-fit on its separate path.
