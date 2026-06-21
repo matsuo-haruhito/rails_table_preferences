@@ -83,7 +83,7 @@ table_preferences_column(
 )
 ```
 
-The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
+The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. The package entrypoint also uses the label in the filter button active summary when it can resolve a saved value to a known option; unknown or stale saved values fall back to the raw value so the summary stays readable. It does not infer labels from enums, load remote options, or change host-app query execution.
 
 For long static option lists, the package entrypoint controller can show an in-panel option search when the option count reaches the configured threshold. See [Select filter option search threshold](select_filter_option_search_threshold.md) for the root value, no-results cue, and package-entrypoint-only boundary.
 
@@ -261,7 +261,7 @@ Supported plain-param metadata:
 
 `operator_param` is not emitted for every operator. The ControllerParams adapter currently maps operators as follows:
 
-- `between` writes the `from` and `to` values to `from_param` / `to_param`, or to `from_<param>` / `to_<param>` fallbacks. It does not emit `operator_param`.
+- `between` writes the `from` and `to` values to `from_param` / `to_param`, or to the `from_<param>` / `to_<param>` fallbacks. It does not emit `operator_param`.
 - `gteq` and `gt` write the scalar value to `from_param`, or to the `from_<param>` fallback. They do not emit `operator_param`.
 - `lteq` and `lt` write the scalar value to `to_param`, or to the `to_<param>` fallback. They do not emit `operator_param`.
 - `in` and `not_in` write an array to `values_param`, or to the base `param` fallback. They do not emit `operator_param`.
@@ -270,7 +270,16 @@ Supported plain-param metadata:
 
 If an existing `search(params)` implementation expects an operator name for every condition, normalize that expectation in host-app code or provide metadata/UI conventions that match the adapter output. Rails Table Preferences keeps this adapter as a params-shaping helper; it does not execute the query or infer a host application's predicate semantics.
 
-The plain ControllerParams adapter emits one top-level sort value for compatibility with common `order_by(params[:sort])` style controllers. If `settings["sorts"]` contains multiple entries, it uses the first valid entry after metadata mapping and ignores the rest. Use the Ransack adapter or a host-owned adapter when the target search layer accepts ordered multi-sort input.
+The plain ControllerParams adapter emits one top-level sort value for compatibility with common `order_by(params[:sort])` style controllers. If `settings["sorts"]` contains multiple entries, it uses the first valid entry after metadata mapping and ignores the rest. Use `sort_param:` to change the top-level sort param name:
+
+```ruby
+RailsTablePreferences::Adapters::ControllerParams.to_params(
+  filters: settings["filters"],
+  sorts: settings["sorts"],
+  columns: columns,
+  sort_param: :order
+)
+```
 
 ## Saved filter settings
 
