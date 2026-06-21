@@ -83,7 +83,7 @@ table_preferences_column(
 )
 ```
 
-The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. It does not infer labels from enums, load remote options, or change host-app query execution.
+The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. The package entrypoint also uses the label in the filter button active summary when it can resolve a saved value to a known option; unknown or stale saved values fall back to the raw value so the summary stays readable. It does not infer labels from enums, load remote options, or change host-app query execution.
 
 For long static option lists, the package entrypoint controller can show an in-panel option search when the option count reaches the configured threshold. See [Select filter option search threshold](select_filter_option_search_threshold.md) for the root value, no-results cue, and package-entrypoint-only boundary.
 
@@ -270,110 +270,7 @@ Supported plain-param metadata:
 
 If an existing `search(params)` implementation expects an operator name for every condition, normalize that expectation in host-app code or provide metadata/UI conventions that match the adapter output. Rails Table Preferences keeps this adapter as a params-shaping helper; it does not execute the query or infer a host application's predicate semantics.
 
-The plain ControllerParams adapter emits one top-level sort value for compatibility with common `order_by(params[:sort])` style controllers. If `settings["sorts"]` contains multiple entries, it uses the first valid entry after metadata mapping and ignores the rest. Use the Ransack adapter or a host-owned adapter when the target search layer accepts ordered multi-sort input.
-
-## Saved filter settings
-
-Saved filter conditions use a neutral format:
-
-```json
-{
-  "filters": {
-    "customer_name": {
-      "operator": "contains",
-      "value": "山田"
-    },
-    "status": {
-      "operator": "in",
-      "values": ["pending", "shipped"]
-    },
-    "delivery_date": {
-      "operator": "between",
-      "from": "2026-01-01",
-      "to": "2026-01-31"
-    },
-    "shipped_at": {
-      "operator": "between",
-      "from": "2026-01-01T09:00",
-      "to": "2026-01-01T18:00"
-    },
-    "dispatch_time": {
-      "operator": "gteq",
-      "value": "09:30"
-    }
-  },
-  "sorts": [
-    {
-      "key": "delivery_date",
-      "direction": "desc"
-    },
-    {
-      "key": "customer_code",
-      "direction": "asc"
-    }
-  ]
-}
-```
-
-The saved `sorts` array keeps the order written by the bundled controller, an import, or a host-app custom/copied controller. The bundled controller writes at most one entry, while custom controllers can write multiple entries when the host app owns the multi-sort interaction.
-
-`datetime` / `datetime-local` and `time` filters do not change the saved condition shape. The values above are strings from the browser input and are passed through adapters without timezone normalization. Convert them to the host application's timezone-aware query representation before executing database searches.
-
-`SettingsNormalizer` normalizes:
-
-- symbol keys to string keys
-- filter entries with blank keys are ignored before condition normalization
-- `predicate` to `operator`
-- scalar `values` to arrays
-- sort aliases `column`/`dir` to `key`/`direction`
-- sort direction casing to `asc` or `desc`
-
-Invalid filters with blank keys or without an operator are dropped. Invalid sorts without a key, without a direction, or with a direction other than `asc` or `desc` are dropped.
-
-## Ignored columns
-
-When `ignored_columns`, per-column `ignored: true`, or unresolved labels are used, saved filters and sorts for those columns are also removed from `settings_json`.
-
-This prevents hidden columns from being reintroduced through an old saved preference.
-
-## Search adapters
-
-The neutral format can be converted for an existing search layer.
-
-### ControllerParams adapter
-
-Use this adapter for existing controllers that accept plain params:
-
-```ruby
-preference = current_user.table_preferences.find_by!(table_key: "warehouse_stocks", name: "default")
-settings = preference.settings
-
-preference_params = RailsTablePreferences::Adapters::ControllerParams.to_params(
-  filters: settings["filters"],
-  sorts: settings["sorts"],
-  columns: columns
-)
-
-merged_params = params.to_unsafe_h.merge(preference_params)
-
-@warehouse_stocks = WarehouseStock
-  .search(merged_params)
-  .order_by(merged_params["sort"])
-```
-
-Example output:
-
-```ruby
-{
-  "search_word" => "山田",
-  "statuses" => ["pending", "shipped"],
-  "from_date" => "2026-01-01",
-  "to_date" => "2026-01-31",
-  "sort" => "-delivery_date"
-}
-```
-
-Descending sorts are prefixed with `-` by default. Ascending sorts use the key as-is. If multiple neutral sort entries are present, this adapter emits only the first valid mapped sort because the plain controller shape has a single sort slot. Use `sort_param:` to change the top-level sort param name:
+The plain ControllerParams adapter emits one top-level sort value for compatibility with common `order_by(params[:sort])` style controllers. If `settings["sorts"]` contains multiple entries, it uses the first valid entry after metadata mapping and ignores the rest. Use `sort_param:` to change the top-level sort param name:
 
 ```ruby
 RailsTablePreferences::Adapters::ControllerParams.to_params(
