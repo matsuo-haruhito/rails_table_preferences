@@ -41,6 +41,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Forced-colors manual QA note](forced_colors_manual_qa.md): focused high-contrast evidence handoff for active filters, sorted headers, resize focus, filter panels, and pinned/fixed cells.
 - [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, dirty-state helper, browser QA handoff, and copied-controller boundary.
 - [Editor reorder accessibility note](editor_reorder_accessibility.md): package-entrypoint visual-only row drag handle, keyboard reorder controls, and copied-controller boundary.
 - [Header drag reorder](header_drag_reorder.md): package-entrypoint table-header drag reorder, `draggable: false` opt-out, and host-app interactive header boundary.
@@ -119,8 +120,9 @@ Use this as a navigation map after choosing a starting path above. The first gro
 13. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
 14. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
 15. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-16. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-17. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+16. When forced-colors or high-contrast evidence is needed, use the forced-colors manual QA note to keep browser-capable checks scoped to the relevant states.
+17. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+18. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
 
 ### Wire data, presets, and exports
 
@@ -136,7 +138,8 @@ Use this as a navigation map after choosing a starting path above. The first gro
 1. Verify the feature in a sandbox Rails app.
 2. Review [Support matrix](support_matrix.md) when the host app's Ruby/Rails version is outside the currently documented representative CI matrix.
 3. Run the manual QA checklist before asking real users to try the feature.
-4. Before release, run the release checklist and package verification guide.
+4. Use the forced-colors manual QA note when the handoff needs high-contrast evidence for active filters, sorted headers, resize handles, filter panels, or pinned/fixed cells.
+5. Before release, run the release checklist and package verification guide.
 
 ## Responsibility boundary
 
