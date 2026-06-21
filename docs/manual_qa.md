@@ -11,6 +11,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Open the generated demo or a representative host-app list screen and confirm the editor and table both render.
 - [ ] Hide one non-sensitive column, apply the change, and confirm the table updates without hiding required actions or links.
 - [ ] Change one editor order input, apply the change, and confirm the table order updates without using drag and drop.
+- [ ] If the screen uses the package entrypoint, search for one editor row and use the row up/down controls once; if it uses a copied controller, record that the numeric order input remains the keyboard-friendly fallback instead.
 - [ ] Save the preset, reload the page, and confirm the saved visibility/order state returns.
 - [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
@@ -76,6 +77,9 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] Reorder columns by dragging editor rows.
 - [ ] Reorder columns by dragging table headers directly.
 - [ ] Using only the keyboard, change a column's numeric order input, move to `適用`, and confirm the table order changes.
+- [ ] On package entrypoint screens, use the editor row search to find a column by label, key, or group text and confirm applying or saving does not drop rows hidden by the search.
+- [ ] On package entrypoint screens, move a filtered editor row with the row up/down controls, then apply and confirm the visible order changes while numeric order inputs refresh.
+- [ ] On copied-controller screens, confirm those package entrypoint-only search and row move controls are not assumed to exist; use the numeric order input plus `適用` as the documented fallback.
 - [ ] At a narrow width or on a touch device, confirm the editor order input remains usable as the fallback when table-header drag is awkward or unavailable.
 - [ ] At 320px, 375px, and 390px-equivalent widths or narrow containers, confirm long Japanese and long unbroken editor row labels wrap without covering the drag handle, visible checkbox, or order/width/truncate inputs.
 - [ ] Resize a column using the header resize handle.
@@ -281,6 +285,8 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm resize handles show a visible focus indicator when reached by keyboard.
 - [ ] If using the package entrypoint, confirm Enter or Space on the focused resize handle triggers auto-fit without implying arrow-key resizing is available.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
+- [ ] On package entrypoint screens, confirm the row search field has a visible label or accessible name and that row up/down controls expose the moved column name.
+- [ ] On copied-controller screens, confirm the row search and row up/down package controls are not promised unless the host app has ported them; numeric order inputs remain the fallback.
 - [ ] Confirm keyboard-only reordering can be completed with the numeric order input and `適用`, without using editor-row drag or table-header drag.
 - [ ] Confirm touch or narrow-viewport users can use editor order inputs as the fallback when direct table-header drag is not comfortable.
 - [ ] Confirm read-only scoped presets disable destructive/default controls.
