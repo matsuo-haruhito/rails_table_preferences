@@ -26,11 +26,12 @@ Run the minimum local checks:
 ```bash
 bundle exec rspec
 node script/check_javascript_syntax.mjs
+node script/check_ci_workflow_permissions.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The JavaScript syntax script checks the copied controller plus the JavaScript targets declared by `package.json` exports, keeping the release checklist aligned when package entrypoints change.
+The JavaScript syntax script checks the copied controller plus the JavaScript targets declared by `package.json` exports, keeping the release checklist aligned when package entrypoints change. The CI workflow permissions smoke checks that the GitHub Actions workflow keeps top-level `permissions: contents: read` and does not request write permissions for contents or pull requests.
 
 Representative Rails compatibility checks are also useful before a release:
 
@@ -47,6 +48,7 @@ Confirm:
 
 - [ ] RSpec passes.
 - [ ] JavaScript syntax script passes for the copied controller and package entrypoints.
+- [ ] CI workflow permissions smoke passes for the read-only GITHUB_TOKEN policy.
 - [ ] Gem package builds.
 - [ ] Package verification passes.
 - [ ] Representative Rails 7.0 / 7.1 / 7.2 / 8.0 RSpec checks pass.
@@ -56,8 +58,8 @@ Confirm:
 
 Confirm GitHub Actions passes for both the release commit and the latest release-prep pull request:
 
-- [ ] The release commit passes the default RSpec / JavaScript syntax / gem build / package verification job.
-- [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / gem build / package verification job.
+- [ ] The release commit passes the default RSpec / JavaScript syntax / CI workflow permissions / gem build / package verification job.
+- [ ] The latest release-prep pull request passes the same default RSpec / JavaScript syntax / CI workflow permissions / gem build / package verification job.
 - [ ] The latest release-prep pull request passes the representative Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0 compatibility jobs.
 - [ ] Any additional release-time matrix jobs pass in the workflow where they actually run; they are not part of the required PR matrix unless `.github/workflows/ci.yml` adds them.
 - [ ] The latest release-prep pull request is compared against current `main`, not only against the `main` commit recorded when the PR body was written.
