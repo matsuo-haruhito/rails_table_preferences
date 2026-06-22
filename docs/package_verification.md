@@ -224,12 +224,13 @@ CI runs:
 ```bash
 bundle exec rspec
 node script/check_javascript_syntax.mjs
+node script/check_ci_workflow_permissions.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The JavaScript syntax step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets. Keep this command synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
+The JavaScript syntax step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets. The CI workflow permissions smoke checks that the workflow keeps top-level `permissions: contents: read` and does not request contents or pull-request write permissions. Keep these commands synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
-The package verification task also follows the documented package root, top-level types, and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax check by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior to the release checklist's manual Vite integration check.
+The package verification task also follows the documented package root, top-level types, and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax and workflow permissions checks by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior and repository release policy to the release checklist's manual evidence.
 
 Manual package inspection is still recommended before tagging a release.
