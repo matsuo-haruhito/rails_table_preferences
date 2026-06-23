@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   test:
-    name: RSpec, JavaScript syntax, gem build, and package verification
+    name: RSpec, JavaScript syntax, CI workflow permissions, gem build, and package verification
     runs-on: ubuntu-latest
 
     steps:
