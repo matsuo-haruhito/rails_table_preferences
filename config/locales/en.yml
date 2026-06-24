@@ -2,7 +2,7 @@ en:
   rails_table_preferences:
     resource_table:
       empty: No records to display
-      all_columns_hidden: All columns are hidden
+      all_columns_hidden: All columns are hidden. Use Show all columns in the table preferences editor to restore them.
     editor:
       preset_select: Saved presets
       preset_select_hint: Choose which saved settings to load. On first run, or when no saved presets exist yet, the selector shows only the current preset name; that does not mean a saved preset already exists. If the preset list cannot load, only the current preset name remains; check the connection and reload the page.
