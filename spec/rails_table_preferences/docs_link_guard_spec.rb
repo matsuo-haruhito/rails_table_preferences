@@ -18,12 +18,12 @@ RSpec.describe "Required documentation local links" do
     expect(gemspec_files).to include(*referenced_images)
   end
 
-  it "keeps required docs images reachable from README or docs markdown" do
-    required_docs_images = RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\Adocs\/images\//).sort
+  it "keeps local docs image references synchronized with package verifier required paths" do
     referenced_images = docs_local_image_references
+    required_docs_images = RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\Adocs\/images\//).sort
 
-    expect(required_docs_images).not_to be_empty
-    expect(referenced_images).to include(*required_docs_images)
+    expect(referenced_images).not_to be_empty
+    expect(required_docs_images).to eq(referenced_images)
   end
 
   def docs_link_guard_paths
