@@ -75,6 +75,7 @@ module RailsTablePreferences
       "docs/accessibility.md",
       "docs/editor_i18n.md",
       "docs/editor_entrypoint_affordances.md",
+      "docs/editor_reorder_accessibility.md",
       "docs/header_drag_reorder.md",
       "docs/editor_root_options.md",
       "docs/helper_free_controller_root_urls.md",
