@@ -177,6 +177,8 @@ The bundled editor exposes a live status region for async preset actions. These 
 
 `resize_auto_fit_status` is package-entrypoint-only success copy for Enter / Space auto-fit on a focused resize handle. It feeds `data-rails-table-preferences-resize-auto-fit-status-label-value` and is shown in the same status region after the one-shot auto-fit shortcut completes.
 
+When auditing async failure copy, keep the failure keys in this section as the source of truth instead of expanding the minimal override example into a full inventory. In addition to `saving_failed_status`, check `loading_failed_status`, `saving_as_new_failed_status`, and `deleting_failed_status` whenever the host app customizes preset workflow failure wording.
+
 Use locale overrides for message wording. Use copied ERB / JavaScript when the host app wants a different status surface, notification system, busy-state behavior, or copied-controller support for package-entrypoint-only reset feedback, visibility bulk feedback, or resize auto-fit feedback.
 
 ## Minimal host-app override example
