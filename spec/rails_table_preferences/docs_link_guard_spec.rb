@@ -11,6 +11,21 @@ RSpec.describe "Required documentation local links" do
     expect(missing_links).to eq([])
   end
 
+  it "keeps local docs image references included in gem package files" do
+    referenced_images = docs_local_image_references
+
+    expect(referenced_images).not_to be_empty
+    expect(gemspec_files).to include(*referenced_images)
+  end
+
+  it "keeps local docs image references synchronized with package verifier required paths" do
+    referenced_images = docs_local_image_references
+    required_docs_images = RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\Adocs\/images\//).sort
+
+    expect(referenced_images).not_to be_empty
+    expect(required_docs_images).to eq(referenced_images)
+  end
+
   def docs_link_guard_paths
     markdown_required_paths = RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\A(?:README\.md|docs\/.*\.md)\z/)
 
@@ -29,6 +44,26 @@ RSpec.describe "Required documentation local links" do
 
       "#{path} -> #{target} (missing #{resolved_target.relative_path_from(repository_root)})"
     end
+  end
+
+  def docs_local_image_references
+    docs_link_guard_paths.flat_map do |path|
+      content = strip_fenced_code(File.read(repository_root.join(path)))
+
+      markdown_link_targets(content).filter_map do |target|
+        local_target = local_file_target(target)
+        next unless local_target
+
+        resolved_target = resolve_link_target(path, local_target)
+        next unless resolved_target.to_s.start_with?("#{repository_root}/docs/images/")
+
+        resolved_target.relative_path_from(repository_root).to_s
+      end
+    end.uniq.sort
+  end
+
+  def gemspec_files
+    @gemspec_files ||= Gem::Specification.load(repository_root.join("rails_table_preferences.gemspec").to_s).files
   end
 
   def repository_root
