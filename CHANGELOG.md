@@ -70,6 +70,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - The Ransack adapter can read normalized column metadata so `filter: { param: ... }` and `sort_param:` override the saved column key before params are handed to the host app.
 - The default development Gemfile now pins Rails 8.0.x to match the current representative pull-request compatibility matrix.
 - The package verification path now resolves documented package root and controller export targets, then checks their packaged JavaScript relative import/export references.
+- Package verification documentation now records `docs/editor_reorder_accessibility.md` as a required packaged docs entrance while keeping `docs/preset_name_save_boundary.md` outside `REQUIRED_PATHS` until it is intentionally promoted.
 - Documentation now states the bundled sort UI single-sort boundary and leaves multi-sort composition to host apps.
 - Filter adapter documentation now distinguishes ordered neutral `sorts` arrays that Ransack or host-owned adapters can preserve from plain controller params that intentionally reduce to the first valid sort for existing `order_by(params[:sort])` compatibility.
 - Documentation now keeps richer filter widgets, date pickers, autocomplete, and external helper widgets as host-app-owned renderer or custom-partial responsibilities instead of bundled filter UI dependencies.
