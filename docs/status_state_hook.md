@@ -42,6 +42,19 @@ Success status is intentionally temporary. Local editor edits, filter/sort chang
 
 Richer notifications, custom confirmation flows, toast surfaces, or branded messaging should stay in host-app code or a copied/replacement controller.
 
+## State QA quick reference
+
+Use this table when reviewing package-entrypoint screens that rely on the bundled status region. It maps the state hook to representative actions and the cue that should remain visible without changing the underlying live region or API behavior.
+
+| State | Representative action | Expected user-facing cue | Boundary |
+| --- | --- | --- | --- |
+| `idle` | Open the editor, or make a local editor/filter/sort/drag/resize change after a success message | No active status message is rendered; the hook returns to `idle` after local changes clear old success copy | Do not treat `idle` as a custom lifecycle event or analytics signal |
+| `busy` | Load a preset, save, save as new, delete, or refresh the preset list | Progress copy is announced in the existing `role="status"` live region while affected controls are temporarily disabled | Toasts, custom notifications, and branded progress UI stay in host-app or copied-controller code |
+| `success` | Complete save/save as new/delete, or use package-entrypoint resize auto-fit from a focused resize handle | Success copy is announced in the same status region and remains only until the next local editor change or explicit status clear | The resize auto-fit success path is package-entrypoint-only unless a copied controller ports it |
+| `error` | Fail to load, save, save as new, delete, or load the preset list | Display-safe failure copy remains available in the status region until a later bundled operation or status update | Raw API errors, JSON response shape changes, and error framework redesigns are outside this hook |
+
+This table is a QA map for the existing hook. It does not add new required copy, state names, ARIA markup, or lifecycle event payloads.
+
 ## Manual check
 
 For a screen using the packaged `rails_table_preferences/controller` entrypoint, confirm that bundled load/save/save as new/delete actions update the status text and expose the expected state value while controls are temporarily disabled during async work. Also confirm that a successful status clears after a local editor change, while an error status remains visible until the next operation or status update.
