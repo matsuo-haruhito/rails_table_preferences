@@ -151,6 +151,8 @@ export default defineConfig({
 })
 ```
 
+The `rails_table_preferences/controller` alias intentionally points at `rails_table_preferences/preset_select_recovery.js`, matching the gem package export target and the documented package behavior entrypoint. Keep that target unless the host app intentionally owns a custom divergence; do not retarget the public controller specifier to `controller.js` just to make the path look shorter.
+
 See [JavaScript entrypoints](docs/javascript_entrypoints.md) for the default `stimulus-rails`, Vite, and custom bundler registration paths.
 
 For a lightweight local browser verification screen, add `--with-demo`:
