@@ -63,6 +63,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Resource table all-columns-hidden empty state copy now points users to the table preferences editor's Show all columns / 全列表示 recovery action instead of reading like a generic empty table.
 - Select filter option search copy now separates the label from the placeholder so the field names the action and the placeholder describes searching option names.
 - The package entrypoint controller adds a lightweight preset selector search for larger preset collections while keeping the native select, scope grouping, and preset payload semantics unchanged.
+- Preset selector hint copy now explains the `[shared]` / `[role]` / `[organization]` scope markers and `*` default marker near the selector without changing option text or resolver behavior.
 - The package entrypoint filter button active summary now shows `{ value:, label: }` select option labels when a saved value matches a known option, while unknown values still fall back to the raw saved value.
 - The package entrypoint editor now exposes a separate dirty-state helper for unsaved changes while leaving async operation messages in the existing status region.
 - Datetime and time filters in the package entrypoint render native browser inputs and pass `min`, `max`, and `step` metadata as browser attributes without changing saved filter values or query semantics.
