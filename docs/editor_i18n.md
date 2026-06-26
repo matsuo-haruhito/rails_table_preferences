@@ -8,7 +8,7 @@ This guide lists the main keys that are useful during host-app integration. It i
 
 The bundled `table_preferences_editor` partial emits the controller-root label values in this guide from Rails I18n before the packaged controller runs. That path is the normal way to keep visible labels, filter/sort copy, scope fallback labels, editor search labels, row move labels, and status copy aligned with the host app locale without copying JavaScript.
 
-When a host app bypasses the bundled editor partial or hand-builds a helper-free root for the package entrypoint, those `data-rails-table-preferences-*-label-value` attributes become host-owned markup. The package entrypoint still has Japanese JavaScript defaults for values such as `editorSearchLabel`, `selectFilterOptionSearchLabel`, `moveUpLabel`, `moveDownLabel`, `resizeAutoFitStatusLabel`, and `resetStatusLabel`, but those defaults are only last-resort fallback copy. Do not treat them as English, neutral, or locale-aware text for direct package-entrypoint roots.
+When a host app bypasses the bundled editor partial or hand-builds a helper-free root for the package entrypoint, those `data-rails-table-preferences-*-label-value` attributes become host-owned markup. The package entrypoint still has Japanese JavaScript defaults for values such as `editorSearchLabel`, `selectFilterOptionSearchLabel`, `moveUpLabel`, `moveDownLabel`, `presetSearchLabel`, `presetSearchClearLabel`, `resizeAutoFitStatusLabel`, and `resetStatusLabel`, but those defaults are only last-resort fallback copy. Do not treat them as English, neutral, or locale-aware text for direct package-entrypoint roots.
 
 If a helper-free or directly assembled package-entrypoint screen should match the bundled editor copy, pass the same root label values that the partial would have emitted. Keep URL, table key, settings, and columns root values separate from this copy surface; the helper-free URL contract is documented in [Helper-free controller root URLs](helper_free_controller_root_urls.md).
 
@@ -33,6 +33,22 @@ In the current bundled editor, the preset selector is the source for loading or 
 The bundled selector option text can include scope labels such as `[shared]`, `[role]`, or `[organization]`, and `*` marks the default preset. When overriding `preset_select_hint`, keep those display markers understandable near the selector so users can tell whether they are loading a scoped preset, a personal preset, or a default preset without changing option text or resolver behavior.
 
 When the selected preset is read-only, the bundled save action does not overwrite that scoped preset. It creates or updates an owner preset instead, using the current preset name input as the owner preset name. The selected read-only preset name is loaded into that input first, so users can keep the same visible name or change the input before saving a personal copy. If an owner preset with that name already exists, the bundled editor keeps the existing API failure path; host apps that need detailed duplicate-name guidance should customize the failure copy or controller behavior separately.
+
+## Preset selector search labels
+
+The package entrypoint can add a search field before the saved preset selector when the preset count reaches `presetSearchThreshold`. That search UI is rendered by JavaScript after the bundled ERB has loaded. In current `main`, the bundled ERB does not emit Rails I18n keys for these preset-search labels, so helper-free or per-screen wording should be supplied as controller-root values when needed.
+
+Representative package-entrypoint root values are:
+
+- `data-rails-table-preferences-preset-search-label-value`
+- `data-rails-table-preferences-preset-search-placeholder-value`
+- `data-rails-table-preferences-preset-no-search-results-label-value`
+- `data-rails-table-preferences-preset-search-clear-label-value`
+- `data-rails-table-preferences-preset-search-threshold-value`
+
+`presetSearchClearLabel` labels the clear button that appears only while a saved-preset search query is active. The button clears the query and rerenders the saved preset options; it does not load, save, delete, or mutate presets by itself.
+
+Use root values for wording-only changes on package-entrypoint screens. Use copied or replacement JavaScript when the host app needs different preset-search behavior, copied/base-controller support, remote search, ranking, custom no-results recovery, or a different busy-state model.
 
 ## Actions, grouping, and reset copy
 
@@ -225,10 +241,10 @@ Keep overrides close to the host app's normal locale files so copied ERB and cop
 Use the lightest path that matches the change:
 
 1. Locale keys for global wording changes across every bundled editor.
-2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, select option search, reset status, resize auto-fit status, or action-group wording.
+2. Controller-root `data-rails-table-preferences-*-label-value` attributes when one mounted table needs different filter, sort, scope fallback, editor search, row move, preset search, select option search, reset status, resize auto-fit status, or action-group wording.
 3. Package entrypoint `data-rails-table-preferences-filter-operator-labels-value` when a packaged-controller table only needs different filter operator display text.
-4. Package entrypoint editor search / move / select-option-search label values when the packaged-controller table only needs different search or move button copy.
+4. Package entrypoint editor search / move / preset-search / select-option-search label values when the packaged-controller table only needs different search, clear, or move button copy.
 5. Copied ERB when markup, helper-text placement, action grouping, or status-region structure needs to change.
-6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, select option search behavior, row movement, reset status feedback, or resize auto-fit status handling needs to change.
+6. Copied or replacement JavaScript when controller behavior, operator semantics, busy-state logic, editor search behavior, preset search behavior, select option search behavior, row movement, reset status feedback, or resize auto-fit status handling needs to change.
 
 See [Accessibility baseline](accessibility.md) for accessibility surfaces that consume these labels, [Editor entrypoint affordances](editor_entrypoint_affordances.md) for the package-only browser QA surface, and [JavaScript controller notes](javascript_controller.md) for the controller-root value contract.
