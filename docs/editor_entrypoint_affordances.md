@@ -2,6 +2,24 @@
 
 This note covers small browser checks for the packaged `rails_table_preferences/controller` entrypoint. The copied base controller remains the escape hatch for host applications that want to own their editor markup or interaction model directly.
 
+## Preset selector search
+
+The package entrypoint adds a lightweight search field before the saved preset selector when the preset list reaches the configured threshold. It filters saved presets by preset name, scope label, and scope type while keeping the normal select element as the loading surface.
+
+When a query is active, the package entrypoint also renders a small clear button for the preset search surface. The clear button is shown only while a query exists, uses `presetSearchClearLabel` for its text and accessible name, and is disabled while the editor is busy. Activating it empties the search input, rerenders the preset options, hides the no-results message, re-enables the preset select when matches return, and returns focus to the search input.
+
+The clear affordance is local to the package preset search surface. It does not call the saved preset API, change the selected preset payload, save settings, delete presets, or change owner/shared/role/organization scope behavior. The copied/base controller path does not render this clear button unless a host app ports the package entrypoint behavior into its copied JavaScript.
+
+Use the preset selector search during browser QA when a screen has enough saved presets to show the search field:
+
+- search by preset name and confirm matching options remain available in the select
+- search by a scope label or scope type and confirm the option grouping still reflects the remaining presets
+- enter a query with no matching presets and confirm the no-results message appears and the select is disabled
+- confirm the clear button appears while the query is active and disappears after the query is cleared
+- use the clear button from a no-results query and confirm all preset options return, the no-results message is hidden, and the select is usable again
+- confirm the clear button is disabled while bundled async preset actions are busy
+- confirm clearing the preset search does not load, save, delete, or mutate a preset by itself
+
 ## Column search
 
 The package entrypoint adds a lightweight column search field before the generated editor rows. It filters the rendered editor row list by column label, key, or group text. Hidden rows remain in the DOM so applying or saving settings does not drop columns that are temporarily filtered out of view.
@@ -104,6 +122,8 @@ Use this note together with the existing checklist entries rather than as a repl
 `spec/javascript/rails_table_preferences_reset_feedback_spec.rb` guards the package entrypoint reset feedback surface: the editor root exposes reset result copy, reset completion uses the bundled status region, and the reset affordance is synchronized with the current default-state draft.
 
 `spec/javascript/rails_table_preferences_dirty_state_spec.rb` guards the package entrypoint dirty-state surface: package-only target/value exposure, separation from the async status region, and representative clean transitions after save, save as new, preset load, read-only save fallback, and preset delete.
+
+`spec/javascript/rails_table_preferences_preset_search_clear_spec.rb` guards the package preset search clear surface: package-only clear button/value exposure, query-only visibility, busy disabled state, rerender-based clearing, input refocus, and the boundary that clearing does not call saved preset persistence paths.
 
 When this package entrypoint is changed, record in the PR comment or sign-off note which of those checklist areas were actually run. If browser access is not available, say that explicitly and rely on behavior-level entrypoint specs plus source-level guards until a human or browser-capable environment can complete the visual check.
 
