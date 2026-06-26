@@ -1,6 +1,11 @@
 import RailsTablePreferencesController from "./controller.js"
 
 export default class RailsTablePreferencesPresetSelectRecoveryController extends RailsTablePreferencesController {
+  static values = {
+    ...(RailsTablePreferencesController.values || {}),
+    presetSearchClearLabel: { type: String, default: "検索をクリア" }
+  }
+
   filterButtonLabel(column, condition = {}) {
     const columnLabel = column?.label || column?.key || this.filterLabelValue
     const baseLabel = `${this.filterLabelValue}: ${columnLabel}`
@@ -41,6 +46,50 @@ export default class RailsTablePreferencesPresetSelectRecoveryController extends
     const option = (filter.options || []).find((candidate) => this.selectFilterOptionValue(candidate) === rawValue)
     if (!option) return rawValue
     return this.selectFilterOptionLabel(option, rawValue)
+  }
+
+  ensurePresetSearchControl() {
+    super.ensurePresetSearchControl()
+    if (!this.presetSearchControl || this.presetSearchClearButton) return
+
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "rails-table-preferences-editor__search-clear"
+    button.dataset.railsTablePreferencesPresetSearchClear = "true"
+    button.textContent = this.presetSearchClearLabelValue || "検索をクリア"
+    button.setAttribute("aria-label", this.presetSearchClearLabelValue || "検索をクリア")
+    button.hidden = true
+    button.addEventListener("click", (event) => this.clearPresetSearchQuery(event))
+
+    const emptyMessage = this.presetSearchEmptyMessage
+    if (emptyMessage?.parentNode) emptyMessage.parentNode.insertBefore(button, emptyMessage)
+    else this.presetSearchControl.appendChild(button)
+  }
+
+  syncPresetSearchState({ query, visibleCount, enabled }) {
+    super.syncPresetSearchState({ query, visibleCount, enabled })
+
+    const hasQuery = enabled && Boolean(query)
+    if (this.presetSearchClearButton) {
+      this.presetSearchClearButton.hidden = !hasQuery
+      this.presetSearchClearButton.disabled = this.busy || !hasQuery
+    }
+  }
+
+  clearPresetSearchQuery(event) {
+    if (event) event.preventDefault()
+    if (this.busy) return
+
+    const input = this.presetSearchInput
+    if (!input) return
+
+    input.value = ""
+    this.renderPresetOptions()
+    if (typeof input.focus === "function") input.focus()
+  }
+
+  get presetSearchClearButton() {
+    return this.presetSearchControl?.querySelector("[data-rails-table-preferences-preset-search-clear]")
   }
 
   async selectPreset(event) {
