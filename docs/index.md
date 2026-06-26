@@ -41,6 +41,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Resize and auto-fit guidance](resize_auto_fit.md): resize handle root values, double-click auto-fit bounds, and the manual QA focus for dense or horizontally scrolled tables.
 - [Export integration](export_integration.md): reuse saved column visibility/order/labels when building CSV, Excel, or report exports in the host app.
 - [Accessibility baseline](accessibility.md): what the bundled editor/controller provide and what the host app still owns.
+- [Package status state hook](status_state_hook.md): status-state values, package-entrypoint-only boundary, and QA quick reference for bundled status region cues.
 - [Forced-colors manual QA note](forced_colors_manual_qa.md): focused high-contrast evidence handoff for active filters, sorted headers, resize focus, filter panels, and pinned/fixed cells.
 - [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, dirty-state helper, browser QA handoff, and copied-controller boundary.
 - [Editor reorder accessibility note](editor_reorder_accessibility.md): package-entrypoint visual-only row drag handle, keyboard reorder controls, and copied-controller boundary.
