@@ -4,7 +4,7 @@ require "generators/rails_table_preferences/install/install_generator"
 require "generators/rails_table_preferences/javascript/javascript_generator"
 require "generators/rails_table_preferences/stylesheets/stylesheets_generator"
 
-RSpec.describe "rails_table_preferences:install owner foreign key", type: :generator do
+RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :generator do
   include FileUtils
 
   before do
