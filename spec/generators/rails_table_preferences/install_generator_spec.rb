@@ -54,6 +54,12 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(migration).to include("[:scope_type, :scope_key, :member_id, :table_key, :name]")
   end
 
+  it "rejects owner foreign keys that do not match the generated t.references column" do
+    run_generator %w[--owner-model customers --owner-foreign-key account_uuid]
+
+    expect(generated_migration).not_to exist
+  end
+
   it "can skip JavaScript copying" do
     run_generator %w[--skip-javascript]
 

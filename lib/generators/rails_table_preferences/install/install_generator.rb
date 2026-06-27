@@ -26,7 +26,7 @@ module RailsTablePreferences
       class_option :owner_foreign_key,
                    type: :string,
                    default: nil,
-                   desc: "Foreign key column for the owner model. Defaults to the owner model foreign key."
+                   desc: "Foreign key column for the owner model. Must end with _id to match the generated t.references migration."
 
       class_option :skip_javascript,
                    type: :boolean,
@@ -54,6 +54,10 @@ module RailsTablePreferences
                    desc: "Also add the demo route to config/routes.rb. Implies --with-demo."
 
       desc "Copies Rails Table Preferences migrations, initializer, JavaScript, and stylesheets into the host application."
+
+      def ensure_owner_foreign_key_uses_reference_column
+        validate_owner_foreign_key!(owner_foreign_key)
+      end
 
       def copy_initializer
         template "initializer.rb", "config/initializers/rails_table_preferences.rb"
@@ -121,7 +125,9 @@ module RailsTablePreferences
       end
 
       def owner_foreign_key
-        options[:owner_foreign_key].presence || owner_class_name.foreign_key
+        key = options[:owner_foreign_key].presence || owner_class_name.foreign_key
+        validate_owner_foreign_key!(key)
+        key
       end
 
       def owner_table_name
@@ -137,6 +143,14 @@ module RailsTablePreferences
       end
 
       private
+
+      def validate_owner_foreign_key!(key)
+        return if key.to_s.end_with?("_id")
+
+        raise Thor::Error,
+              "--owner-foreign-key must end with _id so the generated t.references column matches the table_preferences indexes. " \
+              "Use --owner-model for normal owner references; custom UUID or string owner keys need a hand-written migration."
+      end
 
       def post_install_steps
         steps = [
