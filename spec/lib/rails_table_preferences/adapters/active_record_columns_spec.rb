@@ -53,6 +53,18 @@ RSpec.describe RailsTablePreferences::Adapters::ActiveRecordColumns do
     expect(column_keys(columns)).to eq(%w[customer])
   end
 
+  it "removes the association convenience when except names the association" do
+    columns = described_class.call(model: model, except: %i[customer])
+
+    expect(column_keys(columns)).to eq(%w[order_no customer_id status])
+  end
+
+  it "removes both the raw attribute and association convenience when except names the foreign key" do
+    columns = described_class.call(model: model, except: %i[customer_id])
+
+    expect(column_keys(columns)).to eq(%w[order_no status])
+  end
+
   it "keeps attribute-only inference when associations are disabled" do
     columns = described_class.call(model: model, only: %i[customer_id], include_associations: false)
 
