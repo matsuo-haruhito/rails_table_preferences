@@ -61,6 +61,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Preset list loading failure copy now explains the current-name-only fallback and asks users to check the connection and reload before retrying the editor flow.
 - The package entrypoint controller now reports Show all columns and Hide all columns bulk actions through the existing editor status region, including the all-hidden recovery path.
 - Resource table all-columns-hidden empty state copy now points users to the table preferences editor's Show all columns / 全列表示 recovery action instead of reading like a generic empty table.
+- Resource table `except:` filtering now treats a belongs_to foreign key exclusion, such as `customer_id`, as excluding the companion association convenience column too, while association-name exclusions still leave the raw foreign key attribute available.
 - Select filter option search copy now separates the label from the placeholder so the field names the action and the placeholder describes searching option names.
 - The package entrypoint controller adds a lightweight preset selector search for larger preset collections while keeping the native select, scope grouping, and preset payload semantics unchanged.
 - The package entrypoint controller now shows a saved-preset search clear button while a preset search query is active, restoring all preset options without calling the saved preset API.
