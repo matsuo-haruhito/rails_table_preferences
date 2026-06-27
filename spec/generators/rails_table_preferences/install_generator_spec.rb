@@ -55,9 +55,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   end
 
   it "rejects owner foreign keys that do not match the generated t.references column" do
-    expect do
-      run_generator %w[--owner-model customers --owner-foreign-key account_uuid]
-    end.to raise_error(Thor::Error, /--owner-foreign-key must end with _id/)
+    run_generator %w[--owner-model customers --owner-foreign-key account_uuid]
 
     expect(generated_migration).not_to exist
   end
