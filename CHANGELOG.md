@@ -64,7 +64,8 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Select filter option search copy now separates the label from the placeholder so the field names the action and the placeholder describes searching option names.
 - The package entrypoint controller adds a lightweight preset selector search for larger preset collections while keeping the native select, scope grouping, and preset payload semantics unchanged.
 - The package entrypoint controller now shows a saved-preset search clear button while a preset search query is active, restoring all preset options without calling the saved preset API.
-- Preset selector hint copy now explains the `[shared]` / `[role]` / `[organization]` scope markers and `*` default marker near the selector without changing option text or resolver behavior.
+- The package entrypoint preset selector now marks default presets with `（既定）` instead of a bare `*` while preserving scope labels, option order, option values, preset identity data, and save/load/delete behavior.
+- Preset selector hint copy now explains the `[shared]` / `[role]` / `[organization]` scope markers and `（既定）` default marker near the selector without changing option resolver behavior.
 - The package entrypoint filter button active summary now shows `{ value:, label: }` select option labels when a saved value matches a known option, while unknown values still fall back to the raw saved value.
 - The package entrypoint editor now exposes a separate dirty-state helper for unsaved changes while leaving async operation messages in the existing status region.
 - Datetime and time filters in the package entrypoint render native browser inputs and pass `min`, `max`, and `step` metadata as browser attributes without changing saved filter values or query semantics.
@@ -95,6 +96,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Saved column numeric settings now drop non-positive or malformed `width`, `truncate`, and `order` values while preserving positive numeric values and numeric strings.
 - The package entrypoint controller restores the preset selector to the applied preset after a failed preset load instead of leaving the failed selection visible.
 - Select filter option search no longer shows the no-results message when the current selected option is the only match, while still preserving selected options as visible context for non-matching queries.
+- The install generator now rejects custom owner foreign keys that do not end with `_id`, avoiding generated reference migrations and table preference indexes that disagree with the configured owner column.
 
 ## [0.1.0] - Unreleased
 

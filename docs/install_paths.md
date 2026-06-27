@@ -46,6 +46,18 @@ end
 
 The method must return a persisted record. `--with-demo` and `--with-demo-route` copy verification files; they do not create the owner record or bypass the normal owner lookup.
 
+## Owner foreign key boundary
+
+The install generator builds the owner column with a normal Rails `t.references` migration. The default foreign key comes from `--owner-model`, so `--owner-model customers` generates `customer_id` and `--owner-model client` generates `client_id`.
+
+Use `--owner-foreign-key` only when the host app needs another reference-style column name that still ends with `_id`, such as `member_id`:
+
+```bash
+bin/rails generate rails_table_preferences:install --owner-model customers --owner-foreign-key member_id
+```
+
+Values that do not end with `_id`, such as `account_uuid` or `tenant_key`, are rejected by the generator because they would not match the generated reference migration and table preference indexes. Host apps with UUID, string, or otherwise custom owner keys should write and review the migration by hand instead of forcing the install generator option.
+
 ## Parent controller and mounted API boundary
 
 The mounted engine controller inherits `RailsTablePreferences.config.parent_controller_class_name`, which defaults to the host app's `ApplicationController`. Keep that value pointed at the controller that should own authentication, CSRF handling, tenant or locale setup, and other request-wide callbacks for the mounted JSON API.
