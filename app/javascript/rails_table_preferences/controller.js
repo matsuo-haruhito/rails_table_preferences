@@ -33,7 +33,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     const name = preset.name || "default"
     const scopeType = preset.scope_type || "owner"
     const scopeLabel = preset.scope_label || this.scopeFallbackLabel(scopeType)
-    const defaultMark = preset.default === true ? " *"
+    const defaultMark = preset.default === true ? "（既定）"
       : ""
     const scopeMark = scopeLabel ? ` [${scopeLabel}]` : ""
     option.textContent = `${name}${scopeMark}${defaultMark}`
