@@ -28,10 +28,6 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     mkdir_p(destination_root)
   end
 
-  def run_generator(args = [])
-    described_class.start(args, destination_root: destination_root)
-  end
-
   def generated_migration
     Pathname.new(Dir[File.join(destination_root, "db/migrate/*_create_table_preferences.rb")].first.to_s)
   end
