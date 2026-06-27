@@ -72,7 +72,7 @@ module RailsTablePreferences
         model.reflect_on_all_associations(:belongs_to).filter_map do |reflection|
           foreign_key = reflection.foreign_key.to_s
           next unless model.attribute_names.include?(foreign_key)
-          next if except.include?(reflection.name.to_s)
+          next if association_excluded?(reflection, foreign_key)
           next if only && !only.include?(reflection.name.to_s)
 
           RailsTablePreferences::ColumnDefinition.new(
@@ -82,6 +82,10 @@ module RailsTablePreferences
             sortable: false
           )
         end
+      end
+
+      def association_excluded?(reflection, foreign_key)
+        except.include?(reflection.name.to_s) || except.include?(foreign_key)
       end
 
       def filter_for_attribute(name)

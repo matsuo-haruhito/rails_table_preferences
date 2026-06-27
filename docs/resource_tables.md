@@ -115,6 +115,8 @@ Choose the column key by the behavior the host app wants:
 
 When `only:` is present, association names and foreign key attribute names are matched independently. `only: %i[customer]` keeps the inferred `customer` association column. `only: %i[customer_id]` keeps the raw `customer_id` attribute column and does not add the `customer` association column. Include both keys only when the screen intentionally needs both the stored id and the associated-record display surface.
 
+When `except:` is present, association columns can be excluded by either the association key or its foreign key attribute. `except: %i[customer]` removes the inferred `customer` association column while leaving the raw `customer_id` attribute available. `except: %i[customer_id]` removes the raw foreign key attribute and also prevents the companion `customer` association column from being inferred. Include both keys when the screen wants to document that neither surface should appear.
+
 ```erb
 <%= resource_table_for @orders, only: %i[customer] %>
 <%= resource_table_for @orders, only: %i[customer_id] %>
