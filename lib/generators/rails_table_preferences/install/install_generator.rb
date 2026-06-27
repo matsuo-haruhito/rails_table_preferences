@@ -26,7 +26,7 @@ module RailsTablePreferences
       class_option :owner_foreign_key,
                    type: :string,
                    default: nil,
-                   desc: "Foreign key column for the owner model. Defaults to the owner model foreign key."
+                   desc: "Foreign key column for the owner model. Must end with _id to match the generated t.references migration."
 
       class_option :skip_javascript,
                    type: :boolean,
@@ -54,6 +54,14 @@ module RailsTablePreferences
                    desc: "Also add the demo route to config/routes.rb. Implies --with-demo."
 
       desc "Copies Rails Table Preferences migrations, initializer, JavaScript, and stylesheets into the host application."
+
+      def validate_owner_foreign_key
+        return if owner_foreign_key.to_s.end_with?("_id")
+
+        raise Thor::Error,
+              "--owner-foreign-key must end with _id so the generated t.references column matches the table_preferences indexes. " \
+              "Use --owner-model for normal owner references; custom UUID or string owner keys need a hand-written migration."
+      end
 
       def copy_initializer
         template "initializer.rb", "config/initializers/rails_table_preferences.rb"
