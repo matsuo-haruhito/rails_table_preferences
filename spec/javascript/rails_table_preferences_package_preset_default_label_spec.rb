@@ -24,6 +24,10 @@ RSpec.describe "rails_table_preferences package preset default label" do
         File.join(base_controller_dir, "rails_table_preferences_controller.js")
       )
       FileUtils.cp(
+        File.join(repo_root, "app/javascript/controllers/rails_table_preferences_controller.js"),
+        File.join(base_controller_dir, "rails_table_preferences_controller")
+      )
+      FileUtils.cp(
         File.join(repo_root, "app/javascript/rails_table_preferences/controller.js"),
         File.join(package_controller_dir, "controller.js")
       )
