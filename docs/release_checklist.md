@@ -102,6 +102,19 @@ Before publishing, the release owner should confirm:
 - [ ] A checksum, provenance note, or artifact identifier is recorded in the release-prep PR, tag note, or release note when the release process requires one.
 - [ ] A human release owner, not an automated docs agent, reviews the final publish command, account, artifact path, and release gate before any publish action runs.
 
+Use a short evidence block like this in the release-prep PR, tag note, or release note so reviewers can match the selected artifact to the verification result without turning the checklist into publish automation:
+
+```markdown
+### Publish evidence
+
+- Target version:
+- Built artifact: `pkg/rails_table_preferences-...gem`
+- `bundle exec rake package:verify`: pass/fail, run against `<artifact>`
+- Checksum / provenance / artifact identifier note:
+- Publish method selected by release owner: manual `gem push` / trusted publishing / other approved path
+- Human release owner final review: name/date and confirmation that account, MFA or trusted-publishing posture, artifact path, and release gate were reviewed before publishing
+```
+
 Keep these checks as release-time evidence. Do not add repository secrets, change RubyGems settings, create a tag, or publish the gem from a docs-only release-readiness task.
 
 ## 5. Install generator checks
