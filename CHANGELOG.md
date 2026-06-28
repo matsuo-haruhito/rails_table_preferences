@@ -68,6 +68,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - The package entrypoint controller now shows a saved-preset search clear button while a preset search query is active, restoring all preset options without calling the saved preset API.
 - The package entrypoint preset selector now marks default presets with `（既定）` instead of a bare `*` while preserving scope labels, option order, option values, preset identity data, and save/load/delete behavior.
 - Preset selector hint copy now explains the `[shared]` / `[role]` / `[organization]` scope markers and `（既定）` default marker near the selector without changing option resolver behavior.
+- The generated demo verification panels now use Japanese sample-screen wording around hidden-field evidence, export payload evidence, owner/scope context, reset, and async-failure checks while preserving the same demo behavior and technical boundary cues.
 - The package entrypoint filter button active summary now shows `{ value:, label: }` select option labels when a saved value matches a known option, while unknown values still fall back to the raw saved value.
 - The package entrypoint editor now exposes a separate dirty-state helper for unsaved changes while leaving async operation messages in the existing status region.
 - Datetime and time filters in the package entrypoint render native browser inputs and pass `min`, `max`, and `step` metadata as browser attributes without changing saved filter values or query semantics.
