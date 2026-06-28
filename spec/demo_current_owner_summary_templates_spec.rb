@@ -20,7 +20,7 @@ RSpec.describe "demo current owner summary templates" do
   it "includes a current owner summary surface in the generated demo view" do
     template = File.read(demo_view_template_path)
 
-    expect(template).to include("Current owner")
+    expect(template).to include("現在の owner")
     expect(template).to include("@demo_owner_summary.fetch(\"model_name\")")
     expect(template).to include("@demo_owner_summary.fetch(\"display_name\")")
     expect(template).to include("@demo_owner_summary.fetch(\"identifier\")")

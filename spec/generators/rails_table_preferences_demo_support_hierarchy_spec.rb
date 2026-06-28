@@ -14,10 +14,10 @@ RSpec.describe "generated demo support section hierarchy" do
 
   it "keeps secondary verification blocks behind collapsible summaries" do
     expect(template_source).to include('<details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">')
-    expect(template_source).to include('<summary>Search form hidden fields preview</summary>')
-    expect(template_source).to include('<summary>Export payload preview</summary>')
-    expect(template_source).to include('<summary>Demo state reset</summary>')
-    expect(template_source).to include('<summary>Async failure check</summary>')
+    expect(template_source).to include('<summary>検索フォーム hidden fields プレビュー</summary>')
+    expect(template_source).to include('<summary>export payload プレビュー</summary>')
+    expect(template_source).to include('<summary>デモ状態リセット</summary>')
+    expect(template_source).to include('<summary>非同期失敗チェック</summary>')
   end
 
   it "preserves existing support evidence payloads and demo-only actions" do

@@ -11,9 +11,9 @@ RSpec.describe "generated demo export payload preview" do
   let(:template) { File.read(template_path) }
 
   it "compares default export payload with include-hidden export payload" do
-    expect(template).to include("Export payload preview")
+    expect(template).to include("export payload プレビュー")
     expect(template).to include("include_hidden: true")
-    expect(template).to include("Default column keys")
-    expect(template).to include("Include-hidden column keys")
+    expect(template).to include("通常 column keys")
+    expect(template).to include("include_hidden column keys")
   end
 end
