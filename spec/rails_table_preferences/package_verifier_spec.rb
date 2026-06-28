@@ -27,6 +27,13 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
       )
     end
 
+    it "keeps documented Vite controller aliases synchronized with the package export target" do
+      expected_target = packaged_controller_export_target
+
+      expect(documented_vite_controller_alias_targets("README.md")).to include(expected_target)
+      expect(documented_vite_controller_alias_targets("docs/javascript_entrypoints.md")).to include(expected_target)
+    end
+
     it "guards resource table default partials used by public helpers" do
       expect(described_class::REQUIRED_PATHS).to include(
         "app/views/rails_table_preferences/_resource_table.html.erb",
@@ -256,6 +263,22 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
 
   def required_overview_svg_paths
     described_class::REQUIRED_PATHS.grep(%r{\Adocs/images/visual-overview-.*\.svg\z})
+  end
+
+  def packaged_controller_export_target
+    package_json = JSON.parse(File.read(repository_root.join("package.json")))
+
+    package_json
+      .fetch("exports")
+      .fetch("./controller")
+      .fetch("default")
+      .sub(%r{\A\./app/javascript/}, "")
+  end
+
+  def documented_vite_controller_alias_targets(path)
+    File.read(repository_root.join(path)).scan(
+      %r{find:\s*/\^rails_table_preferences\\/controller\$/,\s*replacement:\s*gemJavaScriptPath\("rails_table_preferences",\s*"(?<target>[^"]+)"\)}
+    ).flatten
   end
 
   def package_entrypoint_files
