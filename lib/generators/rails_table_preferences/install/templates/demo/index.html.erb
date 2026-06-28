@@ -261,24 +261,24 @@
 <% end %>
 
 <details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">
-  <summary>Search form hidden fields preview</summary>
+  <summary>検索フォーム hidden fields プレビュー</summary>
 
   <p>
-    This preview shows the hidden inputs that the existing search form above
-    submits from the current saved filter and sort state. It is separate from
-    the export payload preview below.
+    上の検索フォームが、現在保存されている filter / sort 状態から送信する
+    hidden input を確認するためのプレビューです。下の export payload
+    プレビューとは別の検証面です。
   </p>
 
-  <% demo_hidden_fields_preview = demo_hidden_fields_html.present? ? String.new(demo_hidden_fields_html.to_s) : "No saved filter or sort hidden fields are currently generated." %>
+  <% demo_hidden_fields_preview = demo_hidden_fields_html.present? ? String.new(demo_hidden_fields_html.to_s) : "保存済みの filter / sort hidden fields は現在生成されていません。" %>
   <div class="rails-table-preferences-demo-copy-controls">
-    <h3 id="rails-table-preferences-demo-hidden-fields-copy-heading">Hidden fields evidence</h3>
+    <h3 id="rails-table-preferences-demo-hidden-fields-copy-heading">hidden fields 証跡</h3>
     <button type="button"
             class="rails-table-preferences-demo-copy-trigger"
             data-rails-table-preferences-demo-copy-trigger
             data-rails-table-preferences-demo-copy-source="hidden-fields"
             data-rails-table-preferences-demo-copy-target="rails-table-preferences-demo-hidden-fields-preview"
             aria-describedby="rails-table-preferences-demo-hidden-fields-copy-status">
-      Copy hidden fields preview
+      hidden fields プレビューをコピー
     </button>
     <span class="rails-table-preferences-demo-copy-status"
           id="rails-table-preferences-demo-hidden-fields-copy-status"
@@ -291,10 +291,9 @@
   <pre class="rails-table-preferences-demo-hidden-fields-preview" id="rails-table-preferences-demo-hidden-fields-preview"><code><%= h(demo_hidden_fields_preview) %></code></pre>
 
   <p>
-    Save a filter or sort, reload, and compare this markup with the search
-    results above. Array params keep their <code>[]</code> names, blank values are
-    omitted, and saved boolean false values remain visible when they are part of
-    the saved preference state.
+    filter や sort を保存して reload し、上の検索結果とこの markup を比較します。
+    array params は <code>[]</code> 付きの name を保ち、空の値は省略され、保存済みの
+    boolean false は preference state に含まれる場合だけ表示されます。
   </p>
 </details>
 
@@ -342,46 +341,46 @@
 </div>
 
 <section class="rails-table-preferences-demo-summary rails-table-preferences-demo-verification-context">
-  <h2>Verification context</h2>
+  <h2>検証コンテキスト</h2>
 
   <p>
-    Compare the active owner and scope before checking how presets resolve,
-    save, and stay isolated between demo contexts.
+    preset の解決、保存、demo context 間の分離を確認する前に、現在の owner と
+    scope をここで比較します。
   </p>
 
   <div class="rails-table-preferences-demo-verification-grid">
     <div class="rails-table-preferences-demo-verification-panel">
-      <h3>Current owner</h3>
+      <h3>現在の owner</h3>
 
       <p>
-        Shared presets save back into this owner context when you use
-        <strong>Save</strong> or <strong>Save as new</strong>.
+        共有 preset を読み込んだあとに <strong>Save</strong> または
+        <strong>Save as new</strong> を使うと、この owner context に保存されます。
       </p>
 
       <dl>
         <div>
-          <dt>Model</dt>
+          <dt>モデル</dt>
           <dd><%= @demo_owner_summary.fetch("model_name") %></dd>
         </div>
 
         <div>
-          <dt>Display</dt>
+          <dt>表示名</dt>
           <dd><%= @demo_owner_summary.fetch("display_name") %></dd>
         </div>
 
         <div>
-          <dt>Identifier</dt>
+          <dt>識別子</dt>
           <dd><%= @demo_owner_summary.fetch("identifier") %></dd>
         </div>
       </dl>
     </div>
 
     <div class="rails-table-preferences-demo-verification-panel">
-      <h3>Owner switch</h3>
+      <h3>owner 切り替え</h3>
 
       <p>
-        Use these demo-only links to switch the active owner and confirm that
-        saved presets stay isolated between representative owners.
+        demo-only のリンクで active owner を切り替え、代表 owner 間で保存済み
+        preset が分離されることを確認します。
       </p>
 
       <% if @demo_owner_switch_ready %>
@@ -401,17 +400,17 @@
         </ul>
       <% else %>
         <p class="rails-table-preferences-demo-owner-note">
-          Keep the host app owner and create at least one more owner record to
-          compare save/load isolation here.
+          save / load の分離をここで比較するには、host app owner を維持したまま
+          owner record をもう 1 件以上作成してください。
         </p>
       <% end %>
     </div>
 
     <div class="rails-table-preferences-demo-verification-panel">
-      <h3>Current scope context</h3>
+      <h3>現在の scope context</h3>
 
       <p>
-        <strong>Current context:</strong>
+        <strong>現在の context:</strong>
         <% if @demo_scope_context_summary["owner_only"] %>
           owner-only
         <% else %>
@@ -427,24 +426,24 @@
       </p>
 
       <p>
-        Use this summary to confirm which scope the preset selector and default
-        resolution below should reflect before comparing owner, role, and
-        organization behavior.
+        owner / role / organization の挙動を比較する前に、preset selector と
+        default resolution がどの scope を反映するべきかをこの summary で確認します。
       </p>
     </div>
 
     <div class="rails-table-preferences-demo-verification-panel">
-      <h3>Scope switch</h3>
+      <h3>scope 切り替え</h3>
 
       <p>
-        Use these demo-only links to compare owner, role, and organization
-        preset resolution without editing controller code between requests.
+        demo-only のリンクで owner、role、organization の preset 解決を比較します。
+        request ごとに controller code を編集する必要はありません。
       </p>
 
       <% unless @demo_scope_context_toggle_ready %>
         <p class="rails-table-preferences-demo-scope-note">
-          Set <code>scope_context_method</code> to <code>table_preference_scope_context</code>
-          once to make the owner / role / organization links below drive the demo.
+          下の owner / role / organization リンクで demo を動かすには、
+          <code>scope_context_method</code> を一度だけ
+          <code>table_preference_scope_context</code> に設定してください。
         </p>
       <% end %>
 
@@ -467,12 +466,12 @@
 </section>
 
 <details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details">
-  <summary>Export payload preview</summary>
+  <summary>export payload プレビュー</summary>
 
   <p>
-    This preview compares the ordered headers, column keys, and export keys that
-    the current saved table settings would pass into the export helper by
-    default and with <code>include_hidden: true</code>.
+    現在保存されている table settings が export helper に渡す ordered headers、
+    column keys、export keys を、default と <code>include_hidden: true</code> の
+    両方で比較するプレビューです。
   </p>
 
   <% export_payload_with_hidden_preview = RailsTablePreferences::ExportPayload.call(
@@ -482,14 +481,14 @@
   ) %>
 
   <div class="rails-table-preferences-demo-copy-controls">
-    <h3 id="rails-table-preferences-demo-export-payload-copy-heading">Export payload evidence</h3>
+    <h3 id="rails-table-preferences-demo-export-payload-copy-heading">export payload 証跡</h3>
     <button type="button"
             class="rails-table-preferences-demo-copy-trigger"
             data-rails-table-preferences-demo-copy-trigger
             data-rails-table-preferences-demo-copy-source="export-payload"
             data-rails-table-preferences-demo-copy-target="rails-table-preferences-demo-export-payload-preview"
             aria-describedby="rails-table-preferences-demo-export-payload-copy-status">
-      Copy export payload preview
+      export payload プレビューをコピー
     </button>
     <span class="rails-table-preferences-demo-copy-status"
           id="rails-table-preferences-demo-export-payload-copy-status"
@@ -501,60 +500,57 @@
 
   <dl id="rails-table-preferences-demo-export-payload-preview">
     <div>
-      <dt>Default headers</dt>
+      <dt>通常 headers</dt>
       <dd><%= @export_payload_preview.fetch("headers", []).join(" / ") %></dd>
     </div>
 
     <div>
-      <dt>Default column keys</dt>
+      <dt>通常 column keys</dt>
       <dd><code><%= @export_payload_preview.fetch("column_keys", []).join(", ") %></code></dd>
     </div>
 
     <div>
-      <dt>Default export keys</dt>
+      <dt>通常 export keys</dt>
       <dd><code><%= @export_payload_preview.fetch("export_keys", []).join(", ") %></code></dd>
     </div>
 
     <div>
-      <dt>Include-hidden headers</dt>
+      <dt>include_hidden headers</dt>
       <dd><%= export_payload_with_hidden_preview.fetch("headers", []).join(" / ") %></dd>
     </div>
 
     <div>
-      <dt>Include-hidden column keys</dt>
+      <dt>include_hidden column keys</dt>
       <dd><code><%= export_payload_with_hidden_preview.fetch("column_keys", []).join(", ") %></code></dd>
     </div>
 
     <div>
-      <dt>Include-hidden export keys</dt>
+      <dt>include_hidden export keys</dt>
       <dd><code><%= export_payload_with_hidden_preview.fetch("export_keys", []).join(", ") %></code></dd>
     </div>
   </dl>
 
   <p>
-    Hidden columns stay out of the default payload and appear in the
-    include-hidden payload. Compare <code>column_keys</code> with
-    <code>export_keys</code> to confirm when export value extraction uses
-    <code>export_key</code> metadata instead of the display/preference key.
-    Change visibility or order in the editor, save once, and reload to compare
-    both export-helper results before wiring a host-app CSV, Excel, or report
-    export.
+    hidden column は default payload から外れ、include-hidden payload では表示されます。
+    <code>column_keys</code> と <code>export_keys</code> を比較し、export value extraction が
+    表示 / preference key ではなく <code>export_key</code> metadata を使う場面を確認します。
+    editor で表示や順序を変更し、一度保存して reload してから、host app の CSV、Excel、
+    report export を接続する前に両方の export-helper result を比較してください。
   </p>
 </details>
 
 <details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details" data-rails-table-preferences-demo-reset>
-  <summary>Demo state reset</summary>
+  <summary>デモ状態リセット</summary>
 
   <p>
-    Use this demo-only button to delete owner-scoped presets for the current
-    owner and table, then reload into the seeded shared / role / organization
-    baseline without changing code.
+    demo-only のボタンで、現在の owner と table に紐づく owner-scoped preset を削除し、
+    code を変更せずに seeded shared / role / organization baseline へ戻して reload します。
   </p>
 
   <button type="button"
           class="rails-table-preferences-demo-reset-trigger"
           data-rails-table-preferences-demo-reset-trigger>
-    Reset demo verification state
+    検証用デモ状態をリセット
   </button>
 
   <p class="rails-table-preferences-demo-reset-status"
@@ -564,17 +560,17 @@
 </details>
 
 <details class="rails-table-preferences-demo-summary rails-table-preferences-demo-support-details" data-rails-table-preferences-demo-failure>
-  <summary>Async failure check</summary>
+  <summary>非同期失敗チェック</summary>
 
   <p>
-    Use this demo-only button to make the next preset save, load, or delete
-    request fail once. The following retry uses the normal mounted engine API.
+    demo-only のボタンで、次の preset save、load、delete request を1回だけ失敗させます。
+    その次の retry は通常の mounted engine API を使います。
   </p>
 
   <button type="button"
           class="rails-table-preferences-demo-failure-trigger"
           data-rails-table-preferences-demo-failure-trigger>
-    Fail next preset request once
+    次の preset request を1回だけ失敗させる
   </button>
 
   <p class="rails-table-preferences-demo-failure-status"
@@ -600,7 +596,7 @@
           const available = copyAvailable()
           trigger.disabled = !available
           if (!available) {
-            setCopyStatus(trigger.dataset.railsTablePreferencesDemoCopySource, "Copy unavailable in this browser. Select the preview text manually.")
+            setCopyStatus(trigger.dataset.railsTablePreferencesDemoCopySource, "このブラウザではコピーできません。プレビュー本文を選択してください。")
           }
         })
       }
@@ -619,20 +615,20 @@
 
         if (!copyAvailable()) {
           trigger.disabled = true
-          setCopyStatus(source, "Copy unavailable in this browser. Select the preview text manually.")
+          setCopyStatus(source, "このブラウザではコピーできません。プレビュー本文を選択してください。")
           return
         }
 
         if (!text) {
-          setCopyStatus(source, "Nothing is available to copy yet.")
+          setCopyStatus(source, "コピーできる内容はまだありません。")
           return
         }
 
         try {
           await navigator.clipboard.writeText(text)
-          setCopyStatus(source, "Copied preview text.")
+          setCopyStatus(source, "プレビュー本文をコピーしました。")
         } catch (error) {
-          setCopyStatus(source, "Copy failed. Select the preview text manually.")
+          setCopyStatus(source, "コピーに失敗しました。プレビュー本文を選択してください。")
           console.error(error)
         }
       })
@@ -662,12 +658,12 @@
 
         const url = collectionUrl()
         if (!url) {
-          setDemoResetStatus("Demo reset is not available until the preset editor is rendered.")
+          setDemoResetStatus("preset editor が表示されるまで、デモ状態リセットは利用できません。")
           return
         }
 
         trigger.disabled = true
-        setDemoResetStatus("Resetting owner presets for this demo table...")
+        setDemoResetStatus("この demo table の owner preset をリセットしています...")
 
         try {
           const response = await fetch(url, { headers: { "Accept": "application/json" } })
@@ -684,11 +680,11 @@
             }
           })))
 
-          setDemoResetStatus("Demo owner presets were reset. Reloading the seeded baseline...")
+          setDemoResetStatus("owner preset をリセットしました。seeded baseline を再読み込みしています...")
           window.location.reload()
         } catch (error) {
           trigger.disabled = false
-          setDemoResetStatus("Demo reset could not finish. Check the browser console or server log, then retry.")
+          setDemoResetStatus("デモ状態リセットを完了できませんでした。browser console または server log を確認してから再試行してください。")
           console.error(error)
         }
       })
@@ -723,13 +719,13 @@
       if (!trigger) return
 
       failNextPresetRequest = true
-      setDemoFailureStatus("The next preset request will fail once.")
+      setDemoFailureStatus("次の preset request は1回だけ失敗します。")
     })
 
     window.fetch = (...args) => {
       if (failNextPresetRequest && matchesPreferenceRequest(args[0])) {
         failNextPresetRequest = false
-        setDemoFailureStatus("One preset request failed as planned. Retry the same action to confirm recovery.")
+        setDemoFailureStatus("preset request を予定どおり1回失敗させました。同じ操作を retry して復帰を確認してください。")
         return Promise.resolve(new Response(JSON.stringify({ error: "Demo failure" }), {
           status: 503,
           headers: { "Content-Type": "application/json" }
