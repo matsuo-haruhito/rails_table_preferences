@@ -24,7 +24,7 @@ export default class RailsTablePreferencesController extends RailsTablePreferenc
     selectFilterOptionSearchThreshold: { type: Number, default: 8 },
     presetSearchLabel: { type: String, default: "保存済み設定を検索" },
     presetSearchPlaceholder: { type: String, default: "設定名やスコープで絞り込み" },
-    presetNoSearchResultsLabel: { type: String, default: "一致する保存済み設定はありません。検索語を変更してください。" },
+    presetNoSearchResultsLabel: { type: String, default: "読み込む保存済み設定の候補に一致はありません。検索語を変更してください。" },
     presetSearchThreshold: { type: Number, default: 8 }
   }
 
