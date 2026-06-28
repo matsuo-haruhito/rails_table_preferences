@@ -23,7 +23,7 @@ The bundled editor and Stimulus controller provide:
 - per-button `title` and `aria-label` text on the bundled `適用`, `保存`, and `別名で保存` buttons so users can tell whether they are applying the current editor state, saving to the current preset name, or creating a separately named preset
 - a visible helper message when saving from a read-only preset will create or update the owner preset path instead of overwriting the shared preset directly
 - a visible helper message and `aria-describedby` context for the bundled default preset checkbox so users can tell it only takes effect when they save or save as new
-- a live `role="status"` region for bundled save/load/delete feedback and package-entrypoint resize auto-fit success feedback
+- a live `role="status"` region for bundled save/load/delete feedback and package-entrypoint reset, visibility bulk, and resize auto-fit success feedback
 - a visible helper message plus explanatory `title`, `aria-label`, and `aria-describedby` text on the bundled reset button so users can tell it discards unsaved editor changes and returns to the default settings without relying only on hover text
 - visible maintenance helper copy for delete/reset actions, with `aria-describedby` context on the maintenance group and delete/reset buttons
 - temporary busy-state disabling for preset controls, generated editor inputs, and bundled header buttons while bundled async preset actions are running
@@ -127,13 +127,15 @@ This prevents the regular user-facing editor from accidentally overwriting share
 
 ## Status region and busy state
 
-The bundled editor now includes a lightweight status region for the main async preset actions and package-entrypoint resize auto-fit feedback:
+The bundled editor now includes a lightweight status region for the main async preset actions and package-entrypoint reset, visibility bulk, and resize auto-fit feedback:
 
 - loading saved settings
 - saving the current settings
 - saving as a new preset
 - deleting the current preset
 - reporting action-specific failure copy when load, save, save as new, or delete cannot complete
+- reporting package-entrypoint reset success after the bundled reset action returns the editor and table to the current column-definition defaults
+- reporting package-entrypoint Show all columns / Hide all columns success after the bulk checkbox update completes
 - reporting package-entrypoint Enter / Space auto-fit success after a focused resize handle uses the one-shot auto-fit shortcut
 
 The default markup uses a native live region:
@@ -153,7 +155,7 @@ The packaged controller uses these values:
 
 - `idle`: no current status message is shown, including after a successful message is cleared by a local editor change.
 - `busy`: a bundled async preset action is loading, saving, saving as new, or deleting.
-- `success`: a bundled async action completed successfully, or package-entrypoint resize auto-fit reported success.
+- `success`: a bundled async action completed successfully, or package-entrypoint reset, visibility bulk, or resize auto-fit reported success.
 - `error`: load, save, save as new, delete, or initial preset-list loading failed; the error status stays visible until a later successful status or explicit clear.
 
 The copied/base controller path should not rely on this data hook unless the host app ports the packaged status-state behavior into its copied or replacement controller. Host applications that need richer inline messaging, toast notifications, or custom state names should keep that behavior in their copied ERB, copied JavaScript, or host-app notification layer.
@@ -176,6 +178,7 @@ Representative locale keys include:
 - `rails_table_preferences.editor.loading_status`
 - `rails_table_preferences.editor.saved_status`
 - `rails_table_preferences.editor.deleting_failed_status`
+- `rails_table_preferences.editor.reset_status`
 - `rails_table_preferences.editor.resize_auto_fit_status`
 - `rails_table_preferences.editor.reset_hint`
 - `rails_table_preferences.editor.reset_visible_hint`
@@ -186,6 +189,7 @@ Those keys feed different bundled accessibility surfaces:
 - `maintenance_hint`: the visible helper text and `aria-describedby` context for delete/reset maintenance actions
 - `read_only_preset_hint`: the helper text shown when a shared, role, or organization preset is read-only
 - `*_status`: the live `role="status"` region used for async preset feedback
+- `reset_status`: the same live status region after package-entrypoint reset restores current column-definition defaults
 - `resize_auto_fit_status`: the same live status region after package-entrypoint Enter / Space auto-fit on a focused resize handle
 - `reset_hint`: the bundled reset button `title` and `aria-label`
 - `reset_visible_hint`: the visible helper text and `aria-describedby` context for the bundled reset button
@@ -206,7 +210,7 @@ Typical locale-driven surfaces include:
 - read-only preset helper text
 - reset visible helper and button wording
 - async status-region progress, success, and failure copy
-- package-entrypoint resize auto-fit success copy
+- package-entrypoint reset, visibility bulk, and resize auto-fit success copy
 
 This is the best default when the same wording should stay consistent across every screen that uses the bundled editor.
 
@@ -320,7 +324,7 @@ Before releasing a screen, check:
 - At 36rem and 26rem-equivalent widths or narrow containers, the action row wraps without clipping, the delete/reset maintenance group stays visually separated from save actions, and helper text does not overlap buttons or editor controls.
 - Sortable headers expose the current sort state.
 - Active filters expose an active pressed state.
-- Active filter buttons expose a short summary through `title` or `aria-label`.
+- Active filter buttons expose a short operator/value summary through `title` or `aria-label`.
 - Filter buttons expose expanded state only while their panel is open.
 - Opening a filter panel moves focus into the first bundled field.
 - `Escape` closes the bundled filter panel and returns focus to the triggering filter button.
@@ -329,7 +333,7 @@ Before releasing a screen, check:
 - Read-only scoped presets show helper text that explains the save fallback goes to the owner preset path without implying it always creates a brand-new preset.
 - Save/load/delete actions update the status region with understandable progress, result, and action-specific failure copy.
 - Async preset actions temporarily disable controls and re-enable them after completion.
-- Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request completes.
+- Async preset actions keep editor row inputs, drag handles, filter buttons, resize handles, and sortable headers from changing state until the request finishes.
 - When using the packaged `rails_table_preferences/controller` entrypoint, the column search input has a visible label or accessible name, filtered-out rows are not dropped from apply/save settings, row up/down buttons announce the configured move labels, and hidden/first/last/busy move-button states are disabled.
 - When using the packaged entrypoint at 320px, 375px, and 390px-equivalent widths or narrow containers, the column search and row move buttons remain reachable without overlapping labels, numeric order inputs, width inputs, or truncate inputs.
 - Resource table captions are present when a short semantic table name is needed, and they do not duplicate or replace the page heading or surrounding instructions.
