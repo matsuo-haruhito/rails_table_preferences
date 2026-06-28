@@ -64,6 +64,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Resource table `except:` filtering now treats a belongs_to foreign key exclusion, such as `customer_id`, as excluding the companion association convenience column too, while association-name exclusions still leave the raw foreign key attribute available.
 - Select filter option search copy now separates the label from the placeholder so the field names the action and the placeholder describes searching option names.
 - The package entrypoint controller adds a lightweight preset selector search for larger preset collections while keeping the native select, scope grouping, and preset payload semantics unchanged.
+- Saved-preset search no-results copy now describes matches as load candidates so users do not confuse the selector search with the save target or current preset name input.
 - The package entrypoint controller now shows a saved-preset search clear button while a preset search query is active, restoring all preset options without calling the saved preset API.
 - The package entrypoint preset selector now marks default presets with `（既定）` instead of a bare `*` while preserving scope labels, option order, option values, preset identity data, and save/load/delete behavior.
 - Preset selector hint copy now explains the `[shared]` / `[role]` / `[organization]` scope markers and `（既定）` default marker near the selector without changing option resolver behavior.
