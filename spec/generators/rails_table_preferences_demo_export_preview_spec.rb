@@ -32,11 +32,11 @@ RSpec.describe "generated demo export payload preview" do
   end
 
   it "shows column keys and export keys for both default and include-hidden payloads" do
-    expect(template_source).to include("<dt>Default column keys</dt>")
-    expect(template_source).to include("<dt>Default export keys</dt>")
+    expect(template_source).to include("<dt>通常 column keys</dt>")
+    expect(template_source).to include("<dt>通常 export keys</dt>")
     expect(template_source).to include("@export_payload_preview.fetch(\"export_keys\", [])")
-    expect(template_source).to include("<dt>Include-hidden column keys</dt>")
-    expect(template_source).to include("<dt>Include-hidden export keys</dt>")
+    expect(template_source).to include("<dt>include_hidden column keys</dt>")
+    expect(template_source).to include("<dt>include_hidden export keys</dt>")
     expect(template_source).to include("export_payload_with_hidden_preview.fetch(\"export_keys\", [])")
   end
 
