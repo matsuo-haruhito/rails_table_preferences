@@ -26,7 +26,7 @@ RSpec.describe "demo scope context switch templates" do
   it "renders the generated demo scope switch surface" do
     template = File.read(view_template_path)
 
-    expect(template).to include("<h3>Scope switch</h3>")
+    expect(template).to include("<h3>scope 切り替え</h3>")
     expect(template).to include('switch.fetch("label")')
     expect(template).to include('rails-table-preferences-demo-scope-switch')
     expect(template).to include('table_preference_scope_context')
