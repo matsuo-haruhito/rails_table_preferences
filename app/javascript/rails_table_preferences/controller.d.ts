@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export type RailsTablePreferencesLifecycleEvent = "applied" | "saved" | "loaded" | "deleted" | "error"
 export type RailsTablePreferencesEventName = `rails-table-preferences:${RailsTablePreferencesLifecycleEvent}`
 
-export type RailsTablePreferencesSuccessAction = "apply" | "reset" | "save" | "create" | "load" | "delete"
+export type RailsTablePreferencesSuccessAction = "apply" | "reset" | "clear-filters-and-sorts" | "save" | "create" | "load" | "delete"
 export type RailsTablePreferencesErrorAction = RailsTablePreferencesSuccessAction | "load-presets" | "operation"
 export type RailsTablePreferencesLifecycleAction = RailsTablePreferencesSuccessAction | RailsTablePreferencesErrorAction
 
