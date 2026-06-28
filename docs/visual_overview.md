@@ -50,6 +50,21 @@ Use this quick matrix when deciding what evidence a PR or release-prep check sho
 | Replacement of either SVG, a changed README first-visual promise, or a claim about spacing, overlap, clipping, or visual hierarchy | Render or open the artifact when available, then record the changed visual/doc paths and the source-of-truth docs compared. | Required when rendered confirmation is unavailable or the acceptance criteria ask for rendered proof. |
 | Generated demo layout, first-screen ordering, owner/scope/export/reset/async support-section behavior, or runtime UI behavior | Use the generated demo page and the relevant focused docs as the behavior source of truth. Record whether evidence was rendered, source-only, or substituted. | Leave the exact remaining screen, viewport, or support-section check for review when this environment cannot render it. |
 
+For narrow PR comments, keep the handoff short enough to paste directly under the review summary:
+
+```markdown
+### Visual evidence handoff
+
+- Artifact / changed paths:
+- Checked in this PR: source-only / rendered / browser-capable
+- Source-of-truth docs compared:
+- Not checked here:
+- Remaining browser-capable handoff:
+- Generated demo cues intentionally left outside the compact SVG:
+```
+
+Use `source-only` when you compared Markdown, SVG text, captions, or package paths without opening the rendered artifact. Use `rendered` only after opening the changed visual artifact. Use `browser-capable` only after checking the relevant browser viewport, support section, or generated demo screen.
+
 Do not describe source inspection as rendered proof. Use [Manual QA smoke matrix for PRs](manual_qa_pr_smoke_matrix.md#pr-category-matrix) and its static visual docs row for the general evidence format.
 
 ## Notes
