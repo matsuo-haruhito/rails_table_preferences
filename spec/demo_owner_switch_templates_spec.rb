@@ -26,7 +26,7 @@ RSpec.describe "demo owner switch templates" do
   it "renders the generated owner switch surface in the demo view" do
     template = File.read(view_template_path)
 
-    expect(template).to include("<h3>Owner switch</h3>")
+    expect(template).to include("<h3>owner 切り替え</h3>")
     expect(template).to include('switch.fetch("label")')
     expect(template).to include('switch.fetch("description")')
     expect(template).to include('rails-table-preferences-demo-owner-switch')
