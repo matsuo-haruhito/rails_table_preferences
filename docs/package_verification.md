@@ -200,7 +200,7 @@ package.json#types -> app/javascript/rails_table_preferences/index.d.ts
 
 The top-level `types` target is reported as `package.json#types` so it remains distinguishable from `exports["."].types` even when both intentionally point at the same declaration file.
 
-The `./controller` default export is the package entrypoint host apps import as `rails_table_preferences/controller`. It currently points at `preset_select_recovery.js`, which subclasses the shared `controller.js` implementation; manual bundler aliases for the package specifier should preserve that same behavior entrypoint instead of bypassing the recovery subclass.
+The `./controller` default export is the package entrypoint host apps import as `rails_table_preferences/controller`. It currently points at `preset_select_recovery.js`, which subclasses the shared `controller.js` implementation; manual bundler aliases for the package specifier should preserve that same behavior entrypoint instead of bypassing the recovery subclass. The verifier checks that this packaged export target exists and that its relative imports resolve inside the built gem, while the release checklist remains the place to compare README and `docs/javascript_entrypoints.md` manual alias examples against the same target.
 
 After confirming those package target files exist, the verifier scans JavaScript export targets' static relative `import ... from`, side-effect `import`, and `export ... from` references. Extensionless references such as `./controller` and `../controllers/rails_table_preferences_controller` must resolve to packaged JavaScript files, so package verification catches drift where an exported entrypoint ships but one of its internal package files does not.
 
@@ -212,7 +212,7 @@ The packaged `package.json` is resolver metadata for these gem-packaged JavaScri
 
 ## Runtime import smoke boundary
 
-`bundle exec rake package:verify` confirms that package metadata, files, JavaScript relative imports, and TypeScript declaration re-exports are internally consistent in the built gem. It does not run a host-app bundler or install frontend dependencies. Keep the real `rails_table_preferences` and `rails_table_preferences/controller` ESM import smoke as release or host-app evidence in the Vite / `app/frontend` checklist rather than adding a partial CI import that could pass without proving real bundler integration.
+`bundle exec rake package:verify` confirms that package metadata, files, JavaScript relative imports, and TypeScript declaration re-exports are internally consistent in the built gem. It does not run a host-app bundler or install frontend dependencies. It also does not parse README or `docs/javascript_entrypoints.md` code blocks to prove their manual resolver aliases still mirror `package.json`; keep that docs-to-metadata comparison in the release checklist's JavaScript entrypoint checks. Keep the real `rails_table_preferences` and `rails_table_preferences/controller` ESM import smoke as release or host-app evidence in the Vite / `app/frontend` checklist rather than adding a partial CI import that could pass without proving real bundler integration.
 
 ## Why this matters
 
