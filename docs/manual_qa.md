@@ -136,7 +136,7 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] If you use the generated demo example, use `Demo state reset` before repeating scoped/default precedence checks when earlier save testing may have created owner-scoped demo presets.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner, role, organization, and shared presets are grouped in the selector when multiple scope buckets are returned, while single-scope owner presets remain easy to scan.
-- [ ] Confirm owner default is preferred over role, organization, and shared defaults.
+- [ ] Confirm owner default is preferred over role, organization and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, use `Owner-only baseline` to clear representative role/organization context and compare the shared baseline again.
 - [ ] In the generated demo flow, clear any owner default and confirm `担当ビュー [role:operations]` wins before `共有ビュー [shared]`.
@@ -357,4 +357,4 @@ Use a short sign-off note for release candidates, host-app launch checks, or any
 - Release or rollout recommendation:
 ```
 
-For a quick smoke, record the quick smoke items that passed and the specific full-checklist sections you did not run. For full release or host-app launch sign-off, note any skipped section by number and include the risk or reason, such as not using Ransack, not testing exports in that host app, or deferring browser coverage to a separate compatibility pass.
+For a quick smoke, record the quick smoke items that passed and the specific full-checklist sections you did not run. For full release or host-app launch, note any skipped section by number and include the risk or reason, such as not using Ransack, not testing exports in that host app, or deferring browser coverage to a separate compatibility pass.
