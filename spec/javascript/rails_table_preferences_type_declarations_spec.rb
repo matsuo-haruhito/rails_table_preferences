@@ -23,12 +23,21 @@ RSpec.describe "rails_table_preferences TypeScript declarations" do
       "export type RailsTablePreferencesErrorAction",
       "\"load-presets\" | \"operation\"",
       "export interface RailsTablePreferencesSettingsSnapshot",
+      "export interface RailsTablePreferencesEventDetailMap",
+      "\"rails-table-preferences:applied\": RailsTablePreferencesSuccessEventDetail",
+      "\"rails-table-preferences:saved\": RailsTablePreferencesSuccessEventDetail",
+      "\"rails-table-preferences:loaded\": RailsTablePreferencesSuccessEventDetail",
+      "\"rails-table-preferences:deleted\": RailsTablePreferencesSuccessEventDetail",
+      "\"rails-table-preferences:error\": RailsTablePreferencesErrorEventDetail",
+      "export type RailsTablePreferencesEventDetailFor<EventName extends RailsTablePreferencesEventName>",
       "export type RailsTablePreferencesEventDetail"
     )
 
     expect(index_declaration).to include(
       "RailsTablePreferencesController",
       "RailsTablePreferencesEventDetail",
+      "RailsTablePreferencesEventDetailFor",
+      "RailsTablePreferencesEventDetailMap",
       "RailsTablePreferencesEventName",
       "RailsTablePreferencesSuccessAction",
       "RailsTablePreferencesErrorAction"
