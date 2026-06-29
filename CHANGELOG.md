@@ -93,6 +93,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Engine route names avoid duplicate route name conflicts in the test app.
 - Private `current_user` methods are supported.
 - Saved filter/sort state survives editor apply operations.
+- TypeScript lifecycle action declarations now include the package-entrypoint clear-filters-and-sorts success action, matching the already documented applied event detail.
 - Current column metadata overrides stale saved metadata for labels, filters, sortable state, and pinned state.
 - Ignored columns are filtered out of editor payloads and saved settings.
 - Boolean `false` filter values are preserved through hidden-field and controller-params round trips while `nil`, empty strings, and blank array items remain omitted.
