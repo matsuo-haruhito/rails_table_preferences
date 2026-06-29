@@ -1,12 +1,14 @@
-# TypeScript settings snapshot declarations
+# TypeScript lifecycle event declarations
 
-Rails Table Preferences packages TypeScript helper types for the settings snapshots exposed through package-entrypoint lifecycle events.
+Rails Table Preferences packages TypeScript helper types for the settings snapshots and event-specific detail shapes exposed through package-entrypoint lifecycle events.
 
 Host apps can import the helpers from the package root:
 
 ```ts
 import type {
   RailsTablePreferencesColumnSnapshot,
+  RailsTablePreferencesEventDetailFor,
+  RailsTablePreferencesEventDetailMap,
   RailsTablePreferencesFilterSnapshot,
   RailsTablePreferencesSettingsSnapshot,
   RailsTablePreferencesSortSnapshot
@@ -19,6 +21,11 @@ The snapshot helpers describe the stable shape that package-entrypoint event con
 - `RailsTablePreferencesColumnSnapshot` covers common column metadata exported from the Rails column definitions, including keys, labels, visibility, ordering, width, truncation, overflow, grouping, filtering, and sorting hints.
 - `RailsTablePreferencesFilterSnapshot` covers representative filter metadata and intentionally keeps filter values open-ended because host apps may provide scalar values, arrays, ranges, or option payloads.
 - `RailsTablePreferencesSortSnapshot` describes persisted sort entries by key and direction while allowing additional sort metadata.
+
+The event detail helpers describe which detail shape belongs to each package-entrypoint lifecycle event:
+
+- `RailsTablePreferencesEventDetailMap` maps each `rails-table-preferences:*` event name to its success or error detail shape.
+- `RailsTablePreferencesEventDetailFor<EventName>` lets TypeScript listener code select the matching detail shape from the event name, such as `RailsTablePreferencesEventDetailFor<"rails-table-preferences:saved">` for saved-event listeners.
 
 These declarations are compile-time helpers only. They do not validate runtime payloads, replace Rails-side column or filter definitions, or guarantee that every host application uses every optional property. Treat unknown keys as extension data supplied by the server or host app.
 
