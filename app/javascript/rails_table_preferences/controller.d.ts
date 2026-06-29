@@ -71,6 +71,16 @@ export type RailsTablePreferencesErrorEventDetail = RailsTablePreferencesEventDe
   message: string
 }
 
+export interface RailsTablePreferencesEventDetailMap {
+  "rails-table-preferences:applied": RailsTablePreferencesSuccessEventDetail
+  "rails-table-preferences:saved": RailsTablePreferencesSuccessEventDetail
+  "rails-table-preferences:loaded": RailsTablePreferencesSuccessEventDetail
+  "rails-table-preferences:deleted": RailsTablePreferencesSuccessEventDetail
+  "rails-table-preferences:error": RailsTablePreferencesErrorEventDetail
+}
+
+export type RailsTablePreferencesEventDetailFor<EventName extends RailsTablePreferencesEventName> = RailsTablePreferencesEventDetailMap[EventName]
+
 export type RailsTablePreferencesEventDetail = RailsTablePreferencesSuccessEventDetail | RailsTablePreferencesErrorEventDetail
 
 declare const RailsTablePreferencesController: typeof Controller

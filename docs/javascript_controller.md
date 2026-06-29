@@ -63,17 +63,37 @@ document.addEventListener("rails-table-preferences:saved", (event) => {
 })
 ```
 
-TypeScript host apps can import the packaged lifecycle detail type and narrow the DOM event to a `CustomEvent` at the listener boundary:
+TypeScript host apps can import the packaged event-specific helper type and narrow each DOM event to the matching `CustomEvent` detail at the listener boundary:
 
 ```ts
-import type { RailsTablePreferencesEventDetail } from "rails_table_preferences"
+import type { RailsTablePreferencesEventDetailFor } from "rails_table_preferences"
 
 document.addEventListener("rails-table-preferences:saved", (event) => {
-  const { tableKey, name, action, settings } = (event as CustomEvent<RailsTablePreferencesEventDetail>).detail
+  const { tableKey, name, action, settings } = (event as CustomEvent<RailsTablePreferencesEventDetailFor<"rails-table-preferences:saved">>).detail
 
-  // Update host-app analytics, export previews, or surrounding UI here.
+  // Success events expose the current settings snapshot after the operation succeeds.
+  window.appAnalytics?.track("table_preference_saved", {
+    table_key: tableKey,
+    preset_name: name,
+    action,
+    visible_column_count: settings.columns?.filter((column) => column.visible !== false).length ?? 0
+  })
+})
+
+document.addEventListener("rails-table-preferences:error", (event) => {
+  const { tableKey, name, action, message } = (event as CustomEvent<RailsTablePreferencesEventDetailFor<"rails-table-preferences:error">>).detail
+
+  // Error events expose a display-safe message, not the raw Error object.
+  window.appAnalytics?.track("table_preference_error", {
+    table_key: tableKey,
+    preset_name: name,
+    action,
+    message
+  })
 })
 ```
+
+Use `RailsTablePreferencesEventDetailFor<"rails-table-preferences:saved">` or the underlying `RailsTablePreferencesEventDetailMap` when listener code needs the event name to select the detail shape. The broader `RailsTablePreferencesEventDetail` union remains available for shared handlers that intentionally handle both success and error details.
 
 Each event detail includes the stable `tableKey`, `name`, and current `settings` snapshot. Success events also include an `action` such as `apply`, `clear-filters-and-sorts`, `save`, `create`, `load`, or `delete`. The `error` event includes a stable `action` and display-safe `message`; it does not expose DOM nodes or the raw `Error` object.
 

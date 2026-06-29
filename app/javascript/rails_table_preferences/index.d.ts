@@ -6,6 +6,8 @@ export type {
   RailsTablePreferencesErrorEventDetail,
   RailsTablePreferencesEventDetail,
   RailsTablePreferencesEventDetailBase,
+  RailsTablePreferencesEventDetailFor,
+  RailsTablePreferencesEventDetailMap,
   RailsTablePreferencesEventName,
   RailsTablePreferencesFilterSnapshot,
   RailsTablePreferencesLifecycleAction,
