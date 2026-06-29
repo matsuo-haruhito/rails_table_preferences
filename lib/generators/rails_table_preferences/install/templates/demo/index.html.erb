@@ -10,49 +10,53 @@
   <summary>Preset, scope, and sample-data checks included in this demo</summary>
 
   <p>
-    The generated demo seeds one shared preset named <strong>共有ビュー</strong>.
-    Select it to confirm that a normal user can load a shared preset, cannot
-    delete it directly, and saves changes back into an owner preset instead of
-    overwriting the shared preset.
+    Use this generated demo as a quick verification map before connecting host-app data.
+    The sections below separate preset scope, sample rows, overflow, and grouped-table
+    checks so each first-run task is easier to scan.
   </p>
 
-  <p>
-    The demo also seeds one role preset named <strong>担当ビュー</strong> for the
-    role key <code>operations</code>. If the host app configures
-    <code>scope_context_method</code> to return <code>{ roles: ["operations"] }</code>,
-    the selector also shows <strong>担当ビュー [role:operations]</strong> and resolves
-    it before the shared preset while no owner default exists.
-  </p>
+  <dl>
+    <div>
+      <dt>Preset scope</dt>
+      <dd>
+        The demo seeds one shared preset named <strong>共有ビュー</strong>. Select it to confirm
+        that a normal user can load a shared preset, cannot delete it directly, and saves
+        changes back into an owner preset instead of overwriting the shared preset.
+        It also seeds <strong>担当ビュー</strong> for <code>roles: ["operations"]</code> and
+        <strong>東京組織ビュー</strong> for <code>organization: "tokyo-hq"</code>, so role and
+        organization defaults can be checked before the shared preset when no owner default exists.
+      </dd>
+    </div>
 
-  <p>
-    The demo also seeds one organization preset named <strong>東京組織ビュー</strong>
-    for the organization key <code>tokyo-hq</code>. If the host app returns
-    <code>{ organization: "tokyo-hq" }</code>, the selector shows
-    <strong>東京組織ビュー [organization:tokyo-hq]</strong>. With no owner default and
-    no matching role default, reloading the demo resolves it before the shared preset.
-  </p>
+    <div>
+      <dt>Sample rows</dt>
+      <dd>
+        Rows intentionally mix statuses, delivery dates, repeated customer prefixes,
+        long shipping codes, long delivery notes, and memo lengths. Search for
+        <strong>東京</strong> or sort by <strong>納品日</strong> / <strong>金額</strong> to make the
+        differences easier to spot.
+      </dd>
+    </div>
 
-  <p>
-    Sample rows intentionally mix statuses, delivery dates, repeated customer
-    prefixes, long shipping codes, long delivery notes, and memo lengths.
-    Search for <strong>東京</strong> or sort by <strong>納品日</strong> /
-    <strong>金額</strong> to make the differences easier to spot.
-  </p>
+    <div>
+      <dt>Resize and overflow</dt>
+      <dd>
+        Double-click the resize handle on <strong>配送メモ</strong> or <strong>配送コード</strong>
+        to confirm auto-fit, then compare <strong>配送メモ</strong> (wrap),
+        <strong>配送コード</strong> (nowrap), and <strong>備考</strong> (ellipsis) side by side.
+      </dd>
+    </div>
 
-  <p>
-    Double-click the resize handle on <strong>配送メモ</strong> or <strong>配送コード</strong>
-    to confirm auto-fit, then compare <strong>配送メモ</strong> (wrap),
-    <strong>配送コード</strong> (nowrap), and <strong>備考</strong> (ellipsis)
-    to see the overflow modes side by side.
-  </p>
-
-  <p>
-    The table below also keeps <strong>受注番号</strong> pinned inside a dedicated
-    horizontal scroll wrapper and shows one grouped header row
-    (<strong>受注情報</strong> / <strong>得意先情報</strong> / <strong>配送情報</strong>) that follows the
-    current saved visible-column order after reload, so fixed-column and column-group
-    behavior can be checked without additional host-app markup first.
-  </p>
+    <div>
+      <dt>Fixed columns and grouped headers</dt>
+      <dd>
+        The table keeps <strong>受注番号</strong> pinned inside a dedicated horizontal scroll
+        wrapper and shows one grouped header row (<strong>受注情報</strong> /
+        <strong>得意先情報</strong> / <strong>配送情報</strong>) that follows the current saved
+        visible-column order after reload.
+      </dd>
+    </div>
+  </dl>
 </details>
 
 <style<%= respond_to?(:content_security_policy_nonce) && content_security_policy_nonce.present? ? tag.attributes(nonce: content_security_policy_nonce) : nil %>>
