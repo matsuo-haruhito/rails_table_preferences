@@ -12,6 +12,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Hide one non-sensitive column, apply the change, and confirm the table updates without hiding required actions or links.
 - [ ] Change one editor order input, apply the change, and confirm the table order updates without using drag and drop.
 - [ ] If the screen uses the package entrypoint, search for one editor row and use the row up/down controls once; if it uses a copied controller, record that the numeric order input remains the keyboard-friendly fallback instead.
+- [ ] If the screen uses the package entrypoint, use Show all columns and Hide all columns once and confirm the status region announces each bulk visibility result; if it uses a copied controller, record whether that packaged status feedback was ported or intentionally unavailable.
 - [ ] Save the preset, reload the page, and confirm the saved visibility/order state returns.
 - [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
@@ -85,6 +86,7 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] If the screen uses the package entrypoint, focus a header resize handle, press Enter or Space, and confirm it auto-fits like double-click; if the screen uses the copied controller, record whether that package-only shortcut was ported or intentionally unavailable.
+- [ ] On package entrypoint screens, confirm the status region announces the Enter or Space auto-fit success copy; on copied-controller screens, do not treat that package-only status copy as required unless the host app has ported it.
 - [ ] Confirm the resize hit area is easy enough to grab.
 - [ ] Hover the resize handle and confirm a visible resize affordance appears without shifting header text, filter buttons, or sort indicators.
 - [ ] Move keyboard focus to the resize handle and confirm the focus-visible affordance remains visible with long labels and nearby header controls.
@@ -134,7 +136,7 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] If you use the generated demo example, use `Demo state reset` before repeating scoped/default precedence checks when earlier save testing may have created owner-scoped demo presets.
 - [ ] Confirm preset options show enough scope context to distinguish owner/shared/role/organization presets.
 - [ ] Confirm owner, role, organization, and shared presets are grouped in the selector when multiple scope buckets are returned, while single-scope owner presets remain easy to scan.
-- [ ] Confirm owner default is preferred over role, organization, and shared defaults.
+- [ ] Confirm owner default is preferred over role, organization and shared defaults.
 - [ ] Confirm role default is preferred over organization and shared defaults when there is no owner default.
 - [ ] In the generated demo flow, use `Owner-only baseline` to clear representative role/organization context and compare the shared baseline again.
 - [ ] In the generated demo flow, clear any owner default and confirm `担当ビュー [role:operations]` wins before `共有ビュー [shared]`.
@@ -284,6 +286,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Confirm resize handles expose the visible column name, not only an internal column key.
 - [ ] Confirm resize handles show a visible focus indicator when reached by keyboard.
 - [ ] If using the package entrypoint, confirm Enter or Space on the focused resize handle triggers auto-fit without implying arrow-key resizing is available.
+- [ ] On package entrypoint screens, confirm the bundled status region announces visibility bulk and focused resize auto-fit success; on copied-controller screens, only require those messages if the host app has ported the package-entrypoint behavior.
 - [ ] Confirm numeric order inputs provide a keyboard-friendly alternative to drag and drop.
 - [ ] On package entrypoint screens, confirm the row search field has a visible label or accessible name and that row up/down controls expose the moved column name.
 - [ ] On copied-controller screens, confirm the row search and row up/down package controls are not promised unless the host app has ported them; numeric order inputs remain the fallback.
@@ -354,4 +357,4 @@ Use a short sign-off note for release candidates, host-app launch checks, or any
 - Release or rollout recommendation:
 ```
 
-For a quick smoke, record the quick smoke items that passed and the specific full-checklist sections you did not run. For full release or host-app launch sign-off, note any skipped section by number and include the risk or reason, such as not using Ransack, not testing exports in that host app, or deferring browser coverage to a separate compatibility pass.
+For a quick smoke, record the quick smoke items that passed and the specific full-checklist sections you did not run. For full release or host-app launch, note any skipped section by number and include the risk or reason, such as not using Ransack, not testing exports in that host app, or deferring browser coverage to a separate compatibility pass.
