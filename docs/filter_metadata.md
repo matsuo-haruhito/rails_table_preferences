@@ -63,7 +63,7 @@ table_preferences_column(:internal_note, label: "内部メモ", filter: false, o
 
 The metadata is serialized into `columns_json` so the front-end can decide which filter UI to render and how to apply static display behavior such as overflow. It is not a query definition.
 
-For bundled `select` filters, `options:` accepts scalar values or label/value hashes. Scalar options keep the historical behavior: the same value is used for the HTML `<option value>`, visible option text, saved filter value, and adapter params.
+For `select` filters, `options:` accepts scalar values or label/value hashes. Scalar options keep the historical behavior: the same value is used for the HTML `<option value>`, visible option text, saved filter value, and adapter params.
 
 Use `{ value:, label: }` when the saved/search value should be stable machine data and the UI should show a human label:
 
@@ -83,7 +83,7 @@ table_preferences_column(
 )
 ```
 
-The bundled controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. The package entrypoint also uses the label in the filter button active summary when it can resolve a saved value to a known option; unknown or stale saved values fall back to the raw value so the summary stays readable. It does not infer labels from enums, load remote options, or change host-app query execution.
+The package entrypoint controller renders the label as option text, stores the `value` in saved filter settings, restores multi-select selected state by `value`, and passes that `value` through the ControllerParams / Ransack adapters. The copied/base controller path currently keeps scalar select option rendering as its safe default; host apps that copy and maintain that controller should use scalar options unless they have ported the package entrypoint label/value normalization. The package entrypoint also uses the label in the filter button active summary when it can resolve a saved value to a known option; unknown or stale saved values fall back to the raw value so the summary stays readable. It does not infer labels from enums, load remote options, or change host-app query execution.
 
 For long static option lists, the package entrypoint controller can show an in-panel option search when the option count reaches the configured threshold. See [Select filter option search threshold](select_filter_option_search_threshold.md) for the root value, no-results cue, and package-entrypoint-only boundary.
 
