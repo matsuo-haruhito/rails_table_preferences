@@ -50,6 +50,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - TypeScript lifecycle event detail helper declarations for mapping `rails-table-preferences:*` event names to success or error detail shapes from the package root.
 - Pull request template guidance for automated verification, manual QA, UI/visual evidence, representative surfaces, focused viewport/state checks, and browser-capture handoff.
 - GitHub Actions CI for Ruby specs, JavaScript syntax, CI workflow permission policy, gem build, and package verification, plus representative pull-request Rails compatibility lanes for Rails 7.0, Rails 7.1, Rails 7.2, and Rails 8.0.
+- Package entrypoint smoke boundary coverage now guards that generated demo browser smoke remains scoped to copied/base controller behavior while package-entrypoint-only affordances stay in source-level and manual QA boundaries.
 - Package verification now guards representative core runtime files used by resource tables, adapters, formatters, registries, and helpers.
 - Package verification now checks the packaged `package.json` top-level `types` target and reports it as `package.json#types` when missing.
 
