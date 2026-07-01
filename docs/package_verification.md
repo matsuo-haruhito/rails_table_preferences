@@ -206,7 +206,7 @@ After confirming those package target files exist, the verifier scans JavaScript
 
 The verifier performs the same lightweight relative-target check for packaged declaration targets. For example, `app/javascript/rails_table_preferences/index.d.ts` re-exports `./controller`, and package verification now expects that reference to resolve to `app/javascript/rails_table_preferences/controller.d.ts` inside the same built gem. This keeps TypeScript host-app import metadata aligned without adding a full TypeScript compiler check.
 
-This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files and declarations, while the package target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, declaration re-exports, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the manual host-app Vite check in `docs/release_checklist.md`.
+This check complements the fixed required-file list: the fixed list catches accidental removal of representative entrypoint files and declarations, while the package target and internal import checks catch drift between `package.json`, JavaScript entrypoint wiring, declaration re-exports, and the gem contents. It is intentionally a lightweight package-content guard, not a replacement for the TypeScript declaration smoke or the manual host-app Vite check in `docs/release_checklist.md`.
 
 The packaged `package.json` is resolver metadata for these gem-packaged JavaScript entrypoints. Its current `private: true` and `version: "0.0.0"` values are intentional metadata boundaries: they do not make the gem a separate npm distribution. The verifier treats drift from `private: true` or `version: "0.0.0"` as a package metadata error so release/package evidence keeps npm distribution policy separate from the Ruby gem package. It still does not treat the JavaScript version as something that must track `RailsTablePreferences::VERSION`. If the project later chooses an npm distribution strategy, document and test that as a separate release policy change.
 
@@ -216,7 +216,9 @@ The packaged `package.json` is resolver metadata for these gem-packaged JavaScri
 
 The repository JavaScript check adds a narrow Node ESM import smoke for the package root and `rails_table_preferences/controller` specifier. That smoke creates a temporary `node_modules/rails_table_preferences` sandbox from this repository's `package.json` exports and `app/javascript` files, stubs only `@hotwired/stimulus`, normalizes the known extensionless package-internal import for raw Node resolution, and imports the package root default/named controller plus the controller subpath. It catches package specifier resolution and public export drift that `node --check` alone cannot see.
 
-Treat that smoke as repository-level package-entrypoint evidence, not as full host-app bundler proof. A real Vite / `app/frontend` host app should still verify its resolver aliases, dependency graph, CSS loading, and Stimulus registration through the release checklist or host-app QA path.
+The TypeScript declaration smoke is a separate compiler-level resolver check. It uses the repository declaration files with `moduleResolution: "Bundler"`, a minimal Stimulus declaration stub, and representative imports for the package root, `rails_table_preferences/controller`, and lifecycle event detail types. Keep it scoped to declaration import and typing drift; do not fold it into `bundle exec rake package:verify` or treat it as full host-app Vite evidence.
+
+Treat these smokes as repository-level package-entrypoint evidence, not as full host-app bundler proof. A real Vite / `app/frontend` host app should still verify its resolver aliases, dependency graph, CSS loading, and Stimulus registration through the release checklist or host-app QA path.
 
 ## Why this matters
 
@@ -229,13 +231,14 @@ CI runs:
 ```bash
 bundle exec rspec
 node script/check_javascript_syntax.mjs
+npm run test:typescript-declarations
 node script/check_ci_workflow_permissions.mjs
 bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The JavaScript syntax and package import resolution step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets for syntax errors, then smoke-imports the package root and `rails_table_preferences/controller` specifiers in a temporary Node sandbox. The CI workflow permissions smoke checks that the workflow keeps top-level `permissions: contents: read` and does not request contents or pull-request write permissions. Keep these commands synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
+The JavaScript syntax and package import resolution step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets for syntax errors, then smoke-imports the package root and `rails_table_preferences/controller` specifiers in a temporary Node sandbox. The TypeScript declaration smoke independently checks package-root and controller declaration resolution plus representative lifecycle event detail typing under the repository's bundler-style TypeScript resolver. The CI workflow permissions smoke checks that the workflow keeps top-level `permissions: contents: read` and does not request contents or pull-request write permissions. Keep these commands synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
-The package verification task also follows the documented package root, top-level types, and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax/import smoke and workflow permissions checks by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior and repository release policy to the release checklist's manual evidence.
+The package verification task also follows the documented package root, top-level types, and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax/import smoke, TypeScript declaration smoke, and workflow permissions checks by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior and repository release policy to the release checklist's manual evidence.
 
 Manual package inspection is still recommended before tagging a release.
