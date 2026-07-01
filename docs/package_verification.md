@@ -212,7 +212,11 @@ The packaged `package.json` is resolver metadata for these gem-packaged JavaScri
 
 ## Runtime import smoke boundary
 
-`bundle exec rake package:verify` confirms that package metadata, files, JavaScript relative imports, and TypeScript declaration re-exports are internally consistent in the built gem. It does not run a host-app bundler or install frontend dependencies. It also does not parse README or `docs/javascript_entrypoints.md` code blocks to prove their manual resolver aliases still mirror `package.json`; keep that docs-to-metadata comparison in the release checklist's JavaScript entrypoint checks. Keep the real `rails_table_preferences` and `rails_table_preferences/controller` ESM import smoke as release or host-app evidence in the Vite / `app/frontend` checklist rather than adding a partial CI import that could pass without proving real bundler integration.
+`bundle exec rake package:verify` confirms that package metadata, files, JavaScript relative imports, and TypeScript declaration re-exports are internally consistent in the built gem. It does not run a host-app bundler or install frontend dependencies. It also does not parse README or `docs/javascript_entrypoints.md` code blocks to prove their manual resolver aliases still mirror `package.json`; keep that docs-to-metadata comparison in the release checklist's JavaScript entrypoint checks.
+
+The repository JavaScript check adds a narrow Node ESM import smoke for the package root and `rails_table_preferences/controller` specifier. That smoke creates a temporary `node_modules/rails_table_preferences` sandbox from this repository's `package.json` exports and `app/javascript` files, stubs only `@hotwired/stimulus`, normalizes the known extensionless package-internal import for raw Node resolution, and imports the package root default/named controller plus the controller subpath. It catches package specifier resolution and public export drift that `node --check` alone cannot see.
+
+Treat that smoke as repository-level package-entrypoint evidence, not as full host-app bundler proof. A real Vite / `app/frontend` host app should still verify its resolver aliases, dependency graph, CSS loading, and Stimulus registration through the release checklist or host-app QA path.
 
 ## Why this matters
 
@@ -230,8 +234,8 @@ bundle exec rake build
 bundle exec rake package:verify
 ```
 
-The JavaScript syntax step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets. The CI workflow permissions smoke checks that the workflow keeps top-level `permissions: contents: read` and does not request contents or pull-request write permissions. Keep these commands synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
+The JavaScript syntax and package import resolution step checks the copied controller plus JavaScript files named by the packaged `package.json` export targets for syntax errors, then smoke-imports the package root and `rails_table_preferences/controller` specifiers in a temporary Node sandbox. The CI workflow permissions smoke checks that the workflow keeps top-level `permissions: contents: read` and does not request contents or pull-request write permissions. Keep these commands synchronized with `.github/workflows/ci.yml`; `docs/release_checklist.md` lists the same local release-prep commands.
 
-The package verification task also follows the documented package root, top-level types, and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax and workflow permissions checks by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior and repository release policy to the release checklist's manual evidence.
+The package verification task also follows the documented package root, top-level types, and controller export targets and checks their packaged internal relative JavaScript and declaration references. That complements the syntax/import smoke and workflow permissions checks by guarding package export wiring against missing files in the built gem while leaving full host-app bundler behavior and repository release policy to the release checklist's manual evidence.
 
 Manual package inspection is still recommended before tagging a release.
