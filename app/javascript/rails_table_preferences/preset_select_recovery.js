@@ -48,6 +48,19 @@ export default class RailsTablePreferencesPresetSelectRecoveryController extends
     return this.selectFilterOptionLabel(option, rawValue)
   }
 
+  positionFilterPanel(panel, headerCell) {
+    super.positionFilterPanel(panel, headerCell)
+
+    const rect = headerCell.getBoundingClientRect()
+    const viewportMargin = 8
+    const panelTop = window.scrollY + rect.bottom + 4
+    const viewportBottom = window.scrollY + window.innerHeight - viewportMargin
+    const availableHeight = Math.max(viewportMargin, viewportBottom - panelTop)
+
+    panel.style.maxHeight = `${availableHeight}px`
+    panel.style.overflowY = "auto"
+  }
+
   ensurePresetSearchControl() {
     super.ensurePresetSearchControl()
     if (!this.presetSearchControl || this.presetSearchClearButton) return
