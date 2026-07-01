@@ -32,7 +32,7 @@ jobs:
       - name: Run RSpec
         run: bundle exec rspec
 
-      - name: Check JavaScript syntax
+      - name: Check JavaScript syntax and package import resolution
         run: node script/check_javascript_syntax.mjs
 
       - name: Check CI workflow permissions
