@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test:typescript-declarations": "npm exec --yes --package typescript@5.9.2 -- tsc --project test/typescript/tsconfig.json"
+  },
   "types": "./app/javascript/rails_table_preferences/index.d.ts",
   "exports": {
     ".": {
