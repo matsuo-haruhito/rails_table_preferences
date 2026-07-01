@@ -58,7 +58,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar or label/value select options, option-search threshold cues, and host-app query ownership when select filters do not affect results.
 - [Select filter option search threshold](select_filter_option_search_threshold.md): package-entrypoint-only threshold controls for static select option search, empty-result feedback, and the host-owned boundary for remote or async option search.
 - [Datetime and time filter browser attributes](datetime_time_filter_attributes.md): package-entrypoint native datetime/time inputs, `min` / `max` / `step` metadata, and host-owned validation/query boundaries.
-- [Filter panel viewport boundary](filter_panel_viewport_boundary.md): QA and design handoff note for the current body-mounted filter panel, future bottom-edge implementation boundary, and browser-capable evidence expectations.
+- [Filter panel viewport boundary](filter_panel_viewport_boundary.md): QA and design handoff note for the current package-entrypoint body-mounted filter panel, bottom-edge internal scrolling boundary, and browser-capable evidence expectations.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
 - [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md): focused evidence guidance for old `page` params when saved filter/sort hidden fields roundtrip through existing search forms.
