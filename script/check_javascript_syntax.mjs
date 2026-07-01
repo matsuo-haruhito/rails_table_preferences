@@ -66,6 +66,7 @@ async function verifyPackageImportResolution() {
       }, null, 2)}\n`
     )
     cpSync(path.join(repoRoot, "app", "javascript"), path.join(packageRoot, "app", "javascript"), { recursive: true })
+    normalizeSandboxRelativeImports(packageRoot)
     writeStimulusStub(path.join(sandboxRoot, "node_modules", "@hotwired", "stimulus"))
 
     const smokeModule = path.join(sandboxRoot, "smoke.mjs")
@@ -77,6 +78,21 @@ async function verifyPackageImportResolution() {
   } finally {
     rmSync(sandboxRoot, { recursive: true, force: true })
   }
+}
+
+function normalizeSandboxRelativeImports(packageRoot) {
+  const controllerEntry = path.join(packageRoot, "app", "javascript", "rails_table_preferences", "controller.js")
+  const source = readFileSync(controllerEntry, "utf8")
+  const normalizedSource = source.replace(
+    "from \"../controllers/rails_table_preferences_controller\"",
+    "from \"../controllers/rails_table_preferences_controller.js\""
+  )
+
+  if (normalizedSource === source) {
+    throw new Error("Package import smoke could not normalize the controller entrypoint import")
+  }
+
+  writeFileSync(controllerEntry, normalizedSource)
 }
 
 function writeStimulusStub(stubRoot) {
