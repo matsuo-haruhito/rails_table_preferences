@@ -104,7 +104,7 @@ const imports = {
 
 for (const [name, value] of Object.entries(imports)) {
   if (typeof value !== "function") {
-    throw new Error(\`Expected \\${name} to resolve to a controller class, got \\${typeof value}\`)
+    throw new Error("Expected " + name + " to resolve to a controller class, got " + typeof value)
   }
 }
 
