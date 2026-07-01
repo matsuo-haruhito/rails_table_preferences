@@ -115,7 +115,7 @@ Use this as a navigation map after choosing a starting path above. The first gro
 7. Add `filter:` and `sortable: true` metadata where needed.
 8. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
 9. For datetime or time filter metadata, use [Datetime and time filter browser attributes](datetime_time_filter_attributes.md) to check native input attributes without moving validation or query semantics out of the host app.
-10. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when planning bottom-edge panel behavior or reviewing whether future runtime changes need browser-capable evidence.
+10. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when reviewing package-entrypoint bottom-edge panel behavior or deciding whether future panel changes need browser-capable evidence.
 11. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
 12. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
 13. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
