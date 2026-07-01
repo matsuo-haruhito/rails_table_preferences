@@ -14,6 +14,7 @@ Check these default affordances on a generated demo screen or a representative h
 - open filter panel boundary
 - pinned or fixed column background
 - focused interactive content inside pinned or fixed cells
+- package-entrypoint editor row move buttons
 
 Do not use this pass to redesign the active filter cue, introduce a theme system, or change sticky layout policy. If the host app theme makes a state ambiguous, prefer the smallest host-app stylesheet or copied stylesheet adjustment that restores the cue.
 
@@ -28,6 +29,8 @@ Run the normal quick smoke first, then repeat the focused checks with forced-col
 5. Open a filter panel and confirm the panel boundary remains visible against the table background and surrounding app chrome.
 6. Horizontally scroll a table with pinned or fixed columns and confirm the pinned cells keep an opaque background.
 7. While horizontally scrolled, tab to links, buttons, inputs, and filter controls near pinned cells and confirm focus outlines are not hidden behind the pinned layer.
+8. On a package-entrypoint screen, use an editor row move button and confirm the compact up/down glyph remains visible enough as a cue while the localized `aria-label` or `title` remains the control name.
+9. On a copied-controller screen, do not require those package-entrypoint row move buttons; record that the numeric order input remains the keyboard-friendly fallback instead.
 
 ## Pass / fail notes
 
@@ -44,10 +47,13 @@ Record evidence in the PR or QA note using this shape:
 - Filter panel boundary:
 - Pinned/fixed cell background:
 - Focused content near pinned cells:
+- Row move controls or order-input fallback:
 - Follow-up needed:
 ```
 
 Use `Follow-up needed` when the final host app theme obscures a cue. Keep that follow-up scoped to CSS or copy near the affected surface unless the product needs a broader visual redesign.
+
+When the PR only updates source or docs and no browser-capable pass was run, keep this section as an explicit handoff. Do not mark row move buttons, forced-colors, or narrow-width behavior as visually verified from CI success or source review alone.
 
 ## Host application boundary
 
@@ -56,7 +62,7 @@ Rails Table Preferences provides default hooks and a practical baseline, but the
 - final color palette and contrast after applying app-specific styles
 - custom forced-colors overrides for the host design system
 - z-index ordering around surrounding app chrome, sticky headers, dropdowns, or modals
-- decisions about stronger active-filter, sort, or pinned-column visual treatments
+- decisions about stronger active-filter, sort, row-move, or pinned-column visual treatments
 - browser-capable evidence for the final deployed screen
 
-When a design PR cannot run a browser-capable pass, include this note as the QA handoff and say which checks still need desktop and narrow-width confirmation.
+When a design PR cannot run a browser-capable pass, include this note as the QA handoff and say which checks still need desktop, narrow-width, and forced-colors confirmation.
