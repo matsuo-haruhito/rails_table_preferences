@@ -58,7 +58,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Select filter troubleshooting](select_filter_troubleshooting.md): `values_param`, scalar or label/value select options, option-search threshold cues, and host-app query ownership when select filters do not affect results.
 - [Select filter option search threshold](select_filter_option_search_threshold.md): package-entrypoint-only threshold controls for static select option search, empty-result feedback, and the host-owned boundary for remote or async option search.
 - [Datetime and time filter browser attributes](datetime_time_filter_attributes.md): package-entrypoint native datetime/time inputs, `min` / `max` / `step` metadata, and host-owned validation/query boundaries.
-- [Filter panel viewport boundary](filter_panel_viewport_boundary.md): QA and design handoff note for the current body-mounted filter panel, future bottom-edge implementation boundary, and browser-capable evidence expectations.
+- [Filter panel viewport boundary](filter_panel_viewport_boundary.md): QA and design handoff note for the current package-entrypoint body-mounted filter panel, bottom-edge internal scrolling boundary, and browser-capable evidence expectations.
 - [Manual QA checklist](manual_qa.md): browser and host application checks to run before asking real users to try the feature.
 - [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md): PR-scoped quick smoke guidance for docs-only, UI, helper, generator, export, layout, and scoped preset changes.
 - [Hidden fields pagination evidence](hidden_fields_pagination_evidence.md): focused evidence guidance for old `page` params when saved filter/sort hidden fields roundtrip through existing search forms.
@@ -115,7 +115,7 @@ Use this as a navigation map after choosing a starting path above. The first gro
 7. Add `filter:` and `sortable: true` metadata where needed.
 8. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
 9. For datetime or time filter metadata, use [Datetime and time filter browser attributes](datetime_time_filter_attributes.md) to check native input attributes without moving validation or query semantics out of the host app.
-10. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when planning bottom-edge panel behavior or reviewing whether future runtime changes need browser-capable evidence.
+10. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when reviewing package-entrypoint bottom-edge panel behavior or deciding whether future panel changes need browser-capable evidence.
 11. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
 12. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
 13. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
