@@ -8,6 +8,10 @@ RSpec.describe "package entrypoint preset selector search source" do
     File.expand_path("../app/javascript/rails_table_preferences/controller.js", __dir__)
   end
 
+  let(:recovery_controller_path) do
+    File.expand_path("../app/javascript/rails_table_preferences/preset_select_recovery.js", __dir__)
+  end
+
   let(:base_controller_source_path) do
     File.expand_path("../app/javascript/controllers/rails_table_preferences_controller.js", __dir__)
   end
@@ -21,6 +25,7 @@ RSpec.describe "package entrypoint preset selector search source" do
   end
 
   let(:package_controller) { File.read(package_controller_path) }
+  let(:recovery_controller) { File.read(recovery_controller_path) }
   let(:base_controller_source) { File.read(base_controller_source_path) }
   let(:index_source) { File.read(index_source_path) }
   let(:package_json) { JSON.parse(File.read(package_json_path)) }
@@ -38,6 +43,17 @@ RSpec.describe "package entrypoint preset selector search source" do
     expect(package_controller).to include("presetSearchText(preset)")
     expect(base_controller_source).not_to include("ensurePresetSearchControl")
     expect(base_controller_source).not_to include("presetSearchText")
+  end
+
+  it "bounds package-entrypoint filter panel height without changing the copied controller" do
+    expect(recovery_controller).to include("positionFilterPanel(panel, headerCell)")
+    expect(recovery_controller).to include("super.positionFilterPanel(panel, headerCell)")
+    expect(recovery_controller).to include("const panelTop = window.scrollY + rect.bottom + 4")
+    expect(recovery_controller).to include("const viewportBottom = window.scrollY + window.innerHeight - viewportMargin")
+    expect(recovery_controller).to include("const availableHeight = Math.max(viewportMargin, viewportBottom - panelTop)")
+    expect(recovery_controller).to include("panel.style.maxHeight = `${availableHeight}px`")
+    expect(recovery_controller).to include('panel.style.overflowY = "auto"')
+    expect(base_controller_source).not_to include('panel.style.overflowY = "auto"')
   end
 
   it "filters by preset name and scope text without changing option metadata" do
