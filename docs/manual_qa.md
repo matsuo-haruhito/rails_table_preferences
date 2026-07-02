@@ -20,7 +20,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] When the generated demo is the smoke surface, check the support sections that match the changed area: `Current owner`, `Current scope context`, `Demo state reset`, `Async failure check`, hidden fields preview, or export payload preview. Use [Demo screen generator](demo.md) as the detailed source of truth and record any sections intentionally handed off.
 - [ ] For hidden fields preview or export payload preview evidence, record whether the copy control succeeded. If the copy button is disabled or reports a copy failure, select the visible preview text manually and record that text as the evidence instead.
 - [ ] Open one filter panel or preset action with keyboard focus and confirm focus, labels, and status copy remain understandable.
-- [ ] Check one representative narrow desktop width, such as 375px or 390px-equivalent, and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable; record the width used and leave multi-width coverage to the full checklist when needed.
+- [ ] Check one representative phone-like narrow viewport or narrow container, such as 375px or 390px-equivalent, and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable; record the viewport or container width used and leave multi-width coverage to the full checklist when needed.
 
 After this quick smoke, continue into the relevant sections below for the feature area you changed. For release sign-off or host-app launch, complete the full checklist and record any skipped areas in the sign-off notes.
 
@@ -82,7 +82,7 @@ For mixed-track PRs, choose the strictest entry that matches the user-visible ri
 - [ ] On package entrypoint screens, move a filtered editor row with the row up/down controls, then apply and confirm the visible order changes while numeric order inputs refresh.
 - [ ] On copied-controller screens, confirm those package entrypoint-only search and row move controls are not assumed to exist; use the numeric order input plus `適用` as the documented fallback.
 - [ ] At a narrow width or on a touch device, confirm the editor order input remains usable as the fallback when table-header drag is awkward or unavailable.
-- [ ] At 320px, 375px, and 390px-equivalent widths or narrow containers, confirm long Japanese and long unbroken editor row labels wrap without covering the drag handle, visible checkbox, or order/width/truncate inputs.
+- [ ] At 320px, 375px, and 390px-equivalent phone-like viewport widths, and in any narrow container used by the host layout, confirm long Japanese and long unbroken editor row labels wrap without covering the drag handle, visible checkbox, or order/width/truncate inputs.
 - [ ] Resize a column using the header resize handle.
 - [ ] Double-click a header resize handle and confirm the column auto-fits to its visible content.
 - [ ] If the screen uses the package entrypoint, focus a header resize handle, press Enter or Space, and confirm it auto-fits like double-click; if the screen uses the copied controller, record whether that package-only shortcut was ported or intentionally unavailable.
@@ -315,7 +315,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 ## 18. Browser and layout checks
 
 - [ ] Check the screen in Chrome or Edge.
-- [ ] Check the screen at a narrow desktop width.
+- [ ] Check the screen at a phone-like narrow viewport or narrow container.
 - [ ] Check the screen with long Japanese labels.
 - [ ] Check the screen with long table values.
 - [ ] Confirm editor inputs do not overlap.
