@@ -80,6 +80,7 @@ Repository-level release confidence is expected to come from:
 
 - `bundle exec rspec`
 - `node script/check_javascript_syntax.mjs`
+- `npm run test:typescript-declarations`
 - `node script/check_ci_workflow_permissions.mjs`
 - `bundle exec rake build`
 - `bundle exec rake package:verify`
