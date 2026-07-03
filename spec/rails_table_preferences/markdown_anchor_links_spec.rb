@@ -57,7 +57,7 @@ RSpec.describe "Markdown anchor links" do
     counts = Hash.new(0)
 
     strip_fenced_code_blocks(File.read(repository_root.join(path))).each_line do |line|
-      heading = line.match(/\A#{1,6}\s+(?<text>.+?)\s*#*\s*\z/)
+      heading = line.match(/\A\#{1,6}\s+(?<text>.+?)\s*#*\s*\z/)
       next unless heading
 
       base_anchor = heading_anchor(heading[:text])
