@@ -111,7 +111,7 @@ export default class RailsTablePreferencesPresetSelectRecoveryController extends
     if (!this.editorSearchControl || this.editorSearchCountMessage) return
 
     const count = document.createElement("p")
-    count.className = "rails-table-preferences-editor__search-count"
+    count.className = "rails-table-preferences-editor__search-empty rails-table-preferences-editor__search-count"
     count.dataset.railsTablePreferencesEditorSearchCount = "true"
     count.setAttribute("aria-live", "polite")
     count.setAttribute("aria-atomic", "true")
