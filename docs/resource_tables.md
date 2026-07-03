@@ -41,6 +41,8 @@ end
 
 If neither `model:` nor profile `model` is available and the collection has no `klass` or first record, the helper raises `model: is required when records do not expose klass and are empty` instead of guessing.
 
+When model inference and empty collection setup are already correct but the bundled empty row needs screen-specific plain text copy, use [Resource table empty messages](resource_table_empty_messages.md) before copying the default partial for richer markup.
+
 If the same management page also includes a search form, pagination, a create form, or other host-app actions, keep those as separate responsibilities around the table. See [Practical examples](examples.md) for copyable page-composition examples, including a convention-first list screen with small profile overrides and a create-form-plus-list screen.
 
 ## Optional filtering of inferred columns
@@ -382,7 +384,7 @@ RailsTablePreferences.configure do |config|
   end
 
   config.editor_renderers.register("rails_fields_kit") do |form:, method:, editor:, **|
-    form.rfk_combobox(method, **editor.fetch("options", {}).symbolize_keys)
+    form.rfk_enum_select(method, **editor.fetch("options", {}).symbolize_keys)
   end
 end
 ```
