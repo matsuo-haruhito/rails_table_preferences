@@ -8,7 +8,7 @@ RSpec.describe "rails_table_preferences preset search copy" do
 
   it "describes no-match search as a load-candidate filter without changing preset actions" do
     expect(controller_source).to include(
-      'presetNoSearchResultsLabel: { type: String, default: "読み込む保存済み設定の候補に一致はありません。検索語を変更してください。" }'
+      'presetNoSearchResultsLabel: { type: String, default: "一致する保存済み設定はありません。検索語を変更するか、検索欄を空にすると候補に戻ります。" }'
     )
     expect(controller_source).to include("empty.textContent = this.presetNoSearchResultsLabelValue")
     expect(controller_source).to include("input.setAttribute(\"aria-label\", this.presetSearchLabelValue)")
