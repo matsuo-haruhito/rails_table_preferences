@@ -2,6 +2,8 @@
 
 Use this focused checklist when a host app keeps its own `<table>` partial or another renderer owns the table markup, while Rails Table Preferences is mounted manually on the table root or on a wrapper around the first nested table.
 
+Start here after the [Manual QA checklist](manual_qa.md) points you to helper-free, custom partial, or host-app-owned table markup. This checklist keeps the browser evidence narrow: table-root and wrapper-root wiring, managed versus unmanaged columns, and persistence for the supported DOM contract.
+
 This is a narrow smoke checklist for the supported DOM contract described in [JavaScript controller notes](javascript_controller.md#minimal-dom-contract-for-helper-free-tables). It does not replace the full [Manual QA checklist](manual_qa.md) before broader host-app rollout.
 
 ## Setup
