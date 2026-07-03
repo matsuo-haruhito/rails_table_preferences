@@ -2,11 +2,26 @@
 
 Use this note when a PR or release-prep check touches the generated demo support sections or the visual overview images that point at them.
 
-The goal is to keep three evidence types separate:
+The goal is to keep four evidence types separate:
 
 - Source inspection confirms docs, generator templates, captions, and button labels still describe the same support sections.
-- Rendered demo evidence confirms the copied demo screen actually shows the `Demo state reset` and `Async failure check` sections without overlap, clipping, or misleading grouping.
+- Rendered demo evidence confirms the copied demo screen actually shows the `Demo state reset`, `Async failure check`, and preview copy controls without overlap, clipping, or misleading grouping.
 - Browser-capable handoff records the exact desktop or narrow viewport check that still needs a human/browser review when this environment cannot render the demo.
+- Copy fallback evidence records whether preview text stayed readable and manually selectable when Clipboard API support was missing or a copy attempt failed.
+
+## Preview copy controls
+
+Check this section when the PR mentions hidden fields preview, export payload preview, copy controls, Clipboard API fallback, or manual evidence collection.
+
+Record:
+
+- whether the hidden fields preview and export payload preview were rendered or only source-inspected
+- whether each copy control still points at the matching preview target id
+- whether the copy status region remains a polite status message near the matching control
+- whether disabled-copy and failed-copy states tell the reviewer to select the visible preview text manually
+- whether manual selection fallback was browser-checked or handed off
+
+Do not claim Clipboard behavior was verified unless a browser-capable check actually exercised the disabled, success, or failed-copy path. Source inspection can confirm the fallback copy, target ids, and status wiring, but it does not prove the preview text is reachable or selectable in the rendered browser.
 
 ## Demo state reset
 
@@ -50,6 +65,7 @@ Package verification only proves the required SVG files ship in the gem. It does
 - Rendered evidence:
 - Source-only inspection:
 - Browser-capable handoff:
+- Copy fallback evidence:
 - Out of scope:
 ```
 
