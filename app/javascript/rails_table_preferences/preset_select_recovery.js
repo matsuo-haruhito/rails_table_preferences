@@ -3,7 +3,8 @@ import RailsTablePreferencesController from "./controller.js"
 export default class RailsTablePreferencesPresetSelectRecoveryController extends RailsTablePreferencesController {
   static values = {
     ...(RailsTablePreferencesController.values || {}),
-    presetSearchClearLabel: { type: String, default: "検索をクリア" }
+    presetSearchClearLabel: { type: String, default: "検索をクリア" },
+    editorSearchResultCountLabel: { type: String, default: "表示中の列: {visible} / {total}" }
   }
 
   filterButtonLabel(column, condition = {}) {
@@ -103,6 +104,51 @@ export default class RailsTablePreferencesPresetSelectRecoveryController extends
 
   get presetSearchClearButton() {
     return this.presetSearchControl?.querySelector("[data-rails-table-preferences-preset-search-clear]")
+  }
+
+  ensureEditorSearchControl() {
+    super.ensureEditorSearchControl()
+    if (!this.editorSearchControl || this.editorSearchCountMessage) return
+
+    const count = document.createElement("p")
+    count.className = "rails-table-preferences-editor__search-count"
+    count.dataset.railsTablePreferencesEditorSearchCount = "true"
+    count.setAttribute("aria-live", "polite")
+    count.setAttribute("aria-atomic", "true")
+    count.hidden = true
+
+    const emptyMessage = this.editorSearchEmptyMessage
+    if (emptyMessage?.parentNode) emptyMessage.parentNode.insertBefore(count, emptyMessage)
+    else this.editorSearchControl.appendChild(count)
+  }
+
+  syncEditorSearchResults() {
+    super.syncEditorSearchResults()
+    if (!this.hasEditorRowsTarget) return
+
+    const query = this.editorSearchInput?.value.trim().toLowerCase() || ""
+    const visibleCount = this.editorRows.filter((row) => !row.hidden).length
+    this.syncEditorSearchCount({ query, visibleCount, totalCount: this.editorRows.length })
+  }
+
+  syncEditorSearchCount({ query, visibleCount, totalCount }) {
+    const count = this.editorSearchCountMessage
+    if (!count) return
+
+    const showCount = Boolean(query) && visibleCount > 0
+    count.hidden = !showCount
+    count.textContent = showCount ? this.editorSearchResultCountText(visibleCount, totalCount) : ""
+  }
+
+  editorSearchResultCountText(visibleCount, totalCount) {
+    const template = this.editorSearchResultCountLabelValue || "表示中の列: {visible} / {total}"
+    return template
+      .replace("{visible}", String(visibleCount))
+      .replace("{total}", String(totalCount))
+  }
+
+  get editorSearchCountMessage() {
+    return this.editorSearchControl?.querySelector("[data-rails-table-preferences-editor-search-count]")
   }
 
   async selectPreset(event) {
