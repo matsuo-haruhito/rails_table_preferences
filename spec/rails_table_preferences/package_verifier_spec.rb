@@ -62,6 +62,7 @@ RSpec.describe RailsTablePreferences::PackageVerifier do
         "docs/quick_start_ja.md",
         "docs/install_paths.md",
         "docs/resource_tables.md",
+        "docs/render_editor_placement_manual_qa.md",
         "docs/resource_table_cell_hooks.md",
         "docs/table_data_attributes.md",
         "docs/resource_table_formatter_contract.md",
