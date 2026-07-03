@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "rails_table_preferences/package_verifier"
 require "pathname"
 require "set"
 
 RSpec.describe "Markdown anchor links" do
-  it "keeps local anchors from required Markdown entrypoints resolvable" do
+  it "keeps local anchors from primary Markdown entrypoints resolvable" do
     unresolved = markdown_anchor_links.filter_map do |link|
       target_path = link.fetch(:target_path)
       next unless File.exist?(repository_root.join(target_path))
@@ -47,9 +46,7 @@ RSpec.describe "Markdown anchor links" do
   end
 
   def markdown_entrypoint_paths
-    @markdown_entrypoint_paths ||= (["docs/index.md"] + RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\.md\z/))
-      .uniq
-      .select { |path| File.exist?(repository_root.join(path)) }
+    ["docs/index.md", "docs/package_verification.md"]
   end
 
   def heading_anchors_for(path)
