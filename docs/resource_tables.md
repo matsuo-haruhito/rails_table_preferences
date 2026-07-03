@@ -384,7 +384,7 @@ RailsTablePreferences.configure do |config|
   end
 
   config.editor_renderers.register("rails_fields_kit") do |form:, method:, editor:, **|
-    form.rfk_enum_select(method, **editor.fetch("options", {}).symbolize_keys)
+    form.rfk_combobox(method, **editor.fetch("options", {}).symbolize_keys)
   end
 end
 ```
