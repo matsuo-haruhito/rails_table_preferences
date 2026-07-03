@@ -48,6 +48,8 @@ Representative package-entrypoint root values are:
 
 `presetSearchClearLabel` labels the clear button that appears only while a saved-preset search query is active. The button clears the query and rerenders the saved preset options; it does not load, save, delete, or mutate presets by itself.
 
+`presetNoSearchResultsLabel` should keep the no-results state tied to the saved-preset search query. The current package-entrypoint default tells users they can change the query or empty the search field to restore candidates; wording overrides should preserve that recovery path when a query hides every option.
+
 Use root values for wording-only changes on package-entrypoint screens. Use copied or replacement JavaScript when the host app needs different preset-search behavior, copied/base-controller support, remote search, ranking, custom no-results recovery, or a different busy-state model.
 
 ## Actions, grouping, and reset copy
