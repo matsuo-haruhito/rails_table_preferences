@@ -47,7 +47,7 @@ RSpec.describe "Markdown anchor links" do
   end
 
   def markdown_entrypoint_paths
-    @markdown_entrypoint_paths ||= (["README.md", "docs/index.md"] + RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\.md\z/))
+    @markdown_entrypoint_paths ||= (["docs/index.md"] + RailsTablePreferences::PackageVerifier::REQUIRED_PATHS.grep(/\.md\z/))
       .uniq
       .select { |path| File.exist?(repository_root.join(path)) }
   end
@@ -87,9 +87,9 @@ RSpec.describe "Markdown anchor links" do
     text
       .gsub(/<[^>]+>/, "")
       .gsub(/\[[^\]]+\]\([^)]*\)/) { |match| match[/\[([^\]]+)\]/, 1] }
-      .gsub(/[`*_~]/, "")
+      .gsub(/[`*~]/, "")
       .downcase
-      .gsub(/[^\p{Alnum}\s-]/u, "")
+      .gsub(/[^\p{Alnum}_\s-]/u, "")
       .strip
       .gsub(/\s+/, "-")
   end
