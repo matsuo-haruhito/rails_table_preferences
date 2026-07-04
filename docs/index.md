@@ -45,6 +45,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Package status state hook](status_state_hook.md): status-state values, package-entrypoint-only boundary, and QA quick reference for bundled status region cues.
 - [Forced-colors manual QA note](forced_colors_manual_qa.md): focused high-contrast evidence handoff for active filters, sorted headers, resize focus, filter panels, and pinned/fixed cells.
 - [Editor entrypoint affordances](editor_entrypoint_affordances.md): package-entrypoint-only column search, row move buttons, dirty-state helper, browser QA handoff, and copied-controller boundary.
+- [Dirty-state helper visual evidence](dirty_state_helper_visual_evidence.md): focused desktop, narrow viewport, accessibility, and browser-capable handoff evidence for package-entrypoint dirty-state helper changes.
 - [Editor reorder accessibility note](editor_reorder_accessibility.md): package-entrypoint visual-only row drag handle, keyboard reorder controls, and copied-controller boundary.
 - [Header drag reorder](header_drag_reorder.md): package-entrypoint table-header drag reorder, `draggable: false` opt-out, and host-app interactive header boundary.
 - [Bundled editor i18n keys](editor_i18n.md): preset/action/reset/filter/sort/scope/status locale keys and the boundary between locale overrides, controller-root values, copied ERB, and copied JavaScript.
