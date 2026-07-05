@@ -70,6 +70,18 @@ Confirm GitHub Actions passes for both the release commit and the latest release
 
 A successful workflow run on an older PR head is useful history, but it is not enough for release or merge readiness after `main` has moved. Record both the current compare/mergeability state and the head workflow run when refreshing an older PR.
 
+### UI visual evidence and maintainer judgment gates
+
+For release-prep or merge-readiness review, treat rendered UI evidence as separate from CI, source inspection, and behavior specs.
+
+- [ ] If a PR changes visible editor, table, filter panel, status-region, layout, CSS, accessibility, or visual reference behavior, record the PR category and evidence status using [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md).
+- [ ] When review asks for desktop, narrow viewport, forced-colors, high-contrast, or other browser-capable proof, name the viewport or mode, the UI state checked, the evidence used, and the remaining browser-capable check.
+- [ ] Do not treat CI success, source review, Node behavior specs, DOM/static assertions, or package verification as rendered visual evidence for overlap, clipping, focus visibility, contrast, scroll reachability, or announcement timing.
+- [ ] If the agent or reviewer cannot capture browser evidence, leave a clear handoff instead of marking the visual gate complete. The handoff should state the unavailable environment, the strongest substitute used, and whether maintainer visual judgment may close the gate.
+- [ ] Maintainer visual judgment may replace a screenshot only when the PR comment or release note names the checked state and why a screenshot artifact is unnecessary for that PR.
+
+Keep this gate proportional. Docs-only changes and source-only guards usually record `Evidence status: not applicable`; UI cue, editor surface, filter panel, dense layout, visual docs, or accessibility changes should either include rendered evidence or carry an explicit `needs-human` handoff.
+
 ## 4. Gem package checks
 
 Build and verify the gem package:
