@@ -11,6 +11,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Open the generated demo or a representative host-app list screen and confirm the editor and table both render.
 - [ ] Hide one non-sensitive column, apply the change, and confirm the table updates without hiding required actions or links.
 - [ ] Change one editor order input, apply the change, and confirm the table order updates without using drag and drop.
+- [ ] If the screen uses the package entrypoint, change one editor input and confirm the dirty-state helper appears without replacing the async status region, remains visible after Apply, and clears after Save, Save as new, Load, Reset, or another clean-snapshot action; if it uses a copied controller, record whether that package-only helper was ported or intentionally unavailable.
 - [ ] If the screen uses the package entrypoint, search for one editor row and use the row up/down controls once; if it uses a copied controller, record that the numeric order input remains the keyboard-friendly fallback instead.
 - [ ] If the screen uses the package entrypoint, use Show all columns and Hide all columns once and confirm the status region announces each bulk visibility result; if it uses a copied controller, record whether that packaged status feedback was ported or intentionally unavailable.
 - [ ] Save the preset, reload the page, and confirm the saved visibility/order state returns.
