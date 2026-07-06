@@ -25,6 +25,7 @@ Use this short map before the full catalog when you are opening the docs for the
 - [Install path options](install_paths.md): choose the smallest generator option set for default `stimulus-rails`, Vite/package entrypoint, skipped copied assets, or demo verification paths.
 - [Support matrix](support_matrix.md): Ruby/Rails runtime requirements, representative CI coverage, and host-app verification guidance for newer Rails releases.
 - [Resource table adapters](resource_tables.md): infer user-facing columns from Active Record metadata, apply profile overrides, and register host-owned renderer mappings for TreeView or Rails Fields Kit controls.
+- [Rails Fields Kit bridge contract](rails_fields_kit_bridge_contract.md): RTP/RFK ownership boundaries for future bridge metadata, dependency policy, and downstream adoption handoff.
 - [Resource table empty messages](resource_table_empty_messages.md): plain text `empty_message:` copy for bundled resource table empty states and the boundary with richer custom partials.
 - [Resource table editor placement checklist](render_editor_placement_manual_qa.md): focused evidence for `render_editor: false` screens that place the editor in a toolbar, drawer, tab, sidebar, or separate partial.
 - [Manual table scroll wrappers](manual_table_scroll_wrappers.md): `table_preferences_table_tag(...)` `scroll_wrapper:` and `wrapper_options:` guidance for hand-written tables that need a dedicated horizontal scroller.
@@ -82,6 +83,7 @@ Rails Table Preferences keeps the first public-surface source of truth in the ex
 
 - JavaScript package imports, TypeScript snapshot helper types, and the copied-controller boundary are defined in [JavaScript entrypoints](javascript_entrypoints.md) and [TypeScript settings snapshot declarations](typescript_settings_snapshots.md), then checked by package metadata, entrypoint smoke specs, JavaScript syntax checks, and package verification.
 - Helper options, rendered table/editor responsibilities, filter/sort metadata, scoped presets, export payloads, and resource-table adapters are defined in the focused guides linked above instead of being mirrored into README.
+- Cross-gem Rails Fields Kit bridge ownership is documented in [Rails Fields Kit bridge contract](rails_fields_kit_bridge_contract.md) and kept separate from runtime dependency or adapter implementation decisions.
 - Generator options, copied assets, package contents, and release evidence are guarded by [Install path options](install_paths.md), [Release checklist](release_checklist.md), and [Package verification](package_verification.md).
 - README remains the newcomer-facing entry point. This docs index remains the detailed map. Package verification decides which docs and runtime files must ship in the gem.
 
@@ -113,23 +115,24 @@ Use this as a navigation map after choosing a starting path above. The first gro
 1. If the inferred resource table only needs short empty-state copy, use [Resource table empty messages](resource_table_empty_messages.md) before copying the default partial for richer markup.
 2. If the inferred resource table only needs light cell styling, use [Resource table cell hooks](resource_table_cell_hooks.md) before copying the default partial.
 3. If the inferred resource table should render filter inputs or cell editors through a form-helper library, use the renderer registry context examples from [Resource table adapters](resource_tables.md) before copying a custom partial.
-4. If a hand-written table column needs cell editor metadata, use [Manual column editor metadata](manual_column_editor_metadata.md) to keep renderer lookup separate from host-owned form submission and persistence.
-5. When a hand-written table needs a dedicated horizontal scroller, use [Manual table scroll wrappers](manual_table_scroll_wrappers.md) to keep table attributes and wrapper attributes separate.
-6. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
-7. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
-8. For helper-free or host-app-owned table markup, use [Helper-free table root manual QA](helper_free_table_manual_qa.md) after checking the minimal DOM contract in [JavaScript controller notes](javascript_controller.md#minimal-dom-contract-for-helper-free-tables).
-9. Add `filter:` and `sortable: true` metadata where needed.
-10. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
-11. For datetime or time filter metadata, use [Datetime and time filter browser attributes](datetime_time_filter_attributes.md) to check native input attributes without moving validation or query semantics out of the host app.
-12. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when reviewing package-entrypoint bottom-edge panel behavior or deciding whether future panel changes need browser-capable evidence.
-13. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
-14. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
-15. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
-16. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
-17. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
-18. When forced-colors or high-contrast evidence is needed, use the forced-colors manual QA note to keep browser-capable checks scoped to the relevant states.
-19. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
-20. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
+4. If that form-helper library is Rails Fields Kit, review the [Rails Fields Kit bridge contract](rails_fields_kit_bridge_contract.md) to keep RTP metadata ownership, RFK rendering ownership, and host-app query/authorization responsibilities separate before planning adapter work.
+5. If a hand-written table column needs cell editor metadata, use [Manual column editor metadata](manual_column_editor_metadata.md) to keep renderer lookup separate from host-owned form submission and persistence.
+6. When a hand-written table needs a dedicated horizontal scroller, use [Manual table scroll wrappers](manual_table_scroll_wrappers.md) to keep table attributes and wrapper attributes separate.
+7. Use `html_options:` from [Editor root HTML options](editor_root_options.md) when the bundled editor root needs host-app placement attributes without copying the partial.
+8. When `render_editor: false` moves a resource table editor into a toolbar, drawer, tab, sidebar, or separate partial, use the [Resource table editor placement checklist](render_editor_placement_manual_qa.md) to record placement evidence without changing the helper contract.
+9. For helper-free or host-app-owned table markup, use [Helper-free table root manual QA](helper_free_table_manual_qa.md) after checking the minimal DOM contract in [JavaScript controller notes](javascript_controller.md#minimal-dom-contract-for-helper-free-tables).
+10. Add `filter:` and `sortable: true` metadata where needed.
+11. For static select filters with longer option lists, review the [Select filter option search threshold](select_filter_option_search_threshold.md) before changing root values or treating option search as a remote/async search feature.
+12. For datetime or time filter metadata, use [Datetime and time filter browser attributes](datetime_time_filter_attributes.md) to check native input attributes without moving validation or query semantics out of the host app.
+13. Use [Filter panel viewport boundary](filter_panel_viewport_boundary.md) when reviewing package-entrypoint bottom-edge panel behavior or deciding whether future panel changes need browser-capable evidence.
+14. Choose `overflow:` / `default_overflow:` values when text should ellipsize, clip, wrap, or stay single-line.
+15. Tune [resize and auto-fit root values](resize_auto_fit.md) only when dense headers, custom scroll containers, or host-app CSS make the defaults hard to use.
+16. Use `fixed:` / `pinned:` and `group:` metadata only when the table needs fixed columns or grouped headers/exports.
+17. Use the decision guide when choosing between controller params, hidden fields, Ransack, ignored columns, scoped presets, exports, and customization options.
+18. Review the accessibility baseline for screens with custom styling or stricter keyboard requirements.
+19. When forced-colors or high-contrast evidence is needed, use the forced-colors manual QA note to keep browser-capable checks scoped to the relevant states.
+20. Review [Bundled editor i18n keys](editor_i18n.md) before copying ERB or JavaScript for wording-only changes.
+21. Review non-goals before adding behavior that looks like a query builder, export generator, admin framework, heavy browser test stack, or complex sticky layout engine.
 
 ### Wire data, presets, and exports
 
