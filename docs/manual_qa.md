@@ -17,7 +17,7 @@ Use this short path when you need a first browser confidence check for a docs PR
 - [ ] Apply one representative text/select/date/number filter and confirm the host app or demo rows narrow as expected.
 - [ ] Click one sortable header and confirm the visible row order or outgoing host-app sort params change as expected.
 - [ ] Switch to another owner or demo owner link and confirm saved presets do not leak between owners.
-- [ ] When the generated demo is the smoke surface, check the support sections that match the changed area: `Current owner`, `Current scope context`, `Demo state reset`, `Async failure check`, hidden fields preview, or export payload preview. Use [Demo screen generator](demo.md) as the detailed source of truth and record any sections intentionally handed off.
+- [ ] When the generated demo is the smoke surface, use the `Verification task map` near the top to jump to the support sections that match the changed area: `Current owner`, `Current scope context`, `Demo state reset`, `Async failure check`, hidden fields preview, or export payload preview. Use [Demo screen generator](demo.md) as the detailed source of truth and record any sections intentionally handed off.
 - [ ] For hidden fields preview or export payload preview evidence, record whether the copy control succeeded. If the copy button is disabled or reports a copy failure, select the visible preview text manually and record that text as the evidence instead.
 - [ ] Open one filter panel or preset action with keyboard focus and confirm focus, labels, and status copy remain understandable.
 - [ ] Check one representative phone-like narrow viewport or narrow container, such as 375px or 390px-equivalent, and one long-label or long-value row to confirm editor controls, filter panels, and fixed columns do not overlap or become unreachable; record the viewport or container width used and leave multi-width coverage to the full checklist when needed.
@@ -179,7 +179,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Add a select filter column and choose one or more values.
 - [ ] In a short viewport, open a filter panel that includes a multi-select or several fields and confirm the panel scrolls enough to reach Apply and Clear.
 - [ ] Add a date filter column and set from/to values.
-- [ ] Add a number filter column and set from/to values.
+- [ ] Add a number column and set from/to values.
 - [ ] Confirm multiple active filters still leave header controls usable while exposing summary context per column.
 - [ ] Confirm filter panel layering is not clipped by the surrounding layout.
 - [ ] Confirm opening one filter panel closes or does not visually conflict with another.
