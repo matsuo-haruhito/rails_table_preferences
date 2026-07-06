@@ -137,6 +137,18 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
     expect(view.read).to include("Search for")
     expect(view.read).to include("東京")
     expect(view.read).to include("demo_hidden_fields_html = table_preferences_hidden_fields")
+    expect(view.read).to include("検証タスクマップ")
+    expect(view.read).to include("rails-table-preferences-demo-task-list")
+    expect(view.read).to include("href=\"#rails-table-preferences-demo-verification-context\"")
+    expect(view.read).to include("href=\"#rails-table-preferences-demo-reset-section\"")
+    expect(view.read).to include("href=\"#rails-table-preferences-demo-async-failure-section\"")
+    expect(view.read).to include("href=\"#rails-table-preferences-demo-hidden-fields-section\"")
+    expect(view.read).to include("href=\"#rails-table-preferences-demo-export-payload-section\"")
+    expect(view.read).to include("id=\"rails-table-preferences-demo-verification-context\"")
+    expect(view.read).to include("id=\"rails-table-preferences-demo-hidden-fields-section\"")
+    expect(view.read).to include("id=\"rails-table-preferences-demo-export-payload-section\"")
+    expect(view.read).to include("id=\"rails-table-preferences-demo-reset-section\"")
+    expect(view.read).to include("id=\"rails-table-preferences-demo-async-failure-section\"")
     expect(view.read).to include("検索フォーム hidden fields プレビュー")
     expect(view.read).to include("demo_hidden_fields_preview = demo_hidden_fields_html.present?")
     expect(view.read).to include("h(demo_hidden_fields_preview)")
@@ -334,7 +346,7 @@ RSpec.describe RailsTablePreferences::Generators::InstallGenerator, type: :gener
   end
 
   def next_step_headings(output)
-    output.lines.grep(/^\s+\d+\. /).map { |line| line.sub(/^\s+\d+\. /, "").strip }
+    output.lines.grep(/^\s+\d\. /).map { |line| line.sub(/^\s+\d\. /, "").strip }
   end
 
   def generated_migration
