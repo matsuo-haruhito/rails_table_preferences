@@ -179,7 +179,7 @@ For a quick failure-path check, temporarily block one preference API URL in brow
 - [ ] Add a select filter column and choose one or more values.
 - [ ] In a short viewport, open a filter panel that includes a multi-select or several fields and confirm the panel scrolls enough to reach Apply and Clear.
 - [ ] Add a date filter column and set from/to values.
-- [ ] Add a number column and set from/to values.
+- [ ] Add a number filter column and set from/to values.
 - [ ] Confirm multiple active filters still leave header controls usable while exposing summary context per column.
 - [ ] Confirm filter panel layering is not clipped by the surrounding layout.
 - [ ] Confirm opening one filter panel closes or does not visually conflict with another.
