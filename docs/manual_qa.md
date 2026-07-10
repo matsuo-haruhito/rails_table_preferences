@@ -25,6 +25,31 @@ Use this short path when you need a first browser confidence check for a docs PR
 
 After this quick smoke, continue into the relevant sections below for the feature area you changed. For release sign-off or host-app launch, complete the full checklist and record any skipped areas in the sign-off notes.
 
+## Full checklist map
+
+Use this map after the quick smoke when you already know which manual QA areas matter. It is only a jump list: keep using the track-based starting points for scope selection, and do not treat this map as a replacement for the checklist items themselves.
+
+- [1. Environment and installation](#1-environment-and-installation)
+- [2. Owner/current user configuration](#2-ownercurrent-user-configuration)
+- [3. Basic rendering](#3-basic-rendering)
+- [4. Display preference behavior](#4-display-preference-behavior)
+- [5. Preset behavior](#5-preset-behavior)
+- [6. Scoped preset behavior](#6-scoped-preset-behavior)
+- [7. API and network behavior](#7-api-and-network-behavior)
+- [8. Filter UI behavior](#8-filter-ui-behavior)
+- [9. Sort UI behavior](#9-sort-ui-behavior)
+- [10. Fixed columns and column groups](#10-fixed-columns-and-column-groups)
+- [11. Export integration](#11-export-integration)
+- [12. Controller params integration](#12-controller-params-integration)
+- [13. Existing search form integration](#13-existing-search-form-integration)
+- [14. Ransack integration](#14-ransack-integration)
+- [15. Ignored columns and sensitive fields](#15-ignored-columns-and-sensitive-fields)
+- [16. Accessibility baseline](#16-accessibility-baseline)
+- [17. Customization](#17-customization)
+- [18. Browser and layout checks](#18-browser-and-layout-checks)
+- [19. Regression checklist from early implementation issues](#19-regression-checklist-from-early-implementation-issues)
+- [Sign-off](#sign-off)
+
 ## Track-based starting points
 
 Use these track entries to choose the first manual QA scope for small PRs. They do not replace the quick smoke, the full checklist, or the [Manual QA PR smoke matrix](manual_qa_pr_smoke_matrix.md). Use the smoke matrix when a PR comment needs category-specific evidence wording, escalation criteria, or browser-capable handoff language.
