@@ -89,6 +89,7 @@ Until v0.1.0 is tagged, the detailed entries in this section are the temporary s
 - Production integration guidance now calls out association preloading when resource table formatters read related records, including quick host-app smoke checks for query logs or existing N+1 guards.
 - Resource table formatter docs and specs now make formatter exceptions a host-app formatter responsibility and keep that separate from the default no-formatter fallback.
 - Pull request template guidance now has a single canonical `.github/pull_request_template.md` source that keeps manual QA, UI/visual evidence, compatibility, and risk sections together.
+- Manual QA documentation now includes a full checklist jump map after the quick smoke path so release sign-off and host-app handoff reviewers can reach each section without changing checklist scope.
 
 ### Fixed
 
